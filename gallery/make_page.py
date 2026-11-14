@@ -2,27 +2,28 @@
 and gallery/README.md (rendered on GitHub). Run from the repository root."""
 import re, html
 INFO = {
- "01_lines": ("Multi-series lines", "Direct end labels with a value column replace the legend. The two notes are placed automatically."),
- "02_scatter": ("Labelled scatter on a log axis", "Point labels pick the least crowded of eight positions and avoid the fit line. Legend text takes the colour of its key."),
- "03_margins": ("marginsplot", "A graph built by another command. gpolish reads the drawn graph, so the same end labels work."),
- "04_highlight": ("One series highlighted", "Context series in gray, one in colour, and only that one labelled."),
- "05_fitci": ("Scatter with fit and confidence band", "Selected points labelled; the legend becomes a coloured key above the plot."),
- "06_timeseries": ("Daily time series", "A callout placed by the layout step at the series minimum."),
- "07_coef": ("Coefficient plot", "Built from twoway rcap and scatter. The scheme and the title edit do the work."),
- "08_histogram": ("Histogram", "A note with a curved arrow; text position given by hand here."),
- "09_hbar": ("Ranked horizontal bars", "graph hbar is not a twoway graph: the scheme and the bold title apply, the layout commands do not. gr2mpl redraws it."),
- "10_box": ("Box plot", "Same split as the bar chart: scheme and title inside Stata, full restyle from gr2mpl."),
- "11_by": ("Small multiples with by()", "The scheme removes the shaded panel strips. gr2mpl gives bold panel titles and shared axes."),
- "12_combine": ("Combined panels", "graph combine of four graphs, each styled by the scheme; gr2mpl redraws every panel."),
- "13_overlays": ("Finding box, brace and callout", "Three overlays on one scatter: a shaded finding box, a curly brace marking a range, and a callout that finds its own place."),
- "14_cibrace": ("Group means with confidence-interval braces", "One brace names the confidence interval; another measures the gap between the two means."),
- "15_flow": ("Flow chart of sample restrictions", "Boxes and arrows on an empty plot, built from gpolish note and gpolish arrow. The counts come from the data."),
- "16_heatmap": ("Correlation heatmap", "Tiles drawn with twoway rbar, cell values as marker labels, and a legend used as the colour key."),
- "17_matrix": ("Scatterplot matrix", "graph matrix is its own graph family: the scheme and the bold title apply, and gr2mpl redraws it."),
- "18_dendrogram": ("Cluster dendrogram", "cluster dendrogram produces a twoway graph, so the scheme and gpolish apply directly."),
- "19_avplot": ("Added-variable plot", "A regression diagnostic from avplot, with the coefficient stated in a finding box."),
- "20_statplot": ("statplot", "statplot output is a graph hbar. The scheme and title edit apply inside Stata; gr2mpl redraws it with its group labels."),
- "21_heatplot": ("heatplot", "A two-way density from the community command heatplot, with its colour key."),
+ "04_lines": ("Multi-series lines", "Direct end labels with a value column replace the legend. The two notes are placed automatically."),
+ "05_scatter": ("Labelled scatter on a log axis", "Point labels pick the least crowded of eight positions and avoid the fit line. Legend text takes the colour of its key."),
+ "06_margins": ("marginsplot", "A graph built by another command. gpolish reads the drawn graph, so the same end labels work."),
+ "07_highlight": ("One series highlighted", "Context series in gray, one in colour, and only that one labelled."),
+ "11_fitci": ("Scatter with fit and confidence band", "Selected points labelled; the legend becomes a coloured key above the plot."),
+ "12_timeseries": ("Daily time series", "A callout placed by the layout step at the series minimum."),
+ "13_coef": ("Coefficient plot", "Built from twoway rcap and scatter. The scheme and the title edit do the work."),
+ "14_histogram": ("Histogram", "A note with a curved arrow; text position given by hand here."),
+ "15_hbar": ("Ranked horizontal bars", "graph hbar is not a twoway graph: the scheme and the bold title apply, the layout commands do not. gr2mpl redraws it."),
+ "16_box": ("Box plot", "Same split as the bar chart: scheme and title inside Stata, full restyle from gr2mpl."),
+ "17_by": ("Small multiples with by()", "The scheme removes the shaded panel strips. gr2mpl gives bold panel titles and shared axes."),
+ "18_combine": ("Combined panels", "graph combine of four graphs, each styled by the scheme; gr2mpl redraws every panel."),
+ "08_overlays": ("Finding box, brace and callout", "Three overlays on one scatter: a shaded finding box, a curly brace marking a range, and a callout that finds its own place."),
+ "09_cibrace": ("Group means with confidence-interval braces", "One brace names the confidence interval; another measures the gap between the two means."),
+ "10_flow": ("Flow chart of sample restrictions", "Boxes and arrows on an empty plot, built from gpolish note and gpolish arrow. The counts come from the data."),
+ "02_heatmap": ("Correlation heatmap", "Tiles drawn with twoway rbar, cell values as marker labels, and a legend used as the colour key."),
+ "19_matrix": ("Scatterplot matrix", "graph matrix is its own graph family: the scheme and the bold title apply, and gr2mpl redraws it."),
+ "20_dendrogram": ("Cluster dendrogram", "cluster dendrogram produces a twoway graph, so the scheme and gpolish apply directly."),
+ "01_avplot": ("Added-variable plot", "A regression diagnostic from avplot, with the coefficient stated in a finding box."),
+ "21_statplot": ("statplot", "statplot output is a graph hbar. The scheme and title edit apply inside Stata; gr2mpl redraws it with its group labels."),
+ "03_coefplot": ("coefplot with shaded confidence bands", "Two regressions drawn with the community command coefplot: lines for the estimates and three nested bands for 50, 80 and 95 percent intervals, with direct labels and a finding box added by gpolish."),
+ "22_heatplot": ("heatplot", "A two-way density from the community command heatplot, with its colour key."),
 }
 src = open("gallery/gallery.do").read()
 blocks = re.split(r"\n\* -{20,} (\d\d) [^\n]*\n", src)
@@ -59,12 +60,12 @@ footer{color:var(--mute);font-size:13px;margin-top:30px}
 h = ['<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">',
      "<title>gpolish gallery</title><style>" + css + "</style></head><body><main>",
      "<h1>gpolish gallery</h1>",
-     '<p class="lead">Twenty-one Stata graphs, each drawn three ways: Stata\'s default look, the same graph with <code>scheme(pypolish)</code> and <code>gpolish</code> (still a Stata graph), and that graph redrawn in matplotlib by <code>gr2mpl</code>.</p>',
+     '<p class="lead">Twenty-two Stata graphs, each drawn three ways: Stata\'s default look, the same graph with <code>scheme(pypolish)</code> and <code>gpolish</code> (still a Stata graph), and that graph redrawn in matplotlib by <code>gr2mpl</code>.</p>',
      '<p class="lead"><a href="https://github.com/ericabooth/gpolish-stata-public">Repository and installation</a> · every image on this page is produced by <a href="https://github.com/ericabooth/gpolish-stata-public/blob/main/gallery/gallery.do">gallery/gallery.do</a>.</p><nav>']
 for k in sorted(code): h.append(f'<a href="#{k}">{html.escape(INFO[k][0])}</a>')
 h.append("</nav>")
 md = ["# gpolish gallery", "",
-      "Twenty-one Stata graphs, each drawn three ways: Stata's default look, the same graph with `scheme(pypolish)` and `gpolish` (still a Stata graph), and that graph redrawn in matplotlib by `gr2mpl`.", "",
+      "Twenty-two Stata graphs, each drawn three ways: Stata's default look, the same graph with `scheme(pypolish)` and `gpolish` (still a Stata graph), and that graph redrawn in matplotlib by `gr2mpl`.", "",
       "Every image is produced by [gallery.do](gallery.do). A browsable version is at <https://ericabooth.github.io/gpolish-stata-public/gallery/>.", ""]
 for k in sorted(code):
     t, blurb = INFO[k]

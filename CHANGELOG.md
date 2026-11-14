@@ -6,7 +6,7 @@
 - Plain `gpolish` now makes the title bold on every graph family, not only twoway.
 - `gr2mpl`: `graph matrix`, `heatplot`, dendrograms, boxed text with `roundbox`, `blabel()` and second-level `over()` labels, axes-off diagrams.
 - Scheme `pypolish`: colours for bars, boxes and histograms; plain `by()` panel labels and scatterplot-matrix cells; default marker outlines removed.
-- Gallery grows from 12 to 21 examples, including a flow chart, a heatmap and output from `statplot` and `heatplot`.
+- Gallery grows from 12 to 22 examples, including a flow chart, a heatmap, a `coefplot` with shaded confidence bands, and output from `statplot` and `heatplot`.
 
 ## 0.3.0 (2026-11-14)
 

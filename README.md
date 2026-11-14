@@ -67,20 +67,22 @@ Because `gpolish` reads the drawn graph and not your command, it also works on g
 
 ## Gallery
 
-Twenty-one examples, each drawn three ways: Stata's default, `pypolish` + `gpolish`, and the `gr2mpl` render.
+Twenty-two examples, each drawn three ways: Stata's default, `pypolish` + `gpolish`, and the `gr2mpl` render.
 
 - **[Browse the gallery](https://ericabooth.github.io/gpolish-stata-public/gallery/)** (page with full-size images and code)
 - [Gallery on GitHub](gallery/README.md)
 
-<img width="1000" alt="Labelled scatter, three ways" src="gallery/sheets/02_scatter.png" />
-<img width="1000" alt="marginsplot, three ways" src="gallery/sheets/03_margins.png" />
-<img width="1000" alt="One highlighted series, three ways" src="gallery/sheets/04_highlight.png" />
-<img width="1000" alt="Finding box, brace and callout, three ways" src="gallery/sheets/13_overlays.png" />
-<img width="1000" alt="Flow chart, three ways" src="gallery/sheets/15_flow.png" />
-<img width="1000" alt="Correlation heatmap, three ways" src="gallery/sheets/16_heatmap.png" />
-<img width="1000" alt="Small multiples, three ways" src="gallery/sheets/11_by.png" />
+<img width="1000" alt="Added-variable plot, three ways" src="gallery/sheets/01_avplot.png" />
+<img width="1000" alt="Correlation heatmap, three ways" src="gallery/sheets/02_heatmap.png" />
+<img width="1000" alt="coefplot with shaded confidence bands, three ways" src="gallery/sheets/03_coefplot.png" />
+<img width="1000" alt="Labelled scatter, three ways" src="gallery/sheets/05_scatter.png" />
+<img width="1000" alt="marginsplot, three ways" src="gallery/sheets/06_margins.png" />
+<img width="1000" alt="One highlighted series, three ways" src="gallery/sheets/07_highlight.png" />
+<img width="1000" alt="Finding box, brace and callout, three ways" src="gallery/sheets/08_overlays.png" />
+<img width="1000" alt="Flow chart, three ways" src="gallery/sheets/10_flow.png" />
+<img width="1000" alt="Small multiples, three ways" src="gallery/sheets/17_by.png" />
 
-The gallery covers lines, scatters, `marginsplot`, coefficient and added-variable plots, histograms, bars, box plots, `by()` panels, combined graphs, a flow chart, a heatmap, a scatterplot matrix, a dendrogram, and output from the community commands `statplot` and `heatplot`.
+The gallery covers lines, scatters, `marginsplot`, coefficient and added-variable plots, histograms, bars, box plots, `by()` panels, combined graphs, a flow chart, a heatmap, a scatterplot matrix, a dendrogram, and output from the community commands `coefplot`, `statplot` and `heatplot`.
 
 All gallery images come from one script, [gallery/gallery.do](gallery/gallery.do).
 

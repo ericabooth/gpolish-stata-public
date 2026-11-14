@@ -20,4 +20,4 @@ for a in sorted(glob.glob("gallery/img/*_a.png")):
     strip([a, a.replace("_a.png", "_b.png"), a.replace("_a.png", "_c.png")], HEADS, f"gallery/sheets/{tag}.png")
     print(tag)
 os.makedirs("images", exist_ok=True)
-strip(["gallery/img/01_lines_a.png", "gallery/img/01_lines_b.png"], HEADS[:2], "images/before_after.png", w=7.0)
+strip(["gallery/img/04_lines_a.png", "gallery/img/04_lines_b.png"], HEADS[:2], "images/before_after.png", w=7.0)
