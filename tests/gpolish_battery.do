@@ -1,0 +1,153 @@
+* gpolish check battery (Stata 16+). Run from the repository root:
+*   stata-mp -b do tests/gpolish_battery.do
+version 16
+set more off
+set varabbrev off
+clear all
+adopath ++ "`c(pwd)'/src"
+global NCHK 0
+capture program drop chk
+program chk
+    gettoken what 0 : 0
+    capture assert `0'
+    if _rc {
+        di as err "FAILED: `what'   [`0']"
+        exit 9
+    }
+    global NCHK = $NCHK + 1
+end
+capture program drop ntext
+program ntext, rclass
+    args g arr
+    local k `.`g'.plotregion1.`arr'.arrnels'
+    if "`k'"=="" local k 0
+    return scalar k = `k'
+end
+graph set window fontface "Open Sans"
+
+* ---- 1. style ---------------------------------------------------------------
+sysuse uslifeexp, clear
+label var le_wfemale "White women"
+label var le_wmale   "White men"
+label var le_bfemale "Black women"
+label var le_bmale   "Black men"
+line le_wfemale le_wmale le_bfemale le_bmale year, scheme(pypolish) legend(off) title("A title") name(g1, replace)
+gpolish
+chk style_bold  substr(`"`.g1.title.text[1]'"',1,4)=="{bf:"
+gpolish
+chk style_idempotent  `"`.g1.title.text[1]'"'=="{bf:A title}"
+
+* ---- 2. endlabel: counts, labels, repel -------------------------------------
+gpolish endlabel, values dots
+ntext g1 added_text
+chk end_ntext r(k)==8
+ntext g1 added_markers
+chk end_nmark r(k)==4
+chk end_label `"`.g1.plotregion1.added_text[1].text[1]'"'=="{bf:White women}"
+chk end_value `"`.g1.plotregion1.added_text[2].text[1]'"'=="79.9"
+chk end_right `.g1.plotregion1.added_text[1].xpos.val' > 1999
+* repel: Black women (74.7) and White men (74.6) must be separated by at least one text height
+gpolish geom, name(g1)
+local sep = abs(`.g1.plotregion1.added_text[3].ypos.val' - `.g1.plotregion1.added_text[5].ypos.val')*r(yb)
+chk end_repel `sep' >= 0.99*1.3*9.5/72*r(gpi)
+* colour follows the line
+local c1 `.g1.plotregion1.plot1.style.line.color.rgb'
+local c2 `.g1.plotregion1.added_text[1].style.color.rgb'
+chk end_colour "`: list retokenize c1'"=="`: list retokenize c2'"
+
+* ---- 3. named, non-current graph --------------------------------------------
+line le_wfemale le_bmale year, legend(off) name(g2, replace)
+line le year, name(g3, replace)
+gpolish endlabel, name(g2)
+ntext g2 added_text
+chk named_graph r(k)==2
+ntext g3 added_text
+chk named_untouched r(k)==0
+
+* ---- 4. wrap ----------------------------------------------------------------
+label var le_bmale "Black men, the group with the lowest life expectancy"
+line le_wfemale le_bmale year, legend(off) name(g4, replace)
+gpolish endlabel, wrap(12)
+chk wrap_lines `.g4.plotregion1.added_text[2].text.arrnels' >= 3
+label var le_bmale "Black men"
+
+* ---- 5. log y axis ----------------------------------------------------------
+line le_wfemale le_bmale year, legend(off) yscale(log) name(g5, replace)
+gpolish endlabel
+chk logy_pos abs(`.g5.plotregion1.added_text[1].ypos.val' - 79.9) < 1.5
+
+* ---- 6. marginsplot: sersets built from tempvars ----------------------------
+sysuse nlsw88, clear
+quietly regress wage c.ttl_exp##i.collgrad
+quietly margins collgrad, at(ttl_exp=(0(7)28))
+marginsplot, recast(line) recastci(rarea) legend(off) name(g6, replace)
+gpolish endlabel, labels("No degree" "College grad")
+ntext g6 added_text
+chk margins_lines_only r(k)==2
+chk margins_label `"`.g6.plotregion1.added_text[2].text[1]'"'=="{bf:College grad}"
+
+* ---- 7. callout: explicit and automatic -------------------------------------
+sysuse uslifeexp, clear
+line le_wfemale le_bmale year, legend(off) name(g7, replace)
+gpolish callout "Explicit" "two lines", at(1950 45) to(1918 39)
+ntext g7 added_text
+chk callout_text r(k)==1
+chk callout_lines `.g7.plotregion1.added_text[1].text.arrnels'==2
+ntext g7 added_lines
+chk callout_segs r(k)==26
+gpolish callout "Automatic", to(1918 39)
+gpolish geom, name(g7)
+local gx = r(xa) + r(xb)*`.g7.plotregion1.added_text[2].xpos.val'
+local gy = r(ya) + r(yb)*`.g7.plotregion1.added_text[2].ypos.val'
+chk auto_inside `gx' >= r(gx0) & `gx' <= r(gx1) & `gy' >= r(gy0) & `gy' <= r(gy1)
+* the automatic box must not sit on the explicit one
+chk auto_distinct abs(`.g7.plotregion1.added_text[2].xpos.val' - 1950) > 3 | abs(`.g7.plotregion1.added_text[2].ypos.val' - 45) > 3
+gpolish callout "Text only", at(1960 50)
+ntext g7 added_lines
+chk textonly_noarrow r(k)==52
+gpolish bracket, x(1900) y0(40) y1(50)
+ntext g7 added_lines
+chk bracket r(k)==55
+capture gpolish callout "nothing"
+chk callout_needs_pos _rc==198
+
+* ---- 8. ptlabel + legend on a log-x scatter ---------------------------------
+sysuse lifeexp, clear
+drop if missing(gnppc, lexp)
+twoway (scatter lexp gnppc if region==1) (scatter lexp gnppc if region==2), xscale(log) ///
+    legend(order(1 "Europe" 2 "N. America")) name(g8, replace)
+gpolish ptlabel country if inlist(country, "Haiti", "Canada", "Albania", "Norway"), x(gnppc) y(lexp)
+ntext g8 added_text
+chk pt_n r(k)==4
+gpolish geom, name(g8)
+forvalues k = 1/4 {
+    local gx = r(xa) + r(xb)*ln(`.g8.plotregion1.added_text[`k'].xpos.val')
+    chk pt_inside`k' `gx' >= r(gx0) & `gx' <= r(gx1)
+}
+gpolish legend
+local c1 `.g8.plotregion1.plot2.style.marker.fillcolor.rgb'
+local c2 `.g8.legend.plotregion1.label[2].style.color.rgb'
+chk legend_colour "`: list retokenize c1'"=="`: list retokenize c2'"
+
+* ---- 9. rotation: quarter turn drawn, other angles stored + noted ------------
+gpolish callout "Vertical", at(1000 60) angle(90)
+gpolish callout "Tilted", at(2000 60) angle(20)
+chk angle_stored "`.g8.plotregion1.added_text[6].style.angle.setting'"=="20"
+
+* ---- 10. refusals and fallbacks ---------------------------------------------
+graph bar (mean) lexp, over(region) name(g9, replace)
+capture noisily gpolish endlabel
+chk refuse_bar _rc==198
+graph set window fontface "Comic Sans MS"
+sysuse uslifeexp, clear
+line le_wfemale le_bmale year, legend(off) name(g10, replace)
+gpolish endlabel
+ntext g10 added_text
+chk unknown_font r(k)==2
+graph set window fontface "Open Sans"
+scatter le year, name(g11, replace)
+capture noisily gpolish endlabel
+chk no_lines _rc==198
+gpolish limits
+
+di as res _n "gpolish battery: $NCHK checks passed (Stata `c(stata_version)')"

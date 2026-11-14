@@ -1,0 +1,142 @@
+{smcl}
+{* *! version 0.3.0  14nov2026}{...}
+{viewerjumpto "Syntax" "gr2mpl##syntax"}{...}
+{viewerjumpto "Description" "gr2mpl##description"}{...}
+{viewerjumpto "Options" "gr2mpl##options"}{...}
+{viewerjumpto "Python setup" "gr2mpl##python"}{...}
+{viewerjumpto "What is supported" "gr2mpl##support"}{...}
+{viewerjumpto "Examples" "gr2mpl##examples"}{...}
+{title:Title}
+
+{phang}
+{bf:gr2mpl} {hline 2} Redraw a Stata graph held in memory with matplotlib and save it as a PNG
+
+
+{marker syntax}{...}
+{title:Syntax}
+
+{p 8 16 2}{cmd:gr2mpl} [{cmd:,} {opt name(graphname)} {opt sav:ing(filename)} {opt replace} {opt w:idth(#)} {opt dpi(#)}
+{opt endl:abels} {opt noleg:end} {opt pal:ette(name)} {opt font(fontname)} {opt nogrid} {opt nohalo} {opt notick:s}
+{opt lws:cale(#)} {opt mss:cale(#)} {opt py:thon(path)} {opt keep:spec} {opt specdir(dir)}]
+
+{p 8 16 2}{cmd:gr2mpl doctor} [{cmd:,} {opt py:thon(path)} {opt font(fontname)}]
+
+
+{marker description}{...}
+{title:Description}
+
+{pstd}
+{cmd:gr2mpl} reads a graph that Stata has already drawn and redraws it with matplotlib in a clean house style:
+bold left-aligned title, gray subtitle, light horizontal grid, no box, and direct labels where they fit.
+It reads the finished graph object, not your command, so it works on graphs made by {helpb twoway},
+{helpb graph bar}, {helpb graph box}, {helpb graph dot}, {cmd:by()}, {helpb graph combine}, {helpb marginsplot}
+and community commands that build on them.
+
+{pstd}
+The data come from the graph itself. The dataset in memory can have changed since the graph was drawn.
+
+{pstd}
+The result is a PNG file. It is not a Stata graph: it cannot be edited in the Graph Editor or combined.
+For edits that stay inside Stata, see {helpb gpolish}. {cmd:gr2mpl} carries every {cmd:gpolish} edit
+(end labels, callouts, point labels, colored legend text) into the matplotlib version, and applies
+text angles that Stata stores but cannot draw. {cmd:gpolish render} calls {cmd:gr2mpl}.
+
+
+{marker options}{...}
+{title:Options}
+
+{phang}{opt name(graphname)} names the graph to redraw. The default is the current graph.
+
+{phang}{opt saving(filename)} names the PNG to write; {opt replace} allows overwriting. The default is {it:graphname}{cmd:_mpl.png} in the current directory.
+
+{phang}{opt width(#)} sets the image width in pixels; {opt dpi(#)} sets the resolution (default 200). The figure keeps the graph's {cmd:xsize()} and {cmd:ysize()}.
+
+{phang}{opt endlabels} replaces the legend of a line graph with labels at the line ends. {opt nolegend} drops the legend.
+
+{phang}{opt palette(house)} recolors the series with the house palette. The default keeps the colors of the Stata graph.
+
+{phang}{opt font(fontname)} sets the typeface (default Open Sans, falling back to Helvetica or Arial).
+
+{phang}{opt nogrid}, {opt nohalo} and {opt noticks} switch off the grid, the white halo behind annotation text, and the x-axis tick marks.
+
+{phang}{opt lwscale(#)} and {opt msscale(#)} multiply all line widths and marker sizes (default 1, which matches Stata).
+
+{phang}{opt python(path)} names the Python interpreter to use. See {help gr2mpl##python:Python setup}.
+
+{phang}{opt keepspec} keeps the intermediate JSON and CSV files; {opt specdir(dir)} says where to write them.
+
+
+{marker python}{...}
+{title:Python setup}
+
+{pstd}
+{cmd:gr2mpl} needs Python 3 with {bf:matplotlib} and {bf:numpy}. It looks for an interpreter in this order:
+
+{p 8 12 2}1. the {opt python()} option;{p_end}
+{p 8 12 2}2. the global macro {cmd:$GR2MPL_PYTHON};{p_end}
+{p 8 12 2}3. Stata's own Python (see {helpb python}), if it can import matplotlib;{p_end}
+{p 8 12 2}4. {cmd:python3} or {cmd:python} on the system path.{p_end}
+
+{pstd}
+{cmd:gr2mpl doctor} reports which interpreter will be used, its matplotlib version, and whether the font is installed.
+If no interpreter has matplotlib, {cmd:gr2mpl} stops and prints the {cmd:pip install} command to run.
+To set the interpreter once, put {cmd:global GR2MPL_PYTHON "/path/to/python"} in your profile.do.
+
+
+{marker support}{...}
+{title:What is supported}
+
+{p2colset 8 44 46 2}{...}
+{p2col:Graph}Status{p_end}
+{p2line}
+{p2col:twoway line, connected, scatter, marker labels}yes{p_end}
+{p2col:twoway bar, rbar, histogram, area, rarea}yes{p_end}
+{p2col:rcap, rspike, rline, spike, dropline, dot}yes{p_end}
+{p2col:lfit, lfitci, qfitci, lowess, kdensity, function}yes{p_end}
+{p2col:pcspike, pcarrow, pccapsym}yes{p_end}
+{p2col:second y axis, log and reversed scales, dates}yes{p_end}
+{p2col:xline(), yline(), text(), gpolish edits}yes{p_end}
+{p2col:graph bar, hbar, box, hbox, dot}yes{p_end}
+{p2col:by() on twoway and graph bar; graph combine}yes{p_end}
+{p2col:marginsplot, coefplot}yes{p_end}
+{p2col:contour, contourline}layer skipped, with a note{p_end}
+{p2col:graph pie}refused{p_end}
+{p2col:x2axis, a third y axis, blabel(), second over() labels}not read{p_end}
+{p2col:nested combine}panel skipped, with a note{p_end}
+{p2line}
+
+{pstd}
+Skipped layers are listed in {cmd:r(unsupported)}. Some choices differ from the Stata graph on purpose:
+the y-axis title moves above the plot, bars always start at their base, and black reference lines become gray.
+
+
+{marker examples}{...}
+{title:Examples}
+
+{phang2}{cmd:. gr2mpl doctor}{p_end}
+{phang2}{cmd:. sysuse nlsw88, clear}{p_end}
+{phang2}{cmd:. regress wage c.grade##i.race}{p_end}
+{phang2}{cmd:. margins race, at(grade=(8(2)18))}{p_end}
+{phang2}{cmd:. marginsplot}{p_end}
+{phang2}{cmd:. gr2mpl, saving(margins.png) replace endlabels}{p_end}
+
+
+{title:Stored results}
+
+{pstd}{cmd:r(filename)}, {cmd:r(python)}, {cmd:r(pymode)} ({cmd:embedded} or {cmd:shell}), {cmd:r(unsupported)}.
+
+
+{title:Technical note}
+
+{pstd}
+Requires Stata 16 or later. {cmd:gr2mpl} reads undocumented members of Stata's graph objects, which could change in a future release.
+
+
+{title:Author}
+
+{pstd}Eric Booth{p_end}
+
+
+{title:Also see}
+
+{psee}{helpb gpolish}, {helpb python}{p_end}

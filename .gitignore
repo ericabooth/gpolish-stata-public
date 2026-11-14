@@ -1,0 +1,7 @@
+*.log
+*.smcl
+.DS_Store
+tests/out/
+tests/spec/
+__pycache__/
+.venv/

@@ -1,0 +1,119 @@
+*! scheme-pypolish 0.1  matplotlib/ggplot-style defaults for Stata graphs
+#include s2color
+* canvas
+color background        white
+color plotregion        white
+color plotregion_line   white
+linewidth plotregion    none
+margin graph            "3 2 2 3"
+margin twoway           "3 2 2 3"
+margin plotregion       "1 1 1 0"
+* text colours
+color heading           "26 26 26"
+color subheading        "107 107 107"
+color text              "26 26 26"
+color body              "107 107 107"
+color small_body        "107 107 107"
+color axis_title        "107 107 107"
+color tick_label        "107 107 107"
+color text_option       "26 26 26"
+color key_label         "60 60 60"
+* titles: left aligned, spanning the full graph
+clockdir title_position      11
+clockdir subtitle_position   11
+clockdir note_position        7
+clockdir caption_position     7
+yesno title_span        yes
+yesno subtitle_span     yes
+yesno note_span         yes
+yesno caption_span      yes
+horizontal heading      left
+horizontal subheading   left
+horizontal small_body   left
+horizontal body         left
+margin heading          "0 0 1.2 0"
+margin subheading       "0 0 3 0"
+margin small_body       "0 0 0 2"
+* axes and grid
+color axisline          "154 154 154"
+color tick              "154 154 154"
+linewidth axisline      thin
+linewidth tick          thin
+anglestyle vertical_tick horizontal
+color major_grid        "228 228 228"
+color grid              "228 228 228"
+linewidth major_grid    thin
+linepattern major_grid  solid
+yesno draw_major_hgrid  no
+yesno draw_major_vgrid  yes
+yesno grid_draw_min     yes
+yesno grid_draw_max     yes
+gsize tickgap           tiny
+gsize axis_title_gap    small
+* legend: no box, below title
+color legend_line       white
+linewidth legend        none
+clockdir legend_position 12
+numstyle legend_rows    1
+numstyle legend_cols    0
+* series
+linewidth p             medthick
+symbolsize p            medsmall
+color p1  "11 93 122"
+color p2  "184 67 15"
+color p3  "224 161 0"
+color p4  "111 177 199"
+color p5  "240 163 94"
+color p6  "74 124 89"
+color p7  "122 81 149"
+color p8  "140 140 140"
+color p1line  "11 93 122"
+color p2line  "184 67 15"
+color p3line  "224 161 0"
+color p4line  "111 177 199"
+color p5line  "240 163 94"
+color p6line  "74 124 89"
+color p7line  "122 81 149"
+color p8line  "140 140 140"
+color p1markline white
+color p2markline white
+color p3markline white
+color p4markline white
+color p5markline white
+color p6markline white
+color p7markline white
+color p8markline white
+color p1bar  "11 93 122"
+color p2bar  "184 67 15"
+color p3bar  "224 161 0"
+color p4bar  "111 177 199"
+color p1area "11 93 122"
+color p2area "184 67 15"
+color p3area "224 161 0"
+color p4area "111 177 199"
+color ci_area "200 200 200"
+color ci_arealine "200 200 200"
+* more series colours for bars, boxes, areas and histograms
+color p5bar  "240 163 94"
+color p6bar  "74 124 89"
+color p7bar  "122 81 149"
+color p8bar  "140 140 140"
+color p1box  "11 93 122"
+color p2box  "184 67 15"
+color p3box  "224 161 0"
+color p4box  "111 177 199"
+color p1boxline  "11 93 122"
+color p2boxline  "184 67 15"
+color p3boxline  "224 161 0"
+color p4boxline  "111 177 199"
+color p1dot  "11 93 122"
+color p2dot  "184 67 15"
+color p3dot  "224 161 0"
+color histogram      "11 93 122"
+color histogram_line white
+linewidth histogram  vthin
+color box              white
+color textbox          white
+color filled           white
+color text_option_fill white
+color bylabel_outline white

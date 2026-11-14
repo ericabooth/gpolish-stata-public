@@ -1,0 +1,69 @@
+region,country,popgrowth,lexp,gnppc,safewater,regionname
+Europe & C. Asia,Albania,1.2,72,810,76,Europe & C. Asia
+Europe & C. Asia,Armenia,1.1,74,460,,Europe & C. Asia
+Europe & C. Asia,Austria,.40000001,79,26830,,Europe & C. Asia
+Europe & C. Asia,Azerbaijan,1.4,71,480,,Europe & C. Asia
+Europe & C. Asia,Belarus,.30000001,68,2180,,Europe & C. Asia
+Europe & C. Asia,Belgium,.2,78,25380,,Europe & C. Asia
+Europe & C. Asia,Bosnia and Herzegovina,-.5,73,,,Europe & C. Asia
+Europe & C. Asia,Bulgaria,-.40000001,71,1220,,Europe & C. Asia
+Europe & C. Asia,Croatia,-.1,73,4620,63,Europe & C. Asia
+Europe & C. Asia,Czech Republic,0,75,5150,,Europe & C. Asia
+Europe & C. Asia,Denmark,.2,76,33040,,Europe & C. Asia
+Europe & C. Asia,Estonia,-.1,70,3360,,Europe & C. Asia
+Europe & C. Asia,Finland,.40000001,77,24280,98,Europe & C. Asia
+Europe & C. Asia,France,.5,78,24210,100,Europe & C. Asia
+Europe & C. Asia,Georgia,.40000001,73,970,,Europe & C. Asia
+Europe & C. Asia,Germany,.30000001,77,26570,,Europe & C. Asia
+Europe & C. Asia,Greece,.5,78,11740,,Europe & C. Asia
+Europe & C. Asia,Hungary,-.30000001,71,4510,,Europe & C. Asia
+Europe & C. Asia,Ireland,.5,76,18710,,Europe & C. Asia
+Europe & C. Asia,Italy,.1,78,20090,,Europe & C. Asia
+Europe & C. Asia,Kazakhstan,.30000001,65,1340,,Europe & C. Asia
+Europe & C. Asia,Kyrgyz Republic,1.4,67,380,81,Europe & C. Asia
+Europe & C. Asia,Latvia,-.2,70,2420,,Europe & C. Asia
+Europe & C. Asia,Lithuania,.5,72,2540,,Europe & C. Asia
+Europe & C. Asia,Macedonia FYR,.30000001,73,1290,,Europe & C. Asia
+Europe & C. Asia,Moldova,.40000001,67,380,56,Europe & C. Asia
+Europe & C. Asia,Netherlands,.60000002,78,24780,100,Europe & C. Asia
+Europe & C. Asia,Norway,.40000001,78,34310,100,Europe & C. Asia
+Europe & C. Asia,Poland,.5,73,3910,,Europe & C. Asia
+Europe & C. Asia,Portugal,.1,75,10670,82,Europe & C. Asia
+Europe & C. Asia,Romania,.1,69,1360,62,Europe & C. Asia
+Europe & C. Asia,Russian Federation,.30000001,67,2260,,Europe & C. Asia
+Europe & C. Asia,Slovak Republic,.40000001,73,3700,,Europe & C. Asia
+Europe & C. Asia,Slovenia,.2,75,9780,98,Europe & C. Asia
+Europe & C. Asia,Spain,.30000001,78,14100,,Europe & C. Asia
+Europe & C. Asia,Sweden,.40000001,79,25580,,Europe & C. Asia
+Europe & C. Asia,Switzerland,.69999999,79,39980,100,Europe & C. Asia
+Europe & C. Asia,Tajikistan,2.4000001,69,370,69,Europe & C. Asia
+Europe & C. Asia,Turkey,2,69,3160,,Europe & C. Asia
+Europe & C. Asia,Turkmenistan,2.8,66,,60,Europe & C. Asia
+Europe & C. Asia,Ukraine,0,67,980,55,Europe & C. Asia
+Europe & C. Asia,United Kingdom,.30000001,77,21410,100,Europe & C. Asia
+Europe & C. Asia,Uzbekistan,2.3,69,950,57,Europe & C. Asia
+Europe & C. Asia,"Yugoslavia, FR (Serb./Mont.)",.5,72,,,Europe & C. Asia
+North America,Canada,1.2,79,19170,99,North America
+North America,Cuba,.69999999,76,,93,North America
+North America,Dominican Republic,2.0999999,71,1770,71,North America
+North America,El Salvador,1.5,69,1850,55,North America
+North America,Guatemala,2.5999999,64,1640,67,North America
+North America,Haiti,2,54,410,28,North America
+North America,Honduras,3,69,740,65,North America
+North America,Jamaica,1,75,1740,70,North America
+North America,Mexico,1.9,72,3840,83,North America
+North America,Nicaragua,2.8,68,1896,81,North America
+North America,Panama,1.9,74,2990,84,North America
+North America,Puerto Rico,1,76,,97,North America
+North America,Trinidad and Tobago,1,73,4520,82,North America
+North America,United States,1,77,29240,,North America
+South America,Argentina,1.4,73,8030,65,South America
+South America,Bolivia,2.2,62,1010,55,South America
+South America,Brazil,1.7,67,4630,72,South America
+South America,Chile,1.6,75,4990,85,South America
+South America,Colombia,2,70,2470,78,South America
+South America,Ecuador,2.4000001,70,1520,70,South America
+South America,Paraguay,2.9000001,70,1760,39,South America
+South America,Peru,2,69,2440,80,South America
+South America,Uruguay,.69999999,74,6070,89,South America
+South America,Venezuela,2.4000001,73,3530,79,South America

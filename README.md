@@ -1,0 +1,135 @@
+# gpolish
+
+**Make Stata graphs look like the clean charts people build in Python and R.** `gpolish` edits a Stata graph after it is drawn: it labels lines directly, places notes and point labels where they fit, and tidies the axes and title. A companion command, `gr2mpl`, redraws any supported Stata graph in matplotlib when you want effects Stata cannot draw.
+
+<img width="1000" alt="A Stata line chart before and after gpolish" src="images/before_after.png" />
+
+*Left: the default graph. Right: the same data with `scheme(pypolish)` and three `gpolish` commands. Both are Stata graphs.*
+
+## What is in the package
+
+| Piece | What it does | Output |
+|---|---|---|
+| `scheme(pypolish)` | Static defaults: white background, left-aligned titles, light horizontal grid, horizontal axis labels, a restrained palette. | Stata graph |
+| `gpolish` | Reads the drawn graph and adds direct labels, callouts, point labels and brackets, placed by a layout step that avoids markers, lines and other text. | Stata graph |
+| `gr2mpl` | Redraws the graph held in memory with matplotlib, including every `gpolish` edit. Handles `graph bar`, box, dot, `by()` and combined graphs too. | PNG |
+
+`gpolish` needs only Stata. `gr2mpl` needs Python with matplotlib and numpy.
+
+## Install
+
+```stata
+net install gpolish, from("https://raw.githubusercontent.com/ericabooth/gpolish-stata-public/main/") replace
+help gpolish
+```
+
+Requires Stata 16 or later. One install brings both commands, the scheme and the help files.
+
+For `gr2mpl`, check the Python setup once:
+
+```stata
+gr2mpl doctor
+```
+
+It reports which interpreter it will use and prints the `pip install` line if matplotlib is missing. To choose an interpreter, put `global GR2MPL_PYTHON "/path/to/python"` in your `profile.do`.
+
+## Quick start
+
+```stata
+sysuse uslifeexp, clear
+graph set window fontface "Open Sans"      // any installed font
+line le_wfemale le_wmale le_bfemale le_bmale year, scheme(pypolish) legend(off) ///
+    xsize(7) ysize(4.6) title("Life expectancy rose for every group", size(13.5pt))
+
+gpolish                                    // bold title, drop the y-axis line and ticks
+gpolish endlabel, values dots              // direct labels, pushed apart where they collide
+gpolish callout "1918 influenza" "pandemic", to(1918.6 30.6)   // placed automatically
+
+graph export life.png, width(2400)         // still a Stata graph
+gpolish render, saving(life_mpl.png) replace    // optional matplotlib version
+```
+
+| Command | Use |
+|---|---|
+| `gpolish` | Bold title; remove the y-axis line and tick marks. |
+| `gpolish endlabel` | Label each line at its end in the line's colour; `values`, `dots`, `wrap()`. |
+| `gpolish callout` | A note with a curved arrow. Leave out `at()` and it finds its own place. |
+| `gpolish ptlabel` | Label chosen scatter points, each in the least crowded of eight positions. |
+| `gpolish bracket` | A square bracket between two y values. |
+| `gpolish legend` | Colour legend text to match its keys. |
+| `gpolish render` | Hand the finished graph to `gr2mpl`. |
+| `gpolish limits` | List what Stata's renderer cannot draw. |
+
+Because `gpolish` reads the drawn graph and not your command, it also works on graphs made by other commands that produce twoway graphs, such as `marginsplot`.
+
+## Gallery
+
+Twelve chart types, each drawn three ways: Stata's default, `pypolish` + `gpolish`, and the `gr2mpl` render.
+
+- **[Browse the gallery](https://ericabooth.github.io/gpolish-stata-public/gallery/)** (page with full-size images and code)
+- [Gallery on GitHub](gallery/README.md)
+
+<img width="1000" alt="Labelled scatter, three ways" src="gallery/sheets/02_scatter.png" />
+<img width="1000" alt="marginsplot, three ways" src="gallery/sheets/03_margins.png" />
+<img width="1000" alt="One highlighted series, three ways" src="gallery/sheets/04_highlight.png" />
+<img width="1000" alt="Small multiples, three ways" src="gallery/sheets/11_by.png" />
+
+All gallery images come from one script, [gallery/gallery.do](gallery/gallery.do).
+
+## When to use which
+
+| | `pypolish` + `gpolish` | `gr2mpl` |
+|---|---|---|
+| Result | A Stata graph: editable, combinable, exports to any format | A PNG |
+| Needs | Stata 16+ | Stata 16+, Python, matplotlib, numpy |
+| Graph families | twoway (title edit on any family) | twoway, bar, box, dot, `by()`, combine |
+| Ceiling | Stata's renderer | Anything matplotlib can draw |
+
+Start with the scheme and `gpolish`. Use `gr2mpl` when a chart needs something from the list below, or when the graph is not a twoway graph.
+
+## Limits
+
+Stata's graph renderer cannot draw the following. `gpolish` prints a note that names `gpolish render` when a request meets one of them.
+
+- **Text at an angle other than 0, 90 or 270 degrees.** The angle is stored in the graph and applied by `gr2mpl`.
+- **A soft halo behind text.** `halo` draws a white box in Stata, which can cover a nearby marker; `gr2mpl` draws a thin outline instead.
+- **Different colours inside one line of text**, and **filled arrow heads**.
+- **Layout commands on non-twoway graphs.** `endlabel`, `callout` and `ptlabel` are twoway only.
+
+`gr2mpl` does not draw contour plots or pie charts, and does not read a second x axis, a third y axis, `blabel()` or second-level `over()` labels. Skipped layers are named in a note and in `r(unsupported)`.
+
+Two further cautions:
+
+- Both commands rely on undocumented parts of Stata's graph objects and on `gr_edit`. A future Stata release could change them. [docs/OBJECT_MODEL.md](docs/OBJECT_MODEL.md) records what is used.
+- Label spacing depends on the font. `gpolish` has width tables for 16 common fonts and falls back to Arial's widths, with a note, for any other.
+
+## Tests
+
+Run from the repository root.
+
+| Script | What it checks |
+|---|---|
+| `tests/gpolish_battery.do` | 33 assertions: counts, positions, repel spacing, colours, log axes, refusals. |
+| `tests/gr2mpl_tests.do` | 25 graphs across plot families, each exported by Stata and by `gr2mpl`. |
+| `gallery/gallery.do` | The gallery itself. |
+| `tests/reference/` | Two hand-written matplotlib charts used as targets during development. |
+
+Tested on StataNow 19.5 and Stata 16.1 on macOS. Stata 17 and 18 and Windows are untested.
+
+## Repository layout
+
+| Path | Contents |
+|---|---|
+| `src/` | The installed files: both commands, help files, the renderer script, the scheme. |
+| `build/` | `gpolish.ado` is generated from `gpolish_template.ado` and the font-width tables by `make_ado.py`. Edit the template, not `src/gpolish.ado`. |
+| `gallery/` | Gallery script, images, page. |
+| `docs/` | Technical notes on Stata's graph object model. |
+| `tests/` | Test scripts and reference charts. |
+
+## Author and license
+
+Eric Booth. MIT license; see [LICENSE](LICENSE).
+
+## Acknowledgments
+
+Asjad Naqvi's open-source Stata graphics packages (`schemepack`, `graphfunctions` and others) informed the approach to labels and schemes.
