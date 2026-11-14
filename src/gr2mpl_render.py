@@ -25,6 +25,8 @@ import matplotlib.patheffects as pe  # noqa: E402
 from matplotlib import font_manager  # noqa: E402
 from matplotlib.colors import to_rgba  # noqa: E402
 from matplotlib.transforms import Bbox  # noqa: E402
+from matplotlib.offsetbox import AnnotationBbox, DrawingArea  # noqa: E402
+from matplotlib.patches import FancyBboxPatch, Polygon, Rectangle  # noqa: E402
 
 INK = "#1F2328"
 MUTED = "#6B7280"
@@ -263,6 +265,7 @@ class Panel:
         self.horizontal = False
         self.has_legend = False
         self.legend_style = {}
+        self.axis_off = set()
         self._slots = {}
         self.style_axes(ax)
 
@@ -393,7 +396,11 @@ class Panel:
             if hollow:
                 return dict(marker=marker, ms=self.ms(p), mfc="white", mec=mline,
                             mew=max(1.0, self.pts(mlw)) if mlw else 1.2)
-            return dict(marker=marker, ms=self.ms(p), mfc=mfill,
+            size = self.ms(p)
+            if same and (self.s.get("role") == "matrix" or size < 4.5):
+                # a white rim would eat a small marker; draw it solid instead
+                return dict(marker=marker, ms=size, mfc=mfill, mec=mfill, mew=0.0)
+            return dict(marker=marker, ms=size, mfc=mfill,
                         mec=mline if not same else "white",
                         mew=self.pts(mlw) if (mlw is not None and not same) else 0.6)
 
@@ -424,6 +431,24 @@ class Panel:
                 h = ax.bar(x, y - lo, bottom=lo, width=width, **kw)
             info.update(handle=h, color=afill, bars=True, horizontal=horizontal,
                         base=float(np.nanmin(lo)) if len(lo) else base)
+        elif t == "area" and str(p.get("dropbase", "")).strip() == "no":
+            # nodropbase areas are closed polygons separated by missing rows
+            # (heatplot cells, hexagons, map-like shapes)
+            col = afill
+            first = None
+            start = 0
+            pts_x, pts_y = list(x) + [np.nan], list(y) + [np.nan]
+            for k in range(len(pts_x)):
+                if np.isnan(pts_x[k]) or np.isnan(pts_y[k]):
+                    if k - start >= 3:
+                        poly = Polygon(np.column_stack([pts_x[start:k], pts_y[start:k]]),
+                                       closed=True, facecolor=col, edgecolor=col,
+                                       linewidth=0.3, zorder=z)
+                        ax.add_patch(poly)
+                        first = first or poly
+                    start = k + 1
+            info.update(handle=Rectangle((0, 0), 1, 1, facecolor=col, edgecolor="none"),
+                        color=afill, poly=True)
         elif t == "area":
             base = num(p.get("base"))
             if base is None:
@@ -451,6 +476,14 @@ class Panel:
                 h = ax.hlines(x, y, y2, color=lc, lw=lw, zorder=z + 1, capstyle="round")
             else:
                 h = ax.vlines(x, y, y2, color=lc, lw=lw, zorder=z + 1, capstyle="round")
+            cap = num(p.get("msize"), 0.0) or 0.0
+            if t == "rcap" and cap > 0:
+                kw = dict(ls="None", marker="|" if horizontal else "_", ms=self.pts(cap) * 1.6,
+                          mew=lw, mec=lc, zorder=z + 1)
+                if horizontal:
+                    ax.plot(np.r_[y, y2], np.r_[x, x], **kw)
+                else:
+                    ax.plot(np.r_[x, x], np.r_[y, y2], **kw)
             info.update(handle=h, band=True, horizontal=horizontal)
         elif t in ("rline", "rconnected", "rscatter"):
             if y2 is None:
@@ -475,6 +508,9 @@ class Panel:
             if y2 is None or x2 is None:
                 self.skip(f"plot {p.get('index')} (type {t}): second coordinates not found")
                 return None
+            if horizontal:  # stored unswapped; Stata swaps the axes when drawing
+                x, y, x2, y2 = y, x, y2, x2
+                info["horizontal"] = True
             lw = self.lw(p, floor=0.9)
             arrow = {"pcarrow": "-|>", "pcarrowi": "-|>", "pcbarrow": "<|-|>",
                      "pcbarrowi": "<|-|>"}.get(t)
@@ -508,12 +544,15 @@ class Panel:
         dx, dy, ha, va = offsets.get(pos, offsets["3"])
         size = num(p.get("labsize"))
         fs = max(6.5, self.pts(size)) if size else 7.5
+        col = stata_color(p.get("labcolor"), to_rgba(MUTED))
+        if col[:3] == (0, 0, 0):
+            col = to_rgba(INK)
         for xi, yi, lab in zip(x, y, labs):
             if lab in ("nan", "", ".") or np.isnan(xi) or np.isnan(yi):
                 continue
             ax.annotate(clean_text(lab), (xi, yi), xytext=(dx, dy),
                         textcoords="offset points", ha=ha, va=va, fontsize=fs,
-                        color=MUTED, zorder=5)
+                        color=col, zorder=5)
 
     def bar_width(self):
         for i in self.infos:
@@ -586,13 +625,31 @@ class Panel:
                                labelleft=False)
             if a.get("reverse") == "yes":
                 (ax.invert_xaxis if which == "x" else ax.invert_yaxis)()
-            if a.get("draw") == "no" and self.f.multi:
+            if a.get("draw") == "no":
                 if which == "y":
                     ax.tick_params(axis="y", labelleft=False)
                 else:
                     ax.tick_params(axis="x", labelbottom=False)
+                if not self.f.multi and key != "y2axis":
+                    self.axis_off.add(which)  # xscale(off) / yscale(off)
         ax = self.ax
-        if not self.f.nogrid:
+        is_matrix = self.s.get("role") == "matrix"
+        if "x" in self.axis_off:
+            ax.spines["bottom"].set_visible(False)
+        grid_on = not self.f.nogrid and not is_matrix
+        gkey = "xaxis" if horizontal_any else "yaxis"
+        if grid_on and (("x" if horizontal_any else "y") in self.axis_off
+                        or (s.get(gkey) or {}).get("grid") == "no"):
+            grid_on = False
+        if (s.get("xaxis") or {}).get("noline"):
+            ax.spines["bottom"].set_visible(False)
+            self.axis_off.add("xline")
+        if is_matrix:
+            for side in ("top", "right", "left", "bottom"):
+                ax.spines[side].set_visible(True)
+                ax.spines[side].set_color(GRID)
+                ax.spines[side].set_linewidth(0.9)
+        if grid_on:
             if horizontal_any:
                 ax.grid(axis="x", color=GRID, lw=0.9)
                 ax.spines["bottom"].set_visible(False)
@@ -601,10 +658,12 @@ class Panel:
                     ax.spines["left"].set_color(AXIS)
             else:
                 ax.grid(axis="y", color=GRID, lw=0.9)
-        if not horizontal_any and not self.f.noticks:
+        if (not horizontal_any and not self.f.noticks and "x" not in self.axis_off
+                and "xline" not in self.axis_off and not is_matrix):
             ax.tick_params(axis="x", length=3.5, width=0.9, color=AXIS, direction="out")
         ylo, yhi = ax.get_ylim()
-        if min(ylo, yhi) < 0 < max(ylo, yhi) and not horizontal_any:
+        if (min(ylo, yhi) < 0 < max(ylo, yhi) and not horizontal_any
+                and "y" not in self.axis_off and not is_matrix):
             ax.axhline(0, color=AXIS, lw=0.9, zorder=1.8)
         if self.ax2 is not None:
             self.ax2.tick_params(axis="y", labelright=True, labelleft=False,
@@ -665,12 +724,46 @@ class Panel:
         lh = fs * 1.28
         H = lh * len(lines)
         gap = 0.12 * fs
+        # a drawn box: filled and/or outlined rectangle behind the text. A white fill
+        # with no outline is the gpolish halo and is drawn as the thin stroke instead.
+        box = None
+        if str(t.get("drawbox", "")).strip() == "yes":
+            fill = stata_color(t.get("boxfill"), (1, 1, 1, 0))
+            blw = num(t.get("boxlw"), 0.0) or 0.0
+            edge = stata_color(t.get("boxline"), (1, 1, 1, 0)) if blw > 0 else (1, 1, 1, 0)
+            white = min(fill[:3]) > 0.97
+            if not (white and edge[3] == 0) and (fill[3] > 0 or edge[3] > 0):
+                pads = [self.pts((num(t.get("bm" + k), 0.0) or 0.0)
+                                 + (num(t.get("m" + k), 0.0) or 0.0))
+                        for k in ("l", "r", "b", "t")]
+                box = dict(fill=fill, edge=edge, lw=max(0.5, self.pts(blw)) if blw > 0 else 0,
+                           pads=pads)
+                theta, ct, st = 0.0, 1.0, 0.0
+        padl, padr, padb, padt = box["pads"] if box else (0.0, 0.0, 0.0, 0.0)
+        Wb, Hb = W + padl + padr, H + padb + padt
         # the block is rotated about its centre, then its bounding box is placed
         # against the anchor the way Stata's placement() does (in screen space)
-        hw = (W * abs(ct) + H * abs(st)) / 2
-        hh = (W * abs(st) + H * abs(ct)) / 2
+        hw = (Wb * abs(ct) + Hb * abs(st)) / 2
+        hh = (Wb * abs(st) + Hb * abs(ct)) / 2
         cx = {"left": hw + gap, "center": 0.0, "right": -hw - gap}[ha]
         cy = {"bottom": hh + gap, "center": 0.0, "top": -hh - gap}[va]
+        if box:
+            da = DrawingArea(Wb, Hb, 0, 0, clip=False)
+            if self.f.roundbox:
+                r_ = min(0.35 * fs, Hb / 2.2)
+                patch = FancyBboxPatch((r_, r_), Wb - 2 * r_, Hb - 2 * r_,
+                                       boxstyle=f"round,pad={r_}", facecolor=box["fill"],
+                                       edgecolor=box["edge"], linewidth=box["lw"])
+            else:
+                patch = Rectangle((0, 0), Wb, Hb, facecolor=box["fill"],
+                                  edgecolor=box["edge"], linewidth=box["lw"])
+            da.add_artist(patch)
+            ab = AnnotationBbox(da, (x, y), xybox=(cx, cy), xycoords="data",
+                                boxcoords="offset points", box_alignment=(0.5, 0.5),
+                                frameon=False, pad=0, annotation_clip=False, zorder=7.8)
+            self.ax.add_artist(ab)
+            cx += (padl - padr) / 2
+            cy += (padb - padt) / 2
         for k, line in enumerate(lines):
             lx = -W / 2 + {"left": 0, "center": (W - lw_[k]) / 2, "right": W - lw_[k]}[ml]
             ly = H / 2 - (k + 0.5) * lh
@@ -682,7 +775,8 @@ class Panel:
                                      fontsize=fs, color=col,
                                      fontweight="bold" if bold else "normal",
                                      annotation_clip=False, zorder=8)
-                self.halo(a)
+                if not box:
+                    self.halo(a)
                 lx += w
 
     def added_shapes(self):
@@ -762,12 +856,66 @@ class Panel:
             if bold:
                 txt.set_fontweight("bold")
 
+    def ramp_legend(self, labels):
+        """Many filled polygons with a legend (heatplot): a stepped colour bar."""
+        by_idx = {i["p"]["index"]: i for i in self.infos}
+        steps = [(k, labels[k], by_idx[k]["color"]) for k in sorted(labels) if k in by_idx]
+        vals = [num(st_[1].replace(",", "")) for st_ in steps]
+        if all(v is not None for v in vals):  # low to high, whatever the plot order
+            steps = [st_ for _, st_ in sorted(zip(vals, steps), key=lambda q: q[0])]
+        n = len(steps)
+        leg = self.s.get("legend", {})
+        side = str(leg.get("position", "")).strip() in ("2", "3", "4")
+        if side and num(leg.get("rows")) != 1:
+            # key at the right in Stata: a vertical ramp, low values at the bottom
+            cax = self.ax.inset_axes([1.03, 0.22, 0.035, 0.62])
+            for k, (_, _, col) in enumerate(steps):
+                cax.add_patch(Rectangle((0, k), 1, 1, facecolor=col, edgecolor="none"))
+            cax.set_xlim(0, 1)
+            cax.set_ylim(0, n)
+            show = sorted({0, n // 4, n // 2, (3 * n) // 4, n - 1})
+            cax.set_yticks([k + 0.5 for k in show])
+            cax.set_yticklabels([steps[k][1] for k in show])
+            cax.set_xticks([])
+            cax.tick_params(axis="y", length=0, labelsize=7.5, pad=3, left=False, right=True,
+                            labelleft=False, labelright=True, labelcolor=MUTED)
+            for sp in cax.spines.values():
+                sp.set_visible(False)
+            title = clean_text(leg.get("title", ""))
+            if title:
+                cax.set_title(title, fontsize=8.5, color=MUTED, loc="left", pad=4)
+            return True
+        cax = self.ax.inset_axes([0.0, 1.035, 0.46, 0.035])
+        for k, (_, _, col) in enumerate(steps):
+            cax.add_patch(Rectangle((k, 0), 1, 1, facecolor=col, edgecolor="none"))
+        cax.set_xlim(0, n)
+        cax.set_ylim(0, 1)
+        show = sorted({0, n // 4, n // 2, (3 * n) // 4, n - 1})
+        cax.set_xticks([k + 0.5 for k in show])
+        cax.set_xticklabels([steps[k][1] for k in show])
+        cax.set_yticks([])
+        cax.tick_params(axis="x", length=0, labelsize=7.5, pad=2, top=True, bottom=False,
+                        labeltop=True, labelbottom=False, labelcolor=MUTED)
+        for sp in cax.spines.values():
+            sp.set_visible(False)
+        title = clean_text(self.s.get("legend", {}).get("title", ""))
+        if title:
+            cax.text(1.03, 0.5, title, transform=cax.transAxes, fontsize=8.5, color=MUTED,
+                     ha="left", va="center")
+        self.has_legend = True
+        return True
+
     def legend(self):
-        handles, texts = self.legend_items(self.series_labels())
+        labels = self.series_labels()
+        polys = [i for i in self.infos if i.get("poly") and i["p"]["index"] in labels]
+        if len(polys) >= 5 and len(polys) == len(labels):
+            return self.ramp_legend(labels)
+        handles, texts = self.legend_items(labels)
         if not handles:
             return False
+        one_row = num(self.s.get("legend", {}).get("rows")) == 1 or len(handles) <= 6
         leg = self.ax.legend(handles, texts, loc="lower left", bbox_to_anchor=(0, 1.0),
-                             ncol=min(len(handles), 4), frameon=False,
+                             ncol=len(handles) if one_row else 4, frameon=False,
                              fontsize=self.f.tickfs - 0.5, handlelength=1.6,
                              handletextpad=0.5, columnspacing=1.4, borderaxespad=0.2,
                              labelcolor=INK)
@@ -917,6 +1065,45 @@ class Panel:
             if not self.f.nogrid:
                 ax.grid(axis="y", color=GRID, lw=0.9)
 
+    def bar_extras(self):
+        """blabel() texts and the second-level over() labels."""
+        s, ax = self.s, self.ax
+        for b in s.get("barlabels", []):
+            if b.get("draw") == "no":
+                continue
+            x, y = num(b.get("x")), num(b.get("y"))
+            txt = join_lines(b.get("text"))
+            if x is None or y is None or not txt:
+                continue
+            ha, va = ALIGN.get(str(b.get("place", "")).strip().lower(), ("center", "center"))
+            off = {"left": 3, "right": -3, "center": 0}[ha], {"bottom": 3, "top": -3, "center": 0}[va]
+            ax.annotate(txt, (x, y), xytext=off, textcoords="offset points", ha=ha, va=va,
+                        fontsize=max(6.5, self.f.tickfs - 1.5), color=INK, zorder=4,
+                        annotation_clip=False)
+        sup = [(num(t[0]), clean_text(t[1])) for t in s.get("supaxis", [])]
+        sup = [t for t in sup if t[0] is not None and t[1]]
+        if not sup:
+            return
+        fig = self.f.fig
+        fig.canvas.draw()
+        r = fig.canvas.get_renderer()
+        px2pt = 72.0 / fig.dpi
+        fs = self.f.tickfs
+        if self.horizontal:
+            wmax = max([t.get_window_extent(r).width for t in ax.get_yticklabels()] or [0])
+            for pos, lab in sup:
+                ax.annotate(lab, xy=(0, pos), xycoords=("axes fraction", "data"),
+                            xytext=(-(wmax * px2pt + 16), 0), textcoords="offset points",
+                            ha="right", va="center", fontsize=fs, fontweight="bold",
+                            color="#374151", annotation_clip=False)
+        else:
+            hmax = max([t.get_window_extent(r).height for t in ax.get_xticklabels()] or [0])
+            for pos, lab in sup:
+                ax.annotate(lab, xy=(pos, 0), xycoords=("data", "axes fraction"),
+                            xytext=(0, -(hmax * px2pt + 14)), textcoords="offset points",
+                            ha="center", va="top", fontsize=fs, fontweight="bold",
+                            color="#374151", annotation_clip=False)
+
     def bar_legend(self):
         leg = self.s.get("legend", {})
         entries = [e for e in leg.get("entries", []) if e[1]]
@@ -975,7 +1162,10 @@ class Panel:
         key = {"x": "xaxis", "y": "yaxis", "y2": "y2axis"}[which]
         if self.s.get("family") == "bar":
             return join_lines(self.s.get("scaletitle")) if which == "y" else ""
-        return join_lines((self.s.get(key) or {}).get("title"))
+        a = self.s.get(key) or {}
+        if a.get("draw") == "no" and not self.f.multi:
+            return ""
+        return join_lines(a.get("title"))
 
 
 # --------------------------------------------------------------------------
@@ -997,10 +1187,11 @@ class Figure:
         self.lwscale = num(spec.get("lwscale"), 1.0) or 1.0
         self.msscale = num(spec.get("msscale"), 1.0) or 1.0
         self.nohalo = bool(spec.get("nohalo"))
+        self.roundbox = bool(spec.get("roundbox"))
         self.nogrid = bool(spec.get("nogrid"))
         self.noticks = bool(spec.get("noticks"))
         self.pspecs = spec.get("panels", [])
-        self.multi = len(self.pspecs) > 1 or spec.get("family") in ("by", "combine")
+        self.multi = len(self.pspecs) > 1 or spec.get("family") in ("by", "combine", "matrix")
         self.tickfs = 8.5 if len(self.pspecs) > 2 else 9.5
 
     def data(self, path):
@@ -1039,6 +1230,18 @@ class Figure:
                 p.draw_twoway()
             elif fam == "bar":
                 p.draw_bar()
+                p.bar_extras()
+            elif fam == "diag":  # graph matrix: variable name on the diagonal
+                ax.set_xticks([])
+                ax.set_yticks([])
+                for sp in ax.spines.values():
+                    sp.set_visible(True)
+                    sp.set_color(GRID)
+                ax.text(0.5, 0.5, join_lines(ps.get("ptitle")), transform=ax.transAxes,
+                        ha="center", va="center", fontsize=self.tickfs + 1.5,
+                        fontweight="bold", color="#374151", wrap=True)
+            elif fam == "blank":
+                ax.set_axis_off()
             else:
                 p.skip(f"sub-graph of family {fam}")
                 ax.set_axis_off()
@@ -1080,7 +1283,7 @@ class Figure:
                     p.legend()
         else:
             is_by = s.get("family") == "by"
-            for p in self.panels:
+            for p in ([] if s.get("family") == "matrix" else self.panels):
                 if not is_by and not s.get("nolegend"):
                     if p.s.get("family") == "bar":
                         p.bar_legend()
@@ -1161,8 +1364,9 @@ class Figure:
 
         L, B, R, T = padx / W, bottom / H, 1 - padx / W, ycur / H
         rows, cols = self.rows, self.cols
-        gapx = (16.0 / W) if cols > 1 else 0.0
-        gapy = (14.0 / H) if rows > 1 else 0.0
+        tight = s.get("family") == "matrix"
+        gapx = ((5.0 if tight else 16.0) / W) if cols > 1 else 0.0
+        gapy = ((5.0 if tight else 14.0) / H) if rows > 1 else 0.0
         dl, dr = [0.0] * cols, [0.0] * cols
         dt_, db = [0.0] * rows, [0.0] * rows
         rects = {}

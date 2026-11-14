@@ -226,3 +226,121 @@ sysuse auto, clear
 graph pie, over(rep78)
 capture noisily gr2mpl, saving("tests/out/25_pie_mpl.png")
 di "pie rc = " _rc
+
+* 26 boxed text: text(, box), a shaded note box added with gr_edit, and a halo box ----------------
+sysuse auto, clear
+twoway scatter mpg weight, title("Boxed annotations") ytitle("Miles per gallon") xtitle("Weight (lbs.)") ///
+    text(38 4100 "Outlined box" "from text(, box)", box fcolor("255 244 214") lcolor("200 140 0") ///
+        lwidth(thin) margin(small) size(9pt)) xsize(6) ysize(4)
+gr_edit .plotregion1.AddTextBox added_text editor 15 2100
+gr_edit .plotregion1.added_text_new = 1
+gr_edit .plotregion1.added_text_rec = 1
+gr_edit .plotregion1.added_text[1].style.editstyle size(9pt) drawbox(yes) fillcolor("226 238 246%90") linestyle(color("11 93 122") width(thin)) boxmargin(2 2 1.2 1.2) box_alignment(east) horizontal(left) editcopy
+gr_edit .plotregion1.added_text[1].text = {}
+gr_edit .plotregion1.added_text[1].text.Arrpush "{bf:Finding.} Light cars"
+gr_edit .plotregion1.added_text[1].text.Arrpush "cluster above 25 mpg"
+gr_edit .plotregion1.AddTextBox added_text editor 22 4300
+gr_edit .plotregion1.added_text_new = 2
+gr_edit .plotregion1.added_text_rec = 2
+gr_edit .plotregion1.added_text[2].style.editstyle size(9pt) drawbox(yes) fillcolor("255 255 255%80") linestyle(color(none) width(none)) editcopy
+gr_edit .plotregion1.added_text[2].text = {}
+gr_edit .plotregion1.added_text[2].text.Arrpush "halo, not a box"
+both 26_boxed_text
+both 26b_boxed_text_round roundbox
+
+* 27 graph matrix, half and full ---------------------------------------------------------------------
+sysuse auto, clear
+graph matrix mpg weight price length, half title("Scatterplot matrix, lower half") xsize(6) ysize(6)
+both 27_matrix_half
+graph matrix mpg weight price, title("Scatterplot matrix") xsize(6) ysize(6)
+both 27b_matrix_full
+
+* 28 heatplot (community command), only if installed ---------------------------------------------------
+capture which heatplot
+if !_rc {
+    sysuse auto, clear
+    heatplot price weight mpg, title("Mean price by weight and mileage") xsize(6.5) ysize(4.5)
+    both 28_heatplot
+}
+else di as txt "heatplot not installed; test 28 skipped"
+
+* 29 a heat map built from rbar layers, labelled ticks on both axes, values in the cells -----------------
+sysuse nlsw88, clear
+collapse (mean) wage, by(race occupation)
+keep if occupation <= 6
+gen lo = race - 0.5
+gen hi = race + 0.5
+gen str5 lab = string(wage, "%4.1f")
+twoway (rbar lo hi occupation if wage < 7, barwidth(1) color("222 235 247")) ///
+       (rbar lo hi occupation if inrange(wage, 7, 9.999), barwidth(1) color("158 202 225")) ///
+       (rbar lo hi occupation if wage >= 10, barwidth(1) color("49 130 189")) ///
+       (scatter race occupation, msymbol(none) mlabel(lab) mlabpos(0) mlabcolor(black)), ///
+    ylabel(1 2 3, valuelabel angle(0) nogrid) xlabel(1(1)6, valuelabel angle(30) nogrid) ///
+    legend(order(1 "Under $7" 2 "$7 to $10" 3 "$10 or more")) ///
+    title("Mean hourly wage by race and occupation") ytitle("") xtitle("") xsize(7) ysize(4)
+both 29_rbar_heatmap
+
+* 30 cluster dendrogram ----------------------------------------------------------------------------------
+sysuse auto, clear
+keep in 1/20
+cluster wardslinkage mpg weight price, name(wl)
+cluster dendrogram wl, labels(make) xlabel(, angle(45) labsize(vsmall)) ///
+    title("Ward's linkage, 20 cars") ytitle("Dissimilarity") xsize(7) ysize(4.5)
+both 30_dendrogram
+
+* 31 statplot (community command), only if installed --------------------------------------------------------
+capture which statplot
+if !_rc {
+    sysuse auto, clear
+    statplot mpg trunk turn, over(foreign) blabel(bar, format(%4.1f)) title("Means by origin") xsize(6.5) ysize(4)
+    both 31_statplot
+}
+else di as txt "statplot not installed; test 31 skipped"
+
+* 32 graph hbar with two over() levels and bar labels --------------------------------------------------------
+sysuse nlsw88, clear
+graph hbar (mean) wage, over(collgrad) over(race) blabel(bar, format(%4.2f)) ///
+    title("Mean wage by race and degree") ytitle("Dollars per hour") xsize(6.5) ysize(4.2)
+both 32_hbar_two_over
+graph bar (mean) wage hours, over(union) over(married) blabel(bar, format(%4.1f)) ///
+    legend(order(1 "Hourly wage" 2 "Weekly hours")) title("Wage and hours") xsize(6.5) ysize(4.2)
+both 32b_bar_two_over
+
+* 33-35 regression diagnostics ----------------------------------------------------------------------------------
+sysuse auto, clear
+quietly regress price mpg weight foreign
+avplot mpg, title("Added-variable plot") xsize(6) ysize(4)
+both 33_avplot
+rvfplot, yline(0) title("Residuals against fitted values") xsize(6) ysize(4)
+both 34_rvfplot
+lvr2plot, mlabel(make) title("Leverage against squared residuals") xsize(6) ysize(4)
+both 35_lvr2plot
+
+* 36 marginsplot with by() ------------------------------------------------------------------------------------------
+sysuse nlsw88, clear
+quietly regress wage i.race##i.collgrad i.union c.grade
+quietly margins race, over(collgrad union)
+marginsplot, by(union) title("Predicted wage by race, degree and union status") xsize(7.5) ysize(4.2)
+both 36_marginsplot_by
+
+* 37 coefplot with several models, only if installed -------------------------------------------------------------------
+capture which coefplot
+if !_rc {
+    sysuse auto, clear
+    quietly regress price mpg headroom trunk turn if foreign
+    estimates store Foreign
+    quietly regress price mpg headroom trunk turn if !foreign
+    estimates store Domestic
+    coefplot Foreign Domestic, drop(_cons) xline(0) title("Price models by origin") xsize(6.5) ysize(4)
+    both 37_coefplot_models
+}
+else di as txt "coefplot not installed; test 37 skipped"
+
+* 38 flow-chart style diagram with both axes switched off ------------------------------------------------------------------
+clear
+twoway (pcarrowi 3 1.6 3 2.4  3 3.6 3 4.4  2.75 5 1.4 5, lcolor(gs6) mcolor(gs6)) ///
+       (scatteri 3 1 "Raw data" 3 3 "Clean" 3 5 "Model" 1.1 5 "Report", msymbol(none) mlabpos(0) mlabsize(medium)), ///
+    xscale(off range(0.3 5.7)) yscale(off range(0.6 3.5)) legend(off) ///
+    title("A four-step pipeline") xsize(6.5) ysize(3)
+both 38_flowchart_axes_off
+

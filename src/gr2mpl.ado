@@ -1,12 +1,12 @@
-*! gr2mpl 0.3.0  redraw a Stata graph held in memory with matplotlib
+*! gr2mpl 0.4.0  redraw a Stata graph held in memory with matplotlib
 *! Walks the graph object (not the syntax), writes a JSON spec + serset CSVs,
 *! then runs gr2mpl_render.py (embedded Python if it has matplotlib, else a shell
-*! call). Returns a PNG. Families: twoway, graph bar/hbar/dot/box, by(), combine.
+*! call). Returns a PNG. Families: twoway, graph bar/hbar/dot/box, graph matrix, by(), combine.
 program gr2mpl, rclass
     version 16
     syntax [anything(name=sub)] [, name(string) SAVing(string) Width(integer 0) ///
         DPI(integer 200) ENDLabels noLEGend FONT(string) PYthon(string) KEEPspec ///
-        PALette(string) SPECdir(string) noGRID REPLACE DOCtor noHALO noTICKs ///
+        PALette(string) SPECdir(string) noGRID REPLACE DOCtor noHALO noTICKs ROUNDbox ///
         LWScale(real 1) MSScale(real 1)]
 
     if "`sub'" == "doctor" | "`doctor'" != "" {
@@ -35,9 +35,9 @@ program gr2mpl, rclass
         exit 111
     }
     if "``g'.classname'" == "piegraph_g" local fam pie
-    if !inlist("`fam'", "twoway", "bar", "by", "combine") {
+    if !inlist("`fam'", "twoway", "bar", "by", "combine", "matrix") {
         di as err "gr2mpl: graph family `fam' is not supported"
-        di as err "        (supported: twoway, graph bar/hbar/dot/box, by(), graph combine)"
+        di as err "        (supported: twoway, graph bar/hbar/dot/box, graph matrix, by(), graph combine)"
         exit 198
     }
 
@@ -81,13 +81,18 @@ program gr2mpl, rclass
     _g2m_kv `fh' "specdir" `"`specdir'"'
     file write `fh' `"  "lwscale": `lwscale', "msscale": `msscale',"' _n
     file write `fh' `"  "endlabels": `=("`endlabels'"!="")', "nolegend": `=("`legend'"!="")', "' ///
-        `""nogrid": `=("`grid'"!="")', "nohalo": `=("`halo'"!="")', "noticks": `=("`ticks'"!="")',"' _n
+        `""nogrid": `=("`grid'"!="")', "nohalo": `=("`halo'"!="")', "noticks": `=("`ticks'"!="")', "' ///
+        `""roundbox": `=("`roundbox'"!="")',"' _n
 
     foreach t in title subtitle note caption {
         _g2m_textarr `fh' "`t'" "`g'.`t'"
     }
 
-    if inlist("`fam'", "by", "combine") {
+    global G2M_DONE
+    if "`fam'" == "matrix" {
+        _g2m_matrix `fh' "`g'" "`specdir'"
+    }
+    else if inlist("`fam'", "by", "combine") {
         local np = ``g'.graphs.arrnels'
         capture local rows = ``g'.rows'
         capture local cols = ``g'.cols'
@@ -362,6 +367,18 @@ program _g2m_twoway
             "draw draw_view.setting" "linecolor style.linestyle.color.setting"
         _g2m_pairs `fh' "`sc'" "reverse reverse.setting" "transform transform.setting" ///
             "min curmin" "max curmax" "datamin min" "datamax max"
+        * xscale(noline) leaves the line style members unchanged; it is recorded
+        * only as an edit in the graph's construction log
+        local noline 0
+        if "`a'" != "y2" {
+            local nlog ``g'.__LOG.arrnels'
+            if "`nlog'" == "" local nlog 0
+            forvalues q = 1/`nlog' {
+                local ll `"``g'.__LOG[`q']'"'
+                if strpos(`"`ll'"', ".`a'axis1.style.editstyle") & strpos(`"`ll'"', "linestyle(none)") local noline 1
+            }
+        }
+        file write `fh' `""noline": `noline', "'
         file write `fh' `""e": 1"' _n "  }," _n
     }
 
@@ -392,7 +409,13 @@ program _g2m_twoway
         _g2m_pairs `fh' "`o'" "x xpos.val" "y ypos.val" "color style.color.setting" ///
             "size style.size.gmval" "place style.box_alignment.setting" ///
             "horizontal style.horizontal.setting" "angle style.angle.setting" ///
-            "orientation orientation.setting" "draw draw_view.setting"
+            "orientation orientation.setting" "draw draw_view.setting" ///
+            "drawbox style.drawbox.setting" "boxfill style.fillcolor.setting" ///
+            "boxline style.linestyle.color.setting" "boxlw style.linestyle.width.gmval" ///
+            "bml style.boxmargin.gleft.gmval" "bmr style.boxmargin.gright.gmval" ///
+            "bmb style.boxmargin.gbottom.gmval" "bmt style.boxmargin.gtop.gmval" ///
+            "ml style.margin.gleft.gmval" "mr style.margin.gright.gmval" ///
+            "mb style.margin.gbottom.gmval" "mt style.margin.gtop.gmval"
         _g2m_textarr `fh' "text" "`o'" 0 nocomma
         file write `fh' "}"
     }
@@ -412,7 +435,13 @@ program _g2m_twoway
         _g2m_pairs `fh' "`o'" "x xpos.val" "y ypos.val" "color style.color.setting" ///
             "size style.size.gmval" "place style.box_alignment.setting" ///
             "horizontal style.horizontal.setting" "angle style.angle.setting" ///
-            "orientation orientation.setting" "draw draw_view.setting"
+            "orientation orientation.setting" "draw draw_view.setting" ///
+            "drawbox style.drawbox.setting" "boxfill style.fillcolor.setting" ///
+            "boxline style.linestyle.color.setting" "boxlw style.linestyle.width.gmval" ///
+            "bml style.boxmargin.gleft.gmval" "bmr style.boxmargin.gright.gmval" ///
+            "bmb style.boxmargin.gbottom.gmval" "bmt style.boxmargin.gtop.gmval" ///
+            "ml style.margin.gleft.gmval" "mr style.margin.gright.gmval" ///
+            "mb style.margin.gbottom.gmval" "mt style.margin.gtop.gmval"
         _g2m_textarr `fh' "text" "`o'" 0 nocomma
         file write `fh' "}"
     }
@@ -456,10 +485,64 @@ program _g2m_twoway
     _g2m_legend `fh' "`g'"
 
     * plots
-    local done
     file write `fh' `"  "plots": ["' _n
     forvalues i = 1/`np' {
-        local p `preg`i''.plot`i'
+        _g2m_plot `fh' "`preg`i''.plot`i'" `i' "`yax`i''" "`specdir'"
+        if `i' < `np' file write `fh' ","
+        file write `fh' _n
+    }
+    file write `fh' "  ]," _n
+end
+
+* graph matrix: an nvars x nvars grid of panels. Cell (i,j) is the plot region
+* .plotregion1.plotregion<i>_<j>; the diagonal holds the variable titles.
+program _g2m_matrix
+    args fh g specdir
+    local nv = ``g'.nvars'
+    local m `g'.plotregion1
+    file write `fh' `"  "rows": "`nv'", "cols": "`nv'","' _n
+    file write `fh' `"  "panels": ["' _n
+    forvalues i = 1/`nv' {
+        forvalues j = 1/`nv' {
+            file write `fh' "    {" _n
+            local pr `m'.plotregion`i'_`j'
+            if `i' == `j' {
+                _g2m_kv `fh' "family" "diag" 6
+                _g2m_textarr `fh' "ptitle" "`m'.titlegrid`i'.variable_title`i'" 6
+            }
+            else if "``pr'.plot1.type.setting'" == "" {
+                _g2m_kv `fh' "family" "blank" 6
+            }
+            else {
+                _g2m_kv `fh' "family" "twoway" 6
+                _g2m_kv `fh' "role" "matrix" 6
+                foreach a in x y {
+                    local v = cond("`a'" == "x", `j', `i')
+                    * ticks of variable v sit on whichever matrix axis was created for it
+                    local ax `m'.xaxis`v'
+                    if "``ax'.major.dlg_tickpos.arrnels'" == "" local ax `m'.yaxis`v'
+                    local edge = cond("`a'" == "x", `i' == `nv', `j' == 1)
+                    file write `fh' `"  "`a'axis": {"title": [],"' _n
+                    _g2m_ticks `fh' "ticks" "`ax'"
+                    _g2m_pairs `fh' "`pr'.`a'scale" "min curmin" "max curmax" "transform transform.setting"
+                    file write `fh' `""grid": "no", "draw": "`=cond(`edge', "yes", "no")'"},"' _n
+                }
+                file write `fh' `"  "legend": {"draw": "no", "entries": []},"' _n
+                file write `fh' `"  "plots": ["' _n
+                _g2m_plot `fh' "`pr'.plot1" 1 "1" "`specdir'"
+                file write `fh' _n "  ]," _n
+            }
+            file write `fh' `"      "end": 1"' _n "    }"
+            if !(`i' == `nv' & `j' == `nv') file write `fh' ","
+            file write `fh' _n
+        }
+    }
+    file write `fh' "  ]," _n
+end
+
+* one plot record; the serset behind it is exported once per gr2mpl call
+program _g2m_plot
+    args fh p i yax specdir
         local type ``p'.type.setting'
         if "`type'" == "" local type unknown
         local sid ``p'.serset.id'
@@ -475,7 +558,7 @@ program _g2m_twoway
                 local `v'fmt ``p'.serset.sers[`idx'].format'
             }
         }
-        file write `fh' `"    {"index": `i', "type": "`type'", "serset": `sid', "yaxis": "`yax`i''", "' _n
+        file write `fh' `"    {"index": `i', "type": "`type'", "serset": `sid', "yaxis": "`yax'", "' _n
         file write `fh' `"     "xi": `xvari', "yi": `yvari', "y2i": `y2vari', "x2i": `x2vari', "labeli": `lvari', "weighti": `wvari',"' _n
         _g2m_esc `"`yvarlab'"'
         file write `fh' `"     "ylabel": "`s(esc)'", "xformat": "`xvarfmt'", "yformat": "`yvarfmt'", "' _n
@@ -509,12 +592,11 @@ program _g2m_twoway
             "alwidth style.area.linestyle.width.gmval" "connect style.connect.setting" ///
             "labpos style.label.position.setting" "labcolor style.label.textstyle.color.setting" ///
             "labsize style.label.textstyle.size.gmval" "draw draw_view.setting" ///
-            "barsize bar_size" "base base" "drawnbase drawn_base" "dropto bar_drop_to.setting"
+            "barsize bar_size" "base base" "drawnbase drawn_base" "dropto bar_drop_to.setting" ///
+            "dropbase drop_base.setting"
         file write `fh' `""csv": "serset`sid'.csv"}"'
-        if `i' < `np' file write `fh' ","
-        file write `fh' _n
-        if `sid' >= 0 & !`: list sid in done' {
-            local done `done' `sid'
+        if `sid' >= 0 & !`: list sid in global(G2M_DONE)' {
+            global G2M_DONE $G2M_DONE `sid'
             preserve
             capture quietly {
                 serset set `sid'
@@ -524,8 +606,6 @@ program _g2m_twoway
             }
             restore
         }
-    }
-    file write `fh' "  ]," _n
 end
 
 * ---------------------------------------------------------------------------
@@ -585,6 +665,23 @@ program _g2m_bar
         file write `fh' "  ]," _n
     }
 
+    local n ``pr'.barlabels.arrnels'
+    if "`n'" == "" local n 0
+    file write `fh' `"  "barlabels": ["' _n
+    local first 1
+    forvalues k = 1/`n' {
+        local b `pr'.barlabels[`k']
+        if "``b'.xpos.val'" == "" continue
+        if !`first' file write `fh' "," _n
+        local first 0
+        file write `fh' "    {"
+        _g2m_pairs `fh' "`b'" "x xpos.val" "y ypos.val" "place style.box_alignment.setting" ///
+            "size style.size.gmval" "color style.color.setting" "draw draw_view.setting"
+        _g2m_textarr `fh' "text" "`b'" 0 nocomma
+        file write `fh' "}"
+    }
+    file write `fh' _n "  ]," _n
+
     * legend labels, with the colour of the matching bar style
     local ldraw ``g'.legend.draw_view.setting'
     local nk ``g'.legend.map.arrnels'
@@ -610,7 +707,11 @@ program _g2m_legend
     local ldraw ``g'.legend.draw_view.setting'
     local nk ``g'.legend.map.arrnels'
     if "`nk'" == "" local nk 0
-    file write `fh' `"  "legend": {"draw": "`ldraw'", "entries": ["'
+    local ltitle `"``g'.legend.subtitle.text[1]'"'
+    if `"`ltitle'"' == "" local ltitle `"``g'.legend.title.text[1]'"'
+    _g2m_esc `"`ltitle'"'
+    file write `fh' `"  "legend": {"draw": "`ldraw'", "title": "`s(esc)'", "rows": "``g'.legend.style.rows.val'", "' ///
+        `""cols": "``g'.legend.style.cols.val'", "position": "``g'.style.legend_position.setting'", "entries": ["'
     forvalues k = 1/`nk' {
         local m ``g'.legend.map[`k']'
         local lab `"``g'.legend.plotregion1.label[`k'].text[1]'"'

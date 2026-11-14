@@ -1,6 +1,6 @@
 # gpolish gallery
 
-Twelve Stata graphs, each drawn three ways: Stata's default look, the same graph with `scheme(pypolish)` and `gpolish` (still a Stata graph), and that graph redrawn in matplotlib by `gr2mpl`.
+Twenty-one Stata graphs, each drawn three ways: Stata's default look, the same graph with `scheme(pypolish)` and `gpolish` (still a Stata graph), and that graph redrawn in matplotlib by `gr2mpl`.
 
 Every image is produced by [gallery.do](gallery.do). A browsable version is at <https://ericabooth.github.io/gpolish-stata-public/gallery/>.
 
@@ -269,6 +269,222 @@ histogram price, `o' title("Price", size(10pt)) xtitle("") ytitle("") name(c3, r
 line mpg weight if foreign, sort || line mpg weight if !foreign, sort `o' title("Foreign and domestic", size(10pt)) ///
     legend(order(1 "Foreign" 2 "Domestic") rows(1) position(11) region(lstyle(none))) xtitle("Weight (lbs.)") ytitle("") name(c4, replace)
 graph combine c1 c2 c3 c4, scheme(pypolish) xsize(7) ysize(4.6) title("Four views of the 1978 automobile data", size(13.5pt)) note("Source: Stata auto dataset.", size(8pt))
+gpolish
+gr2mpl, saving(figure.png) replace
+```
+
+</details>
+
+## Finding box, brace and callout
+
+Three overlays on one scatter: a shaded finding box, a curly brace marking a range, and a callout that finds its own place.
+
+![Finding box, brace and callout](sheets/13_overlays.png)
+
+<details><summary>Stata code for the polished versions</summary>
+
+```stata
+twoway (lfit mpg weight, lcolor("60 60 60") lwidth(medium)) ///
+       (scatter mpg weight, mcolor("11 93 122%85") mlcolor(white) mlwidth(vthin) msize(6pt)) ///
+    , scheme(pypolish) legend(off) xsize(7) ysize(4.6) title("Weight explains most of the difference in mileage", size(13.5pt)) ///
+    subtitle("Mileage (mpg) and weight (lbs.), 74 cars, 1978", size(10pt)) note("Source: Stata auto dataset.", size(8pt)) ///
+    xtitle("Weight (lbs.)", size(9pt)) ytitle("") xlabel(, labsize(9pt) format(%9.0fc)) ylabel(, labsize(9pt)) yscale(range(8 42))
+gpolish
+gpolish note "{bf:Finding}" "Each extra 1,000 lbs. costs" "about `slope' miles per gallon", at(3350 34)
+gpolish brace "Every car over 4,000 lbs." "gets under 22 mpg", from(3980 23) to(4860 23)
+gpolish callout "VW Diesel: 41 mpg", to(2040 41)
+gr2mpl, saving(figure.png) replace
+```
+
+</details>
+
+## Group means with confidence-interval braces
+
+One brace names the confidence interval; another measures the gap between the two means.
+
+![Group means with confidence-interval braces](sheets/14_cibrace.png)
+
+<details><summary>Stata code for the polished versions</summary>
+
+```stata
+local m1 = m[1]
+local m2 = m[2]
+local lo2 = lo[2]
+local hi2 = hi[2]
+local gap = strtrim("`: display %4.2f `m2'-`m1''")
+twoway (bar m x if x==1, barwidth(0.55) color("111 177 199")) (bar m x if x==2, barwidth(0.55) color("11 93 122")) ///
+       (rcap lo hi x, lcolor("26 26 26") lwidth(medium)) ///
+    , scheme(pypolish) legend(off) xsize(7) ysize(4.6) xlabel(1 "Nonunion" 2 "Union", labsize(9pt)) xscale(range(0.4 3.3)) ///
+    ylabel(0(2)10, labsize(9pt)) yscale(range(0 10)) xtitle("") ytitle("") ///
+    title("Union members earned about a dollar more an hour", size(13.5pt)) ///
+    subtitle("Mean hourly wage (1988 dollars), with 95% confidence intervals", size(10pt)) note("Source: NLSW 1988 extract.", size(8pt))
+gpolish
+gpolish brace "95% confidence" "interval", from(2.33 `lo2') to(2.33 `hi2') flip width(5)
+gpolish brace "{bf:`gap' dollars}", from(1.5 `m1') to(1.5 `m2') width(5) color("184 67 15") lcolor("184 67 15")
+gr2mpl, saving(figure.png) replace
+```
+
+</details>
+
+## Flow chart of sample restrictions
+
+Boxes and arrows on an empty plot, built from gpolish note and gpolish arrow. The counts come from the data.
+
+![Flow chart of sample restrictions](sheets/15_flow.png)
+
+<details><summary>Stata code for the polished versions</summary>
+
+```stata
+scatter y x, msymbol(none) scheme(pypolish) xscale(off range(0 100)) yscale(off range(0 100)) ///
+    xlabel(, nogrid) ylabel(, nogrid) xsize(7) ysize(4.6) plotregion(margin(zero)) ///
+    title("From the full extract to the estimation sample", size(13.5pt)) ///
+    subtitle("National Longitudinal Survey of Women, 1988 extract", size(10pt)) note("Source: NLSW 1988 extract.", size(8pt))
+gpolish, keepyline keepyticks
+local main fill("232 241 245") border("11 93 122") align(center) size(9.5) pad(7)
+local drop fill("253 243 220") border("224 161 0") align(center) size(8.8) pad(6)
+gpolish note "{bf:`n0'}" "women in the extract", at(35 90) `main'
+gpolish note "{bf:`n1'}" "union status known", at(35 64) `main'
+gpolish note "{bf:`n2'}" "tenure and hours known", at(35 38) `main'
+gpolish note "{bf:`n3'}" "working 35 hours or more" "(estimation sample)", at(35 10) `main'
+gpolish note "`d1' dropped:" "union status missing", at(76 77) `drop'
+gpolish note "`d2' dropped:" "tenure or hours missing", at(76 51) `drop'
+gpolish note "`d3' dropped:" "part-time workers", at(76 25) `drop'
+gpolish arrow, from(35 83) to(35 71)
+gpolish arrow, from(35 57) to(35 45)
+gpolish arrow, from(35 31) to(35 19)
+gpolish arrow, from(35 77) to(64.5 77) headsize(3.5)
+gpolish arrow, from(35 51) to(63 51) headsize(3.5)
+gpolish arrow, from(35 25) to(65.5 25) headsize(3.5)
+gr2mpl, saving(figure.png) replace
+```
+
+</details>
+
+## Correlation heatmap
+
+Tiles drawn with twoway rbar, cell values as marker labels, and a legend used as the colour key.
+
+![Correlation heatmap](sheets/16_heatmap.png)
+
+<details><summary>Stata code for the polished versions</summary>
+
+```stata
+local c1 "184 67 15"
+local c2 "240 163 94"
+local c3 "240 240 236"
+local c4 "111 177 199"
+local c5 "11 93 122"
+local layers
+forvalues k = 1/5 {
+    local layers `layers' (rbar y0 y1 i if bin==`k', barwidth(1) color("`c`k''") lcolor(white) lwidth(vthin))
+}
+twoway `layers' ///
+       (scatter j i if inlist(bin, 2, 3, 4), msymbol(none) mlabel(rtxt) mlabpos(0) mlabsize(8pt) mlabcolor("26 26 26")) ///
+       (scatter j i if inlist(bin, 1, 5), msymbol(none) mlabel(rtxt) mlabpos(0) mlabsize(8pt) mlabcolor(white)) ///
+    , scheme(pypolish) xsize(7) ysize(4.6) yscale(reverse) xlabel(`al', labsize(8pt) angle(35) nogrid) ylabel(`al', labsize(8pt) nogrid) ///
+    xtitle("") ytitle("") xscale(noline) plotregion(margin(zero)) ///
+    title("Bigger cars cost more and travel less far on a gallon", size(13.5pt)) ///
+    subtitle("Pairwise correlations, 74 cars", size(10pt)) note("Source: Stata auto dataset.", size(8pt)) ///
+    legend(order(1 "Below -0.6" 2 "-0.6 to -0.2" 3 "-0.2 to 0.2" 4 "0.2 to 0.6" 5 "Above 0.6") rows(1) position(11) span ///
+           size(8.5pt) region(lstyle(none) margin(zero)) symxsize(*.35) keygap(*.5) colgap(*1.6) bmargin(b+1))
+gpolish
+gr2mpl, saving(figure.png) replace
+```
+
+</details>
+
+## Scatterplot matrix
+
+graph matrix is its own graph family: the scheme and the bold title apply, and gr2mpl redraws it.
+
+![Scatterplot matrix](sheets/17_matrix.png)
+
+<details><summary>Stata code for the polished versions</summary>
+
+```stata
+graph matrix price mpg weight length, half scheme(pypolish) xsize(7) ysize(4.6) mcolor("11 93 122%70") msize(3.5pt) ///
+    title("Four measures of a car, two at a time", size(13.5pt)) subtitle("Price, mileage, weight and length, 74 cars", size(10pt)) ///
+    note("Source: Stata auto dataset.", size(8pt))
+gpolish
+gr2mpl, saving(figure.png) replace
+```
+
+</details>
+
+## Cluster dendrogram
+
+cluster dendrogram produces a twoway graph, so the scheme and gpolish apply directly.
+
+![Cluster dendrogram](sheets/18_dendrogram.png)
+
+<details><summary>Stata code for the polished versions</summary>
+
+```stata
+cluster dendrogram w, labels(make) horizontal scheme(pypolish) xsize(7) ysize(4.6) lcolor("11 93 122") lwidth(medium) ///
+    ylabel(, labsize(8pt) nogrid) xlabel(, labsize(9pt) grid glcolor("228 228 228") glwidth(thin)) xtitle("Dissimilarity (Ward's linkage)", size(9pt)) ytitle("") ///
+    title("The imported cars fall into three families", size(13.5pt)) ///
+    subtitle("Hierarchical clustering on price, mileage, weight and length (standardized)", size(10pt)) ///
+    note("Source: Stata auto dataset, 22 foreign cars.", size(8pt))
+gpolish
+gr2mpl, saving(figure.png) replace
+```
+
+</details>
+
+## Added-variable plot
+
+A regression diagnostic from avplot, with the coefficient stated in a finding box.
+
+![Added-variable plot](sheets/19_avplot.png)
+
+<details><summary>Stata code for the polished versions</summary>
+
+```stata
+local b = strtrim("`: display %4.2f _b[weight]'")
+avplot weight, scheme(pypolish) xsize(7) ysize(4.6) mcolor("11 93 122%85") mlcolor(white) mlwidth(vthin) msize(6pt) ///
+    rlopts(lcolor("184 67 15") lwidth(medthick)) note("Source: Stata auto dataset. Linear regression of price on mileage, weight and origin.", size(8pt)) ///
+    title("Holding mileage and origin fixed, heavier cars cost more", size(13.5pt)) ///
+    subtitle("Added-variable plot: price and weight, both net of the other regressors", size(10pt)) ///
+    xtitle("Weight, residualized (lbs.)", size(9pt)) ytitle("") xlabel(, labsize(9pt) format(%9.0fc)) ylabel(, labsize(9pt) format(%9.0fc))
+gpolish
+gpolish note "{bf:`b' dollars per pound}" "after adjusting for mileage" "and foreign origin", at(-850 4600)
+gr2mpl, saving(figure.png) replace
+```
+
+</details>
+
+## statplot
+
+statplot output is a graph hbar. The scheme and title edit apply inside Stata; gr2mpl redraws it with its group labels.
+
+![statplot](sheets/20_statplot.png)
+
+<details><summary>Stata code for the polished versions</summary>
+
+```stata
+statplot wage hours tenure, over(collgrad) scheme(pypolish) xsize(7) ysize(4.6) ///
+    title("College graduates earn more for similar hours and tenure", size(13.5pt)) ///
+    subtitle("Means of hourly wage, weekly hours and job tenure (years)", size(10pt)) note("Source: NLSW 1988 extract. Drawn with statplot.", size(8pt)) ytitle("")
+gpolish
+gr2mpl, saving(figure.png) replace
+```
+
+</details>
+
+## heatplot
+
+A two-way density from the community command heatplot, with its colour key.
+
+![heatplot](sheets/21_heatplot.png)
+
+<details><summary>Stata code for the polished versions</summary>
+
+```stata
+heatplot wage tenure if wage < 25, scheme(pypolish) xsize(7) ysize(4.6) color(viridis, reverse) levels(8) ///
+    legend(position(3) cols(1) rows(8) region(lstyle(none)) size(8pt)) ///
+    title("Most women had short tenure and modest pay", size(13.5pt)) subtitle("Share of women by hourly wage and job tenure", size(10pt)) ///
+    note("Source: NLSW 1988 extract. Drawn with heatplot.", size(8pt)) xtitle("Job tenure (years)", size(9pt)) ytitle("") ///
+    xlabel(, labsize(9pt)) ylabel(, labsize(9pt))
 gpolish
 gr2mpl, saving(figure.png) replace
 ```

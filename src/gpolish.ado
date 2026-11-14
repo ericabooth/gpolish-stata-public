@@ -1,11 +1,14 @@
-*! gpolish 0.3.0  prototype: post-hoc polish + layout layer for Stata graphs
-*! gpolish [style] | endlabel | callout | bracket | ptlabel | legend | render | limits | geom
+*! gpolish 0.4.0  prototype: post-hoc polish + layout layer for Stata graphs
+*! gpolish [style] | endlabel | callout | note | arrow | brace | bracket | ptlabel | legend | render | limits | geom
 *! Requires Stata 16+. Uses undocumented graph-object members and gr_edit.
 program gpolish
     version 16
     gettoken sub rest : 0, parse(" ,")
     if "`sub'"=="endlabel"      _gpl_endlabel `rest'
     else if "`sub'"=="callout"  _gpl_callout `rest'
+    else if "`sub'"=="note"     _gpl_callout `rest' isnote
+    else if "`sub'"=="arrow"    _gpl_arrow `rest'
+    else if "`sub'"=="brace"    _gpl_brace `rest'
     else if "`sub'"=="bracket"  _gpl_bracket `rest'
     else if "`sub'"=="ptlabel"  _gpl_ptlabel `rest'
     else if "`sub'"=="legend"   _gpl_legend `rest'
@@ -87,7 +90,7 @@ end
 * add one text box; lines() is a list of quoted strings; returns r(k)
 program _gpl_addtext, rclass
     syntax , name(string) x(string) y(string) lines(string asis) [size(real 9) color(string) ///
-        hz(string) ba(string) halo angle(real 0) linegap(string)]
+        hz(string) ba(string) halo angle(real 0) linegap(string) fill(string) border(string) pad(real 5)]
     if "`color'"=="" local color "26 26 26"
     if "`hz'"=="" local hz left
     if "`ba'"=="" local ba east
@@ -98,7 +101,14 @@ program _gpl_addtext, rclass
     gr_edit .plotregion1.added_text_new = `k'
     gr_edit .plotregion1.added_text_rec = `k'
     local box
-    if "`halo'"!="" local box drawbox(yes) fillcolor(white%80) linestyle(color(white%0) width(none)) boxmargin(0.5 0.5 0.2 0.2)
+    if "`fill'"!="" {
+        if "`border'"=="" local border "`fill'"
+        _gpl_geom, name(`name')
+        local ph = `pad'*r(relperpt)
+        local pv = 0.7*`pad'*r(relperpt)
+        local box drawbox(yes) fillcolor("`fill'") linestyle(color("`border'") width(thin)) margin(`ph' `ph' `pv' `pv')
+    }
+    else if "`halo'"!="" local box drawbox(yes) fillcolor(white%80) linestyle(color(white%0) width(none)) boxmargin(0.5 0.5 0.2 0.2)
     gr_edit .plotregion1.added_text[`k'].style.editstyle size(`size'pt) color("`color'") horizontal(`hz') vertical(middle) box_alignment(`ba') linegap(`linegap') `box' editcopy
     gr_edit .plotregion1.added_text[`k'].text = {}
     foreach l of local lines {
@@ -369,7 +379,8 @@ end
 program _gpl_callout
     syntax anything(name=txt id="text" everything), [at(numlist min=2 max=2) to(numlist min=2 max=2) ///
         FRom(numlist min=2 max=2) name(string) CURve(real 0.25) SIZe(real 8.8) COLor(string) ///
-        LColor(string) ALign(string) HEADsize(real 4.5) SEGments(integer 24) LWidth(string) ANGle(real 0) HALO noARROW]
+        LColor(string) ALign(string) HEADsize(real 4.5) SEGments(integer 24) LWidth(string) ANGle(real 0) HALO noARROW ///
+        FILL(string) BORder(string) PAD(real 5) ISNOTE]
     _gpl_name `name'
     local name `r(name)'
     if "`at'"=="" & "`to'"=="" {
@@ -378,6 +389,11 @@ program _gpl_callout
     }
     if "`color'"=="" local color "26 26 26"
     if "`align'"=="" local align left
+    if "`isnote'"!="" & "`fill'"=="" {
+        * a shaded finding box in the scheme's warm accent
+        local fill "253 243 220"
+        if "`border'"=="" local border "224 161 0"
+    }
     * text box size in ems
     local nl 0
     local w 0
@@ -397,6 +413,11 @@ program _gpl_callout
     local fs = `size'/72*`gpi'
     local bw = `w'*`fs'
     local bh = `nl'*`fs'*1.3
+    if "`fill'"!="" {
+        * the padded box is what must fit and what the arrow leaves from
+        local bw = `bw' + 2*`pad'/72*`gpi'
+        local bh = `bh' + 1.4*`pad'/72*`gpi'
+    }
     tempname B
     if "`at'"=="" {
         * automatic placement around the target, avoiding what is already drawn
@@ -424,7 +445,13 @@ program _gpl_callout
     if `xlog' local px = exp(`px')
     if `ylog' local py = exp(`py')
     local ba = cond("`align'"=="right", "west", cond("`align'"=="center", "center", "east"))
-    _gpl_addtext, name(`name') x(`px') y(`py') lines(`txt') size(`size') color("`color'") hz(`align') ba(`ba') angle(`angle') `halo'
+    if "`fill'"!="" {
+        * Stata pads a boxed text outward from its anchor, so anchor the text inside the padding
+        local shift = cond("`align'"=="right", -1, cond("`align'"=="center", 0, 1))*`pad'/72*`gpi'
+        local px = (`gx' + `shift' - `xa')/`xb'
+        if `xlog' local px = exp(`px')
+    }
+    _gpl_addtext, name(`name') x(`px') y(`py') lines(`txt') size(`size') color("`color'") hz(`align') ba(`ba') angle(`angle') `halo' fill(`fill') border(`border') pad(`pad')
     if "`to'"=="" | "`arrow'"!="" exit
     gettoken tx ty : to
     local gtx = `xa' + `xb'*cond(`xlog', ln(`tx'), `tx')
@@ -446,6 +473,72 @@ program _gpl_callout
     local rows = rowsof(`P')
     forvalues i = 1/`rows' {
         _gpl_addline, name(`name') seg(`=`P'[`i',1]' `=`P'[`i',2]' `=`P'[`i',3]' `=`P'[`i',4]') lcolor(`lcolor') lwidth(`lwidth')
+    }
+end
+
+* ================================================================ arrow
+program _gpl_arrow
+    syntax , FRom(numlist min=2 max=2) to(numlist min=2 max=2) [name(string) CURve(real 0) HEADsize(real 4.5) ///
+        SEGments(integer 24) LColor(string) LWidth(string) SHRink(real 0)]
+    _gpl_name `name'
+    local name `r(name)'
+    _gpl_geom, name(`name')
+    gettoken fx fy : from
+    gettoken tx ty : to
+    local gfx = r(xa) + r(xb)*cond(r(xlog), ln(`fx'), `fx')
+    local gfy = r(ya) + r(yb)*cond(r(ylog), ln(`fy'), `fy')
+    local gtx = r(xa) + r(xb)*cond(r(xlog), ln(`tx'), `tx')
+    local gty = r(ya) + r(yb)*cond(r(ylog), ln(`ty'), `ty')
+    tempname P
+    mata: _gpl_bezier("`P'", (`gfx', `gfy'), (`gtx', `gty'), `curve', `segments', `headsize'/72*`r(gpi)', ///
+        `r(xa)', `r(xb)', `r(ya)', `r(yb)', `r(xlog)', `r(ylog)', `shrink'/72*`r(gpi)')
+    local rows = rowsof(`P')
+    forvalues i = 1/`rows' {
+        _gpl_addline, name(`name') seg(`=`P'[`i',1]' `=`P'[`i',2]' `=`P'[`i',3]' `=`P'[`i',4]') lcolor(`lcolor') lwidth(`lwidth')
+    }
+end
+
+* ================================================================ brace
+* a curly brace between two points, with an optional label at its tip
+program _gpl_brace
+    syntax [anything(name=txt everything)], FRom(numlist min=2 max=2) to(numlist min=2 max=2) [name(string) ///
+        Width(real 7) FLIP SIZe(real 8.8) COLor(string) LColor(string) LWidth(string) GAP(real 4)]
+    _gpl_name `name'
+    local name `r(name)'
+    _gpl_geom, name(`name')
+    local gpi = r(gpi)
+    local xa = r(xa)
+    local xb = r(xb)
+    local ya = r(ya)
+    local yb = r(yb)
+    local xlog = r(xlog)
+    local ylog = r(ylog)
+    gettoken fx fy : from
+    gettoken tx ty : to
+    local gfx = `xa' + `xb'*cond(`xlog', ln(`fx'), `fx')
+    local gfy = `ya' + `yb'*cond(`ylog', ln(`fy'), `fy')
+    local gtx = `xa' + `xb'*cond(`xlog', ln(`tx'), `tx')
+    local gty = `ya' + `yb'*cond(`ylog', ln(`ty'), `ty')
+    tempname P T
+    mata: _gpl_bracepath("`P'", "`T'", (`gfx', `gfy'), (`gtx', `gty'), `width'/72*`gpi', "`flip'"!="", `gap'/72*`gpi', ///
+        `xa', `xb', `ya', `yb', `xlog', `ylog')
+    local rows = rowsof(`P')
+    forvalues i = 1/`rows' {
+        _gpl_addline, name(`name') seg(`=`P'[`i',1]' `=`P'[`i',2]' `=`P'[`i',3]' `=`P'[`i',4]') lcolor(`lcolor') lwidth(`lwidth')
+    }
+    if `"`txt'"'!="" {
+        * label sits beyond the tip, aligned away from the brace
+        local nx = `T'[1,3]
+        local ny = `T'[1,4]
+        if abs(`nx') >= abs(`ny') {
+            local hz = cond(`nx' > 0, "left", "right")
+            local ba = cond(`nx' > 0, "east", "west")
+        }
+        else {
+            local hz center
+            local ba = cond(`ny' > 0, "north", "south")
+        }
+        _gpl_addtext, name(`name') x(`=`T'[1,1]') y(`=`T'[1,2]') lines(`txt') size(`size') color("`color'") hz(`hz') ba(`ba')
     }
 end
 
@@ -1222,5 +1315,77 @@ void _gpl_bezier(string scalar nm, real rowvector p0, real rowvector p2, real sc
         S[,4] = exp(S[,4])
     }
     st_matrix(nm, S)
+}
+
+// ---------------------------------------------------------------- curly brace
+// path from a to b (device units) with the tip w to the left of the direction of travel
+// (right if flip); returns data-space segments and the label anchor (x, y, normal x, normal y)
+void _gpl_bracepath(string scalar nm, string scalar tnm, real rowvector a, real rowvector b, real scalar w,
+                    real scalar flip, real scalar gap, real scalar xa, real scalar xb, real scalar ya,
+                    real scalar yb, real scalar xlog, real scalar ylog)
+{
+    real rowvector d
+    real rowvector n
+    real rowvector tip
+    real matrix pts
+    real matrix S
+    real matrix Q
+    real scalar L
+    real scalar q
+    real scalar i
+    real scalar u
+    real scalar k
+    real scalar s0
+    real scalar s1
+    real scalar o0
+    real scalar o1
+    real scalar sc
+    real scalar oc
+
+    d = b - a
+    L = sqrt(d*d')
+    d = d/L
+    n = (-d[2], d[1])
+    if (flip) n = -n
+    q = min((w/2, L/4))
+    // four quarter-curves in (along, offset) coordinates: start, control, end
+    Q = (0, 0,            0, w/2,        q, w/2 \
+         L/2 - q, w/2,    L/2, w/2,      L/2, w \
+         L/2, w,          L/2, w/2,      L/2 + q, w/2 \
+         L - q, w/2,      L, w/2,        L, 0)
+    pts = J(0, 2, .)
+    for (k=1; k<=4; k++) {
+        s0 = Q[k,1]
+        o0 = Q[k,2]
+        sc = Q[k,3]
+        oc = Q[k,4]
+        s1 = Q[k,5]
+        o1 = Q[k,6]
+        for (i=0; i<=10; i++) {
+            u = i/10
+            pts = pts \ ( ((1-u)^2*s0 + 2*u*(1-u)*sc + u^2*s1), ((1-u)^2*o0 + 2*u*(1-u)*oc + u^2*o1) )
+        }
+    }
+    pts = J(rows(pts), 1, a) + pts[,1]*d + pts[,2]*n
+    S = (pts[1::(rows(pts)-1),], pts[2::rows(pts),])
+    tip = (a + b)/2 + (w + gap)*n
+    S[,1] = (S[,1] :- xa)/xb
+    S[,3] = (S[,3] :- xa)/xb
+    S[,2] = (S[,2] :- ya)/yb
+    S[,4] = (S[,4] :- ya)/yb
+    tip[1] = (tip[1] - xa)/xb
+    tip[2] = (tip[2] - ya)/yb
+    if (xlog) {
+        S[,1] = exp(S[,1])
+        S[,3] = exp(S[,3])
+        tip[1] = exp(tip[1])
+    }
+    if (ylog) {
+        S[,2] = exp(S[,2])
+        S[,4] = exp(S[,4])
+        tip[2] = exp(tip[2])
+    }
+    st_matrix(nm, S)
+    st_matrix(tnm, (tip, n))
 }
 end

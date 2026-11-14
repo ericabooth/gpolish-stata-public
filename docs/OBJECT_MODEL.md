@@ -207,3 +207,78 @@ More object paths
   (see `build/make_fontwidths.py`) and picks one from `graph set window fontface`.
 - Scheme note: in the s2color family, `draw_major_vgrid yes` switches on the horizontal
   gridlines (the entry is named for the axis the lines come from).
+
+## Boxed text
+
+Members of a text box object, for both `text()` boxes (`.plotregion1.textboxK`) and
+boxes added through the Graph Editor interface (`.plotregion1.added_text[k]`):
+
+| Member | Meaning |
+|---|---|
+| `.style.drawbox.setting` | `yes` when a box is drawn |
+| `.style.fillcolor.setting` | fill, e.g. `226 238 246 %90` |
+| `.style.linestyle.color.setting` | outline colour |
+| `.style.linestyle.width.gmval` | outline width in relative units; `0` for `width(none)` |
+| `.style.boxmargin.gleft/.gright/.gbottom/.gtop.gmval` | `boxmargin()` padding |
+| `.style.margin.gleft/.gright/.gbottom/.gtop.gmval` | `margin()` padding, used by `text(, box margin())` |
+
+`linestyle(color(none) width(none))` reads back as colour `0 0 0 %100` with width `0`,
+so the width, not the colour, says whether there is an outline. gr2mpl draws a filled
+rectangle with the two paddings added; a white fill with no outline is treated as a
+halo and drawn as a thin stroke around the glyphs. Boxed text is not rotated.
+
+## graph matrix
+
+- `.g.graphfamily == "matrix"`, `.g.nvars`.
+- Cell (row i, column j): `.g.plotregion1.plotregion<i>_<j>.plot1`, an ordinary scatter
+  view with its own `.xscale` / `.yscale`. With `half` only i > j exists.
+- Diagonal titles: `.g.plotregion1.titlegrid<k>.variable_title<k>.text[1..]`.
+- Tick sets per variable: `.g.plotregion1.xaxis<k>` or `.yaxis<k>`; only some exist, so
+  the one that is present for a variable is used for both directions.
+
+## graph bar: labels
+
+- `blabel()` texts: `.g.plotregion1.barlabels[k]` with `.text[1]`, `.xpos.val`,
+  `.ypos.val` (plot-region units) and `.style.box_alignment.setting`.
+- Second-level `over()` labels: `.g.supaxis.major.dlg_tickpos[k]` / `.dlg_ticklabel[k]`.
+  With several variables and one `over()`, the variables are on `.grpaxis` and the
+  groups on `.supaxis` or the reverse, depending on `ascategory`; both arrays are read.
+
+## Polygon areas (heatplot)
+
+`heatplot` draws each colour class as one `area` plot with `nodropbase`: the serset holds
+closed polygons separated by missing rows. `.plotN.drop_base.setting == "no"` marks
+them. The legend is ordinary (`.legend.map`, labels, and the heading in
+`.legend.subtitle.text[1]`); five or more polygon classes are drawn as a stepped
+colour bar.
+
+## Axes switched off
+
+`xscale(off)` / `yscale(off)` show as `.xaxis1.draw_view.setting == "no"`. The axis
+line, ticks, labels, title and the grid belonging to that axis are then left out.
+
+## Known differences found with these graph types
+
+- `cluster dendrogram`: the spikes are drawn in the colour stored in
+  `.style.line.color` (black), while Stata draws them in the scheme's first plot colour.
+- `graph matrix` without `half`: tick labels are drawn on the left and bottom edges
+  only, so the first row and last column have none.
+- Marker labels are not moved apart; a dense `lvr2plot` overprints as it does in Stata.
+
+## Further members read
+
+- Legend layout: `.legend.style.rows.val` (0 when not set), `.legend.style.cols.val`,
+  and the legend's clock position in `.g.style.legend_position.setting`. `rows(1)` keeps
+  the legend on one row; a polygon colour key at positions 2-4 without `rows(1)` is
+  drawn as a vertical ramp at the right, low values at the bottom.
+- `xscale(noline)` does not change `.xaxis1.style.linestyle` members. It is visible only
+  in the construction log: an entry of `.g.__LOG[]` containing
+  `.xaxis1.style.editstyle  linestyle(none)`. gr2mpl scans the log for it.
+- Grid: `.xaxis1.style.draw_major_grid.setting` / `.yaxis1...` are honoured, so
+  `xlabel(, nogrid)` and `ylabel(, nogrid)` remove the corresponding grid lines.
+- `rcap` cap size is the plot's marker size (`.style.marker.size.gmval`); `msize(zero)`
+  gives plain spikes.
+- Paired-coordinate plots drawn `horizontal` (for example `cluster dendrogram,
+  horizontal`) keep the serset unswapped and set `.bar_drop_to.setting` to `y`; the
+  two coordinate pairs are swapped when drawing.
+

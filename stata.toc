@@ -1,4 +1,4 @@
 v 3
-d Materials by Eric Booth
+d Materials by Eric A. Booth, Sr Researcher, Texas 2036
 d gpolish: publication-style Stata graphs
 p gpolish

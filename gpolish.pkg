@@ -3,7 +3,7 @@ d gpolish: publication-style Stata graphs, with an optional matplotlib final ren
 d
 d gpolish edits a graph after it is drawn: direct end-of-line labels with
 d collision avoidance, automatically placed callouts and point labels,
-d brackets, and legend text coloured like its keys.  The result is still a
+d shaded finding boxes, braces, arrows, and legend text coloured like its keys.  The result is still a
 d Stata graph.  The scheme pypolish sets matching defaults.
 d
 d gr2mpl redraws a Stata graph held in memory with matplotlib (twoway,
@@ -14,7 +14,8 @@ d Start with: help gpolish
 d
 d Requires: Stata version 16
 d
-d Author: Eric Booth
+d Author: Eric A. Booth, Sr Researcher, Texas 2036
+d Support: eric.a.booth@gmail.com
 d
 d Distribution-Date: 20261114
 f src/gpolish.ado

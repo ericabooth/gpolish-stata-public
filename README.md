@@ -54,6 +54,9 @@ gpolish render, saving(life_mpl.png) replace    // optional matplotlib version
 | `gpolish` | Bold title; remove the y-axis line and tick marks. |
 | `gpolish endlabel` | Label each line at its end in the line's colour; `values`, `dots`, `wrap()`. |
 | `gpolish callout` | A note with a curved arrow. Leave out `at()` and it finds its own place. |
+| `gpolish note` | A shaded box for a finding or call-out, with an optional arrow. |
+| `gpolish brace` | A curly brace with a label: mark a confidence interval, a gap or a range. |
+| `gpolish arrow` | A straight or curved arrow; with `note` it builds simple flow charts. |
 | `gpolish ptlabel` | Label chosen scatter points, each in the least crowded of eight positions. |
 | `gpolish bracket` | A square bracket between two y values. |
 | `gpolish legend` | Colour legend text to match its keys. |
@@ -64,7 +67,7 @@ Because `gpolish` reads the drawn graph and not your command, it also works on g
 
 ## Gallery
 
-Twelve chart types, each drawn three ways: Stata's default, `pypolish` + `gpolish`, and the `gr2mpl` render.
+Twenty-one examples, each drawn three ways: Stata's default, `pypolish` + `gpolish`, and the `gr2mpl` render.
 
 - **[Browse the gallery](https://ericabooth.github.io/gpolish-stata-public/gallery/)** (page with full-size images and code)
 - [Gallery on GitHub](gallery/README.md)
@@ -72,7 +75,12 @@ Twelve chart types, each drawn three ways: Stata's default, `pypolish` + `gpolis
 <img width="1000" alt="Labelled scatter, three ways" src="gallery/sheets/02_scatter.png" />
 <img width="1000" alt="marginsplot, three ways" src="gallery/sheets/03_margins.png" />
 <img width="1000" alt="One highlighted series, three ways" src="gallery/sheets/04_highlight.png" />
+<img width="1000" alt="Finding box, brace and callout, three ways" src="gallery/sheets/13_overlays.png" />
+<img width="1000" alt="Flow chart, three ways" src="gallery/sheets/15_flow.png" />
+<img width="1000" alt="Correlation heatmap, three ways" src="gallery/sheets/16_heatmap.png" />
 <img width="1000" alt="Small multiples, three ways" src="gallery/sheets/11_by.png" />
+
+The gallery covers lines, scatters, `marginsplot`, coefficient and added-variable plots, histograms, bars, box plots, `by()` panels, combined graphs, a flow chart, a heatmap, a scatterplot matrix, a dendrogram, and output from the community commands `statplot` and `heatplot`.
 
 All gallery images come from one script, [gallery/gallery.do](gallery/gallery.do).
 
@@ -82,7 +90,7 @@ All gallery images come from one script, [gallery/gallery.do](gallery/gallery.do
 |---|---|---|
 | Result | A Stata graph: editable, combinable, exports to any format | A PNG |
 | Needs | Stata 16+ | Stata 16+, Python, matplotlib, numpy |
-| Graph families | twoway (title edit on any family) | twoway, bar, box, dot, `by()`, combine |
+| Graph families | twoway (title edit on any family) | twoway, bar, box, dot, matrix, `by()`, combine |
 | Ceiling | Stata's renderer | Anything matplotlib can draw |
 
 Start with the scheme and `gpolish`. Use `gr2mpl` when a chart needs something from the list below, or when the graph is not a twoway graph.
@@ -96,7 +104,7 @@ Stata's graph renderer cannot draw the following. `gpolish` prints a note that n
 - **Different colours inside one line of text**, and **filled arrow heads**.
 - **Layout commands on non-twoway graphs.** `endlabel`, `callout` and `ptlabel` are twoway only.
 
-`gr2mpl` does not draw contour plots or pie charts, and does not read a second x axis, a third y axis, `blabel()` or second-level `over()` labels. Skipped layers are named in a note and in `r(unsupported)`.
+`gr2mpl` does not draw contour plots or pie charts, and does not read a second x axis or a third y axis. Skipped layers are named in a note and in `r(unsupported)`.
 
 Two further cautions:
 
@@ -109,8 +117,8 @@ Run from the repository root.
 
 | Script | What it checks |
 |---|---|
-| `tests/gpolish_battery.do` | 33 assertions: counts, positions, repel spacing, colours, log axes, refusals. |
-| `tests/gr2mpl_tests.do` | 25 graphs across plot families, each exported by Stata and by `gr2mpl`. |
+| `tests/gpolish_battery.do` | Assertions on counts, positions, repel spacing, colours, log axes, refusals. |
+| `tests/gr2mpl_tests.do` | About 40 graphs across plot families, each exported by Stata and by `gr2mpl`. |
 | `gallery/gallery.do` | The gallery itself. |
 | `tests/reference/` | Two hand-written matplotlib charts used as targets during development. |
 
@@ -126,10 +134,18 @@ Tested on StataNow 19.5 and Stata 16.1 on macOS. Stata 17 and 18 and Windows are
 | `docs/` | Technical notes on Stata's graph object model. |
 | `tests/` | Test scripts and reference charts. |
 
+## Works with other graph commands
+
+`gpolish` and `gr2mpl` read the finished graph, so they work with commands that build on Stata's own graph families. Checked in the gallery or the tests: `marginsplot`, `avplot`, `rvfplot`, `lvr2plot`, `cluster dendrogram`, `histogram`, `coefplot`, `heatplot` and `statplot`. `statplot` and other `graph bar` based commands take the scheme and the title edit inside Stata and the full restyle from `gr2mpl`.
+
 ## Author and license
 
-Eric Booth. MIT license; see [LICENSE](LICENSE).
+Eric A. Booth, Sr Researcher, Texas 2036 (eric.a.booth@gmail.com).
+
+Issues and suggestions: [github.com/ericabooth/gpolish-stata-public/issues](https://github.com/ericabooth/gpolish-stata-public/issues)
+
+MIT. See [LICENSE](LICENSE). Copyright (c) 2026 Eric A. Booth.
 
 ## Acknowledgments
 
-Asjad Naqvi's open-source Stata graphics packages (`schemepack`, `graphfunctions` and others) informed the approach to labels and schemes.
+Asjad Naqvi ([@asjadnaqvi](https://github.com/asjadnaqvi)) and his open-source Stata graphics packages (`schemepack`, `graphfunctions` and others) informed the approach to labels and schemes.

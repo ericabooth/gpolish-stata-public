@@ -22,7 +22,8 @@ capture program drop shotBC
 program shotBC
     args tag opts
     graph export "gallery/img/`tag'_b.png", replace width(1400)
-    gr2mpl, saving("gallery/img/`tag'_c.png") replace width(1400) `opts'
+    capture noisily gr2mpl, saving("gallery/img/`tag'_c.png") replace width(1400) `opts'
+    if _rc di as err "gr2mpl could not draw `tag'"
 end
 * options shared by every polished version
 local SZ xsize(7) ysize(4.6)
@@ -251,5 +252,209 @@ line mpg weight if foreign, sort || line mpg weight if !foreign, sort `o' title(
 graph combine c1 c2 c3 c4, scheme(pypolish) `SZ' title("Four views of the 1978 automobile data", `TS') note("Source: Stata auto dataset.", `NS')
 gpolish
 shotBC 12_combine
+
+* ---------------------------------------------------------------- 13 finding box, brace and callout
+sysuse auto, clear
+quietly regress mpg weight
+local slope = strtrim("`: display %3.1f -1000*_b[weight]'")
+twoway (scatter mpg weight) (lfit mpg weight), title("Mileage and weight") `SZ'
+shotA 13_overlays
+twoway (lfit mpg weight, lcolor("60 60 60") lwidth(medium)) ///
+       (scatter mpg weight, mcolor("11 93 122%85") mlcolor(white) mlwidth(vthin) msize(6pt)) ///
+    , scheme(pypolish) legend(off) `SZ' title("Weight explains most of the difference in mileage", `TS') ///
+    subtitle("Mileage (mpg) and weight (lbs.), 74 cars, 1978", `SS') note("Source: Stata auto dataset.", `NS') ///
+    xtitle("Weight (lbs.)", size(9pt)) ytitle("") xlabel(, `LS' format(%9.0fc)) ylabel(, `LS') yscale(range(8 42))
+gpolish
+gpolish note "{bf:Finding}" "Each extra 1,000 lbs. costs" "about `slope' miles per gallon", at(3350 34)
+gpolish brace "Every car over 4,000 lbs." "gets under 22 mpg", from(3980 23) to(4860 23)
+gpolish callout "VW Diesel: 41 mpg", to(2040 41)
+shotBC 13_overlays
+
+* ---------------------------------------------------------------- 14 group means with CI braces
+sysuse nlsw88, clear
+drop if missing(union)
+collapse (mean) m=wage (semean) se=wage (count) n=wage, by(union)
+gen lo = m - invttail(n-1, 0.025)*se
+gen hi = m + invttail(n-1, 0.025)*se
+gen x = union + 1
+twoway (bar m x) (rcap lo hi x), xlabel(1 "Nonunion" 2 "Union") title("Mean wage by union status") `SZ'
+shotA 14_cibrace
+local m1 = m[1]
+local m2 = m[2]
+local lo2 = lo[2]
+local hi2 = hi[2]
+local gap = strtrim("`: display %4.2f `m2'-`m1''")
+twoway (bar m x if x==1, barwidth(0.55) color("111 177 199")) (bar m x if x==2, barwidth(0.55) color("11 93 122")) ///
+       (rcap lo hi x, lcolor("26 26 26") lwidth(medium)) ///
+    , scheme(pypolish) legend(off) `SZ' xlabel(1 "Nonunion" 2 "Union", `LS') xscale(range(0.4 3.3)) ///
+    ylabel(0(2)10, `LS') yscale(range(0 10)) xtitle("") ytitle("") ///
+    title("Union members earned about a dollar more an hour", `TS') ///
+    subtitle("Mean hourly wage (1988 dollars), with 95% confidence intervals", `SS') note("Source: NLSW 1988 extract.", `NS')
+gpolish
+gpolish brace "95% confidence" "interval", from(2.33 `lo2') to(2.33 `hi2') flip width(5)
+gpolish brace "{bf:`gap' dollars}", from(1.5 `m1') to(1.5 `m2') width(5) color("184 67 15") lcolor("184 67 15")
+shotBC 14_cibrace
+
+* ---------------------------------------------------------------- 15 flow chart of sample restrictions
+sysuse nlsw88, clear
+local n0 = _N
+quietly count if missing(union)
+local d1 = r(N)
+drop if missing(union)
+local n1 = _N
+quietly count if missing(tenure, hours)
+local d2 = r(N)
+drop if missing(tenure, hours)
+local n2 = _N
+quietly count if hours < 35
+local d3 = r(N)
+drop if hours < 35
+local n3 = _N
+foreach k in n0 n1 n2 n3 d1 d2 d3 {
+    local `k' = strtrim(string(``k'', "%9.0fc"))
+}
+clear
+set obs 2
+gen x = cond(_n==1, 0, 100)
+gen y = x
+scatter y x, msymbol(none) xscale(off) yscale(off) xlabel(, nogrid) ylabel(, nogrid) title("Sample restrictions") ///
+    text(90 35 "Women in the extract: `n0'", box) text(64 35 "Union status known: `n1'", box) ///
+    text(38 35 "Tenure and hours known: `n2'", box) text(12 35 "Working full time: `n3'", box) `SZ'
+shotA 15_flow
+scatter y x, msymbol(none) scheme(pypolish) xscale(off range(0 100)) yscale(off range(0 100)) ///
+    xlabel(, nogrid) ylabel(, nogrid) `SZ' plotregion(margin(zero)) ///
+    title("From the full extract to the estimation sample", `TS') ///
+    subtitle("National Longitudinal Survey of Women, 1988 extract", `SS') note("Source: NLSW 1988 extract.", `NS')
+gpolish, keepyline keepyticks
+local main fill("232 241 245") border("11 93 122") align(center) size(9.5) pad(7)
+local drop fill("253 243 220") border("224 161 0") align(center) size(8.8) pad(6)
+gpolish note "{bf:`n0'}" "women in the extract", at(35 90) `main'
+gpolish note "{bf:`n1'}" "union status known", at(35 64) `main'
+gpolish note "{bf:`n2'}" "tenure and hours known", at(35 38) `main'
+gpolish note "{bf:`n3'}" "working 35 hours or more" "(estimation sample)", at(35 10) `main'
+gpolish note "`d1' dropped:" "union status missing", at(76 77) `drop'
+gpolish note "`d2' dropped:" "tenure or hours missing", at(76 51) `drop'
+gpolish note "`d3' dropped:" "part-time workers", at(76 25) `drop'
+gpolish arrow, from(35 83) to(35 71)
+gpolish arrow, from(35 57) to(35 45)
+gpolish arrow, from(35 31) to(35 19)
+gpolish arrow, from(35 77) to(64.5 77) headsize(3.5)
+gpolish arrow, from(35 51) to(63 51) headsize(3.5)
+gpolish arrow, from(35 25) to(65.5 25) headsize(3.5)
+shotBC 15_flow
+
+* ---------------------------------------------------------------- 16 correlation heatmap from twoway tiles
+sysuse auto, clear
+local vars price mpg weight length displacement gear_ratio headroom turn
+local labs `""Price" "Mileage" "Weight" "Length" "Displacement" "Gear ratio" "Headroom" "Turn circle""'
+quietly correlate `vars'
+matrix C = r(C)
+clear
+set obs 64
+gen i = ceil(_n/8)
+gen j = _n - 8*(i-1)
+gen r = C[i, j]
+gen y0 = j - 0.5
+gen y1 = j + 0.5
+gen str5 rtxt = strtrim(string(r, "%4.2f"))
+gen bin = 1 + (r > -0.6) + (r > -0.2) + (r > 0.2) + (r > 0.6)
+local al
+forvalues k = 1/8 {
+    local al `al' `k' `"`: word `k' of `labs''"'
+}
+twoway (scatter j i [aweight=abs(r)], msymbol(S)) (scatter j i, msymbol(none) mlabel(rtxt) mlabpos(0)), ///
+    xlabel(`al', angle(45)) ylabel(`al', angle(0)) yscale(reverse) legend(off) title("Correlations") `SZ'
+shotA 16_heatmap
+local c1 "184 67 15"
+local c2 "240 163 94"
+local c3 "240 240 236"
+local c4 "111 177 199"
+local c5 "11 93 122"
+local layers
+forvalues k = 1/5 {
+    local layers `layers' (rbar y0 y1 i if bin==`k', barwidth(1) color("`c`k''") lcolor(white) lwidth(vthin))
+}
+twoway `layers' ///
+       (scatter j i if inlist(bin, 2, 3, 4), msymbol(none) mlabel(rtxt) mlabpos(0) mlabsize(8pt) mlabcolor("26 26 26")) ///
+       (scatter j i if inlist(bin, 1, 5), msymbol(none) mlabel(rtxt) mlabpos(0) mlabsize(8pt) mlabcolor(white)) ///
+    , scheme(pypolish) `SZ' yscale(reverse) xlabel(`al', labsize(8pt) angle(35) nogrid) ylabel(`al', labsize(8pt) nogrid) ///
+    xtitle("") ytitle("") xscale(noline) plotregion(margin(zero)) ///
+    title("Bigger cars cost more and travel less far on a gallon", `TS') ///
+    subtitle("Pairwise correlations, 74 cars", `SS') note("Source: Stata auto dataset.", `NS') ///
+    legend(order(1 "Below -0.6" 2 "-0.6 to -0.2" 3 "-0.2 to 0.2" 4 "0.2 to 0.6" 5 "Above 0.6") rows(1) position(11) span ///
+           size(8.5pt) region(lstyle(none) margin(zero)) symxsize(*.35) keygap(*.5) colgap(*1.6) bmargin(b+1))
+gpolish
+shotBC 16_heatmap
+
+* ---------------------------------------------------------------- 17 scatterplot matrix
+sysuse auto, clear
+graph matrix price mpg weight length, half title("Scatterplot matrix") `SZ'
+shotA 17_matrix
+graph matrix price mpg weight length, half scheme(pypolish) `SZ' mcolor("11 93 122%70") msize(3.5pt) ///
+    title("Four measures of a car, two at a time", `TS') subtitle("Price, mileage, weight and length, 74 cars", `SS') ///
+    note("Source: Stata auto dataset.", `NS')
+gpolish
+shotBC 17_matrix
+
+* ---------------------------------------------------------------- 18 cluster dendrogram
+sysuse auto, clear
+keep if foreign
+foreach v of varlist price mpg weight length {
+    quietly summarize `v'
+    gen z_`v' = (`v' - r(mean))/r(sd)
+}
+cluster wardslinkage z_price z_mpg z_weight z_length, name(w)
+cluster dendrogram w, labels(make) xlabel(, angle(90) labsize(small)) title("Dendrogram") `SZ'
+shotA 18_dendrogram
+cluster dendrogram w, labels(make) horizontal scheme(pypolish) `SZ' lcolor("11 93 122") lwidth(medium) ///
+    ylabel(, labsize(8pt) nogrid) xlabel(, `LS' grid glcolor("228 228 228") glwidth(thin)) xtitle("Dissimilarity (Ward's linkage)", size(9pt)) ytitle("") ///
+    title("The imported cars fall into three families", `TS') ///
+    subtitle("Hierarchical clustering on price, mileage, weight and length (standardized)", `SS') ///
+    note("Source: Stata auto dataset, 22 foreign cars.", `NS')
+gpolish
+shotBC 18_dendrogram
+
+* ---------------------------------------------------------------- 19 added-variable plot after regress
+sysuse auto, clear
+quietly regress price mpg weight foreign
+avplot weight, title("Added-variable plot") `SZ'
+shotA 19_avplot
+local b = strtrim("`: display %4.2f _b[weight]'")
+avplot weight, scheme(pypolish) `SZ' mcolor("11 93 122%85") mlcolor(white) mlwidth(vthin) msize(6pt) ///
+    rlopts(lcolor("184 67 15") lwidth(medthick)) note("Source: Stata auto dataset. Linear regression of price on mileage, weight and origin.", `NS') ///
+    title("Holding mileage and origin fixed, heavier cars cost more", `TS') ///
+    subtitle("Added-variable plot: price and weight, both net of the other regressors", `SS') ///
+    xtitle("Weight, residualized (lbs.)", size(9pt)) ytitle("") xlabel(, `LS' format(%9.0fc)) ylabel(, `LS' format(%9.0fc))
+gpolish
+gpolish note "{bf:`b' dollars per pound}" "after adjusting for mileage" "and foreign origin", at(-850 4600)
+shotBC 19_avplot
+
+* ---------------------------------------------------------------- 20 statplot (community command)
+capture which statplot
+if !_rc {
+    sysuse nlsw88, clear
+    statplot wage hours tenure, over(collgrad) title("Means by college degree") `SZ'
+    shotA 20_statplot
+    statplot wage hours tenure, over(collgrad) scheme(pypolish) `SZ' ///
+        title("College graduates earn more for similar hours and tenure", `TS') ///
+        subtitle("Means of hourly wage, weekly hours and job tenure (years)", `SS') note("Source: NLSW 1988 extract. Drawn with statplot.", `NS') ytitle("")
+    gpolish
+    shotBC 20_statplot
+}
+
+* ---------------------------------------------------------------- 21 heatplot (community command)
+capture which heatplot
+if !_rc {
+    sysuse nlsw88, clear
+    heatplot wage tenure, title("Wage and tenure") `SZ'
+    shotA 21_heatplot
+    heatplot wage tenure if wage < 25, scheme(pypolish) `SZ' color(viridis, reverse) levels(8) ///
+        legend(position(3) cols(1) rows(8) region(lstyle(none)) size(8pt)) ///
+        title("Most women had short tenure and modest pay", `TS') subtitle("Share of women by hourly wage and job tenure", `SS') ///
+        note("Source: NLSW 1988 extract. Drawn with heatplot.", `NS') xtitle("Job tenure (years)", size(9pt)) ytitle("") ///
+        xlabel(, `LS') ylabel(, `LS')
+    gpolish
+    shotBC 21_heatplot
+}
 
 di as res "gallery done"

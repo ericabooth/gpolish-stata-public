@@ -75,14 +75,6 @@ color p5line  "240 163 94"
 color p6line  "74 124 89"
 color p7line  "122 81 149"
 color p8line  "140 140 140"
-color p1markline white
-color p2markline white
-color p3markline white
-color p4markline white
-color p5markline white
-color p6markline white
-color p7markline white
-color p8markline white
 color p1bar  "11 93 122"
 color p2bar  "184 67 15"
 color p3bar  "224 161 0"
@@ -117,3 +109,7 @@ color textbox          white
 color filled           white
 color text_option_fill white
 color bylabel_outline white
+* scatterplot matrix: plain diagonal cells
+color mat_label_box    white
+color matrix_plotregion white
+color matplotregion_line "200 200 200"

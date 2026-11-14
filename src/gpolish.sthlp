@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 0.3.0  14nov2026}{...}
+{* *! version 0.4.0  14nov2026}{...}
 {viewerjumpto "Syntax" "gpolish##syntax"}{...}
 {viewerjumpto "Description" "gpolish##description"}{...}
 {viewerjumpto "Subcommands" "gpolish##subcommands"}{...}
@@ -23,6 +23,15 @@
 {p 8 16 2}{cmd:gpolish callout} {it:"line 1"} [{it:"line 2"} ...]{cmd:,} {c -(}{opt at(x y)} | {opt to(x y)}{c )-}
 [{opt fr:om(x y)} {opt cur:ve(#)} {opt siz:e(#)} {opt col:or(rgb)} {opt lc:olor(rgb)} {opt lw:idth(str)} {opt al:ign(str)}
 {opt ang:le(#)} {opt halo} {opt noarrow} {opt name(graphname)}]
+
+{p 8 16 2}{cmd:gpolish note} {it:"line 1"} [{it:"line 2"} ...]{cmd:,} {c -(}{opt at(x y)} | {opt to(x y)}{c )-}
+[{opt fill(rgb)} {opt bor:der(rgb)} {opt pad(#)} {it:callout_options}]
+
+{p 8 16 2}{cmd:gpolish brace} [{it:"label line 1"} ...]{cmd:,} {opt fr:om(x y)} {opt to(x y)}
+[{opt w:idth(#)} {opt flip} {opt gap(#)} {opt siz:e(#)} {opt col:or(rgb)} {opt lc:olor(rgb)} {opt lw:idth(str)} {opt name(graphname)}]
+
+{p 8 16 2}{cmd:gpolish arrow,} {opt fr:om(x y)} {opt to(x y)}
+[{opt cur:ve(#)} {opt head:size(#)} {opt shr:ink(#)} {opt lc:olor(rgb)} {opt lw:idth(str)} {opt name(graphname)}]
 
 {p 8 16 2}{cmd:gpolish ptlabel} {it:strvar} {ifin}{cmd:,} {opt x(varname)} {opt y(varname)}
 [{opt siz:e(#)} {opt col:or(rgb)} {opt off:set(#)} {opt ms:ize(#)} {opt halo} {opt name(graphname)}]
@@ -84,6 +93,22 @@ If {opt at()} is omitted, the note is placed automatically near the target, clea
 {opt from()} moves the tail of the arrow; by default it starts at the edge of the text nearest the target.
 {opt curve(#)} sets the bend (0 is straight; the sign sets the side).
 {opt halo} draws a white box behind the text.
+
+{phang}
+{cmd:gpolish note} adds a shaded box of text, for a finding or a call-out. It takes the same options as
+{cmd:gpolish callout}, plus {opt fill()} and {opt border()} for the box colors and {opt pad(#)} for the padding in points.
+With {opt to()} it draws an arrow from the box; with {opt at()} alone it is a plain box.
+With {opt align(center)} the box is centered on {opt at()}, which suits flow charts.
+
+{phang}
+{cmd:gpolish brace} draws a curly brace between two points, with an optional label at its tip.
+Use it to mark a confidence interval, a gap between two values, or a range on an axis.
+The tip points to the left of the direction from {opt from()} to {opt to()}; {opt flip} turns it to the other side.
+{opt width(#)} is the depth of the brace in points.
+
+{phang}
+{cmd:gpolish arrow} draws an arrow between two points, straight by default; {opt curve(#)} bends it.
+Together with {cmd:gpolish note} it builds simple flow charts on an empty plot.
 
 {phang}
 {cmd:gpolish ptlabel} labels selected points of a scatterplot with the string variable {it:strvar}.
@@ -154,7 +179,15 @@ Run {cmd:gpolish} after the graph has its final size, because positions are solv
 
 {title:Author}
 
-{pstd}Eric Booth{p_end}
+{pstd}
+Eric A. Booth{break}
+Sr Researcher, Texas 2036{break}
+{browse "mailto:eric.a.booth@gmail.com":eric.a.booth@gmail.com}{break}
+{browse "https://github.com/ericabooth":github.com/ericabooth}{p_end}
+
+{pstd}
+Issues and suggestions:
+{browse "https://github.com/ericabooth/gpolish-stata-public/issues":github.com/ericabooth/gpolish-stata-public/issues}{p_end}
 
 
 {title:Also see}

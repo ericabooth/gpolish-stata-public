@@ -14,15 +14,25 @@ INFO = {
  "10_box": ("Box plot", "Same split as the bar chart: scheme and title inside Stata, full restyle from gr2mpl."),
  "11_by": ("Small multiples with by()", "The scheme removes the shaded panel strips. gr2mpl gives bold panel titles and shared axes."),
  "12_combine": ("Combined panels", "graph combine of four graphs, each styled by the scheme; gr2mpl redraws every panel."),
+ "13_overlays": ("Finding box, brace and callout", "Three overlays on one scatter: a shaded finding box, a curly brace marking a range, and a callout that finds its own place."),
+ "14_cibrace": ("Group means with confidence-interval braces", "One brace names the confidence interval; another measures the gap between the two means."),
+ "15_flow": ("Flow chart of sample restrictions", "Boxes and arrows on an empty plot, built from gpolish note and gpolish arrow. The counts come from the data."),
+ "16_heatmap": ("Correlation heatmap", "Tiles drawn with twoway rbar, cell values as marker labels, and a legend used as the colour key."),
+ "17_matrix": ("Scatterplot matrix", "graph matrix is its own graph family: the scheme and the bold title apply, and gr2mpl redraws it."),
+ "18_dendrogram": ("Cluster dendrogram", "cluster dendrogram produces a twoway graph, so the scheme and gpolish apply directly."),
+ "19_avplot": ("Added-variable plot", "A regression diagnostic from avplot, with the coefficient stated in a finding box."),
+ "20_statplot": ("statplot", "statplot output is a graph hbar. The scheme and title edit apply inside Stata; gr2mpl redraws it with its group labels."),
+ "21_heatplot": ("heatplot", "A two-way density from the community command heatplot, with its colour key."),
 }
 src = open("gallery/gallery.do").read()
 blocks = re.split(r"\n\* -{20,} (\d\d) [^\n]*\n", src)
 code = {}
 for i in range(1, len(blocks), 2):
     body = blocks[i + 1]
-    m = re.search(r"shotA (\S+)\n(.*?)\nshotBC \S+", body, re.S)
+    m = re.search(r"shotA (\S+)\n(.*?)\n\s*shotBC \S+", body, re.S)
     if not m: continue
-    c = m.group(2).replace("`SZ'", "xsize(7) ysize(4.6)").replace("`TS'", "size(13.5pt)").replace("`SS'", "size(10pt)")
+    import textwrap
+    c = textwrap.dedent(m.group(2)).replace("`SZ'", "xsize(7) ysize(4.6)").replace("`TS'", "size(13.5pt)").replace("`SS'", "size(10pt)")
     c = c.replace("`NS'", "size(8pt)").replace("`LS'", "labsize(9pt)")
     code[m.group(1)] = c.strip() + "\ngr2mpl, saving(figure.png) replace"
 COLS = [("a", "Stata default"), ("b", "scheme(pypolish) + gpolish"), ("c", "+ gr2mpl (matplotlib render)")]
@@ -49,12 +59,12 @@ footer{color:var(--mute);font-size:13px;margin-top:30px}
 h = ['<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">',
      "<title>gpolish gallery</title><style>" + css + "</style></head><body><main>",
      "<h1>gpolish gallery</h1>",
-     '<p class="lead">Twelve Stata graphs, each drawn three ways: Stata\'s default look, the same graph with <code>scheme(pypolish)</code> and <code>gpolish</code> (still a Stata graph), and that graph redrawn in matplotlib by <code>gr2mpl</code>.</p>',
+     '<p class="lead">Twenty-one Stata graphs, each drawn three ways: Stata\'s default look, the same graph with <code>scheme(pypolish)</code> and <code>gpolish</code> (still a Stata graph), and that graph redrawn in matplotlib by <code>gr2mpl</code>.</p>',
      '<p class="lead"><a href="https://github.com/ericabooth/gpolish-stata-public">Repository and installation</a> · every image on this page is produced by <a href="https://github.com/ericabooth/gpolish-stata-public/blob/main/gallery/gallery.do">gallery/gallery.do</a>.</p><nav>']
 for k in sorted(code): h.append(f'<a href="#{k}">{html.escape(INFO[k][0])}</a>')
 h.append("</nav>")
 md = ["# gpolish gallery", "",
-      "Twelve Stata graphs, each drawn three ways: Stata's default look, the same graph with `scheme(pypolish)` and `gpolish` (still a Stata graph), and that graph redrawn in matplotlib by `gr2mpl`.", "",
+      "Twenty-one Stata graphs, each drawn three ways: Stata's default look, the same graph with `scheme(pypolish)` and `gpolish` (still a Stata graph), and that graph redrawn in matplotlib by `gr2mpl`.", "",
       "Every image is produced by [gallery.do](gallery.do). A browsable version is at <https://ericabooth.github.io/gpolish-stata-public/gallery/>.", ""]
 for k in sorted(code):
     t, blurb = INFO[k]

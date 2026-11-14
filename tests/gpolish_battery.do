@@ -148,6 +148,35 @@ graph set window fontface "Open Sans"
 scatter le year, name(g11, replace)
 capture noisily gpolish endlabel
 chk no_lines _rc==198
+* ---- 11. note, brace, arrow ----------------------------------------------------
+sysuse auto, clear
+scatter mpg weight, name(g12, replace)
+gpolish note "{bf:Finding}" "two lines", at(3500 35)
+chk note_box "`.g12.plotregion1.added_text[1].style.drawbox.setting'"=="yes"
+chk note_lines `.g12.plotregion1.added_text[1].text.arrnels'==2
+ntext g12 added_lines
+chk note_noarrow r(k)==0
+gpolish note "Auto", to(3000 20)
+ntext g12 added_lines
+chk note_arrow r(k)==26
+gpolish brace "Range", from(4000 12) to(4800 12)
+ntext g12 added_lines
+chk brace_segs r(k)==26+43
+ntext g12 added_text
+chk brace_label r(k)==3
+chk brace_above `.g12.plotregion1.added_text[3].ypos.val' > 12
+gpolish brace, from(2000 20) to(2000 30) flip
+ntext g12 added_text
+chk brace_nolabel r(k)==3
+gpolish arrow, from(2500 35) to(2500 28)
+ntext g12 added_lines
+chk arrow_segs r(k)==26+43+43+26
+
+* ---- 12. bold title on a non-twoway graph ---------------------------------------
+graph bar (mean) mpg, over(foreign) title("Bar title") name(g13, replace)
+gpolish
+chk bar_bold `"`.g13.title.text[1]'"'=="{bf:Bar title}"
+
 gpolish limits
 
 di as res _n "gpolish battery: $NCHK checks passed (Stata `c(stata_version)')"

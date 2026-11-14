@@ -16,7 +16,7 @@
 {title:Syntax}
 
 {p 8 16 2}{cmd:gr2mpl} [{cmd:,} {opt name(graphname)} {opt sav:ing(filename)} {opt replace} {opt w:idth(#)} {opt dpi(#)}
-{opt endl:abels} {opt noleg:end} {opt pal:ette(name)} {opt font(fontname)} {opt nogrid} {opt nohalo} {opt notick:s}
+{opt endl:abels} {opt noleg:end} {opt pal:ette(name)} {opt font(fontname)} {opt nogrid} {opt nohalo} {opt notick:s} {opt round:box}
 {opt lws:cale(#)} {opt mss:cale(#)} {opt py:thon(path)} {opt keep:spec} {opt specdir(dir)}]
 
 {p 8 16 2}{cmd:gr2mpl doctor} [{cmd:,} {opt py:thon(path)} {opt font(fontname)}]
@@ -57,6 +57,8 @@ text angles that Stata stores but cannot draw. {cmd:gpolish render} calls {cmd:g
 
 {phang}{opt font(fontname)} sets the typeface (default Open Sans, falling back to Helvetica or Arial).
 
+{phang}{opt roundbox} draws boxed text (a {cmd:text(, box)} box or a shaded note box added with {cmd:gpolish}) with rounded corners. The default is square corners, as in Stata.
+
 {phang}{opt nogrid}, {opt nohalo} and {opt noticks} switch off the grid, the white halo behind annotation text, and the x-axis tick marks.
 
 {phang}{opt lwscale(#)} and {opt msscale(#)} multiply all line widths and marker sizes (default 1, which matches Stata).
@@ -96,12 +98,19 @@ To set the interpreter once, put {cmd:global GR2MPL_PYTHON "/path/to/python"} in
 {p2col:pcspike, pcarrow, pccapsym}yes{p_end}
 {p2col:second y axis, log and reversed scales, dates}yes{p_end}
 {p2col:xline(), yline(), text(), gpolish edits}yes{p_end}
+{p2col:boxed text: text(, box), shaded note boxes}yes{p_end}
+{p2col:xscale(off), yscale(off) diagrams, scatteri, pcarrowi}yes{p_end}
 {p2col:graph bar, hbar, box, hbox, dot}yes{p_end}
+{p2col:blabel() bar labels, second over() group labels}yes{p_end}
+{p2col:graph matrix (half honoured)}yes{p_end}
 {p2col:by() on twoway and graph bar; graph combine}yes{p_end}
-{p2col:marginsplot, coefplot}yes{p_end}
+{p2col:marginsplot (also with by()), coefplot (several models)}yes{p_end}
+{p2col:avplot, rvfplot, lvr2plot, cluster dendrogram}yes{p_end}
+{p2col:heatplot and other nodropbase area polygons}yes, with a stepped colour legend{p_end}
+{p2col:statplot}yes{p_end}
 {p2col:contour, contourline}layer skipped, with a note{p_end}
 {p2col:graph pie}refused{p_end}
-{p2col:x2axis, a third y axis, blabel(), second over() labels}not read{p_end}
+{p2col:x2axis, a third y axis}not read{p_end}
 {p2col:nested combine}panel skipped, with a note{p_end}
 {p2line}
 
@@ -134,7 +143,15 @@ Requires Stata 16 or later. {cmd:gr2mpl} reads undocumented members of Stata's g
 
 {title:Author}
 
-{pstd}Eric Booth{p_end}
+{pstd}
+Eric A. Booth{break}
+Sr Researcher, Texas 2036{break}
+{browse "mailto:eric.a.booth@gmail.com":eric.a.booth@gmail.com}{break}
+{browse "https://github.com/ericabooth":github.com/ericabooth}{p_end}
+
+{pstd}
+Issues and suggestions:
+{browse "https://github.com/ericabooth/gpolish-stata-public/issues":github.com/ericabooth/gpolish-stata-public/issues}{p_end}
 
 
 {title:Also see}
