@@ -26,12 +26,20 @@ Pipeline: the ado writes `spec.json` plus one CSV per serset to a spec folder, t
 older matplotlib, gr2mpl stops with error 601 before writing anything, names the version
 and prints the `pip install --upgrade matplotlib` line; `gr2mpl doctor` marks the version
 as too old. A Python whose matplotlib is too old is not cached for the session.
+`gr2mpl doctor` prints the matplotlib line itself and runs the renderer with
+`--doctor-ado`, which leaves that line out; `gr2mpl_render.py --doctor` run directly
+prints it.
 
 ## Python discovery
 
 Order: `python()` option, `$GR2MPL_PYTHON`, Stata's embedded Python if it can import
-matplotlib (then the renderer runs through `python script`, no shell), then `python3` /
-`python` on PATH. The working choice is cached in `$GR2MPL_PYRESOLVED`, `$GR2MPL_PYMODE`
+matplotlib (then the renderer runs through `python script`, no shell), then `python3`,
+then `python`, on PATH. In the default search (the last three) an interpreter whose
+matplotlib is older than 3.6 is passed over with a note and the next one is tried; the
+first one found is reported with error 601 only when none is new enough. An interpreter
+named with `python()` or `$GR2MPL_PYTHON` is not passed over. `$GR2MPL_SEARCH` replaces
+the default search list (`embedded` names Stata's Python), which the test battery uses
+to check the fall-through. The working choice is cached in `$GR2MPL_PYRESOLVED`, `$GR2MPL_PYMODE`
 and `$GR2MPL_MPLVERSION` for the session. If nothing works the command exits 601 and
 prints the interpreters tried and the exact `pip install` / `set python_exec` fixes.
 There is no hardcoded path.
@@ -72,8 +80,11 @@ Axes (`.g.xaxis1`, `.g.yaxis1`)
 - scale: `.g.plotregionJ.xscale.curmin/.curmax` (axis range), `.min/.max` (data range),
   `.reverse.setting`, `.transform.setting` (`linear`/`log`), read from the region that
   holds y axis 1 and x axis 1. That is `.plotregion1` unless plot 1 is on `yaxis(2)`;
-  then `.plotregion1` is the second axis's region. A graph whose only y axis is axis 2
-  has no `.yaxis1`; gr2mpl then draws `.yaxis2` as its main axis.
+  then `.plotregion1` is the second axis's region. A region whose `.y_scales` entry lists
+  axis 1 counts as an axis-1 region: `yaxis(1 2)` gives one region with the entry `"2 1"`,
+  and both axes, the axis-1 title and the grid are drawn from it. A graph whose only y
+  axis is axis 2 (no region lists axis 1, and `.yaxis1` does not exist) draws `.yaxis2`
+  as its main axis.
 - plot-region margin: `.g.plotregionJ.style.margin.gleft/.gright/.gbottom/.gtop.gmval`
   (relative units), the space between the axis ends and the data range. Defaults are
   2.2 on each side in s2color and stcolor, 0.6 in economist, and 3 2 3 2 (left, right,
@@ -149,6 +160,7 @@ Other
 | pcspike, pcarrow, pcbarrow, pccapsym, pcscatter | yes | class `yxyxview_g`, `.x2var/.y2var` |
 | `horizontal` bar / rcap / rspike / rarea | yes | `.bar_drop_to.setting == "y"` |
 | second y axis (`yaxis(2)`) | yes | plot is in the region of its axis (`.plotregion2` when plot 1 is on y axis 1), axis in `.yaxis2`; sides from `.position.setting` |
+| `yaxis(1 2)` (one plot on both axes) | yes | one region whose `.y_scales` entry is `"2 1"`; the second axis repeats the first axis's scale |
 | `yscale(alt)` | yes | `.yaxis1.position.setting == "right"` |
 | `xscale(alt)` | no | the x axis stays at the bottom |
 | `xline()`, `yline()`, `text()`, rotated text | yes | |
@@ -181,9 +193,16 @@ More object paths
   .adjl .adjh .width2 .horizontal`, colour in `.rect.style.shadestyle.color.setting`;
   outside values in `.plotregion1.outsides[k].x/.y`.
 - dot: `.plotregion1.points[k].x/.y` and `.style.marker.fillcolor.setting`.
-- second axis: `.g.n_plotregions`, `.g.y_scales` and `.g.x_scales` (one quoted axis
-  number per plot region, not per plot); plot i is `.plotregionJ.plotI` for the region
+- second axis: `.g.n_plotregions`, `.g.y_scales` and `.g.x_scales` (one quoted entry
+  per plot region, not per plot; the entry lists every axis that shares the region's
+  scale, so `yaxis(1 2)` gives `"2 1"` and `twoway (line price weight, yaxis(2))
+  (scatter mpg weight)` gives `"2" "1"`); plot i is `.plotregionJ.plotI` for the region
   that has it.
+- legend map: `.g.legend.map[k]` numbers the plots region by region, the plots of
+  `.plotregion1` first. In `twoway (scatter mpg weight) (scatter price weight, yaxis(2))
+  (scatter turn weight)` map entry 2 is plot 3 (turn) and entry 3 is plot 2 (price);
+  `order()` uses the same numbering. gr2mpl converts map entries to plot numbers before
+  matching keys to plots (by() legends use the first panel's regions).
 - text rotation: `.textboxK.style.angle.setting` (a number, or `horizontal`/`vertical`)
   and `.orientation.setting`; the same members on `.added_text[k]`. Stata itself draws
   `text(, angle(30))` flat; gr2mpl honours the stored angle.
@@ -212,6 +231,15 @@ More object paths
   Sizes, then multiplied by `lwscale()`/`msscale()` when set.
 - Graph-margin edits made by gpolish are ignored; the layout is refit around whatever
   text extends past the axes, so end labels are never clipped.
+- The y-axis title of a single graph sits above the plot at the left, or at the right
+  when Stata drew the y axis on the right (`yscale(alt)`). With two y axes each title stays beside its axis. by() graphs keep the shared
+  title at the left, as Stata does with `yscale(alt)`.
+- Text boxes (`text()` and gpolish's `added_text`) in by() and combine panels are scaled
+  by the panel's `iscale()` factor (`.gmetric_mult`), like titles and tick labels.
+- graph combine: each member gets an equal cell, and its axes take what is left of the
+  cell after its own tick labels, end labels and titles, so a member whose end labels
+  sit outside the plot has a narrower plot than its neighbour, as in Stata. by() panels
+  share one plot width.
 - Plot-region margins of 4 relative units or less (the scheme defaults) are replaced by
   gr2mpl's padding of about 2.5% of the axis range at each end (none below a y axis that
   starts at 0). A wider margin is kept: the data range is drawn that many points inside

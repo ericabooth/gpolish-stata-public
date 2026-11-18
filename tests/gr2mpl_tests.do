@@ -655,6 +655,61 @@ has "panel1.yticks=40|50|60|70|80"
 line le year, yscale(alt) title("yscale(alt)")
 rchk yalt
 has "panel1.yside=right"
+* the y-axis title goes above the right end, on the side of the axis
+has "ytitle_side=right"
+line le year, title("y title on the left")
+rchk ytitle_left
+has "ytitle_side=left"
+* by() keeps the shared title on the left, as Stata does
+sysuse auto, clear
+scatter mpg weight, yscale(alt) by(foreign)
+rchk by_yalt
+has "ytitle_side=left"
+* yaxis(1 2): one region holds both axes (.y_scales is "2 1"); Stata draws both axes,
+* the axis-1 title and the grid
+sysuse uslifeexp, clear
+line le year, yaxis(1 2) title("yaxis(1 2)")
+rchk y12
+has "panel1.plot1.axis=y1"
+has "panel1.yside=left"
+has "panel1.y2side=right"
+has "panel1.yticks=40|50|60|70|80"
+has "panel1.y2ticks=40|50|60|70|80"
+* (the variable label is "life expectancy" in Stata 16's copy of the data)
+getv panel1.ylabel
+ok lower(`"`r(val)'"') == "life expectancy"
+has "panel1.ygrid=1"
+twoway (line le_male year, yaxis(1 2)) (line le_female year), title("yaxis(1 2) and a second plot")
+rchk y12_two
+has "panel1.plot1.axis=y1"
+has "panel1.plot2.axis=y1"
+has "panel1.yside=left"
+has "panel1.y2side=right"
+has "panel1.ygrid=1"
+* a region on axis 1 and 2 next to a region on axis 2 alone: plots keep their own scale
+sysuse auto, clear
+twoway (scatter mpg weight) (scatter price weight, yaxis(2)) (scatter turn weight, yaxis(1 2)), title("mixed regions")
+rchk y12_mixed
+has "panel1.plot2.axis=y2"
+has "panel1.plot3.axis=y1"
+has "panel1.y2ticks=0|5,000|10,000|15,000"
+
+* -- the legend map numbers plots region by region: with plot 2 on yaxis(2), key 2 is plot 3
+twoway (scatter mpg weight) (scatter price weight, yaxis(2)) (scatter turn weight), title("legend across regions")
+rchk legend_regions
+* (Stata 16's auto data label turn "Turn Circle (ft.) ")
+getv panel1.legend
+ok ustrregexm(lower(`"`r(val)'"'), "^mileage \(mpg\)\|turn circle \(ft\.\) ?\|price$")
+has "panel1.legend_plots=1|3|2"
+twoway (scatter mpg weight) (scatter price weight, yaxis(2)) (scatter turn weight), legend(order(3 2 1)) title("order() across regions")
+rchk legend_regions_order
+getv panel1.legend
+ok ustrregexm(lower(`"`r(val)'"'), "^price\|turn circle \(ft\.\) ?\|mileage \(mpg\)$")
+has "panel1.legend_plots=2|3|1"
+twoway (scatter mpg weight) (scatter price weight, yaxis(2)) (scatter turn weight), by(foreign)
+rchk legend_regions_by
+has "panel1.plot2.axis=y2"
+sysuse uslifeexp, clear
 
 * -- gpolish endlabel next to a y axis: the plot-region margin is kept, so the labels
 *    sit between the axis and the lines, as in Stata's export
@@ -690,6 +745,30 @@ rchk endlabel_plot1y2
 has "panel1.ann=79.9|left|0|y2|in"
 has "panel1.ann=67.8|left|0|y2|in"
 has "panel1.ann_overlaps=0"
+* graph combine: a member with end labels on the left keeps its plot-region margin in
+* its own cell; its data are not squeezed and its labels clear the tick labels
+line le_wfemale le_wmale year, scheme(pypolish) legend(off) name(ga, replace) title("A")
+gpolish, name(ga)
+gpolish endlabel, side(left) name(ga)
+line le_bfemale le_bmale year, scheme(pypolish) legend(off) name(gb, replace) title("B")
+gpolish, name(gb)
+gpolish endlabel, name(gb) values
+graph combine ga gb, title("combine with end labels")
+rchk combine_endlabel
+has "panel1.ann_tick_overlaps=0"
+has "panel2.ann_tick_overlaps=0"
+has "panel1.ann_overlaps=0"
+has "panel2.ann_overlaps=0"
+* (Stata's own export gives the data about a quarter of panel A's plot width on 16.1
+* and about 40% on 19.5; the squeezed render gave under 15%)
+getv panel1.xdata_frac
+ok real(`"`r(val)'"') > 0.2
+* as in Stata, the member whose end labels sit outside the plot has the narrower plot
+getv panel1.axes_wpts
+local wa = real(`"`r(val)'"')
+getv panel2.axes_wpts
+ok `wa' > real(`"`r(val)'"')
+graph drop ga gb
 * a default plot-region margin keeps gr2mpl's padding (no change from earlier renders)
 line le year, title("default margin")
 rchk margin_default
@@ -726,6 +805,22 @@ has "panel1.legend=A|group|B|A again"
 * -- matplotlib version: gr2mpl needs 3.6 or later
 gr2mpl doctor
 ok "`r(mplok)'" == "1"
+* doctor prints the matplotlib line once
+capture log close g2mdoc
+log using "tests/out/doctor.txt", text replace name(g2mdoc)
+gr2mpl doctor
+log close g2mdoc
+local nml 0
+tempname dh
+file open `dh' using "tests/out/doctor.txt", read text
+file read `dh' line
+while r(eof) == 0 {
+    if strpos(`"`macval(line)'"', "matplotlib  :") local ++nml
+    file read `dh' line
+}
+file close `dh'
+ok `nml' == 1
+erase "tests/out/doctor.txt"
 if c(os) != "Windows" {
     * a stand-in Python that reports matplotlib 3.5.3
     tempname fk
@@ -744,6 +839,30 @@ if c(os) != "Windows" {
     * the old Python is not remembered: the next call uses the working one
     gr2mpl, name(mv) saving("tests/out/r_old.png") replace
     ok "`r(python)'" != "`c(pwd)'/tests/out/oldmpl.sh"
+    * the default search passes over a Python whose matplotlib is too old and uses the
+    * next one; it stops with 601 only when none is new enough
+    local keeppy `"$GR2MPL_PYTHON"'
+    if `"`keeppy'"' != "" {
+        global GR2MPL_PYTHON
+        global GR2MPL_PYRESOLVED
+        global GR2MPL_SEARCH `""`c(pwd)'/tests/out/oldmpl.sh" "`keeppy'""'
+        gr2mpl, name(mv) saving("tests/out/r_old.png") replace
+        ok `"`r(python)'"' == `"`keeppy'"'
+        gr2mpl doctor
+        ok "`r(mplok)'" == "1"
+        global GR2MPL_PYRESOLVED
+        global GR2MPL_SEARCH `""`c(pwd)'/tests/out/oldmpl.sh""'
+        capture erase "tests/out/r_old.png"
+        capture gr2mpl, name(mv) saving("tests/out/r_old.png") replace
+        ok _rc == 601
+        capture confirm file "tests/out/r_old.png"
+        ok _rc != 0
+        global GR2MPL_SEARCH
+        global GR2MPL_PYRESOLVED
+        global GR2MPL_PYMODE
+        global GR2MPL_MPLVERSION
+        global GR2MPL_PYTHON `"`keeppy'"'
+    }
     erase "tests/out/oldmpl.sh"
     capture erase "tests/out/r_old.png"
 }

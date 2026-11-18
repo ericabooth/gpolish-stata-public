@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 0.5.1  18nov2026}{...}
+{* *! version 0.6.0  18nov2026}{...}
 {viewerjumpto "Syntax" "gr2mpl##syntax"}{...}
 {viewerjumpto "Description" "gr2mpl##description"}{...}
 {viewerjumpto "Options" "gr2mpl##options"}{...}
@@ -45,10 +45,13 @@ including angles that Stata itself cannot draw. {cmd:gpolish render} calls {cmd:
 
 {pstd}
 Text sizes follow the graph. {cmd:gr2mpl} reads the size Stata used for each title, axis title,
-tick label, legend and marker label, and converts it to points the way Stata does: relative to the
+tick label, legend, marker label and text box, and converts it to points the way Stata does: relative to the
 shorter side of the graph, so a small {cmd:xsize()} and {cmd:ysize()} or a scheme with its own sizes
 gives the same proportions as Stata's own export. Panels of {cmd:by()}, {cmd:graph combine} and
-{cmd:graph matrix} graphs are shrunk by the same factor Stata uses ({cmd:iscale()}).
+{cmd:graph matrix} graphs are shrunk by the same factor Stata uses ({cmd:iscale()}), and that factor
+also applies to text added with {cmd:text()} or {cmd:gpolish}. As in Stata, each member of
+{cmd:graph combine} gets a cell of equal size, and its plot takes what is left of the cell after its own
+tick labels, end labels and titles; the axes of {cmd:by()} panels are lined up.
 
 
 {marker options}{...}
@@ -90,14 +93,19 @@ gives the same proportions as Stata's own export. Panels of {cmd:by()}, {cmd:gra
 {p 8 12 2}1. the {opt python()} option;{p_end}
 {p 8 12 2}2. the global macro {cmd:$GR2MPL_PYTHON};{p_end}
 {p 8 12 2}3. Stata's own Python (see {helpb python}), if it can import matplotlib;{p_end}
-{p 8 12 2}4. {cmd:python3} or {cmd:python} on the system path.{p_end}
+{p 8 12 2}4. {cmd:python3}, then {cmd:python}, on the system path.{p_end}
 
 {pstd}
 {cmd:gr2mpl doctor} reports which interpreter will be used, its matplotlib version and whether that version
 is new enough, and whether the font is installed.
 If no interpreter has matplotlib, {cmd:gr2mpl} stops and prints the {cmd:pip install} command to run.
-If the interpreter's matplotlib is older than 3.6, {cmd:gr2mpl} stops with error 601, names the version it found,
+In steps 3 and 4, an interpreter whose matplotlib is older than 3.6 is passed over, with a note, and
+{cmd:gr2mpl} tries the next one. If no interpreter has matplotlib 3.6 or later, or if the interpreter named
+in step 1 or 2 has an older matplotlib, {cmd:gr2mpl} stops with error 601, names the version it found,
 and prints the {cmd:pip install --upgrade} command to run.
+The global macro {cmd:$GR2MPL_SEARCH} can replace the list searched in steps 3 and 4, for example
+{cmd:global GR2MPL_SEARCH python3 embedded} to try {cmd:python3} before Stata's own Python
+({cmd:embedded} stands for Stata's own Python).
 To set the interpreter once, put {cmd:global GR2MPL_PYTHON "/path/to/python"} in your profile.do.
 
 
@@ -115,7 +123,8 @@ To set the interpreter once, put {cmd:global GR2MPL_PYTHON "/path/to/python"} in
 {p2col:horizontal spike, dropline, area, rbar, rcap}yes{p_end}
 {p2col:lfit, lfitci, qfitci, lowess, kdensity, function}yes{p_end}
 {p2col:pcspike, pcarrow, pccapsym}yes{p_end}
-{p2col:second y axis (also when plot 1 is on it), yscale(alt)}yes{p_end}
+{p2col:second y axis (also when plot 1 is on it), yaxis(1 2)}yes{p_end}
+{p2col:yscale(alt)}yes{p_end}
 {p2col:log and reversed scales, dates}yes{p_end}
 {p2col:xline(), yline(), text(), also on the second y axis}yes{p_end}
 {p2col:gpolish edits}yes{p_end}
@@ -149,7 +158,8 @@ Skipped layers, panels and annotations are named in a note and listed in {cmd:r(
 {title:Limits}
 
 {pstd}
-Some choices differ from the Stata graph on purpose: the y-axis title moves above the plot, the series
+Some choices differ from the Stata graph on purpose: the y-axis title moves above the plot (above its
+right end when the y axis of a single graph is on the right; with two y axes each title stays beside its axis), the series
 legend sits above the plot, bars always start at their base, black reference lines become gray, and y-axis tick
 labels are drawn horizontally unless Stata set a diagonal angle.
 
