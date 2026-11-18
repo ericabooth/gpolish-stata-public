@@ -1,10 +1,11 @@
 {smcl}
-{* *! version 0.5.0  17nov2026}{...}
+{* *! version 0.5.1  18nov2026}{...}
 {viewerjumpto "Syntax" "gr2mpl##syntax"}{...}
 {viewerjumpto "Description" "gr2mpl##description"}{...}
 {viewerjumpto "Options" "gr2mpl##options"}{...}
 {viewerjumpto "Python setup" "gr2mpl##python"}{...}
 {viewerjumpto "What is supported" "gr2mpl##support"}{...}
+{viewerjumpto "Limits" "gr2mpl##limits"}{...}
 {viewerjumpto "Examples" "gr2mpl##examples"}{...}
 {title:Title}
 
@@ -16,7 +17,7 @@
 {title:Syntax}
 
 {p 8 16 2}{cmd:gr2mpl} [{cmd:,} {opt name(graphname)} {opt sav:ing(filename)} {opt replace} {opt w:idth(#)} {opt dpi(#)}
-{opt endl:abels} {opt noleg:end} {opt pal:ette(name)} {opt font(fontname)} {opt nogrid} {opt nohalo} {opt notick:s} {opt round:box}
+{opt endl:abels} {opt noleg:end} {opt pal:ette(house)} {opt font(fontname)} {opt nogrid} {opt nohalo} {opt notick:s} {opt round:box}
 {opt lws:cale(#)} {opt mss:cale(#)} {opt py:thon(path)} {opt keep:spec} {opt specdir(dir)}]
 
 {p 8 16 2}{cmd:gr2mpl doctor} [{cmd:,} {opt py:thon(path)} {opt font(fontname)}]
@@ -38,8 +39,16 @@ The data come from the graph itself. The dataset in memory can have changed sinc
 {pstd}
 The result is a PNG file. It is not a Stata graph: it cannot be edited in the Graph Editor or combined.
 For edits that stay inside Stata, see {helpb gpolish}. {cmd:gr2mpl} carries every {cmd:gpolish} edit
-(end labels, callouts, point labels, colored legend text) into the matplotlib version, and applies
-text angles that Stata stores but cannot draw. {cmd:gpolish render} calls {cmd:gr2mpl}.
+(end labels, callouts, point labels, colored legend text) into the matplotlib version.
+It applies the angles that Stata stores for text boxes, marker labels and x-axis tick labels,
+including angles that Stata itself cannot draw. {cmd:gpolish render} calls {cmd:gr2mpl}.
+
+{pstd}
+Text sizes follow the graph. {cmd:gr2mpl} reads the size Stata used for each title, axis title,
+tick label, legend and marker label, and converts it to points the way Stata does: relative to the
+shorter side of the graph, so a small {cmd:xsize()} and {cmd:ysize()} or a scheme with its own sizes
+gives the same proportions as Stata's own export. Panels of {cmd:by()}, {cmd:graph combine} and
+{cmd:graph matrix} graphs are shrunk by the same factor Stata uses ({cmd:iscale()}).
 
 
 {marker options}{...}
@@ -47,7 +56,7 @@ text angles that Stata stores but cannot draw. {cmd:gpolish render} calls {cmd:g
 
 {phang}{opt name(graphname)} names the graph to redraw. The default is the current graph.
 
-{phang}{opt saving(filename)} names the file to write. The extension sets the format: {cmd:.png} (the default when there is none), {cmd:.pdf}, {cmd:.svg} or {cmd:.jpg}. The default file is {it:graphname}{cmd:_mpl.png} in the current directory. The folder must exist.
+{phang}{opt saving(filename)} names the file to write. The extension sets the format: {cmd:.png} (the default when there is none), {cmd:.pdf}, {cmd:.svg} or {cmd:.jpg}. The default file is {it:graphname}{cmd:_mpl.png} in the current directory. A folder ending in a slash, such as {cmd:saving(out/)}, writes {it:graphname}{cmd:_mpl.png} in that folder. The folder must exist.
 
 {phang}{opt replace} allows an existing file to be overwritten; without it {cmd:gr2mpl} stops with an error, as {helpb graph export} does. The image is rendered to a temporary file first, so a failed render leaves an existing file untouched.
 
@@ -55,7 +64,7 @@ text angles that Stata stores but cannot draw. {cmd:gpolish render} calls {cmd:g
 
 {phang}{opt endlabels} replaces the legend of a line graph with labels at the line ends. {opt nolegend} drops the legend.
 
-{phang}{opt palette(house)} recolors the series with the house palette. The default keeps the colors of the Stata graph.
+{phang}{opt palette(house)} recolors the series with the house palette. The default keeps the colors of the Stata graph. {cmd:house} is the only palette; any other name is an error.
 
 {phang}{opt font(fontname)} sets the typeface (default Open Sans, falling back to Helvetica or Arial).
 
@@ -67,7 +76,9 @@ text angles that Stata stores but cannot draw. {cmd:gpolish render} calls {cmd:g
 
 {phang}{opt python(path)} names the Python interpreter to use. See {help gr2mpl##python:Python setup}.
 
-{phang}{opt keepspec} keeps the intermediate JSON and CSV files; {opt specdir(dir)} says where to write them.
+{phang}{opt keepspec} keeps the intermediate files: the JSON spec, a CSV copy of the data behind each plot, and {cmd:render_info.txt}, a plain-text record of what was drawn. {cmd:gr2mpl} reports the folder and returns it in {cmd:r(specdir)}. Without {opt keepspec}, {cmd:gr2mpl} deletes these files when it finishes, also after an error, because the CSV files hold the graph's data.
+
+{phang}{opt specdir(dir)} says where to write the intermediate files. The default is a new folder in Stata's temporary directory. Without {opt keepspec}, {cmd:gr2mpl} deletes its own files from {it:dir} and removes {it:dir} if {cmd:gr2mpl} created it; a folder that already existed is left in place.
 
 
 {marker python}{...}
@@ -94,12 +105,19 @@ To set the interpreter once, put {cmd:global GR2MPL_PYTHON "/path/to/python"} in
 {p2col:Graph}Status{p_end}
 {p2line}
 {p2col:twoway line, connected, scatter, marker labels}yes{p_end}
+{p2col:mlabformat(), mlabvposition(), mlabangle()}yes{p_end}
+{p2col:connect(stairstep), cmissing()}yes{p_end}
 {p2col:twoway bar, rbar, histogram, area, rarea}yes{p_end}
 {p2col:rcap, rspike, rline, spike, dropline, dot}yes{p_end}
+{p2col:horizontal spike, dropline, area, rbar, rcap}yes{p_end}
 {p2col:lfit, lfitci, qfitci, lowess, kdensity, function}yes{p_end}
 {p2col:pcspike, pcarrow, pccapsym}yes{p_end}
 {p2col:second y axis, log and reversed scales, dates}yes{p_end}
-{p2col:xline(), yline(), text(), gpolish edits}yes{p_end}
+{p2col:xline(), yline(), text(), also on the second y axis}yes{p_end}
+{p2col:gpolish edits}yes{p_end}
+{p2col:legend order(), subtitle, repeated labels}yes{p_end}
+{p2col:SMCL superscripts, subscripts, Greek, bold}yes (see {help gr2mpl##limits:Limits}){p_end}
+{p2col:two-line tick labels, non-Latin scripts}yes{p_end}
 {p2col:boxed text: text(, box), shaded note boxes}yes{p_end}
 {p2col:xscale(off), yscale(off) diagrams, scatteri, pcarrowi}yes{p_end}
 {p2col:graph bar, hbar, box, hbox, dot}yes{p_end}
@@ -112,13 +130,30 @@ To set the interpreter once, put {cmd:global GR2MPL_PYTHON "/path/to/python"} in
 {p2col:statplot}yes{p_end}
 {p2col:contour, contourline}layer skipped, with a note{p_end}
 {p2col:graph pie}refused{p_end}
-{p2col:x2axis, a third y axis}not read{p_end}
-{p2col:nested combine}panel skipped, with a note{p_end}
+{p2col:a layer on a second x axis or a third y axis}layer skipped, with a note{p_end}
+{p2col:xline(), yline(), text() on those axes}skipped, with a note{p_end}
+{p2col:nested combine; by() graph inside combine}panel skipped, with a note{p_end}
 {p2line}
 
 {pstd}
-Skipped layers are listed in {cmd:r(unsupported)}. Some choices differ from the Stata graph on purpose:
-the y-axis title moves above the plot, bars always start at their base, and black reference lines become gray.
+Skipped layers, panels and annotations are named in a note and listed in {cmd:r(unsupported)}.
+
+
+{marker limits}{...}
+{title:Limits}
+
+{pstd}
+Some choices differ from the Stata graph on purpose: the y-axis title moves above the plot, the series
+legend sits above the plot, bars always start at their base, black reference lines become gray, and y-axis tick
+labels are drawn horizontally unless Stata set a diagonal angle.
+
+{pstd}
+Other differences are limits of the translation:
+
+{p 8 12 2}o {cmd:{c -(}it:{c )-}} text is drawn upright, and SMCL font changes ({cmd:{c -(}stSerif:{c )-}} and the like) use the main font.{p_end}
+{p 8 12 2}o {cmd:{c -(}sup:{c )-}} and {cmd:{c -(}sub:{c )-}} use Unicode superscript and subscript characters; text that has none (most capital letters in subscripts, punctuation) is drawn on the line.{p_end}
+{p 8 12 2}o Characters that no installed font can draw appear as empty boxes; {cmd:gr2mpl} tries the CJK fonts that come with macOS, Windows and Noto.{p_end}
+{p 8 12 2}o With {cmd:gpolish endlabel, values}, the value column is spaced from the widths matplotlib measures, so it can sit a little further right than in Stata.{p_end}
 
 
 {marker examples}{...}
@@ -134,7 +169,8 @@ the y-axis title moves above the plot, bars always start at their base, and blac
 
 {title:Stored results}
 
-{pstd}{cmd:r(filename)}, {cmd:r(python)}, {cmd:r(pymode)} ({cmd:embedded} or {cmd:shell}), {cmd:r(unsupported)}.
+{pstd}{cmd:r(filename)}, {cmd:r(python)}, {cmd:r(pymode)} ({cmd:embedded} or {cmd:shell}), {cmd:r(unsupported)}
+(skipped layers, panels and annotations, separated by semicolons), and, with {opt keepspec}, {cmd:r(specdir)} (the folder that holds the intermediate files).
 
 
 {title:Technical note}

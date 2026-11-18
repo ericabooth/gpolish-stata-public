@@ -10,7 +10,9 @@ embedded Python (`python script gr2mpl_render.py, args(spec.json)`).
 """
 import csv
 import datetime as dt
+import html
 import json
+import logging
 import math
 import os
 import re
@@ -20,6 +22,8 @@ import numpy as np
 import matplotlib
 
 matplotlib.use("Agg")
+# fallback fonts without a bold face are reported once per text; that is expected
+logging.getLogger("matplotlib.font_manager").setLevel(logging.ERROR)
 import matplotlib.pyplot as plt  # noqa: E402
 import matplotlib.patheffects as pe  # noqa: E402
 from matplotlib import font_manager  # noqa: E402
@@ -35,6 +39,10 @@ AXIS = "#9CA3AF"
 HOUSE = ["#1F6FB2", "#D1495B", "#2E9E6B", "#E0A100", "#6C4AB6", "#00A0B0",
          "#C2571A", "#7A7F87"]
 FONT_FALLBACKS = ["Open Sans", "Helvetica Neue", "Helvetica", "Arial", "DejaVu Sans"]
+# fonts tried, glyph by glyph, for characters the main font lacks (CJK and symbols)
+GLYPH_FALLBACKS = ["Hiragino Sans", "Hiragino Sans GB", "PingFang SC", "Apple SD Gothic Neo",
+                   "Noto Sans CJK JP", "Noto Sans CJK SC", "Microsoft YaHei", "Yu Gothic",
+                   "Malgun Gothic", "Arial Unicode MS", "DejaVu Sans"]
 STATA_NAMED = {
     "black": "#000000", "white": "#FFFFFF", "red": "#FF0000", "blue": "#0000FF",
     "green": "#008000", "navy": "#1A476F", "maroon": "#90353B", "gray": "#808080",
@@ -57,6 +65,8 @@ DASHES = {
     "shortdash_dot": (0, (3, 2, 1, 2)), "tight_dot": (0, (1, 1)), "blank": "None",
 }
 LINE_TYPES = {"line", "connected"}
+# connect() styles drawn as steps
+STEPS = {"stairstep": "steps-post", "j": "steps-post", "stepstair": "steps-pre"}
 PC_TYPES = {"pcspike", "pcarrow", "pcbarrow", "pccapsym", "pcscatter", "pcbarrowi",
             "pcarrowi", "pci"}
 SUPPORTED = {"line", "connected", "scatter", "bar", "area", "spike", "dropline", "dot",
@@ -130,12 +140,81 @@ def stata_color(s, default=None):
     return (rgb[0], rgb[1], rgb[2], opacity)
 
 
+SUPER = dict(zip("0123456789+-=()niabcdefghijklmoprstuvwxyzABDEGHIJKLMNOPRTUVW",
+                 "⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻⁼"
+                 "⁽⁾ⁿⁱᵃᵇᶜᵈᵉᶠᵍʰⁱ"
+                 "ʲᵏˡᵐᵒᵖʳˢᵗᵘᵛʷˣ"
+                 "ʸᶻᴬᴮᴰᴱᴳᴴᴵᴶᴷᴸᴹ"
+                 "ᴺᴼᴾᴿᵀᵁⱽᵂ"))
+SUB = dict(zip("0123456789+-=()aehijklmnoprstuvx",
+               "₀₁₂₃₄₅₆₇₈₉₊₋₌"
+               "₍₎ₐₑₕᵢⱼₖₗₘₙₒₚ"
+               "ᵣₛₜᵤᵥₓ"))
+# Stata names that are not HTML entity names
+STATA_ENTITIES = {"Inf": "∞", "inf": "∞", "minus": "−"}
+
+
+def _entity(m):
+    name = m.group(1)
+    if name in STATA_ENTITIES:
+        return STATA_ENTITIES[name]
+    ch = html.unescape("&" + name + ";")
+    return ch if ch != "&" + name + ";" else name
+
+
+def _script(m):
+    table = SUPER if m.group(1) == "sup" else SUB
+    txt = m.group(2)
+    if all(c in table or c == " " for c in txt):
+        return "".join(table.get(c, c) for c in txt)
+    return txt
+
+
+def _char(m):
+    v = m.group(1)
+    try:
+        return chr(int(v, 16) if v.lower().startswith("0x") else int(v))
+    except (ValueError, OverflowError):
+        return m.group(0)
+
+
 def _strip_tags(s):
-    s = re.sub(r"\{c (\d+)\}", lambda m: chr(int(m.group(1))), s)
+    s = re.sub(r"\{c (0[xX][0-9a-fA-F]+|\d+)\}", _char, s)
+    s = re.sub(r"\{&([a-zA-Z]+[0-9]*)\}", _entity, s)
+    s = re.sub(r"\{(sup|sub):([^}]*)\}", _script, s)
     s = re.sub(r"\{(it|bind|stSerif|stSans|stMono|stSymbol):([^}]*)\}", r"\2", s)
     s = re.sub(r"\{fontface [^:}]*:([^}]*)\}", r"\1", s)
-    s = re.sub(r"\{&([a-zA-Z]+)\}", r"\1", s)
     return s
+
+
+def tick_text(s):
+    """A tick label given as compound-quoted lines ("Line A" "Line B") -> two lines."""
+    s = s or ""
+    parts = re.findall(r'"([^"]*)"', s)
+    if len(parts) >= 2 and re.fullmatch(r'\s*("[^"]*"\s*)+', s):
+        return "\n".join(clean_text(x) for x in parts)
+    return clean_text(s)
+
+
+def stata_format(v, fmt):
+    """A number shown with a Stata display format (%9.0g, %4.1f, %9.2fc, %8.0e)."""
+    fmt = (fmt or "").strip()
+    m = re.fullmatch(r"%-?0?(\d*)\.(\d+)(f|g|e)(c?)", fmt)
+    if m and m.group(3) == "f":
+        out = f"{v:,.{int(m.group(2))}f}" if m.group(4) else f"{v:.{int(m.group(2))}f}"
+        return out
+    if m and m.group(3) == "e":
+        return f"{v:.{int(m.group(2))}e}"
+    # %g and anything else: drop the float noise a Stata float carries
+    out = f"{float(np.float32(v)):.7g}" if abs(v) < 1e7 else f"{v:.10g}"
+    if m and m.group(4):
+        try:
+            f = float(out)
+            if f == int(f) and "e" not in out:
+                out = f"{int(f):,}"
+        except ValueError:
+            pass
+    return out
 
 
 def clean_text(s):
@@ -237,12 +316,22 @@ def parse_angle(t):
     return 0.0
 
 
-def nice_dates(pos, labs):
-    """Stata's default %td labels (01jan2001) read better as 'Jan 2001'."""
+def nice_dates(pos, labs, fmt=""):
+    """Stata's default %td labels (01jan2001) read better as 'Jan 2001'. Labels are
+    rewritten only on a daily-date axis and only when every label is the %td
+    rendering of its own tick position; custom label text is kept."""
     if not labs or not all(re.fullmatch(r"\d{2}[a-z]{3}\d{4}", l or "") for l in labs):
         return labs
+    fmt = (fmt or "").strip().lower()
+    if fmt and not (fmt.startswith("%td") or fmt.startswith("%d") or fmt.startswith("%-td")):
+        return labs
     base = dt.date(1960, 1, 1)
-    dates = [base + dt.timedelta(days=int(round(p))) for p in pos]
+    try:
+        dates = [base + dt.timedelta(days=int(round(p))) for p in pos]
+    except (OverflowError, ValueError):
+        return labs
+    if any(d.strftime("%d%b%Y").lower() != l for d, l in zip(dates, labs)):
+        return labs
     if all(d.day == 1 for d in dates):
         out = []
         for k, d in enumerate(dates):
@@ -268,6 +357,20 @@ class Panel:
         self.legend_style = {}
         self.axis_off = set()
         self._slots = {}
+        self.leg = None
+        self._leg_args = None
+        # text sizes Stata used for this panel; graph combine shrinks its members
+        self.gmult = num(spec.get("gmult"), 1.0) or 1.0
+        if spec.get("family") == "bar":
+            gx, gy = spec.get("gtick_size"), spec.get("stick_size")
+            if spec.get("horizontal") == "yes":
+                gx, gy = gy, gx
+        else:
+            gx = (spec.get("xaxis") or {}).get("ticksize")
+            gy = (spec.get("yaxis") or {}).get("ticksize")
+        self.xtickfs = fig.tsize(gx, fig.tickfs0, self.gmult)
+        self.ytickfs = fig.tsize(gy, fig.tickfs0, self.gmult)
+        self.tickfs = self.xtickfs
         self.style_axes(ax)
 
     # ---- small accessors ---------------------------------------------------
@@ -283,8 +386,8 @@ class Panel:
     def ms(self, p, floor=2.0):
         v = num(p.get("msize"))
         if v is None:
-            return 5.0
-        return max(floor, self.pts(v) * self.f.msscale)
+            return 5.0 * self.f.k * self.gmult
+        return max(floor, self.pts(v) * self.f.msscale * self.gmult)
 
     def skip(self, msg):
         where = f"panel {self.index + 1}: " if self.f.multi else ""
@@ -295,7 +398,8 @@ class Panel:
             ax.spines[side].set_visible(False)
         ax.spines["bottom"].set_color(AXIS)
         ax.spines["bottom"].set_linewidth(0.9)
-        ax.tick_params(axis="both", length=0, labelsize=self.f.tickfs, pad=5)
+        ax.tick_params(axis="x", length=0, labelsize=self.xtickfs, pad=5 * self.f.k)
+        ax.tick_params(axis="y", length=0, labelsize=self.ytickfs, pad=5 * self.f.k)
         ax.set_axisbelow(True)
 
     def col(self, cols, p, key):
@@ -326,7 +430,9 @@ class Panel:
     # ---- twoway -------------------------------------------------------------
     def draw_twoway(self):
         s = self.s
-        if s.get("y2axis") and any(str(p.get("yaxis")) == "2" for p in s.get("plots", [])):
+        if s.get("y2axis") and any(str(p.get("yaxis")) == "2"
+                                   and str(p.get("xaxis", "1") or "1") == "1"
+                                   for p in s.get("plots", [])):
             self.ax2 = self.ax.twinx()
             self.style_axes(self.ax2)
             self.ax2.spines["bottom"].set_visible(False)
@@ -347,10 +453,28 @@ class Panel:
         self.apply_axes()
         self.reflines()
         for t in s.get("textboxes", []):
-            self.draw_text(t, keep_color=False)
-        for t in s.get("added_text", []):
+            ax = self.axis_for(t, "text()")
+            if ax is not None:
+                self.draw_text(t, keep_color=False, ax=ax)
+        added = s.get("added_text", [])
+        self.pair_end_values(added)
+        for t in added:
             self.draw_text(t, keep_color=True)
         self.added_shapes()
+
+    def axis_for(self, obj, what):
+        """The Axes an object on yaxis(#)/xaxis(#) belongs to, or None (skipped)."""
+        xa = str(obj.get("xaxis", "1") or "1").strip()
+        ya = str(obj.get("yaxis", "1") or "1").strip()
+        if xa != "1":
+            self.skip(f"{what} on a second x axis")
+            return None
+        if ya == "2" and self.ax2 is not None:
+            return self.ax2
+        if ya not in ("1", "2"):
+            self.skip(f"{what} on y axis {ya}")
+            return None
+        return self.ax
 
     def draw_plot(self, p, i):
         t = p.get("type", "")
@@ -358,6 +482,14 @@ class Panel:
             return None
         if t not in SUPPORTED:
             self.skip(f"plot {p.get('index')} (type {t})")
+            return None
+        xa = str(p.get("xaxis", "1") or "1").strip()
+        ya = str(p.get("yaxis", "1") or "1").strip()
+        if xa != "1":
+            self.skip(f"plot {p.get('index')} (type {t}): second x axis")
+            return None
+        if ya not in ("1", "2"):
+            self.skip(f"plot {p.get('index')} (type {t}): y axis {ya}")
             return None
         path = os.path.join(self.f.dir, p.get("csv", ""))
         if not os.path.exists(path):
@@ -386,6 +518,17 @@ class Panel:
         hollow = "hollow" in sym
         nomarker = sym in ("none", "i", "")
         z = 2 + i * 0.01
+        steps = STEPS.get(str(p.get("connect", "")).strip().lower())
+        bridge = str(p.get("cmissing", "")).strip().lower() not in ("no", "n")
+
+        def joined(a, b):
+            """Stata's default cmissing(y) draws the line across missing values."""
+            if not bridge:
+                return a, b
+            ok = ~(np.isnan(a) | np.isnan(b))
+            return a[ok], b[ok]
+
+        line_kw = dict(drawstyle=steps) if steps else {}
         info = {"type": t, "color": lc, "x": x, "y": y, "handle": None, "p": p,
                 "ax": ax}
 
@@ -406,21 +549,20 @@ class Panel:
                         mew=self.pts(mlw) if (mlw is not None and not same) else 0.6)
 
         if t == "line":
-            (h,) = ax.plot(x, y, color=lc, lw=self.lw(p), ls=dash, zorder=z + 1,
-                           solid_capstyle="round", solid_joinstyle="round")
+            (h,) = ax.plot(*joined(x, y), color=lc, lw=self.lw(p), ls=dash, zorder=z + 1,
+                           solid_capstyle="round", solid_joinstyle="round", **line_kw)
             info["handle"] = h
         elif t in ("connected", "scatter"):
             ls = dash if t == "connected" else "None"
-            (h,) = ax.plot(x, y, color=lc, lw=self.lw(p), ls=ls, zorder=z + 1.5,
-                           **marker_kw())
+            if t == "connected":
+                (h,) = ax.plot(*joined(x, y), color=lc, lw=self.lw(p), ls=ls, zorder=z + 1.5,
+                               **line_kw, **marker_kw())
+            else:
+                (h,) = ax.plot(x, y, color=lc, lw=self.lw(p), ls=ls, zorder=z + 1.5,
+                               **marker_kw())
             info["handle"] = h
             info["color"] = lc if t == "connected" else (mline if hollow else mfill)
-            labs = self.col(cols, p, "label")
-            lmap = p.get("labelmap") or {}
-            if labs is not None and lmap:
-                labs = [lmap.get(v, lmap.get(v.split(".")[0], v)) for v in labs]
-            if labs is not None:
-                self.marker_labels(ax, x, y, labs, p)
+            self.point_labels(ax, cols, x, y, p)
         elif t in ("bar", "rbar"):
             width = num(p.get("barsize"), 0.8) or 0.8
             base = num(p.get("base"), 0.0)
@@ -455,9 +597,13 @@ class Panel:
             if base is None:
                 base = num(p.get("drawnbase"), 0.0) or 0.0
             col = afill if afill[3] < 1 else (afill[0], afill[1], afill[2], 0.85)
-            h = ax.fill_between(x, base, y, color=col, lw=0, zorder=z)
-            ax.plot(x, y, color=afill[:3], lw=1.2, zorder=z + 0.5)
-            info.update(handle=h, color=afill)
+            if horizontal:
+                h = ax.fill_betweenx(x, base, y, color=col, lw=0, zorder=z)
+                ax.plot(y, x, color=afill[:3], lw=1.2, zorder=z + 0.5)
+            else:
+                h = ax.fill_between(x, base, y, color=col, lw=0, zorder=z)
+                ax.plot(x, y, color=afill[:3], lw=1.2, zorder=z + 0.5)
+            info.update(handle=h, color=afill, horizontal=horizontal)
         elif t == "rarea":
             if y2 is None:
                 return None
@@ -491,27 +637,43 @@ class Panel:
                 return None
             ls = "None" if t == "rscatter" else dash
             mk = marker_kw() if t != "rline" else {}
-            (h,) = ax.plot(x, y, color=lc, lw=self.lw(p, floor=0.8), ls=ls, zorder=z + 1, **mk)
-            ax.plot(x, y2, color=lc, lw=self.lw(p, floor=0.8), ls=ls, zorder=z + 1, **mk)
-            info.update(handle=h, band=True)
+            kw = dict(color=lc, lw=self.lw(p, floor=0.8), ls=ls, zorder=z + 1, **mk)
+            if t != "rscatter":
+                kw.update(line_kw)
+            if horizontal:
+                (h,) = ax.plot(*joined(y, x), **kw)
+                ax.plot(*joined(y2, x), **kw)
+            else:
+                (h,) = ax.plot(*joined(x, y), **kw)
+                ax.plot(*joined(x, y2), **kw)
+            info.update(handle=h, band=True, horizontal=horizontal)
         elif t in ("spike", "dropline", "dot"):
             base = num(p.get("base"))
             if base is None:
                 base = num(p.get("drawnbase"), 0.0) or 0.0
             if t != "dot":
-                ax.vlines(x, base, y, color=lc, lw=self.lw(p, floor=0.9), zorder=z)
+                if horizontal:
+                    ax.hlines(x, base, y, color=lc, lw=self.lw(p, floor=0.9), zorder=z)
+                else:
+                    ax.vlines(x, base, y, color=lc, lw=self.lw(p, floor=0.9), zorder=z)
             if t in ("dropline", "dot"):
-                (h,) = ax.plot(x, y, ls="None", zorder=z + 1, **marker_kw())
+                mx, my = (y, x) if horizontal else (x, y)
+                (h,) = ax.plot(mx, my, ls="None", zorder=z + 1, **marker_kw())
                 info["handle"] = h
             else:
                 info["handle"] = plt.Line2D([], [], color=lc, lw=1.5)
+            info["horizontal"] = horizontal
+            if t in ("dropline", "dot"):
+                self.point_labels(ax, cols, *((y, x) if horizontal else (x, y)), p)
         elif t in PC_TYPES:
             if y2 is None or x2 is None:
                 self.skip(f"plot {p.get('index')} (type {t}): second coordinates not found")
                 return None
+            labcols = (x, y)  # marker labels sit at the start point
             if horizontal:  # stored unswapped; Stata swaps the axes when drawing
                 x, y, x2, y2 = y, x, y2, x2
                 info["horizontal"] = True
+                labcols = (x, y)
             lw = self.lw(p, floor=0.9)
             arrow = {"pcarrow": "-|>", "pcarrowi": "-|>", "pcbarrow": "<|-|>",
                      "pcbarrowi": "<|-|>"}.get(t)
@@ -528,12 +690,32 @@ class Panel:
             if t in ("pccapsym", "pcscatter"):
                 kw = marker_kw()
                 ax.plot(np.r_[x, x2], np.r_[y, y2], ls="None", zorder=z + 1.5, **kw)
+            self.point_labels(ax, cols, labcols[0], labcols[1], p)
             info["handle"] = plt.Line2D([], [], color=lc, lw=lw)
             info["x"] = np.r_[x, x2]
             info["y"] = np.r_[y, y2]
         return info
 
-    def marker_labels(self, ax, x, y, labs, p):
+    def point_labels(self, ax, cols, x, y, p):
+        """Marker labels of a plot: mlabel() text, mlabvposition() positions."""
+        labs = self.col(cols, p, "label")
+        if labs is None:
+            return
+        lmap = p.get("labelmap") or {}
+        fmt = str(p.get("labfmt", "") or "").strip() or str(p.get("labelvarfmt", "") or "")
+        is_str = bool(re.fullmatch(r"%-?~?\d*s", str(p.get("labelvarfmt", "")).strip()))
+        out = []
+        for v in labs:
+            if lmap and (v in lmap or v.split(".")[0] in lmap):
+                out.append(lmap.get(v, lmap.get(v.split(".")[0], v)))
+                continue
+            f = None if is_str else num(v)
+            out.append(stata_format(f, fmt) if f is not None else v)
+        posc = self.col(cols, p, "pos")
+        pos = to_float(posc) if posc is not None else None
+        self.marker_labels(ax, x, y, out, p, pos)
+
+    def marker_labels(self, ax, x, y, labs, p, pos_each=None):
         pos = str(p.get("labpos", "3")).strip()
         offsets = {"12": (0, 6, "center", "bottom"), "6": (0, -6, "center", "top"),
                    "3": (6, 0, "left", "center"), "9": (-6, 0, "right", "center"),
@@ -542,18 +724,24 @@ class Panel:
                    "4": (5, -5, "left", "top"), "5": (5, -5, "left", "top"),
                    "7": (-5, -5, "right", "top"), "8": (-5, -5, "right", "top"),
                    "10": (-5, 5, "right", "bottom"), "11": (-5, 5, "right", "bottom")}
-        dx, dy, ha, va = offsets.get(pos, offsets["3"])
         size = num(p.get("labsize"))
-        fs = max(6.5, self.pts(size)) if size else 7.5
+        fs = max(4.0, self.pts(size) * self.gmult) if size else 7.5 * self.f.k
         col = stata_color(p.get("labcolor"), to_rgba(MUTED))
         if col[:3] == (0, 0, 0):
             col = to_rgba(INK)
-        for xi, yi, lab in zip(x, y, labs):
+        angle = parse_angle({"angle": p.get("labangle", "")})
+        kk = fs / 7.5  # offsets grow with the text
+        for k, (xi, yi, lab) in enumerate(zip(x, y, labs)):
             if lab in ("nan", "", ".") or np.isnan(xi) or np.isnan(yi):
                 continue
-            ax.annotate(clean_text(lab), (xi, yi), xytext=(dx, dy),
+            pk = pos
+            if pos_each is not None and k < len(pos_each) and not np.isnan(pos_each[k]):
+                pk = str(int(pos_each[k]))
+            dx, dy, ha, va = offsets.get(pk, offsets["3"])
+            ax.annotate(clean_text(lab), (xi, yi), xytext=(dx * kk, dy * kk),
                         textcoords="offset points", ha=ha, va=va, fontsize=fs,
-                        color=col, zorder=5)
+                        color=col, zorder=5, rotation=angle,
+                        rotation_mode="anchor" if angle else "default")
 
     def bar_width(self):
         for i in self.infos:
@@ -561,15 +749,52 @@ class Panel:
                 return num(i["p"].get("barsize"), 0.8) or 0.8
         return 0.8
 
-    def set_ticks(self, ax, which, ticks):
+    def axis_format(self, key):
+        """Display format of an axis: its label format, else the first plot's variable."""
+        a = self.s.get(key) or {}
+        fmt = str(a.get("format", "") or "").strip()
+        if not fmt:
+            for p in self.s.get("plots", []):
+                fmt = str(p.get("yformat" if key != "xaxis" else "xformat", "") or "").strip()
+                if fmt:
+                    break
+        return fmt
+
+    def set_ticks(self, ax, which, ticks, fmt="", angle=0.0):
         pos = [t[0] for t in ticks]
-        labs = nice_dates(pos, [t[1] for t in ticks])
+        labs = nice_dates(pos, [t[1] for t in ticks], fmt)
         if which == "x":
             ax.set_xticks(pos)
             ax.set_xticklabels(labs)
         else:
             ax.set_yticks(pos)
             ax.set_yticklabels(labs)
+        self.rotate_ticks(ax, which, angle)
+
+    def rotate_ticks(self, ax, which, angle):
+        """Tick-label angle set in Stata (xlabel(, angle())). The y axis keeps the
+        house style (horizontal labels) unless the angle is a diagonal one."""
+        angle = float(angle or 0.0) % 360
+        if which == "y" and angle in (0.0, 90.0, 270.0):
+            return
+        if angle == 0.0:
+            return
+        labels = ax.get_xticklabels() if which == "x" else ax.get_yticklabels()
+        for t in labels:
+            t.set_rotation(angle)
+            t.set_rotation_mode("anchor")
+            if which == "x":
+                if angle in (90.0, 270.0):
+                    t.set_ha("right" if angle == 90.0 else "left")
+                    t.set_va("center")
+                else:
+                    t.set_ha("right" if angle < 180 else "left")
+                    t.set_va("top" if angle < 180 else "bottom")
+            else:
+                t.set_ha("right")
+                t.set_va("center")
+        if which == "x":
+            self._rotated = True  # an explicit angle is not undone by fix_tick_overlap
 
     def apply_axes(self):
         s = self.s
@@ -586,7 +811,7 @@ class Panel:
                 continue
             a = s.get(key, {}) or {}
             lo, hi = num(a.get("min")), num(a.get("max"))
-            ticks = [(num(t[0]), clean_text(t[1])) for t in a.get("ticks", [])]
+            ticks = [(num(t[0]), tick_text(t[1])) for t in a.get("ticks", [])]
             ticks = [t for t in ticks if t[0] is not None]
             is_log = a.get("transform", "") in ("log", "ln", "log10")
             if is_log:
@@ -620,7 +845,8 @@ class Panel:
                         lo2, hi2 = lo - 0.75 * w, hi + 0.75 * w
                 (ax.set_xlim if which == "x" else ax.set_ylim)(lo2, hi2)
             if ticks:
-                self.set_ticks(ax, which, ticks)
+                self.set_ticks(ax, which, ticks, self.axis_format(key if key != "y2axis" else key),
+                               parse_angle({"angle": a.get("tickangle", "")}))
             if is_log:
                 ax.tick_params(axis=which, which="minor", length=0, labelbottom=False,
                                labelleft=False)
@@ -676,6 +902,9 @@ class Panel:
             z = num(r.get("z"))
             if z is None:
                 continue
+            ax = self.axis_for(r, "xline()" if r.get("ord") == "x" else "yline()")
+            if ax is None:
+                continue
             col = stata_color(r.get("color"), to_rgba(MUTED))
             if col[:3] == (0, 0, 0):
                 col = to_rgba(MUTED)
@@ -685,16 +914,84 @@ class Panel:
             w = num(r.get("lw"))
             kw = dict(color=col, lw=max(0.8, self.pts(w)) if w else 1.0, ls=dash, zorder=1.9)
             if r.get("ord") == "x":
-                self.ax.axvline(z, **kw)
+                ax.axvline(z, **kw)
             else:
-                self.ax.axhline(z, **kw)
+                ax.axhline(z, **kw)
 
-    def draw_text(self, t, keep_color):
+    def text_width(self, t):
+        """Width in points of the widest line of a text object."""
+        lines = [rich_segments(l) for l in (t.get("text") or [])]
+        lines = [l for l in lines if l]
+        if not lines:
+            return 0.0
+        size = num(t.get("size"))
+        fs = self.pts(size) if size else 9.0 * self.f.k
+        fig = self.f.fig
+        r = fig.canvas.get_renderer()
+        out = 0.0
+        for line in lines:
+            w = 0.0
+            for txt, bold in line:
+                tmp = fig.text(0, 0, txt, fontsize=fs, fontweight="bold" if bold else "normal")
+                w += tmp.get_window_extent(r).width * 72.0 / fig.dpi
+                tmp.remove()
+            out = max(out, w)
+        return out
+
+    def pair_end_values(self, added):
+        """gpolish endlabel, values: a label (placed east of the line end) and a
+        value (placed west of a point further right) on the same line. Stata
+        spaced them for its own text widths; here the value column is set from
+        the widths measured with matplotlib, so the two never overprint."""
+        def is_value(t):
+            txt = " ".join(t.get("text") or []).strip()
+            return bool(re.fullmatch(r"[-+\u2212]?[\d.,]+%?", txt.replace("$", "").replace("\\", "")))
+        groups = {}
+        for t in added:
+            place = str(t.get("place", "")).strip().lower()
+            if place not in ("east", "west") or t.get("draw") == "no":
+                continue
+            if num(t.get("x")) is None or num(t.get("y")) is None:
+                continue
+            groups.setdefault(round(num(t.get("y")), 9), []).append(t)
+        pairs = []
+        for items in groups.values():
+            labs = [t for t in items if not is_value(t)]
+            vals = [t for t in items if is_value(t)]
+            for v in vals:
+                vx = num(v.get("x"))
+                vplace = str(v.get("place", "")).strip().lower()
+                for lab in labs:
+                    lplace = str(lab.get("place", "")).strip().lower()
+                    lx = num(lab.get("x"))
+                    if lplace == vplace:
+                        continue
+                    # right side: label east of x, value west of a larger x (and mirrored)
+                    if (lplace == "east" and vx > lx) or (lplace == "west" and vx < lx):
+                        pairs.append((lab, v))
+                        break
+        if not pairs:
+            return
+        wl = max(self.text_width(lab) for lab, _ in pairs)
+        wv = max(self.text_width(v) for _, v in pairs)
+        for lab, v in pairs:
+            size = num(lab.get("size"))
+            fs = self.pts(size) if size else 9.0 * self.f.k
+            side = 1.0 if str(lab.get("place", "")).strip().lower() == "east" else -1.0
+            # the value's outer edge sits one column (widest label + gap + widest value)
+            # beyond the label's anchor
+            v["_anchor"] = (num(lab.get("x")), num(v.get("y")))
+            v["_dx"] = side * (0.12 * fs + wl + 0.9 * fs + wv)
+
+    def draw_text(self, t, keep_color, ax=None):
         """Text box anchored to a data point. Each {bf:} run is its own artist,
         placed with point offsets (rotated about the anchor when an angle is set)."""
         if t.get("draw") == "no":
             return
+        ax = ax if ax is not None else self.ax
         x, y = num(t.get("x")), num(t.get("y"))
+        if t.get("_anchor"):
+            x, y = t["_anchor"]
         lines = [rich_segments(l) for l in (t.get("text") or [])]
         lines = [l for l in lines if l]
         if x is None or y is None or not lines:
@@ -704,7 +1001,7 @@ class Panel:
             col = to_rgba(INK)
         ha, va = ALIGN.get(str(t.get("place", "")).strip().lower(), ("center", "center"))
         size = num(t.get("size"))
-        fs = self.pts(size) if size else 9.0
+        fs = self.pts(size) if size else 9.0 * self.f.k
         ml = {"left": "left", "right": "right", "center": "center"}.get(
             str(t.get("horizontal", "")).strip().lower(), ha)
         theta = parse_angle(t)
@@ -748,6 +1045,9 @@ class Panel:
         hh = (Wb * abs(st) + Hb * abs(ct)) / 2
         cx = {"left": hw + gap, "center": 0.0, "right": -hw - gap}[ha]
         cy = {"bottom": hh + gap, "center": 0.0, "top": -hh - gap}[va]
+        if t.get("_dx"):
+            # a paired end-label value: its outer edge sits _dx points from the anchor
+            cx = t["_dx"] - (hw if t["_dx"] > 0 else -hw)
         if box:
             da = DrawingArea(Wb, Hb, 0, 0, clip=False)
             if self.f.roundbox:
@@ -762,14 +1062,14 @@ class Panel:
             ab = AnnotationBbox(da, (x, y), xybox=(cx, cy), xycoords="data",
                                 boxcoords="offset points", box_alignment=(0.5, 0.5),
                                 frameon=False, pad=0, annotation_clip=False, zorder=7.8)
-            self.ax.add_artist(ab)
+            ax.add_artist(ab)
             cx += (padl - padr) / 2
             cy += (padb - padt) / 2
         for k, line in enumerate(lines):
             lx = -W / 2 + {"left": 0, "center": (W - lw_[k]) / 2, "right": W - lw_[k]}[ml]
             ly = H / 2 - (k + 0.5) * lh
             for (txt, bold), w in zip(line, widths[k]):
-                a = self.ax.annotate(txt, xy=(x, y),
+                a = ax.annotate(txt, xy=(x, y),
                                      xytext=(cx + lx * ct - ly * st, cy + lx * st + ly * ct),
                                      textcoords="offset points", ha="left", va="center",
                                      rotation=theta, rotation_mode="anchor",
@@ -823,35 +1123,39 @@ class Panel:
 
     # ---- legend / end labels -------------------------------------------------
     def series_labels(self, leg=None):
+        """Legend entries in the order of Stata's legend map: {plot index: label}."""
         leg = leg if leg is not None else self.s.get("legend", {})
         out = {}
         if leg.get("draw") != "no":
             for e in leg.get("entries", []):
                 k = num(e[0])
-                if k is not None and e[1]:
+                if k is not None and e[1] and int(k) not in out:
                     lab = clean_text(e[1])
                     out[int(k)] = lab
                     col = stata_color(e[2], None) if len(e) > 2 else None
                     bold = bool(re.fullmatch(r"\s*\{bf:[^}]*\}\s*", e[1]))
-                    self.legend_style[lab] = (col, bold)
+                    self.legend_style[int(k)] = (col, bold)
         return out
 
     def legend_items(self, labels):
-        handles, texts, seen = [], [], set()
-        for info in self.infos:
-            lab = labels.get(info["p"]["index"])
-            if not lab or info["handle"] is None or lab in seen:
+        """One key per legend entry, in legend order; repeated label text is kept."""
+        by_idx = {i["p"]["index"]: i for i in self.infos}
+        handles, texts, self._legend_keys = [], [], []
+        for k, lab in labels.items():
+            info = by_idx.get(k)
+            if not lab or info is None or info["handle"] is None:
                 continue
-            seen.add(lab)
             handles.append(info["handle"])
             texts.append(lab)
+            self._legend_keys.append(k)
         if len(handles) == 1 and len(self.infos) == 1:
             return [], []
         return handles, texts
 
     def restyle_legend(self, leg):
-        for txt in leg.get_texts():
-            col, bold = self.legend_style.get(txt.get_text(), (None, False))
+        keys = getattr(self, "_legend_keys", [])
+        for k, txt in enumerate(leg.get_texts()):
+            col, bold = self.legend_style.get(keys[k] if k < len(keys) else None, (None, False))
             if col is not None and col[:3] != (0, 0, 0) and col[3] > 0:
                 txt.set_color(col)
             if bold:
@@ -878,13 +1182,14 @@ class Panel:
             cax.set_yticks([k + 0.5 for k in show])
             cax.set_yticklabels([steps[k][1] for k in show])
             cax.set_xticks([])
-            cax.tick_params(axis="y", length=0, labelsize=7.5, pad=3, left=False, right=True,
+            cax.tick_params(axis="y", length=0, labelsize=7.5 * self.f.k, pad=3 * self.f.k, left=False, right=True,
                             labelleft=False, labelright=True, labelcolor=MUTED)
             for sp in cax.spines.values():
                 sp.set_visible(False)
             title = clean_text(leg.get("title", ""))
             if title:
-                cax.set_title(title, fontsize=8.5, color=MUTED, loc="left", pad=4)
+                cax.set_title(title, fontsize=8.5 * self.f.k, color=MUTED, loc="left",
+                              pad=4 * self.f.k)
             return True
         cax = self.ax.inset_axes([0.0, 1.035, 0.46, 0.035])
         for k, (_, _, col) in enumerate(steps):
@@ -895,13 +1200,13 @@ class Panel:
         cax.set_xticks([k + 0.5 for k in show])
         cax.set_xticklabels([steps[k][1] for k in show])
         cax.set_yticks([])
-        cax.tick_params(axis="x", length=0, labelsize=7.5, pad=2, top=True, bottom=False,
+        cax.tick_params(axis="x", length=0, labelsize=7.5 * self.f.k, pad=2 * self.f.k, top=True, bottom=False,
                         labeltop=True, labelbottom=False, labelcolor=MUTED)
         for sp in cax.spines.values():
             sp.set_visible(False)
         title = clean_text(self.s.get("legend", {}).get("title", ""))
         if title:
-            cax.text(1.03, 0.5, title, transform=cax.transAxes, fontsize=8.5, color=MUTED,
+            cax.text(1.03, 0.5, title, transform=cax.transAxes, fontsize=8.5 * self.f.k, color=MUTED,
                      ha="left", va="center")
         self.has_legend = True
         return True
@@ -914,15 +1219,48 @@ class Panel:
         handles, texts = self.legend_items(labels)
         if not handles:
             return False
-        one_row = num(self.s.get("legend", {}).get("rows")) == 1 or len(handles) <= 6
-        leg = self.ax.legend(handles, texts, loc="lower left", bbox_to_anchor=(0, 1.0),
-                             ncol=len(handles) if one_row else 4, frameon=False,
-                             fontsize=self.f.tickfs - 0.5, handlelength=1.6,
-                             handletextpad=0.5, columnspacing=1.4, borderaxespad=0.2,
-                             labelcolor=INK)
-        self.restyle_legend(leg)
+        leg = self.s.get("legend", {})
+        one_row = num(leg.get("rows")) == 1 or len(handles) <= 6
+        title = clean_text(leg.get("title", ""))
+        self._leg_args = dict(handles=handles, texts=texts, title=title,
+                              fs=self.f.tsize(leg.get("size"), 9.0, self.gmult))
+        self.make_legend(len(handles) if one_row else 4)
         self.has_legend = True
         return True
+
+    def make_legend(self, ncol):
+        a = self._leg_args
+        if self.leg is not None:
+            self.leg.remove()
+        k = self.f.k
+        leg = self.ax.legend(a["handles"], a["texts"], loc="lower left", bbox_to_anchor=(0, 1.0),
+                             ncol=max(1, ncol), frameon=False, fontsize=a["fs"],
+                             handlelength=1.6, handletextpad=0.5, columnspacing=1.4,
+                             borderaxespad=0.2, labelcolor=INK, title=a["title"] or None,
+                             title_fontsize=a["fs"], alignment="left")
+        if a["title"]:
+            leg.get_title().set_color(MUTED)
+        # the legend widens the figure only through its rows: it is left out of the
+        # panel-width solve, and fit_legend() wraps it to fit the figure width
+        leg.set_in_layout(False)
+        self.restyle_legend(leg)
+        self.leg = leg
+        self._leg_ncol = max(1, ncol)
+        return leg
+
+    def fit_legend(self):
+        """Drop legend columns until the legend fits inside the figure. Returns True
+        if it changed the legend."""
+        if self.leg is None or self._leg_args is None:
+            return False
+        fig = self.f.fig
+        r = fig.canvas.get_renderer()
+        right = fig.bbox.width * (1 - self.f.padx / (self.f.xs * 72.0))
+        changed = False
+        while self._leg_ncol > 1 and self.leg.get_window_extent(r).x1 > right + 0.5:
+            self.make_legend(self._leg_ncol - 1)
+            changed = True
+        return changed
 
     def end_labels(self):
         ax, fig = self.ax, self.f.fig
@@ -937,13 +1275,22 @@ class Panel:
             ok = ~(np.isnan(x) | np.isnan(y))
             if not ok.any():
                 continue
-            j = np.where(ok)[0][np.argmax(x[ok])]
-            cands.append((x[j], y[j], lab, info["color"]))
+            cands.append((x, y, ok, lab, info["color"]))
         if not cands:
             return False
         fig.canvas.draw()
+        # the line end is the point furthest right on screen (a reversed x axis
+        # puts the largest x value on the left)
+        ends = []
+        self._end_series = []
+        for x, y, ok, lab, col in cands:
+            sx = ax.transData.transform(np.column_stack([x[ok], y[ok]]))[:, 0]
+            j = np.where(ok)[0][np.argmax(sx)]
+            ends.append((x[j], y[j], lab, col))
+            self._end_series.append((lab, np.column_stack([x[ok], y[ok]])))
+        cands = ends
         ypix = np.array([ax.transData.transform((c[0], c[1]))[1] for c in cands])
-        fs = 9.5
+        fs = self.tickfs
         sep = fs * 1.28 * fig.dpi / 72.0
         ext = ax.get_window_extent()
         newpix = repel_1d(ypix, sep, ext.y0, ext.y1)
@@ -951,7 +1298,7 @@ class Panel:
         for (cx, cy, lab, col), py_new in zip(cands, newpix):
             px = ax.transData.transform((cx, cy))[0]
             ynew = inv.transform((px, py_new))[1]
-            ax.annotate(lab, xy=(cx, ynew), xytext=(8, 0), textcoords="offset points",
+            ax.annotate(lab, xy=(cx, ynew), xytext=(8 * self.f.k, 0), textcoords="offset points",
                         ha="left", va="center", fontsize=fs, fontweight="bold",
                         color=darken_for_text(col), annotation_clip=False, zorder=7)
             ax.plot([cx], [cy], marker="o", ms=4.5, mfc=col, mec="white", mew=0.8,
@@ -992,7 +1339,9 @@ class Panel:
             if b.get("draw") == "no":
                 continue
             v = {k: num(b.get(k)) for k in ("z", "p25", "p50", "p75", "adjl", "adjh", "width2")}
-            if any(val is None for val in v.values()):
+            # a group with few observations has no whiskers (adjl/adjh missing);
+            # its box and median are still drawn
+            if any(v[k] is None for k in ("z", "p25", "p50", "p75", "width2")):
                 continue
             c = colour(b.get("color"))
             face = (c[0], c[1], c[2], 0.35)
@@ -1015,8 +1364,10 @@ class Panel:
                                            zorder=2))
             seg(z - w, v["p50"], z + w, v["p50"], color=c[:3], lw=2.2, zorder=3,
                 solid_capstyle="butt")
-            seg(z, v["adjl"], z, v["p25"], color=c[:3], lw=1.2, zorder=2)
-            seg(z, v["p75"], z, v["adjh"], color=c[:3], lw=1.2, zorder=2)
+            if v["adjl"] is not None:
+                seg(z, v["adjl"], z, v["p25"], color=c[:3], lw=1.2, zorder=2)
+            if v["adjh"] is not None:
+                seg(z, v["p75"], z, v["adjh"], color=c[:3], lw=1.2, zorder=2)
         for arr, size in (("outsides", 3.6), ("points", 6.0)):
             for m in s.get(arr, []):
                 if m.get("draw") == "no":
@@ -1027,12 +1378,12 @@ class Panel:
                 c = colour(m.get("color"))
                 sz = num(m.get("size"))
                 ax.plot([x], [y], ls="None", marker=MARKERS.get(str(m.get("symbol")), "o"),
-                        ms=max(size * 0.6, self.pts(sz) * self.f.msscale) if sz else size,
+                        ms=max(size * 0.6, self.pts(sz) * self.f.msscale * self.gmult) if sz else size,
                         mfc=c if arr == "points" else "white", mec=c if arr == "outsides" else "white",
                         mew=1.0 if arr == "outsides" else 0.6, zorder=3)
         self.bar_seen = seen
-        sticks = [(num(t[0]), clean_text(t[1])) for t in s.get("scaleaxis", [])]
-        gticks = [(num(t[0]), clean_text(t[1])) for t in s.get("grpaxis", [])]
+        sticks = [(num(t[0]), tick_text(t[1])) for t in s.get("scaleaxis", [])]
+        gticks = [(num(t[0]), tick_text(t[1])) for t in s.get("grpaxis", [])]
         ax.autoscale_view()
         lo, hi = num(s.get("smin")), num(s.get("smax"))
         if horizontal:
@@ -1060,6 +1411,7 @@ class Panel:
                 ax.set_ylim(lo - (pad if lo != 0 else 0), hi + pad)
             ax.set_xticks([t[0] for t in gticks])
             ax.set_xticklabels([t[1] for t in gticks])
+            self.rotate_ticks(ax, "x", parse_angle({"angle": s.get("gtickangle", "")}))
             if sticks:
                 ax.set_yticks([t[0] for t in sticks])
                 ax.set_yticklabels([t[1] for t in sticks])
@@ -1077,10 +1429,13 @@ class Panel:
             if x is None or y is None or not txt:
                 continue
             ha, va = ALIGN.get(str(b.get("place", "")).strip().lower(), ("center", "center"))
-            off = {"left": 3, "right": -3, "center": 0}[ha], {"bottom": 3, "top": -3, "center": 0}[va]
+            k = self.f.k
+            off = ({"left": 3, "right": -3, "center": 0}[ha] * k,
+                   {"bottom": 3, "top": -3, "center": 0}[va] * k)
+            size = num(b.get("size"))
+            fs = max(4.0, self.pts(size) * self.gmult) if size else max(4.0, self.tickfs - 1.5)
             ax.annotate(txt, (x, y), xytext=off, textcoords="offset points", ha=ha, va=va,
-                        fontsize=max(6.5, self.f.tickfs - 1.5), color=INK, zorder=4,
-                        annotation_clip=False)
+                        fontsize=fs, color=INK, zorder=4, annotation_clip=False)
         sup = [(num(t[0]), clean_text(t[1])) for t in s.get("supaxis", [])]
         sup = [t for t in sup if t[0] is not None and t[1]]
         if not sup:
@@ -1089,7 +1444,7 @@ class Panel:
         fig.canvas.draw()
         r = fig.canvas.get_renderer()
         px2pt = 72.0 / fig.dpi
-        fs = self.f.tickfs
+        fs = self.tickfs
         if self.horizontal:
             wmax = max([t.get_window_extent(r).width for t in ax.get_yticklabels()] or [0])
             for pos, lab in sup:
@@ -1122,10 +1477,11 @@ class Panel:
                                           mec="white"))
             else:
                 handles.append(plt.Rectangle((0, 0), 1, 1, facecolor=c, edgecolor="none"))
-        self.ax.legend(handles, [clean_text(e[1]) for e in entries], loc="lower left",
-                       bbox_to_anchor=(0, 1.0), ncol=min(len(handles), 4), frameon=False,
-                       fontsize=self.f.tickfs - 0.5, handlelength=1.1, handleheight=0.9,
-                       borderaxespad=0.2)
+        texts = [clean_text(e[1]) for e in entries]
+        self._legend_keys = []
+        self._leg_args = dict(handles=handles, texts=texts, title="",
+                              fs=self.f.tsize(leg.get("size"), 9.0, self.gmult))
+        self.make_legend(min(len(handles), 4))
         self.has_legend = True
         return True
 
@@ -1152,12 +1508,24 @@ class Panel:
         if self.ax2 is not None:
             boxes.append(self.ax2.get_tightbbox(r))
         boxes = [b for b in boxes if b is not None]
-        return Bbox.union(boxes).transformed(self.f.fig.transFigure.inverted())
+        bb = Bbox.union(boxes)
+        if self.leg is not None and self.leg.get_visible():
+            # the legend adds height only; its width is handled by fit_legend()
+            lb = self.leg.get_window_extent(r)
+            bb = Bbox.from_extents(bb.x0, min(bb.y0, lb.y0), bb.x1, max(bb.y1, lb.y1))
+        return bb.transformed(self.f.fig.transFigure.inverted())
 
     def set_position(self, rect):
         self.ax.set_position(rect)
         if self.ax2 is not None:
             self.ax2.set_position(rect)
+
+    def axis_title_size(self, which):
+        if self.s.get("family") == "bar":
+            gm = self.s.get("stitle_size")
+        else:
+            gm = (self.s.get({"x": "xaxis", "y": "yaxis", "y2": "y2axis"}[which]) or {}).get("tsize")
+        return self.f.tsize(gm, 9.5, self.gmult)
 
     def axis_title(self, which):
         key = {"x": "xaxis", "y": "yaxis", "y2": "y2axis"}[which]
@@ -1185,7 +1553,11 @@ class Figure:
             self.notes.append(f"font {want} is not installed; gr2mpl used {self.font}")
         self.xs = num(spec.get("xsize"), 5.5) or 5.5
         self.ys = num(spec.get("ysize"), 4.0) or 4.0
+        # Stata's relative size unit is 1/100 of the shorter side of the graph
         self.unit = min(self.xs, self.ys) * 72.0 / 100.0  # relative size unit -> points
+        # fixed sizes (paddings, gaps, fallbacks) were set for a 5.5 x 4 inch graph
+        self.k = min(max(min(self.xs, self.ys) / 4.0, 0.35), 3.0)
+        self.padx, self.pady = 14.0 * self.k, 12.0 * self.k
         w = num(spec.get("width"), 0) or 0
         self.dpi = (w / self.xs) if w > 0 else (num(spec.get("dpi"), 200) or 200)
         self.palette = (spec.get("palette") or "").strip().lower()
@@ -1197,7 +1569,17 @@ class Figure:
         self.noticks = bool(spec.get("noticks"))
         self.pspecs = spec.get("panels", [])
         self.multi = len(self.pspecs) > 1 or spec.get("family") in ("by", "combine", "matrix")
-        self.tickfs = 8.5 if len(self.pspecs) > 2 else 9.5
+        self.tickfs0 = 8.5 if len(self.pspecs) > 2 else 9.5
+        self.tickfs = self.tsize(None, self.tickfs0)
+
+    def tsize(self, gm, default, mult=1.0):
+        """A Stata text size (relative units, as stored in .gmval) in points; when
+        the graph does not record it, the default (points on a 5.5 x 4 graph) scaled
+        to this graph."""
+        v = num(gm)
+        if v is not None and v > 0:
+            return max(3.0, v * self.unit * mult)
+        return max(3.0, default * self.k * mult)
 
     def data(self, path):
         if path not in self._csv:
@@ -1217,8 +1599,10 @@ class Figure:
 
     def render(self):
         s = self.s
+        names = {f.name for f in font_manager.fontManager.ttflist}
+        family = [self.font] + [f for f in GLYPH_FALLBACKS if f in names and f != self.font]
         plt.rcParams.update({
-            "font.family": self.font, "font.size": 10, "text.color": INK,
+            "font.family": family, "font.size": 10 * self.k, "text.color": INK,
             "axes.labelcolor": MUTED, "axes.edgecolor": AXIS, "xtick.color": INK,
             "ytick.color": INK, "axes.unicode_minus": True,
         })
@@ -1243,12 +1627,16 @@ class Figure:
                     sp.set_visible(True)
                     sp.set_color(GRID)
                 ax.text(0.5, 0.5, join_lines(ps.get("ptitle")), transform=ax.transAxes,
-                        ha="center", va="center", fontsize=self.tickfs + 1.5,
+                        ha="center", va="center", fontsize=self.tickfs * 1.15,
                         fontweight="bold", color="#374151", wrap=True)
             elif fam == "blank":
                 ax.set_axis_off()
             else:
-                p.skip(f"sub-graph of family {fam}")
+                cls = str(ps.get("classname", ""))
+                what = {"bygraph_g": "a by() graph inside graph combine",
+                        "combinegraph_g": "a graph combine inside graph combine"}.get(
+                            cls, f"a sub-graph of family {fam}")
+                p.skip(f"{what} (not drawn)")
                 ax.set_axis_off()
             self.panels.append(p)
 
@@ -1262,12 +1650,14 @@ class Figure:
         two_axes = any(p.ax2 is not None for p in self.panels)
         for p in self.panels:
             if not self.xtitle and p.axis_title("x"):
-                p.ax.set_xlabel(p.axis_title("x"), fontsize=self.tickfs, color=MUTED, labelpad=6)
+                p.ax.set_xlabel(p.axis_title("x"), fontsize=p.axis_title_size("x"), color=MUTED,
+                                labelpad=6 * self.k)
             if (not self.ytitle or two_axes) and p.axis_title("y"):
-                p.ax.set_ylabel(p.axis_title("y"), fontsize=self.tickfs, color=MUTED, labelpad=6)
+                p.ax.set_ylabel(p.axis_title("y"), fontsize=p.axis_title_size("y"), color=MUTED,
+                                labelpad=6 * self.k)
             if p.ax2 is not None and p.axis_title("y2"):
-                p.ax2.set_ylabel(p.axis_title("y2"), fontsize=self.tickfs, color=MUTED,
-                                 rotation=270, labelpad=14)
+                p.ax2.set_ylabel(p.axis_title("y2"), fontsize=p.axis_title_size("y2"), color=MUTED,
+                                 rotation=270, labelpad=14 * self.k)
         if two_axes:
             self.ytitle = ""
 
@@ -1296,20 +1686,25 @@ class Figure:
                         p.legend()
                 title = join_lines(p.s.get("ptitle"))
                 if title:
-                    p.ax.set_title(title, loc="left", fontsize=self.tickfs + 1,
+                    p.ax.set_title(title, loc="left",
+                                   fontsize=self.tsize(p.s.get("ptitle_size"), self.tickfs0 + 1,
+                                                       p.gmult),
                                    fontweight="bold", color="#374151",
-                                   pad=24 if p.has_legend else 7)
+                                   pad=(24 if p.has_legend else 7) * self.k)
             if is_by and not s.get("nolegend") and self.panels:
                 p0 = self.panels[0]
                 handles, texts = p0.legend_items(p0.series_labels(s.get("legend", {})))
                 if len(handles) > 1:
                     self.fig_legend = (handles, texts, p0)
         self.layout()
-        changed = False
-        for p in self.panels:
-            if not p.horizontal:
-                changed = p.fix_tick_overlap() or changed
-        if changed:
+        for _ in range(3):
+            changed = False
+            for p in self.panels:
+                changed = p.fit_legend() or changed
+                if not p.horizontal:
+                    changed = p.fix_tick_overlap() or changed
+            if not changed:
+                break
             self.layout()
         self.save()
 
@@ -1324,54 +1719,73 @@ class Figure:
         subtitle = join_lines(s.get("subtitle"))
         ytitle = self.ytitle
         note = "\n".join(x for x in [join_lines(s.get("note")), join_lines(s.get("caption"))] if x)
+        sub_is_ytitle = False
         if ytitle and not subtitle:
-            subtitle, ytitle = ytitle, ""
+            subtitle, ytitle, sub_is_ytitle = ytitle, "", True
         H, W = self.ys * 72.0, self.xs * 72.0
-        padx, pady = 14.0, 12.0
+        k = self.k
+        padx, pady = self.padx, self.pady
         ycur = H - pady
         left = padx / W
+        p0 = self.panels[0] if self.panels else None
+        fs_title = self.tsize(s.get("title_size"), 14.0)
+        fs_sub = self.tsize(s.get("subtitle_size"), 10.5)
+        fs_note = self.tsize(s.get("note_size"), 8.0)
+        fs_y = p0.axis_title_size("y") if p0 is not None else self.tsize(None, 9.5)
+        fs_x = p0.axis_title_size("x") if p0 is not None else self.tsize(None, 9.5)
+        if sub_is_ytitle:
+            fs_sub = fs_y
         if title:
-            arts.append(fig.text(left, ycur / H, title, fontsize=14, fontweight="bold",
+            arts.append(fig.text(left, ycur / H, title, fontsize=fs_title, fontweight="bold",
                                  color=INK, ha="left", va="top", linespacing=1.15))
-            ycur -= 14 * 1.22 * (title.count("\n") + 1) + 3
+            ycur -= fs_title * 1.22 * (title.count("\n") + 1) + 3 * k
         if subtitle:
-            arts.append(fig.text(left, ycur / H, subtitle, fontsize=10.5, color=MUTED,
+            arts.append(fig.text(left, ycur / H, subtitle, fontsize=fs_sub, color=MUTED,
                                  ha="left", va="top", linespacing=1.2))
-            ycur -= 10.5 * 1.3 * (subtitle.count("\n") + 1) + 2
+            ycur -= fs_sub * 1.3 * (subtitle.count("\n") + 1) + 2 * k
         if ytitle:
-            arts.append(fig.text(left, ycur / H, ytitle, fontsize=9.5, color=MUTED,
+            arts.append(fig.text(left, ycur / H, ytitle, fontsize=fs_y, color=MUTED,
                                  ha="left", va="top"))
-            ycur -= 9.5 * 1.35
+            ycur -= fs_y * 1.35
         if self.fig_legend:
-            handles, texts, p0 = self.fig_legend
-            ycur -= 4
-            leg = fig.legend(handles, texts, loc="upper left",
-                             bbox_to_anchor=(left - 4 / W, ycur / H), ncol=min(len(handles), 5),
-                             frameon=False, fontsize=9, handlelength=1.6, handletextpad=0.5,
-                             columnspacing=1.4, borderaxespad=0.0, borderpad=0.1)
-            p0.restyle_legend(leg)
+            handles, texts, lp = self.fig_legend
+            ycur -= 4 * k
+            fs_leg = self.tsize((s.get("legend") or {}).get("size"), 9.0)
+            rr = fig.canvas.get_renderer()
+            ncol = min(len(handles), 5)
+            while True:
+                leg = fig.legend(handles, texts, loc="upper left",
+                                 bbox_to_anchor=(left - 4 * k / W, ycur / H), ncol=ncol,
+                                 frameon=False, fontsize=fs_leg, handlelength=1.6,
+                                 handletextpad=0.5, columnspacing=1.4, borderaxespad=0.0,
+                                 borderpad=0.1)
+                if ncol <= 1 or leg.get_window_extent(rr).x1 <= fig.bbox.width * (1 - left) + 0.5:
+                    break
+                leg.remove()
+                ncol -= 1
+            lp.restyle_legend(leg)
             arts.append(leg)
-            ycur -= 9 * 1.7
-        ycur -= 8
+            ycur -= leg.get_window_extent(rr).height * 72.0 / fig.dpi + 2 * k
+        ycur -= 8 * k
         bottom = pady
         if note:
-            arts.append(fig.text(left, pady / H, note, fontsize=8, color=MUTED, ha="left",
+            arts.append(fig.text(left, pady / H, note, fontsize=fs_note, color=MUTED, ha="left",
                                  va="bottom", linespacing=1.3))
-            bottom += 8 * 1.35 * (note.count("\n") + 1) + 6
+            bottom += fs_note * 1.35 * (note.count("\n") + 1) + 6 * k
         if self.xtitle:
-            xt = fig.text(0.5, bottom / H, self.xtitle, fontsize=9.5, color=MUTED,
+            xt = fig.text(0.5, bottom / H, self.xtitle, fontsize=fs_x, color=MUTED,
                           ha="center", va="bottom")
             arts.append(xt)
             self._xtitle_artist = xt
-            bottom += 9.5 * 1.3 + 5
+            bottom += fs_x * 1.3 + 5 * k
         else:
             self._xtitle_artist = None
 
         L, B, R, T = padx / W, bottom / H, 1 - padx / W, ycur / H
         rows, cols = self.rows, self.cols
         tight = s.get("family") == "matrix"
-        gapx = ((5.0 if tight else 16.0) / W) if cols > 1 else 0.0
-        gapy = ((5.0 if tight else 14.0) / H) if rows > 1 else 0.0
+        gapx = ((5.0 if tight else 16.0) * k / W) if cols > 1 else 0.0
+        gapy = ((5.0 if tight else 14.0) * k / H) if rows > 1 else 0.0
         dl, dr = [0.0] * cols, [0.0] * cols
         dt_, db = [0.0] * rows, [0.0] * rows
         rects = {}
@@ -1403,9 +1817,125 @@ class Figure:
             xs = [rects[k][0] for k in rects] + [rects[k][0] + rects[k][2] for k in rects]
             self._xtitle_artist.set_x((min(xs) + max(xs)) / 2)
 
+    def info_lines(self):
+        """A plain-text record of what was drawn (render_info.txt in the spec
+        folder; kept with keepspec). The test battery reads it."""
+        out = []
+        fig = self.fig
+        r = fig.canvas.get_renderer()
+        arts = getattr(self, "_title_artists", [])
+        texts = [a for a in arts if isinstance(a, matplotlib.text.Text)]
+        if texts and self.s.get("title"):
+            out.append(f"title={texts[0].get_text()}")
+            out.append(f"title_fs={texts[0].get_fontsize():.2f}")
+        for a in texts:
+            out.append(f"figtext={a.get_text()}|{a.get_fontsize():.2f}")
+        out.append("font_family=" + ",".join(plt.rcParams["font.family"]))
+        out.append("glyphs_missing=" + self.missing_glyphs())
+        for k, p in enumerate(self.panels):
+            ax, tag = p.ax, f"panel{k + 1}"
+            pos = ax.get_position()
+            axbb = ax.get_window_extent(r)
+            out.append(f"{tag}.axes={pos.x0:.3f},{pos.y0:.3f},{pos.width:.3f},{pos.height:.3f}")
+            for info in p.infos:
+                which = "y2" if (p.ax2 is not None and info["ax"] is p.ax2) else "y1"
+                out.append(f"{tag}.plot{info['p'].get('index')}.axis={which}")
+            xt = [t.get_text().replace("\n", "/") for t in ax.get_xticklabels()]
+            out.append(f"{tag}.xticks=" + "|".join(xt))
+            out.append(f"{tag}.yticks=" + "|".join(t.get_text() for t in ax.get_yticklabels()))
+            rot = [t.get_rotation() for t in ax.get_xticklabels()]
+            out.append(f"{tag}.xtickangle={rot[0] if rot else 0:g}")
+            fs = [t.get_fontsize() for t in ax.get_xticklabels()]
+            out.append(f"{tag}.xtickfs={fs[0] if fs else 0:.2f}")
+            out.append(f"{tag}.xlabel={ax.get_xlabel()}")
+            if p.leg is not None:
+                lb = p.leg.get_window_extent(r)
+                out.append(f"{tag}.legend=" + "|".join(t.get_text() for t in p.leg.get_texts()))
+                out.append(f"{tag}.legend_title={p.leg.get_title().get_text()}")
+                out.append(f"{tag}.legend_inside={int(lb.x0 >= -0.5 and lb.x1 <= fig.bbox.width + 0.5)}")
+            anns = []
+            for a_ax, which in ((ax, "y1"), (p.ax2, "y2")):
+                if a_ax is None:
+                    continue
+                for c in a_ax.texts:
+                    if not c.get_text():
+                        continue
+                    bb = c.get_window_extent(r)
+                    side = ("right" if bb.x0 >= axbb.x1 - 1 else
+                            "left" if bb.x1 <= axbb.x0 + 1 else "in")
+                    anns.append(bb)
+                    out.append(f"{tag}.ann={c.get_text()}|{c.get_ha()}|{c.get_rotation():g}|"
+                               f"{which}|{side}")
+            over = sum(1 for m in range(len(anns)) for n in range(m + 1, len(anns))
+                       if anns[m].overlaps(anns[n]) and anns[m].width > 0 and anns[n].width > 0
+                       and min(anns[m].x1, anns[n].x1) - max(anns[m].x0, anns[n].x0) > 1
+                       and min(anns[m].y1, anns[n].y1) - max(anns[m].y0, anns[n].y0) > 1)
+            out.append(f"{tag}.ann_overlaps={over}")
+            # end labels: clear of their line when they start right of every point of it
+            for lab, pts in getattr(p, "_end_series", []):
+                for c in ax.texts:
+                    if c.get_text() == lab:
+                        sx = ax.transData.transform(pts)[:, 0].max()
+                        clear = c.get_window_extent(r).x0 >= sx - 0.5
+                        out.append(f"{tag}.endlabel={lab}|{'clear' if clear else 'over'}")
+            for a_ax, which in ((ax, "y1"), (p.ax2, "y2")):
+                if a_ax is None:
+                    continue
+                for ln in a_ax.get_lines():
+                    xd = np.asarray(ln.get_xdata(), dtype=float)
+                    yd = np.asarray(ln.get_ydata(), dtype=float)
+                    if xd.size == 2 and ln.get_transform() != a_ax.transData:
+                        # axhline / axvline: a reference line
+                        if np.allclose(yd, yd[0]) and not np.allclose(xd, xd[0]):
+                            out.append(f"{tag}.refline={which}:y:{yd[0]:g}")
+                        elif np.allclose(xd, xd[0]):
+                            out.append(f"{tag}.refline={which}:x:{xd[0]:g}")
+                        continue
+                    ds = ln.get_drawstyle()
+                    if ds and ds != "default":
+                        out.append(f"{tag}.drawstyle={ds}")
+                    if yd.size > 2:
+                        out.append(f"{tag}.line_nan={int(np.isnan(yd).sum())}")
+                        ok = ~np.isnan(xd)
+                        if ok.any():
+                            out.append(f"{tag}.line_x={xd[ok].min():g},{xd[ok].max():g}")
+            for c in ax.collections:
+                if hasattr(c, "get_segments") and len(c.get_segments()):
+                    s0 = c.get_segments()[0]
+                    kind = "h" if abs(s0[0][1] - s0[-1][1]) < 1e-12 else "v"
+                    out.append(f"{tag}.segments={kind}{len(c.get_segments())}")
+            out.append(f"{tag}.patches={len(ax.patches)}")
+        return out
+
+    def missing_glyphs(self):
+        """Characters in the figure's text that no font in the font list can draw."""
+        try:
+            from matplotlib.ft2font import FT2Font
+        except ImportError:
+            return ""
+        fonts = []
+        for name in plt.rcParams["font.family"]:
+            try:
+                path = font_manager.findfont(font_manager.FontProperties(family=name),
+                                             fallback_to_default=False)
+                fonts.append(FT2Font(path))
+            except Exception:
+                continue
+        chars = set()
+        for t in self.fig.findobj(matplotlib.text.Text):
+            chars.update(c for c in t.get_text() if ord(c) > 127 and not c.isspace())
+        miss = [c for c in sorted(chars)
+                if not any(f.get_char_index(ord(c)) for f in fonts)]
+        return "".join(miss)
+
     def save(self):
         out = self.s.get("saving") or "gr2mpl.png"
         self.fig.savefig(out, dpi=self.dpi, facecolor="white")
+        try:
+            with open(os.path.join(self.dir, "render_info.txt"), "w", encoding="utf-8") as fh:
+                fh.write("\n".join(self.info_lines()) + "\n")
+        except Exception as e:  # the record is for checking only; never fail the render
+            print("render_info:", e)
         plt.close(self.fig)
         path = os.path.join(self.dir, "skipped.txt")
         if self.skipped:

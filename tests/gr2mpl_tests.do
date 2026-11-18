@@ -363,3 +363,315 @@ gr2mpl, name(fh) saving("tests/out/fh_dollar.png") replace keepspec specdir("tes
 gr2mpl, name(fh) saving("tests/out/fh_font.png") replace font("NoSuchFont")
 di "FILE HANDLING OK"
 
+
+* =================================================================================
+* Regression checks. Each graph is drawn by gr2mpl with keepspec; the renderer's
+* record of what it drew (render_info.txt in the spec folder) is checked line by line.
+* =================================================================================
+capture program drop rchk
+program rchk
+    * draw the current graph with gr2mpl, keep its spec, and export Stata's version
+    args tag opts
+    graph export "tests/out/r_`tag'_stata.png", replace width(1200)
+    gr2mpl, saving("tests/out/r_`tag'_mpl.png") specdir("tests/spec/r_`tag'") keepspec replace `opts'
+    global R_UNSUP `"`r(unsupported)'"'
+    global R_DIR "tests/spec/r_`tag'"
+end
+capture program drop has
+program has
+    * has "line"      the render record holds this exact line
+    * has "line", absent  it does not
+    syntax anything(name=want id="line") [, ABSent]
+    local want `want'
+    tempname fh
+    local found 0
+    file open `fh' using "$R_DIR/render_info.txt", read text
+    file read `fh' line
+    while r(eof) == 0 {
+        if `"`macval(line)'"' == `"`macval(want)'"' local found 1
+        file read `fh' line
+    }
+    file close `fh'
+    if "`absent'" == "" & !`found' {
+        di as err `"render record lacks: `macval(want)'"'
+        type "$R_DIR/render_info.txt"
+        exit 9
+    }
+    if "`absent'" != "" & `found' {
+        di as err `"render record should not hold: `macval(want)'"'
+        exit 9
+    }
+    global R_N = $R_N + 1
+end
+capture program drop getv
+program getv, rclass
+    * r(val): the text after "key=" on the first line that starts with it
+    args key
+    tempname fh
+    local val
+    local got 0
+    file open `fh' using "$R_DIR/render_info.txt", read text
+    file read `fh' line
+    while r(eof) == 0 {
+        if !`got' & strpos(`"`macval(line)'"', "`key'=") == 1 {
+            local val = usubstr(`"`macval(line)'"', ustrlen("`key'=") + 1, .)
+            local got 1
+        }
+        file read `fh' line
+    }
+    file close `fh'
+    if !`got' {
+        di as err "render record has no `key'"
+        exit 9
+    }
+    return local val `"`macval(val)'"'
+end
+capture program drop near
+program near
+    * near key value [tol]: the record's number for key is within tol of value
+    args key target tol
+    if "`tol'" == "" local tol 0.06
+    getv `key'
+    local v = real(`"`r(val)'"')
+    if missing(`v') | abs(`v' - `target') > `tol' {
+        di as err "`key' = `v', expected `target'"
+        exit 9
+    }
+    global R_N = $R_N + 1
+end
+capture program drop ok
+program ok
+    * ok expression: an assert that counts
+    assert `0'
+    global R_N = $R_N + 1
+end
+global R_N 0
+
+* -- a plot on yaxis(2) that is not plot 2 is drawn on the second axis
+sysuse auto, clear
+twoway (scatter mpg weight) (lfit mpg weight) (line price weight, sort yaxis(2)), title("y2 is plot 3")
+rchk y2_plot3
+has "panel1.plot1.axis=y1"
+has "panel1.plot2.axis=y1"
+has "panel1.plot3.axis=y2"
+ok `"$R_UNSUP"' == ""
+
+* -- horizontal spike, dropline and area plots are drawn
+twoway spike mpg weight, horizontal title("spike, horizontal")
+rchk spike_h
+has "panel1.segments=h74"
+twoway dropline mpg weight in 1/15, horizontal title("dropline, horizontal")
+rchk dropline_h
+has "panel1.segments=h15"
+sysuse uslifeexp, clear
+twoway area le year, horizontal title("area, horizontal")
+rchk area_h
+getv panel1.line_x
+ok real(word(subinstr(`"`r(val)'"', ",", " ", .), 1)) > 35 & real(word(subinstr(`"`r(val)'"', ",", " ", .), 2)) < 80
+
+* -- a long legend wraps instead of crushing the plot
+line le_wmale le_wfemale le_bmale le_bfemale le_male le_female year, title("six series")
+rchk long_legend
+has "panel1.legend_inside=1"
+getv panel1.axes
+ok real(word(subinstr(`"`r(val)'"', ",", " ", .), 3)) > 0.6
+
+* -- custom tick labels that look like dates are kept
+clear
+set obs 7
+gen t = _n - 4
+gen y = t^2
+twoway line y t, xlabel(-3 "01jan2020" -2 "01feb2020" -1 "01mar2020" 0 "01apr2020" 1 "01may2020" 2 "01jun2020" 3 "01jul2020") ///
+    title("date-like labels on an event-time axis")
+rchk datelike
+has "panel1.xticks=01jan2020|01feb2020|01mar2020|01apr2020|01may2020|01jun2020|01jul2020"
+* real %td axes still get the short labels
+sysuse sp500, clear
+line close date, title("a daily date axis")
+rchk td_axis
+has "panel1.xticks=Jan 2001|Apr|Jul|Oct|Jan 2002"
+
+* -- gpolish endlabel, values: values clear of the labels
+sysuse uslifeexp, clear
+line le_wfemale le_wmale le_bfemale le_bmale year, scheme(pypolish) legend(off) title("end labels with values")
+gpolish
+gpolish endlabel, values dots
+rchk endlabel_values
+has "panel1.ann_overlaps=0"
+
+* -- text sizes follow Stata's: scheme sizes and small graphs
+sysuse auto, clear
+foreach o in "xsize(5.5) ysize(4)" "scheme(economist)" "xsize(3) ysize(2)" "xsize(9) ysize(6)" "title(, size(10pt))" {
+    twoway (scatter mpg weight if foreign) (scatter mpg weight if !foreign), title("Text sizes") `o'
+    local u = min(`.Graph.style.declared_xsize.val', `.Graph.style.declared_ysize.val') * 0.72
+    local tfs = `.Graph.title.style.size.gmval' * `u'
+    local xfs = `.Graph.xaxis1.style.majorstyle.tickstyle.textstyle.size.gmval' * `u'
+    rchk sizes
+    near title_fs `tfs'
+    near panel1.xtickfs `xfs'
+    has "panel1.legend_inside=1"
+}
+* by() and graph combine shrink panel text by the multiplier Stata stores
+scatter mpg weight, by(foreign)
+local u = min(`.Graph.style.declared_xsize.val', `.Graph.style.declared_ysize.val') * 0.72
+local xfs = `.Graph.graphs[2].xaxis1.style.majorstyle.tickstyle.textstyle.size.gmval' * `u' * `.Graph.plotregion1.gmetric_mult'
+rchk by_sizes
+near panel2.xtickfs `xfs'
+scatter mpg weight, name(ca, replace) nodraw
+scatter mpg price, name(cb, replace) nodraw
+graph combine ca cb
+local u = min(`.Graph.style.declared_xsize.val', `.Graph.style.declared_ysize.val') * 0.72
+local xfs = `.Graph.graphs[1].xaxis1.style.majorstyle.tickstyle.textstyle.size.gmval' * `u' * `.Graph.plotregion1.gmetric_mult'
+rchk combine_sizes
+near panel1.xtickfs `xfs'
+
+* -- legend: one key per entry even when labels repeat; Stata's order; subtitle
+twoway (scatter mpg weight if foreign) (scatter mpg weight if !foreign) (lfit mpg weight), title("repeated labels")
+rchk dup_labels
+has "panel1.legend=Mileage (mpg)|Mileage (mpg)|Fitted values"
+twoway (scatter mpg weight if !foreign) (scatter mpg weight if foreign) (lfit mpg weight), ///
+    legend(order(3 "Fit" 1 "Domestic" 2 "Foreign") subtitle("Measure")) title("legend order")
+rchk legend_order
+has "panel1.legend=Fit|Domestic|Foreign"
+has "panel1.legend_title=Measure"
+
+* -- connect(stairstep) and cmissing()
+sysuse uslifeexp, clear
+twoway line le year if year < 1930, connect(stairstep) title("stairstep")
+rchk stairstep
+has "panel1.drawstyle=steps-post"
+replace le = . if inrange(year, 1915, 1925)
+twoway connected le year if year < 1950, title("default cmissing(y) bridges the gap")
+rchk cmissing_y
+has "panel1.line_nan=0"
+twoway connected le year if year < 1950, cmissing(n) title("cmissing(n) breaks the line")
+rchk cmissing_n
+has "panel1.line_nan=0", absent
+
+* -- SMCL: superscripts, subscripts, Greek letters, hex characters, two-line ticks
+sysuse auto, clear
+twoway scatter mpg weight, title("R{sup:2} = 0.65 and {&beta}{sub:1} < 0 caf{c 0xe9}") ///
+    ytitle("{&mu} mpg") xtitle("Weight {&le} 5000, {&Delta}") xlabel(2000 `""Line A" "Line B""' 4000 "four")
+rchk smcl
+has "title=R² = 0.65 and β₁ < 0 café"
+has "figtext=μ mpg|`: di %4.2f `.Graph.yaxis1.title.style.size.gmval' * min(`.Graph.style.declared_xsize.val', `.Graph.style.declared_ysize.val') * 0.72'"
+has "figtext=Weight ≤ 5000, Δ|`: di %4.2f `.Graph.xaxis1.title.style.size.gmval' * min(`.Graph.style.declared_xsize.val', `.Graph.style.declared_ysize.val') * 0.72'"
+has "panel1.xticks=Line A/Line B|four"
+
+* -- marker labels: mlabformat(), mlabvposition(), pc-plot labels, mlabangle()
+sysuse uslifeexp, clear
+twoway connected le year if mod(year, 10) == 0, msymbol(none) mlabel(le) mlabformat(%4.1f) title("mlabformat")
+rchk mlabformat
+has "panel1.ann=50.0|left|0|y1|in"
+has "panel1.ann=47.3|left|0|y1|in"
+clear
+twoway scatteri 1 1 (3) "Alpha" 2 2 (9) "Beta" 3 1.5 (12) "Gamma", xscale(range(0 3)) yscale(range(0 4)) title("positions")
+rchk scatteri_pos
+has "panel1.ann=Alpha|left|0|y1|in"
+has "panel1.ann=Beta|right|0|y1|in"
+has "panel1.ann=Gamma|center|0|y1|in"
+twoway pcarrowi 1 1 2 2 (3) "arrow label", title("pcarrowi label")
+rchk pc_label
+has "panel1.ann=arrow label|left|0|y1|in"
+sysuse auto, clear
+twoway scatter mpg weight in 1/12, mlabel(make) mlabangle(45) xlabel(, angle(vertical)) title("angles")
+rchk angles
+has "panel1.ann=Buick Opel|left|45|y1|in"
+has "panel1.xtickangle=90"
+
+* -- reference lines and text on the second y axis
+twoway (scatter mpg weight) (line price weight, sort yaxis(2)), yline(5000, axis(2) lcolor(red)) ///
+    text(12000 3000 "on axis 2", yaxis(2)) title("y2 line and text")
+rchk y2_refs
+has "panel1.refline=y2:y:5000"
+has "panel1.ann=on axis 2|left|0|y2|in"
+ok `"$R_UNSUP"' == ""
+
+* -- layers on a second x axis or a third y axis are skipped and reported
+twoway (scatter mpg weight) (scatter mpg length, xaxis(2)), title("x2 plot")
+rchk x2_plot
+ok strpos(`"$R_UNSUP"', "plot 2 (type scatter): second x axis")
+has "panel1.plot2.axis=y1", absent
+twoway (scatter mpg weight) (scatter price weight, yaxis(2)) (scatter length weight, yaxis(3)), title("y3 plot")
+rchk y3_plot
+ok strpos(`"$R_UNSUP"', "plot 3 (type scatter): y axis 3")
+has "panel1.plot2.axis=y2"
+has "panel1.legend=Mileage (mpg)|Price"
+
+* -- graph box: a group without whiskers still gets its box
+graph box mpg, over(rep78) title("box without whiskers")
+rchk box_nowhisk
+has "panel1.patches=5"
+
+* -- CJK characters are drawn with a fallback font
+twoway scatter mpg weight, title("Año São Paulo 日本")
+rchk cjk
+getv font_family
+if strpos(`"`r(val)'"', "Hiragino") | strpos(`"`r(val)'"', "Noto Sans CJK") | strpos(`"`r(val)'"', "YaHei") {
+    has "glyphs_missing="
+}
+else di as txt "no CJK font installed; glyph check skipped"
+
+* -- a by() graph inside graph combine is named in the note
+scatter mpg weight, by(foreign) name(gb, replace)
+scatter mpg price, name(gs, replace)
+graph combine gb gs, title("by() inside combine")
+rchk by_in_combine
+ok strpos(`"$R_UNSUP"', "a by() graph inside graph combine")
+
+* -- end labels sit outside the plot on a reversed x axis
+sysuse uslifeexp, clear
+label var le_wfemale "White women"
+label var le_bmale "Black men"
+line le_wfemale le_bmale year, xscale(reverse) title("reversed x axis")
+rchk reversed_endlabels endlabels
+has "panel1.endlabel=White women|clear"
+has "panel1.endlabel=Black men|clear"
+
+* -- options and temporary files
+sysuse auto, clear
+scatter mpg weight, name(tf, replace)
+capture gr2mpl, name(tf) palette(viridis) saving("tests/out/r_pal.png") replace
+ok _rc == 198
+gr2mpl, name(tf) palette(HOUSE) saving("tests/out/r_pal.png") replace
+ok `"`r(unsupported)'"' == ""
+* saving() that names a folder writes <name>_mpl.png into it
+capture erase "tests/out/tf_mpl.png"
+gr2mpl, name(tf) saving("tests/out/") replace
+confirm file "tests/out/tf_mpl.png"
+ok `"`r(filename)'"' == "tests/out/tf_mpl.png"
+capture gr2mpl, name(tf) saving("tests/out/.png") replace
+ok _rc == 198
+* without keepspec the spec folder and its data are removed
+capture mkdir "tests/spec"
+gr2mpl, name(tf) saving("tests/out/r_tmp.png") replace specdir("tests/spec/r_tmp")
+ok `"`r(specdir)'"' == ""
+mata: st_local("ex", strofreal(direxists("tests/spec/r_tmp")))
+ok "`ex'" == "0"
+gr2mpl, name(tf) saving("tests/out/r_tmp.png") replace
+ok `"`r(specdir)'"' == ""
+* a folder that already existed is kept, but gr2mpl's files in it are removed
+capture mkdir "tests/spec/r_pre"
+gr2mpl, name(tf) saving("tests/out/r_tmp.png") replace specdir("tests/spec/r_pre")
+mata: st_local("ex", strofreal(direxists("tests/spec/r_pre")))
+ok "`ex'" == "1"
+local fl : dir "tests/spec/r_pre" files "*"
+ok `"`fl'"' == ""
+* with keepspec the folder is kept and reported
+gr2mpl, name(tf) saving("tests/out/r_tmp.png") replace keepspec
+local sd `"`r(specdir)'"'
+ok `"`sd'"' != ""
+confirm file `"`sd'/spec.json"'
+confirm file `"`sd'/render_info.txt"'
+local fl : dir `"`sd'"' files "*"
+foreach f of local fl {
+    erase `"`sd'/`f'"'
+}
+rmdir `"`sd'"'
+* a failed render cleans up too
+capture gr2mpl, name(tf) saving("tests/out/r_tmp.png") replace specdir("tests/spec/r_fail") python("/no/such/python")
+ok _rc == 601
+mata: st_local("ex", strofreal(direxists("tests/spec/r_fail")))
+ok "`ex'" == "0"
+
+di as res "$R_N checks passed"
