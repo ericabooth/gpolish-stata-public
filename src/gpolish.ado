@@ -1,4 +1,4 @@
-*! gpolish 0.6.1  post-hoc polish + layout layer for Stata graphs
+*! gpolish 0.7.0  18nov2026  post-hoc polish + layout layer for Stata graphs
 *! gpolish [style] | endlabel | callout | note | arrow | brace | bracket | ptlabel | legend | clear | render | limits | geom
 *! Requires Stata 16+. Uses undocumented graph-object members and gr_edit.
 program gpolish
@@ -107,7 +107,7 @@ program _gpl_font
     }
 end
 
-* region(#) reads plot region # instead of the first; a plot on a second axis lives in its own
+* region(#) reads plot region # instead of the first; a plot on a second axis is drawn in its own
 * plot region, with its own data-to-device transform
 program _gpl_geom, rclass
     syntax [, name(string) REGion(integer 1)]
@@ -177,7 +177,7 @@ program _gpl_val
 end
 
 * how many plots the graph has, and the plot region that holds each (plots on a second
-* axis live in their own region); r(n), r(regs) = region of plot 1, 2, ...
+* axis are drawn in their own region); r(n), r(regs) = region of plot 1, 2, ...
 program _gpl_plots, rclass
     args name
     local n `.`name'.n_views'
@@ -202,33 +202,56 @@ program _gpl_plots, rclass
     return local regs `regs'
 end
 
-* the plot region whose plots use x axis # and y axis # (either may be empty); r(region)
-program _gpl_axregion, rclass
-    args name xax yax
-    if "`xax'`yax'"=="" {
-        return scalar region = 1
-        exit
-    }
-    local ysc `.`name'.y_scales'
-    local ysc : subinstr local ysc `"""' "", all
-    local xsc `.`name'.x_scales'
-    local xsc : subinstr local xsc `"""' "", all
-    _gpl_plots `name'
-    local n = r(n)
-    local regs `r(regs)'
-    forvalues i = 1/`n' {
-        local ya : word `i' of `ysc'
-        local xa : word `i' of `xsc'
-        if "`ya'"=="" local ya 1
-        if "`xa'"=="" local xa 1
-        if ("`yax'"=="" | "`yax'"=="`ya'") & ("`xax'"=="" | "`xax'"=="`xa'") {
-            return scalar region = `: word `i' of `regs''
-            exit
+* the axes of each plot region: .y_scales and .x_scales hold one quoted entry per plot region,
+* each the list of axes that region carries ("2 1" for a plot drawn with yaxis(1 2)).
+* r(npr); r(y#) and r(x#) = the y and x axes of plot region #
+program _gpl_regaxes, rclass
+    args name
+    local npr `.`name'.n_plotregions'
+    if "`npr'"=="" local npr 1
+    local ysc `"`.`name'.y_scales'"'
+    local xsc `"`.`name'.x_scales'"'
+    foreach d in y x {
+        local j 0
+        foreach s of local `d'sc {
+            local ++j
+            local `d'`j' `s'
         }
     }
-    local what = trim(cond("`xax'"!="", "xaxis(`xax')", "") + " " + cond("`yax'"!="", "yaxis(`yax')", ""))
-    di as err "gpolish: graph {bf:`name'} has no plot on `what'"
-    exit 198
+    forvalues j = 1/`npr' {
+        if "`y`j''"=="" local y`j' 1
+        if "`x`j''"=="" local x`j' 1
+        return local y`j' `y`j''
+        return local x`j' `x`j''
+    }
+    return scalar npr = `npr'
+end
+
+* the plot region that carries x axis # and y axis # (either may be empty); r(region)
+program _gpl_axregion, rclass
+    args name xax yax
+    local found 1
+    if "`xax'`yax'"!="" {
+        _gpl_regaxes `name'
+        local npr = r(npr)
+        local found 0
+        forvalues j = 1/`npr' {
+            local yd `r(y`j')'
+            local xd `r(x`j')'
+            local yok : list yax in yd
+            local xok : list xax in xd
+            if ("`yax'"=="" | `yok') & ("`xax'"=="" | `xok') {
+                local found `j'
+                continue, break
+            }
+        }
+    }
+    if !`found' {
+        local what = trim(cond("`xax'"!="", "xaxis(`xax')", "") + " " + cond("`yax'"!="", "yaxis(`yax')", ""))
+        di as err "gpolish: graph {bf:`name'} has no plot on `what'"
+        exit 198
+    }
+    return scalar region = `found'
 end
 
 * convert a point from the data units of plot region `reg' to those of plot region 1, where
@@ -308,7 +331,13 @@ program _gpl_regundo
     local side `r(side)'
     local leg `r(leg)'
     local pm `r(pm)'
-    if "`rec'"=="" exit
+    c_local _gpl_legn 0
+    if "`rec'"=="" {
+        * no record: end labels added by gpolish 0.6.1 or earlier are found in the edit log
+        _gpl_legundo `name'
+        c_local _gpl_legn `r(n)'
+        exit
+    }
     * a record is used once: mark it spent, whether or not it could be applied
     _gpl_ge `name' .plotregion1.added_text[`rec'].text = {}
     _gpl_ge `name' .plotregion1.added_text[`rec'].text.Arrpush "gpolish-endlabel-spent"
@@ -330,6 +359,49 @@ program _gpl_regundo
         else _gpl_ge `name' .style.editstyle margin(`s'-`m') editcopy
     }
     if "`leg'"=="1" _gpl_ge `name' .legend.draw_view.setstyle, style(yes)
+end
+
+* End labels added by gpolish 0.6.1 or earlier, which kept no record in the graph. A graph keeps every
+* edit in its edit log (.__LOG), and graph save keeps the log. There an endlabel run shows as a margin
+* edit ".style.editstyle margin(r+#) editcopy" (l+# for side(left)), the legend switched off by the next
+* edit, and then its text boxes: each label box is styled with linegap(1pt), and a value box follows
+* its label at the same height. Each run whose margin was not given back later in the log is undone
+* here: its boxes and markers are hidden, its margin is given back and the legend is shown again.
+* r(n) = runs undone
+program _gpl_legundo, rclass
+    args name
+    local nlog `.`name'.__LOG.arrnels'
+    if "`nlog'"=="" local nlog 0
+    local n 0
+    if `nlog' > 0 {
+        mata: _gpl_legL = J(`nlog', 1, "")
+        forvalues e = 1/`nlog' {
+            capture local s `.`name'.__LOG[`e']'
+            if _rc continue
+            mata: _gpl_legL[`e'] = st_local("s")
+        }
+        mata: _gpl_legscan(_gpl_legL)
+        mata: mata drop _gpl_legL
+    }
+    if `n' > 0 {
+        _gpl_count `name' added_text
+        local nt = r(k)
+        _gpl_count `name' added_markers
+        local nm = r(k)
+        foreach k of local txt {
+            if `k' <= `nt' _gpl_ge `name' .plotregion1.added_text[`k'].draw_view.setstyle, style(no)
+        }
+        foreach k of local mk {
+            if `k' <= `nm' _gpl_ge `name' .plotregion1.added_markers[`k'].draw_view.setstyle, style(no)
+        }
+        while "`marg'"!="" {
+            gettoken s marg : marg
+            gettoken v marg : marg
+            _gpl_ge `name' .style.editstyle margin(`s'-`v') editcopy
+        }
+        if "`leg'"=="1" & "`.`name'.legend.draw_view.setting'"=="no" _gpl_ge `name' .legend.draw_view.setstyle, style(yes)
+    }
+    return scalar n = `n'
 end
 
 * apply one graph edit; the edit is recorded in the graph, and the graph is drawn once
@@ -588,7 +660,7 @@ program _gpl_endlabel
         di as err "gpolish endlabel: side() must be right or left"
         exit 198
     }
-    * plots are numbered across plot regions; a plot on a second axis lives in its own region
+    * plots are numbered across plot regions; a plot on a second axis is drawn in its own region
     _gpl_plots `name'
     local n = r(n)
     local npr = r(npr)
@@ -611,6 +683,11 @@ program _gpl_endlabel
     }
     * a second endlabel replaces the first instead of stacking on it
     _gpl_regundo `name'
+    if `_gpl_legn' > 0 {
+        di as txt "note: end labels added to graph {bf:`name'} by gpolish 0.6.1 or earlier were found in its"
+        di as txt "      edit log; they are hidden and their margin is given back before the new labels"
+        di as txt "      are added."
+    }
     * which end of each line sits on the chosen side of the plot, whatever the axis direction
     local s = cond("`side'"=="right", 1, -1)
     forvalues j = 1/`npr' {
@@ -845,6 +922,11 @@ program _gpl_clear
     _gpl_name `name'
     local name `r(name)'
     _gpl_regundo `name'
+    if `_gpl_legn' > 0 {
+        di as txt "note: end labels added to graph {bf:`name'} by gpolish 0.6.1 or earlier were found in its"
+        di as txt "      edit log; their margin is given back, and a legend they switched off is shown"
+        di as txt "      again."
+    }
     foreach a in added_text added_lines added_markers {
         _gpl_count `name' `a'
         local n = r(k)
@@ -870,6 +952,14 @@ end
 * local _gpl_reg is set to the plot region they belong to (left empty for region 1)
 program _gpl_axpos
     args name xax yax
+    _gpl_axnum "`xax'" "`yax'"
+    _gpl_axregion `name' "`xax'" "`yax'"
+    local reg = r(region)
+    if `reg'!=1 c_local _gpl_reg `reg'
+end
+
+program _gpl_axnum
+    args xax yax
     foreach a in xax yax {
         if "``a''"!="" & !inlist("``a''", "1", "2", "3", "4", "5", "6", "7", "8", "9") {
             local o = cond("`a'"=="xax", "xaxis", "yaxis")
@@ -877,26 +967,28 @@ program _gpl_axpos
             exit 198
         }
     }
-    _gpl_axregion `name' "`xax'" "`yax'"
-    local reg = r(region)
-    if `reg'!=1 c_local _gpl_reg `reg'
 end
 
-* ptlabel: stop before any edit when the y() (or x()) variable is drawn only on another axis than the
-* one its values are read on, which would put every label far from its point
-program _gpl_axcheck
+* ptlabel: the plot region whose scales the x() and y() values are read on; r(region).
+* Among the plot regions that carry the axes named by xaxis() and yaxis() (all regions when neither is
+* given), the first one where a plot draws y() against x() is used. Failing that, the first one that
+* carries an axis y() is drawn on and an axis x() is drawn on. A variable that no plot draws puts no
+* condition on the region. When no region qualifies, ptlabel stops before any edit and says which
+* option to change, because labels read on another axis's scale would sit far from their points.
+program _gpl_ptregion, rclass
     args name xvar yvar xax yax
-    if "`xax'"=="" local xax 1
-    if "`yax'"=="" local yax 1
-    local ysc `.`name'.y_scales'
-    local ysc : subinstr local ysc `"""' "", all
-    local xsc `.`name'.x_scales'
-    local xsc : subinstr local xsc `"""' "", all
+    _gpl_regaxes `name'
+    local npr = r(npr)
+    forvalues j = 1/`npr' {
+        local yd`j' `r(y`j')'
+        local xd`j' `r(x`j')'
+    }
     _gpl_plots `name'
     local n = r(n)
     local regs `r(regs)'
     local yon
     local xon
+    local both
     forvalues i = 1/`n' {
         local j : word `i' of `regs'
         local pr .`name'.plotregion`j'
@@ -908,24 +1000,81 @@ program _gpl_axcheck
             local yn ``pr'.plot`i'.serset.sers[`yv'].name'
             local xn ``pr'.plot`i'.serset.sers[`xv'].name'
         }
-        local ya : word `i' of `ysc'
-        local xa : word `i' of `xsc'
-        if "`ya'"=="" local ya 1
-        if "`xa'"=="" local xa 1
-        if "`yn'"=="`yvar'" local yon `yon' `ya'
-        if "`xn'"=="`xvar'" local xon `xon' `xa'
+        if "`yn'"=="`yvar'" local yon `yon' `yd`j''
+        if "`xn'"=="`xvar'" local xon `xon' `xd`j''
+        if "`yn'"=="`yvar'" & "`xn'"=="`xvar'" local both `both' `j'
     }
     local yon : list uniq yon
     local xon : list uniq xon
-    foreach d in y x {
-        if "``d'on'"=="" continue
-        if `: list `d'ax in `d'on' continue
-        local a : word 1 of ``d'on'
-        local opt = cond("`d'"=="y", "yaxis", "xaxis")
-        di as err "gpolish ptlabel: `d'() variable {bf:``d'var'} is drawn on `d' axis `a', not on `d' axis ``d'ax'."
-        di as err "  Add {bf:`opt'(`a')} so the labels use that axis's scale."
+    * regions that carry the axes the options name
+    local cand
+    forvalues j = 1/`npr' {
+        local yok : list yax in yd`j'
+        local xok : list xax in xd`j'
+        if ("`yax'"=="" | `yok') & ("`xax'"=="" | `xok') local cand `cand' `j'
+    }
+    if "`cand'"=="" {
+        local what = trim(cond("`xax'"!="", "xaxis(`xax')", "") + " " + cond("`yax'"!="", "yaxis(`yax')", ""))
+        di as err "gpolish: graph {bf:`name'} has no plot on `what'"
         exit 198
     }
+    local reg 0
+    foreach j of local cand {
+        if `: list j in both' {
+            local reg `j'
+            continue, break
+        }
+    }
+    if !`reg' {
+        foreach j of local cand {
+            local yi : list yd`j' & yon
+            local xi : list xd`j' & xon
+            if ("`yon'"=="" | "`yi'"!="") & ("`xon'"=="" | "`xi'"!="") {
+                local reg `j'
+                continue, break
+            }
+        }
+    }
+    if !`reg' {
+        foreach d in y x {
+            local opt = cond("`d'"=="y", "yaxis", "xaxis")
+            local a : word 1 of ``d'on'
+            if "``d'ax'"!="" & "``d'on'"!="" & !`: list `d'ax in `d'on' {
+                local alist : subinstr local `d'on " " " and ", all
+                di as err "gpolish ptlabel: `d'() variable {bf:``d'var'} is drawn on `d' axis `alist', not on `d' axis ``d'ax'."
+                di as err "  Use {bf:`opt'(`a')} so the labels use that axis's scale."
+                exit 198
+            }
+        }
+        * the options rule out the only regions that fit; name the axes of the first region that fits
+        forvalues j = 1/`npr' {
+            local yi : list yd`j' & yon
+            local xi : list xd`j' & xon
+            if ("`yon'"=="" | "`yi'"!="") & ("`xon'"=="" | "`xi'"!="") {
+                if "`yi'"=="" local yi `yd`j''
+                if "`xi'"=="" local xi `xd`j''
+                local ys : word 1 of `yi'
+                local xs : word 1 of `xi'
+                local use
+                local what
+                if "`xax'"!="" {
+                    local use `use' xaxis(`xs')
+                    local what `what' xaxis(`xax')
+                }
+                if "`yax'"!="" {
+                    local use `use' yaxis(`ys')
+                    local what `what' yaxis(`yax')
+                }
+                di as err "gpolish ptlabel: no plot region with `what' carries the axes that x() variable {bf:`xvar'} and y() variable {bf:`yvar'} are drawn on."
+                di as err "  Use {bf:`use'} so the labels use those axes' scales."
+                exit 198
+            }
+        }
+        di as err "gpolish ptlabel: no plot region of graph {bf:`name'} carries both the y axis of {bf:`yvar'} (`yon') and the x axis of {bf:`xvar'} (`xon')."
+        di as err "  ptlabel reads both values in one plot region, so it cannot label these points."
+        exit 198
+    }
+    return scalar region = `reg'
 end
 
 program _gpl_segcheck
@@ -1238,11 +1387,11 @@ program _gpl_ptlabel
         di as txt "note: gpolish ptlabel: no observations to label (check the if/in condition and x(), y())"
         exit
     }
-    * x() and y() are read on the axes named by xaxis() and yaxis(); labels go into plot region 1
-    local _gpl_reg
-    _gpl_axpos `name' "`xaxis'" "`yaxis'"
-    _gpl_axcheck `name' `x' `y' "`xaxis'" "`yaxis'"
-    if "`_gpl_reg'"=="" local _gpl_reg 1
+    * x() and y() are read on the plot region that draws them (or on the axes named by xaxis() and
+    * yaxis()); labels go into plot region 1
+    _gpl_axnum "`xaxis'" "`yaxis'"
+    _gpl_ptregion `name' `x' `y' "`xaxis'" "`yaxis'"
+    local _gpl_reg = r(region)
     _gpl_obstacles `name'
     _gpl_geom, name(`name') region(`_gpl_reg')
     local ixa = r(xa)
@@ -1964,6 +2113,158 @@ void _gpl_recparse(string scalar s)
     f = f, s
     nm = ("", "txt", "mk", "side", "m", "leg", "pm", "lens")
     for (i=2; i<=8; i++) st_local(nm[i], (i <= cols(f) ? f[i] : ""))
+}
+// End labels added by gpolish 0.6.1 or earlier, read from a graph's edit log L (see _gpl_legundo).
+// Sets the caller's locals n (runs whose margin was not given back), txt and mk (their text boxes and
+// markers), marg (the side and size of each run's margin) and leg (1 if one of them switched the legend off).
+void _gpl_legscan(string colvector L)
+{
+    real scalar e
+    real scalar nb
+    real scalar open
+    real scalar nt
+    real scalar nm
+    real scalar curk
+    real scalar prevlab
+    real scalar expleg
+    real scalar b
+    real scalar k
+    real scalar n
+    real scalar lg
+    string scalar s
+    string scalar cury
+    string scalar lasty
+    string scalar pend
+    string scalar ot
+    string scalar om
+    string scalar oc
+    string colvector side
+    string colvector mv
+    string colvector txt
+    string colvector mk
+    real colvector leg
+    real colvector nlab
+    real colvector done
+
+    nb = 0
+    side = J(0, 1, "")
+    mv = J(0, 1, "")
+    txt = J(0, 1, "")
+    mk = J(0, 1, "")
+    leg = J(0, 1, .)
+    nlab = J(0, 1, .)
+    done = J(0, 1, .)
+    open = 0
+    nt = 0
+    nm = 0
+    curk = 0
+    cury = ""
+    lasty = ""
+    prevlab = 0
+    expleg = 0
+    pend = ""
+    for (e=1; e<=rows(L); e++) {
+        s = L[e]
+        if (regexm(s, "^\.style\.editstyle margin\(([rl])([+-])([0-9.eE+-]+)\) editcopy$")) {
+            if (regexs(2) == "+") {
+                // a run starts with the margin it makes
+                nb++
+                side = side \ regexs(1)
+                mv = mv \ regexs(3)
+                txt = txt \ ""
+                mk = mk \ ""
+                leg = leg \ 0
+                nlab = nlab \ 0
+                done = done \ 0
+                open = nb
+                expleg = 1
+                prevlab = 0
+                pend = ""
+            }
+            else {
+                // a margin given back ends the latest run with the same side and size
+                for (b=nb; b>=1; b--) {
+                    if (!done[b] & side[b]==regexs(1) & mv[b]==regexs(3)) {
+                        done[b] = 1
+                        break
+                    }
+                }
+                open = 0
+            }
+            continue
+        }
+        if (s == ".legend.draw_view.setstyle, style(no)") {
+            if (open & expleg) leg[open] = 1
+            expleg = 0
+            continue
+        }
+        expleg = 0
+        if (regexm(s, "^\.plotregion1\.AddTextBox added_text editor ([^ ]+) ")) {
+            nt++
+            curk = nt
+            cury = regexs(1)
+            continue
+        }
+        if (regexm(s, "^\.plotregion1\.added_text\[([0-9]+)\]\.style\.editstyle ")) {
+            // the first style edit of a new box tells a label (line gap 1pt) from a value (same height)
+            k = strtoreal(regexs(1))
+            if (k != curk) continue
+            curk = 0
+            if (!open) continue
+            if (strpos(s, "linegap(1pt)")) {
+                txt[open] = txt[open] + " " + strofreal(k)
+                mk[open] = mk[open] + pend
+                pend = ""
+                nlab[open] = nlab[open] + 1
+                lasty = cury
+                prevlab = 1
+            }
+            else if (prevlab & cury == lasty) {
+                txt[open] = txt[open] + " " + strofreal(k)
+                prevlab = 0
+            }
+            else open = 0
+            continue
+        }
+        if (regexm(s, "^\.plotregion1\.AddMarker added_markers ")) {
+            nm++
+            if (open) pend = pend + " " + strofreal(nm)
+            continue
+        }
+        if (s == ".plotregion1.added_text = {}") {
+            nt = 0
+            curk = 0
+            if (nb) txt = J(nb, 1, "")
+            open = 0
+            continue
+        }
+        if (s == ".plotregion1.added_markers = {}") {
+            nm = 0
+            if (nb) mk = J(nb, 1, "")
+            pend = ""
+            open = 0
+            continue
+        }
+        if (regexm(s, "^\.plotregion1\.AddLine ")) open = 0
+    }
+    n = 0
+    lg = 0
+    ot = ""
+    om = ""
+    oc = ""
+    for (b=1; b<=nb; b++) {
+        if (done[b] | nlab[b]==0) continue
+        n++
+        ot = ot + txt[b]
+        om = om + mk[b]
+        oc = oc + " " + side[b] + " " + mv[b]
+        if (leg[b]) lg = 1
+    }
+    st_local("n", strofreal(n))
+    st_local("txt", strtrim(ot))
+    st_local("mk", strtrim(om))
+    st_local("marg", strtrim(oc))
+    st_local("leg", strofreal(lg))
 }
 void _gpl_obs_text(real scalar gx, real scalar gy, real scalar w, real scalar h, string scalar ba)
 {

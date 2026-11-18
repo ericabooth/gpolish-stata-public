@@ -686,27 +686,240 @@ ntext rb added_text
 chk rec_clear r(all)==0
 chk rec_clear_legend "`.rb.legend.draw_view.setting'"=="yes"
 
-* ---- 33d. ptlabel stops when y() or x() is drawn on another axis only -----------------
+* ---- 33d. ptlabel reads x() and y() on the plot region that draws them ----------------
+capture program drop ptfar
+* r(max): the largest distance, in inches, from a visible label to the nearest selected point,
+* with the points placed on the scales of plot region `treg'
+program ptfar, rclass
+    args g treg xv yv cond
+    preserve
+    quietly keep if `cond'
+    local pr .`g'.plotregion`treg'
+    quietly gen double px = ``pr'.drawn_xalpha' + ``pr'.drawn_xbeta'*`xv'
+    quietly gen double py = ``pr'.drawn_yalpha' + ``pr'.drawn_ybeta'*`yv'
+    gpolish geom, name(`g')
+    local gpi = r(gpi)
+    local xa = r(xa)
+    local xb = r(xb)
+    local ya = r(ya)
+    local yb = r(yb)
+    local k `.`g'.plotregion1.added_text.arrnels'
+    if "`k'"=="" local k 0
+    local mx 0
+    local nl 0
+    forvalues j = 1/`k' {
+        if "`.`g'.plotregion1.added_text[`j'].draw_view.setting'"=="no" continue
+        local ++nl
+        local lx = `xa' + `xb'*`.`g'.plotregion1.added_text[`j'].xpos.val'
+        local ly = `ya' + `yb'*`.`g'.plotregion1.added_text[`j'].ypos.val'
+        quietly gen double d = sqrt((px-`lx')^2 + (py-`ly')^2)/`gpi'
+        quietly summarize d, meanonly
+        local mx = max(`mx', r(min))
+        drop d
+    }
+    restore
+    return scalar max = `mx'
+    return scalar n = `nl'
+end
 sysuse auto, clear
+* y() drawn on the second axis only: read on that axis's region with no option
 twoway (scatter mpg weight) (scatter price weight, yaxis(2)), name(ax2, replace)
 capture gpolish ptlabel make if price > 12000, x(weight) y(price)
+chk ax_auto_rc _rc==0
+ptfar ax2 2 weight price "price > 12000"
+chk ax_auto_near r(n)==5 & r(max) < 1
+* an axis option that contradicts the variable's axis stops before any edit
+twoway (scatter mpg weight) (scatter price weight, yaxis(2)), name(ax2b, replace)
+capture gpolish ptlabel make if price > 12000, x(weight) y(price) yaxis(1)
 chk ax_y_rc _rc==198
-ntext ax2 added_text
+ntext ax2b added_text
 chk ax_y_noedit r(all)==0
 capture gpolish ptlabel make if price > 12000, x(weight) y(price) yaxis(2)
 chk ax_y_ok _rc==0
-capture gpolish ptlabel make in 1, x(weight) y(mpg)
-chk ax_y1_ok _rc==0
+ptfar ax2b 2 weight price "price > 12000"
+chk ax_y_near r(max) < 1
+* the only plot is on yaxis(2) or xaxis(2): plot region 1 holds it
+twoway scatter price weight, yaxis(2) name(ax5, replace)
+capture gpolish ptlabel make if price > 12000, x(weight) y(price)
+chk ax_only_y2 _rc==0
+ptfar ax5 1 weight price "price > 12000"
+chk ax_only_y2_near r(n)==5 & r(max) < 1
+twoway scatter mpg weight, xaxis(2) name(ax6, replace)
+capture gpolish ptlabel make if mpg > 30, x(weight) y(mpg)
+chk ax_only_x2 _rc==0
+* one plot drawn with yaxis(1 2): either axis, or none, reads the same region
+foreach o in "" "yaxis(1)" "yaxis(2)" {
+    twoway scatter mpg weight, yaxis(1 2) name(ax7, replace)
+    capture gpolish ptlabel make if mpg > 30, x(weight) y(mpg) `o'
+    chk ax_y12_rc _rc==0
+    ptfar ax7 1 weight mpg "mpg > 30"
+    chk ax_y12_near r(n)==5 & r(max) < 1
+}
+* plot 1 on yaxis(2), plot 2 on axis 1: each variable is read on its own region
+twoway (scatter price weight, yaxis(2)) (scatter mpg weight), name(ax8, replace)
+capture gpolish ptlabel make if mpg > 30, x(weight) y(mpg)
+chk ax_p1y2_mpg _rc==0
+ptfar ax8 2 weight mpg "mpg > 30"
+chk ax_p1y2_mpg_near r(n)==5 & r(max) < 1
+twoway (scatter price weight, yaxis(2)) (scatter mpg weight), name(ax9, replace)
+capture gpolish ptlabel make if price > 12000, x(weight) y(price) yaxis(2)
+chk ax_p1y2_price _rc==0
+ptfar ax9 1 weight price "price > 12000"
+chk ax_p1y2_price_near r(n)==5 & r(max) < 1
+twoway (scatter price weight, yaxis(2)) (scatter mpg weight), name(ax10, replace)
+capture gpolish ptlabel make if mpg > 30, x(weight) y(mpg) yaxis(2)
+chk ax_p1y2_wrong _rc==198
+* x() drawn on the second x axis only
 twoway (scatter mpg weight) (scatter mpg length, xaxis(2)), name(ax3, replace)
 capture gpolish ptlabel make in 1, x(length) y(mpg)
+chk ax_x_auto _rc==0
+twoway (scatter mpg weight) (scatter mpg length, xaxis(2)), name(ax3b, replace)
+capture gpolish ptlabel make in 1, x(length) y(mpg) xaxis(1)
 chk ax_x_rc _rc==198
 capture gpolish ptlabel make in 1, x(length) y(mpg) xaxis(2)
 chk ax_x_ok _rc==0
+* no plot region carries an axis of each variable
+twoway (scatter price length, yaxis(2)) (scatter mpg weight, xaxis(2)), name(ax11, replace)
+capture gpolish ptlabel make if price > 12000, x(weight) y(price)
+chk ax_noregion _rc==198
 * a variable that is not plotted is not checked
 gen w2 = weight
 twoway scatter mpg weight, name(ax4, replace)
 capture gpolish ptlabel make in 1, x(w2) y(mpg)
 chk ax_unplotted _rc==0
+* positions on yaxis(2) when plot 1 is on yaxis(2) and a later plot on axis 1
+twoway (scatter price weight, yaxis(2)) (scatter mpg weight), name(ax12, replace)
+capture gpolish callout "x", to(3000 5000) yaxis(2)
+chk ax_callout_y2 _rc==0
+capture gpolish callout "y", to(3000 20) yaxis(1)
+chk ax_callout_y1 _rc==0
+capture gpolish arrow, from(2000 4000) to(3000 5000) yaxis(2)
+chk ax_arrow_y2 _rc==0
+gpolish geom, name(ax12)
+local gy = r(ya) + r(yb)*`.ax12.plotregion1.added_text[2].ypos.val'
+local want = `.ax12.plotregion2.drawn_yalpha' + `.ax12.plotregion2.drawn_ybeta'*20
+local gy1 = r(ya) + r(yb)*`.ax12.plotregion1.added_text[1].ypos.val'
+local want1 = `.ax12.plotregion1.drawn_yalpha' + `.ax12.plotregion1.drawn_ybeta'*5000
+chk ax_callout_pos abs(`gy' - `want') < 1.5*r(gpi) & abs(`gy1' - `want1') < 1.5*r(gpi)
+
+* ---- 33f. end labels made by gpolish 0.6.1 or earlier (no record) ---------------------
+capture program drop oldend
+* the edits gpolish 0.6.1 endlabel made, in the same order: margin, legend off, then per line
+* an optional dot, a label box styled with linegap(1pt) and an optional value box at its height
+program oldend
+    args g side values dots
+    local m 30
+    _gm_edit .`g'.style.editstyle margin(`side'+`m') editcopy
+    _gm_edit .`g'.legend.draw_view.setstyle, style(no)
+    local nt 0`.`g'.plotregion1.added_text.arrnels'
+    local nm 0`.`g'.plotregion1.added_markers.arrnels'
+    foreach y in 70 74 78 {
+        if "`dots'"=="dots" {
+            local ++nm
+            _gm_edit .`g'.plotregion1.AddMarker added_markers editor 1999 `y'
+            _gm_edit .`g'.plotregion1.added_markers_new = `nm'
+            _gm_edit .`g'.plotregion1.added_markers_rec = `nm'
+            _gm_edit .`g'.plotregion1.added_markers[`nm'].style.editstyle marker(symbol(circle)) editcopy
+        }
+        local ++nt
+        _gm_edit .`g'.plotregion1.AddTextBox added_text editor `y' 2001
+        _gm_edit .`g'.plotregion1.added_text_new = `nt'
+        _gm_edit .`g'.plotregion1.added_text_rec = `nt'
+        _gm_edit .`g'.plotregion1.added_text[`nt'].style.editstyle size(9.5pt) color("26 26 26") horizontal(left) vertical(middle) box_alignment(east) linegap(1pt)  editcopy
+        _gm_edit .`g'.plotregion1.added_text[`nt'].text = {}
+        _gm_edit .`g'.plotregion1.added_text[`nt'].text.Arrpush "{bf:Line `y'}"
+        if "`values'"=="values" {
+            local ++nt
+            _gm_edit .`g'.plotregion1.AddTextBox added_text editor `y' 2010
+            _gm_edit .`g'.plotregion1.added_text_new = `nt'
+            _gm_edit .`g'.plotregion1.added_text_rec = `nt'
+            _gm_edit .`g'.plotregion1.added_text[`nt'].style.editstyle size(9.5pt) color("26 26 26") horizontal(right) vertical(middle) box_alignment(west) linegap(1.5pt)  editcopy
+            _gm_edit .`g'.plotregion1.added_text[`nt'].text = {}
+            _gm_edit .`g'.plotregion1.added_text[`nt'].text.Arrpush "`y'.0"
+        }
+    }
+end
+capture program drop przx
+program przx, rclass
+    args g
+    quietly graph display `g'
+    return scalar x0 = `.`g'.plotregion1.gdi_x0'
+    return scalar x1 = `.`g'.plotregion1.gdi_x1'
+end
+sysuse uslifeexp, clear
+line le_wfemale le_wmale le_bfemale year, name(old0, replace)
+przx old0
+local bx0 = r(x0)
+local bx1 = r(x1)
+line le_wfemale le_wmale le_bfemale year, name(oldref, replace)
+gpolish endlabel
+przx oldref
+local rx0 = r(x0)
+local rx1 = r(x1)
+tempfile oldg
+foreach v in "r values dots" "r" "l" {
+    line le_wfemale le_wmale le_bfemale year, name(old1, replace)
+    oldend old1 `v'
+    graph save old1 "`oldg'", replace
+    graph drop old1
+    * endlabel replaces the old labels and makes its own margin only
+    graph use "`oldg'", name(old2)
+    gpolish endlabel
+    ntext old2 added_text
+    chk old_end_text r(k)==3
+    ntext old2 added_markers
+    chk old_end_dots r(k)==0
+    przx old2
+    chk old_end_margin abs(r(x1) - `rx1') < 1 & abs(r(x0) - `rx0') < 1
+    chk old_end_legend "`.old2.legend.draw_view.setting'"=="no"
+    * a second run uses the new record
+    gpolish endlabel
+    ntext old2 added_text
+    chk old_end_rerun r(k)==3
+    przx old2
+    chk old_end_rerun_margin abs(r(x1) - `rx1') < 1
+    graph drop old2
+    * clear gives back the margin and the legend
+    graph use "`oldg'", name(old3)
+    gpolish clear
+    ntext old3 added_text
+    chk old_clear_text r(all)==0
+    przx old3
+    chk old_clear_margin abs(r(x1) - `bx1') < 1 & abs(r(x0) - `bx0') < 1
+    chk old_clear_legend "`.old3.legend.draw_view.setting'"=="yes"
+    gpolish clear
+    przx old3
+    chk old_clear_twice abs(r(x1) - `bx1') < 1
+    graph drop old3
+}
+* two old runs stacked by 0.6.1 in separate sessions, and a callout added after them
+line le_wfemale le_wmale le_bfemale year, name(old4, replace)
+oldend old4 r
+oldend old4 r values
+gpolish callout "kept", at(1950 60)
+gpolish endlabel
+ntext old4 added_text
+chk old_stack_text r(k)==4
+przx old4
+chk old_stack_margin abs(r(x1) - `rx1') < 1
+* an old run that was already given back is left alone
+line le_wfemale le_wmale le_bfemale year, name(old5, replace)
+oldend old5 r
+_gm_edit .old5.style.editstyle margin(r-30) editcopy
+_gm_edit .old5.legend.draw_view.setstyle, style(yes)
+gpolish clear
+przx old5
+chk old_undone_margin abs(r(x1) - `bx1') < 1
+* a legend switched off by the user stays off
+line le_wfemale le_wmale le_bfemale year, legend(off) name(old6, replace)
+przx old6
+local ox1 = r(x1)
+_gm_edit .old6.style.editstyle margin(r+30) editcopy
+_gm_edit .old6.plotregion1.AddTextBox added_text editor 70 2001
+_gm_edit .old6.plotregion1.added_text[1].style.editstyle size(9.5pt) linegap(1pt) editcopy
+gpolish clear
+przx old6
+chk old_userlegend "`.old6.legend.draw_view.setting'"=="no" & abs(r(x1) - `ox1') < 1
 
 * ---- 33e. obstacle boxes cover the whole of a long band and line --------------------
 clear

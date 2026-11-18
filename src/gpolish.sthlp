@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 0.6.1  17nov2026}{...}
+{* *! version 0.7.0  18nov2026}{...}
 {viewerjumpto "Syntax" "gpolish##syntax"}{...}
 {viewerjumpto "Description" "gpolish##description"}{...}
 {viewerjumpto "Subcommands" "gpolish##subcommands"}{...}
@@ -56,7 +56,8 @@ Each value in {opt at()}, {opt to()}, {opt from()} and the {opt x()}, {opt y0()}
 may be a number or an expression written without spaces, such as {cmd:to(td(21sep2001) 966)} on a date axis.
 An expression may use the results of the previous command, such as {cmd:to(1999 r(max))} after {cmd:summarize}.
 Positions are read on the first x and y axes; on a graph with a second axis, {opt xaxis(#)} and {opt yaxis(#)}
-say which axis the positions (or the {opt x()} and {opt y()} variables of {cmd:ptlabel}) belong to.
+say which axis the positions belong to. {cmd:ptlabel} finds the axes of its {opt x()} and {opt y()} variables
+itself (see below); for it, {opt xaxis()} and {opt yaxis()} name the axes to read them on instead.
 {opt name()} picks a graph in memory other than the current one.
 
 {pstd}{cmd:gpolish} is not an r-class command: it leaves {cmd:r()} as it found it, except {cmd:gpolish geom},
@@ -113,9 +114,11 @@ Lines on a second y axis are labeled at their own scale.
 Labels are kept within the height of the plot. When the labels need more height than the plot has, the first
 and last labels keep their room at the edges and every distance between neighbouring labels shrinks by the same
 factor, so the labels fill the plot height evenly in the order of the line ends, and {cmd:gpolish endlabel} gives
-a note. The note counts the pairs whose text overlaps
-(the text of a line is taken to span about 0.95 of the font size) and, separately, the pairs that are closer
-than {opt gap()} asks but do not overlap.
+a note. The note counts only the pairs of neighbouring labels that had to be placed closer than {opt gap()}
+asks: first the pairs among them whose text overlaps (the text of a line is taken to span about 0.95 of the
+font size), then, separately, the pairs among them that do not overlap. Labels placed as far apart as
+{opt gap()} asks are not counted, so with a {opt gap()} below about 0.95 neighbouring labels can touch or
+overlap without a note.
 Labels are bold unless {opt nobold} is given; a label with an unmatched {cmd:{c )-}} is shown as typed, because the
 brace would end the bold markup early.
 Running {cmd:gpolish endlabel} again replaces the earlier labels instead of adding a second set.
@@ -161,10 +164,14 @@ labels least. If even the best of the eight still overlaps something, the label 
 rings around its point, and joined to the point by a thin leader line; it moves out only when that spot costs less
 than the best spot next to the point. {opt noleader} keeps every
 label next to its point; {opt lcolor()} and {opt lwidth()} style the leader lines.
-{opt x()} and {opt y()} name the plotted variables; for points plotted on a second axis, add {opt yaxis(2)}
-(or {opt xaxis(2)}). When the {opt y()} variable is drawn on another y axis only (or the {opt x()} variable on
-another x axis only), {cmd:gpolish ptlabel} stops before any edit and names the {opt yaxis()} or {opt xaxis()}
-option to add. Log axes are detected, and points with zero or negative values on a log axis are skipped.
+{opt x()} and {opt y()} name the plotted variables. Their values are read on the scales of the plot region
+where a plot draws {opt y()} against {opt x()}, so points plotted on a second axis need no option. When no plot
+draws that pair, the first plot region that carries an axis {opt y()} is drawn on and an axis {opt x()} is drawn
+on is used. A variable that no plot draws puts no condition on the region, so when neither is drawn the first
+plot region is used. {opt yaxis(#)} and {opt xaxis(#)} limit the choice to the plot regions that carry those axes.
+When the {opt y()} variable is drawn only on other y axes than {opt yaxis()} names (or the {opt x()} variable
+only on other x axes than {opt xaxis()} names), or when no plot region carries an axis of each variable,
+{cmd:gpolish ptlabel} stops before any edit and names the option to use. Log axes are detected, and points with zero or negative values on a log axis are skipped.
 Placement avoids the same drawn objects as an automatic {cmd:gpolish callout}.
 
 {phang}
@@ -179,8 +186,9 @@ line keep every line. If the legend uses {cmd:order()}, give the plot numbers in
 
 {phang}
 {cmd:gpolish clear} removes every added text box, line and marker from the graph and undoes the margin and legend
-changes of {cmd:gpolish endlabel}. It keeps the title and axis edits of plain {cmd:gpolish}. It also removes anything
-added by hand in the Graph Editor.
+changes of {cmd:gpolish endlabel}, including those made by {cmd:gpolish} 0.6.1 or earlier (see
+{help gpolish##technical:Technical notes}). It keeps the title and axis edits of plain {cmd:gpolish}. It also
+removes anything added by hand in the Graph Editor.
 
 {phang}
 {cmd:gpolish render} passes the graph to {helpb gr2mpl}, which redraws it with matplotlib and writes a PNG, PDF,
@@ -209,11 +217,11 @@ It stops with an error when a layout command is used on a graph that is not a tw
 {p2col:Soft halo behind text}{opt halo} draws a white box, which can cover nearby markers{p_end}
 {p2col:Different colors inside one line of text}not possible; color whole labels{p_end}
 {p2col:Filled arrow heads}arrow heads are open{p_end}
-{p2col:Labels that cannot all fit}{cmd:endlabel} reports how many pairs of labels overlap; {cmd:ptlabel} and automatic callouts report how many labels still overlap noticeably{p_end}
+{p2col:Labels that cannot all fit}{cmd:endlabel} reports how many pairs of labels overlap among the pairs it placed closer than {opt gap()} asks; {cmd:ptlabel} and automatic callouts report how many labels still overlap noticeably{p_end}
 {p2col:{cmd:graph bar}, {cmd:by()} and combined graphs}layout commands are refused with a message; plain {cmd:gpolish} still makes the title bold; {helpb gr2mpl} redraws them{p_end}
 {p2col:{cmd:graph pie}}layout commands are refused; {helpb gr2mpl} does not redraw pie charts either{p_end}
 {p2col:Positions on a second axis}{opt at()}, {opt to()} and {opt from()} use the first axes unless {opt xaxis()} or {opt yaxis()} says otherwise{p_end}
-{p2col:Graphs edited by {cmd:gpolish} 0.6.1 or earlier}these carry no {cmd:endlabel} record: run {cmd:gpolish clear} before {cmd:gpolish endlabel} again, or redraw the graph{p_end}
+{p2col:Graphs edited by {cmd:gpolish} 0.6.1 or earlier}these carry no {cmd:endlabel} record; their end labels are found in the graph's edit log (see {help gpolish##technical:Technical notes}){p_end}
 {p2line}
 
 
@@ -291,6 +299,15 @@ ignored; run {cmd:gpolish clear} and start again. A graph holds at most one reco
 {cmd:gpolish endlabel} writes its record into the box of the first. The record box is not drawn, but it is listed
 in the Graph Editor's object browser, and scripts that count {cmd:.plotregion1.added_text} should skip boxes whose
 text starts with {cmd:gpolish-endlabel}.
+
+{pstd}
+{cmd:gpolish} 0.6.1 and earlier kept no such record. On a graph without a record, {cmd:gpolish endlabel} and
+{cmd:gpolish clear} look for the end labels of those releases in the graph's edit log, the list of edits that
+Stata keeps in every graph and saves with it. An earlier {cmd:endlabel} run shows there as a margin edit on the
+graph, followed by the legend switched off (unless {opt keeplegend} was given) and the label boxes. Each run whose margin was not given back
+later is undone: its labels, values and dots are hidden, its margin is given back, and the legend is shown again
+if that run switched it off. A note says so when this happens. Changes made to those labels in the Graph Editor
+are not followed; if the result looks wrong, redraw the graph.
 
 
 {title:Author}

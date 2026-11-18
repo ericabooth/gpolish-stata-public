@@ -118,7 +118,7 @@ Three further cautions:
 
 - Both commands rely on undocumented parts of Stata's graph objects and on `gr_edit`. A future Stata release could change them. [docs/OBJECT_MODEL.md](docs/OBJECT_MODEL.md) records what is used.
 - Label spacing depends on the font. `gpolish` has width tables for 16 common fonts and falls back to Arial's widths, with a note, for any other. It reads the font from `graph set window fontface`, or from `graph set svg fontface` in batch mode; `global GPOLISH_FONT` names it directly (see the [quick start](#quick-start)).
-- A graph edited and saved by `gpolish` 0.6.1 or earlier carries no record of its end labels, so running `gpolish endlabel` on it again adds a second set. Run `gpolish clear` first, or redraw the graph.
+- A graph edited and saved by `gpolish` 0.6.1 or earlier carries no record of its end labels. On such a graph, `gpolish endlabel` and `gpolish clear` find those labels in the edit log that Stata saves with every graph: `endlabel` hides them and gives back their margin before it adds new labels, and `clear` gives back the margin and shows the legend again. Changes made to those labels in the Graph Editor are not followed; if the result looks wrong, redraw the graph.
 
 ## Tests
 
