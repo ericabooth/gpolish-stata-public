@@ -1,5 +1,28 @@
 # Changelog
 
+## 0.5.0 (2026-11-17)
+
+Fixes found in a review of every subcommand and help example:
+
+- `$` and backticks in label, note and point-label text were expanded as macros; they are now kept literally.
+- `endlabel` placed labels on top of the data on a reversed x axis; labels now follow the screen.
+- `endlabel` failed half-way on a series with no data, after widening the margin; such series are skipped.
+- `endlabel` run twice stacked a second set of labels and doubled the margin; it now replaces the first set.
+- `ptlabel` with an `if` that selects nothing, and `brace` with identical ends, stopped with unclear errors.
+- `bracket` drew no tick marks on a log x axis.
+- Unclear messages for a graph name that does not exist and for `plots()` out of range.
+- `gr2mpl` overwrote existing files without `replace`, reported a failure for `saving()` without an extension,
+  and printed a Python traceback when the folder did not exist. A failed render now leaves an existing file alone.
+- `gr2mpl` names a missing interpreter given in `python()`, and notes when the requested font is not installed.
+
+New:
+
+- `gpolish clear` removes added objects and undoes `endlabel`'s margin and legend changes.
+- `endlabel` options `side(left)`, `color()` and `keeplegend`; `endlabel` now turns the legend off.
+- `at()`, `to()` and `from()` accept expressions, such as `td(21sep2001)`.
+- `endlabel, wrap(#)` now counts characters, as documented (it counted ems before).
+- `gr2mpl, saving()` accepts `.pdf`, `.svg` and `.jpg` as well as `.png`.
+
 ## 0.4.0 (2026-11-14)
 
 - `gpolish note` (shaded finding box), `gpolish brace` (curly brace with label) and `gpolish arrow`.

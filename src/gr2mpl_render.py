@@ -131,6 +131,7 @@ def stata_color(s, default=None):
 
 
 def _strip_tags(s):
+    s = re.sub(r"\{c (\d+)\}", lambda m: chr(int(m.group(1))), s)
     s = re.sub(r"\{(it|bind|stSerif|stSans|stMono|stSymbol):([^}]*)\}", r"\2", s)
     s = re.sub(r"\{fontface [^:}]*:([^}]*)\}", r"\1", s)
     s = re.sub(r"\{&([a-zA-Z]+)\}", r"\1", s)
@@ -1177,7 +1178,11 @@ class Figure:
         self.dir = spec.get("specdir") or "."
         self.skipped = []
         self._csv = {}
+        self.notes = []
         self.font = pick_font(spec.get("font") or "")
+        want = spec.get("font") or ""
+        if want and self.font != want:
+            self.notes.append(f"font {want} is not installed; gr2mpl used {self.font}")
         self.xs = num(spec.get("xsize"), 5.5) or 5.5
         self.ys = num(spec.get("ysize"), 4.0) or 4.0
         self.unit = min(self.xs, self.ys) * 72.0 / 100.0  # relative size unit -> points
@@ -1408,6 +1413,10 @@ class Figure:
                 fh.write("\n".join(self.skipped) + "\n")
         elif os.path.exists(path):
             os.remove(path)
+        npath = os.path.join(self.dir, "notes.txt")
+        if self.notes:
+            with open(npath, "w", encoding="utf-8") as fh:
+                fh.write("\n".join(self.notes) + "\n")
         for w in self.skipped:
             print("skipped:", w)
         print("saved", out)

@@ -177,6 +177,113 @@ graph bar (mean) mpg, over(foreign) title("Bar title") name(g13, replace)
 gpolish
 chk bar_bold `"`.g13.title.text[1]'"'=="{bf:Bar title}"
 
+* ---- 13. $ and backticks in text are kept literally -----------------------------
+global foo X
+sysuse uslifeexp, clear
+line le_wfemale le_bmale year, legend(off) name(e1, replace)
+gpolish callout "Cost \$foo here", at(1950 45)
+chk esc_callout strpos(`"`.e1.plotregion1.added_text[1].text[1]'"', "{c 36}foo")>0
+label var le_bmale "Black men \$foo"
+line le_wfemale le_bmale year, name(e2, replace)
+gpolish endlabel
+chk esc_varlabel strpos(`"`.e2.plotregion1.added_text[2].text[1]'"', "{c 36}foo")>0
+gpolish endlabel, labels("A \$foo" "B")
+chk esc_labels strpos(`"`.e2.plotregion1.added_text[3].text[1]'"', "{c 36}foo")>0
+label var le_bmale "Black men"
+sysuse auto, clear
+replace make = "Car \$foo" in 1
+scatter mpg weight, name(e3, replace)
+gpolish ptlabel make in 1, x(weight) y(mpg)
+chk esc_ptlabel strpos(`"`.e3.plotregion1.added_text[1].text[1]'"', "{c 36}foo")>0
+
+* ---- 14. reversed axis and side(left) --------------------------------------------
+sysuse uslifeexp, clear
+line le_wfemale le_bmale year, xscale(reverse) name(r1, replace)
+gpolish endlabel
+chk rev_side `.r1.plotregion1.added_text[1].xpos.val' < 1900
+chk legend_off "`.r1.legend.draw_view.setting'"=="no"
+line le_wfemale le_bmale year, name(r2, replace)
+gpolish endlabel, side(left) values
+chk side_left `.r2.plotregion1.added_text[1].xpos.val' < 1900
+chk side_left_val `.r2.plotregion1.added_text[2].xpos.val' < `.r2.plotregion1.added_text[1].xpos.val'
+line le_wfemale le_bmale year, name(r3, replace)
+gpolish endlabel, keeplegend color("0 0 0")
+chk keeplegend "`.r3.legend.draw_view.setting'"=="yes"
+local c `.r3.plotregion1.added_text[1].style.color.rgb'
+chk colour_opt "`: list retokenize c'"=="0 0 0"
+
+* ---- 15. empty series ------------------------------------------------------------
+gen empty = .
+line le_wfemale empty year, name(m1, replace)
+gpolish endlabel
+ntext m1 added_text
+chk empty_skipped r(k)==1
+line empty year, name(m2, replace)
+local mg0 = `.m2.style.margin.gright.val'
+capture gpolish endlabel
+chk empty_all _rc==2000
+chk empty_nomargin abs(`.m2.style.margin.gright.val' - `mg0') < 1e-6
+
+* ---- 16. re-running endlabel, and gpolish clear -----------------------------------
+line le_wfemale le_bmale year, name(c1, replace)
+local mg0 = `.c1.style.margin.gright.val'
+gpolish endlabel, values dots
+local mg1 = `.c1.style.margin.gright.val'
+gpolish endlabel, values dots
+chk rerun_margin abs(`.c1.style.margin.gright.val' - `mg1') < 1e-6
+ntext c1 added_text
+local vis 0
+forvalues k = 1/`r(k)' {
+    if "`.c1.plotregion1.added_text[`k'].draw_view.setting'"!="no" local ++vis
+}
+chk rerun_visible `vis'==4
+gpolish callout "extra", at(1950 40)
+gpolish clear
+ntext c1 added_text
+chk clear_text r(k)==0
+ntext c1 added_markers
+chk clear_markers r(k)==0
+chk clear_margin abs(`.c1.style.margin.gright.val' - `mg0') < 1e-6
+chk clear_legend "`.c1.legend.draw_view.setting'"=="yes"
+gpolish endlabel
+ntext c1 added_text
+chk after_clear r(k)==2
+
+* ---- 17. clear errors for bad input ------------------------------------------------
+capture gpolish endlabel, name(nosuch)
+chk notfound _rc==111
+line le year, name(p1, replace)
+capture gpolish endlabel, plots(3)
+chk plots_range _rc==198
+sysuse auto, clear
+scatter mpg weight, name(z1, replace)
+gpolish ptlabel make if price > 1e9, x(weight) y(mpg)
+ntext z1 added_text
+chk pt_none r(k)==0
+capture gpolish brace, from(3000 20) to(3000 20)
+chk brace_zero _rc==198
+capture gpolish callout "x", at(3000)
+chk xy_count _rc==198
+scatter price weight, xscale(log) name(b1, replace)
+gpolish bracket, x(3000) y0(5000) y1(10000)
+chk bracket_log abs(`.b1.plotregion1.added_lines[2].x1' - 3000) > 5
+
+* ---- 18. dates and expressions in coordinates --------------------------------------
+sysuse sp500, clear
+line close date, name(d1, replace)
+gpolish callout "Low", to(td(21sep2001) 966)
+ntext d1 added_text
+chk date_callout r(k)==1
+gpolish arrow, from(td(01mar2001) 1200) to(td(01apr2001) 1150)
+chk date_arrow abs(`.d1.plotregion1.added_lines[30].x0' - td(01mar2001)) < 1 | `.d1.plotregion1.added_lines.arrnels' > 26
+
+* ---- 19. wrap() counts characters --------------------------------------------------
+sysuse uslifeexp, clear
+label var le_bmale "Black men, the group with the lowest life expectancy"
+line le_wfemale le_bmale year, name(w1, replace)
+gpolish endlabel, wrap(20)
+chk wrap_chars `.w1.plotregion1.added_text[2].text.arrnels' >= 3
+
 gpolish limits
 
 di as res _n "gpolish battery: $NCHK checks passed (Stata `c(stata_version)')"

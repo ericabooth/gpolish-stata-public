@@ -156,7 +156,7 @@ marginsplot, scheme(pypolish) recast(line) recastci(rarea) ciopts(color(%18) lwi
     note("Source: NLSW 1988 extract. Linear model with race controls; bands are 95% confidence intervals.", size(8pt)) ///
     xtitle("Years of work experience", size(9pt)) ytitle("") xlabel(, labsize(9pt)) ylabel(, labsize(9pt))
 gpolish
-gpolish endlabel, values format(%4.2f) dots labels("Not a college graduate" "College graduate") wrap(8)
+gpolish endlabel, values format(%4.2f) dots labels("Not a college graduate" "College graduate") wrap(16)
 gr2mpl, saving(figure.png) replace
 ```
 

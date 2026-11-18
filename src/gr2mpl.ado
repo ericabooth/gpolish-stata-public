@@ -1,4 +1,4 @@
-*! gr2mpl 0.4.0  redraw a Stata graph held in memory with matplotlib
+*! gr2mpl 0.5.0  redraw a Stata graph held in memory with matplotlib
 *! Walks the graph object (not the syntax), writes a JSON spec + serset CSVs,
 *! then runs gr2mpl_render.py (embedded Python if it has matplotlib, else a shell
 *! call). Returns a PNG. Families: twoway, graph bar/hbar/dot/box, graph matrix, by(), combine.
@@ -54,16 +54,44 @@ program gr2mpl, rclass
 
     * ---- output locations --------------------------------------------------
     if `"`saving'"' == "" local saving "`name'_mpl.png"
+    mata: st_local("sfx", strlower(pathsuffix(st_local("saving"))))
+    if `"`sfx'"' == "" {
+        local sfx ".png"
+        local saving `"`saving'.png"'
+    }
+    if !inlist(`"`sfx'"', ".png", ".pdf", ".svg", ".jpg", ".jpeg") {
+        di as err `"gr2mpl: saving() must end in .png, .pdf, .svg or .jpg (got `sfx')"'
+        exit 198
+    }
+    local sdir = ustrregexra(`"`saving'"', "[^/\\\\]*$", "")
+    if `"`sdir'"' != "" {
+        mata: st_local("dok", strofreal(direxists(st_local("sdir"))))
+        if "`dok'" != "1" {
+            di as err `"gr2mpl: folder `sdir' does not exist"'
+            exit 603
+        }
+    }
+    if "`replace'" == "" {
+        capture confirm new file `"`saving'"'
+        if _rc {
+            di as err `"gr2mpl: file `saving' already exists; add the replace option"'
+            exit 602
+        }
+    }
     if "`specdir'" == "" {
         tempfile tf
         local specdir "`tf'_g2m"
     }
     capture mkdir "`specdir'"
     local spec "`specdir'/spec.json"
+    local outtmp "`specdir'/render_out`sfx'"
     capture erase "`specdir'/skipped.txt"
+    capture erase "`specdir'/notes.txt"
+    capture erase "`outtmp'"
+    capture erase "`spec'"
 
     tempname fh
-    file open `fh' using "`spec'", write text replace
+    file open `fh' using "`spec'", write text
     file write `fh' "{" _n
 
     * ---- graph-level -------------------------------------------------------
@@ -75,7 +103,7 @@ program gr2mpl, rclass
     capture local ys = ``g'.style.declared_ysize.val'
     if _rc local ys = 4
     file write `fh' `"  "xsize": `xs', "ysize": `ys', "dpi": `dpi', "width": `width',"' _n
-    _g2m_kv `fh' "saving" `"`saving'"'
+    _g2m_kv `fh' "saving" `"`outtmp'"'
     _g2m_kv `fh' "font" `"`font'"'
     _g2m_kv `fh' "palette" `"`palette'"'
     _g2m_kv `fh' "specdir" `"`specdir'"'
@@ -122,15 +150,22 @@ program gr2mpl, rclass
     file write `fh' `"  "end": 1"' _n "}" _n
     file close `fh'
 
-    * ---- render ------------------------------------------------------------
-    capture erase `"`saving'"'
+    * ---- render (to a temporary file, so a failure leaves an existing file alone)
     if "`pymode'" == "embedded" {
         capture noisily python script `"`render'"', args(`""`spec'""')
     }
     else {
         shell "`pyexe'" "`render'" "`spec'" > "`specdir'/render.log" 2>&1
     }
-    capture confirm file `"`saving'"'
+    capture confirm file `"`outtmp'"'
+    if !_rc {
+        capture copy `"`outtmp'"' `"`saving'"', replace
+        if _rc {
+            di as err `"gr2mpl: could not write `saving'"'
+            exit 603
+        }
+    }
+    capture confirm file `"`outtmp'"'
     if _rc {
         di as err "gr2mpl: rendering failed"
         if "`pymode'" != "embedded" {
@@ -154,6 +189,17 @@ program gr2mpl, rclass
             file read `sk' line
         }
         file close `sk'
+    }
+    capture confirm file "`specdir'/notes.txt"
+    if !_rc {
+        tempname nt
+        file open `nt' using "`specdir'/notes.txt", read text
+        file read `nt' line
+        while r(eof) == 0 {
+            if `"`line'"' != "" di as txt `"note: `line'"'
+            file read `nt' line
+        }
+        file close `nt'
     }
     di as txt "(matplotlib version of graph `name' written to " as res `"`saving'"' as txt ")"
     if "`keepspec'" != "" di as txt "(spec kept in `specdir')"
@@ -183,6 +229,14 @@ program _g2m_python, sclass
     if `"`python'"' != "" local cands `"`"`python'"'"'
     else if `"$GR2MPL_PYTHON"' != "" local cands `"`"$GR2MPL_PYTHON"'"'
     foreach c of local cands {
+        if strpos(`"`c'"', "/") | strpos(`"`c'"', "\") {
+            capture confirm file `"`c'"'
+            if _rc {
+                di as err `"gr2mpl: Python interpreter `c' not found"'
+                di as err "        check the python() option or the global GR2MPL_PYTHON"
+                exit 601
+            }
+        }
         if `"`c'"' == `"$GR2MPL_PYRESOLVED"' & "$GR2MPL_PYMODE" == "shell" {
             sreturn local mode "shell"
             sreturn local python `"`c'"'

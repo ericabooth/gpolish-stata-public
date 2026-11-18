@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 0.4.0  14nov2026}{...}
+{* *! version 0.5.0  17nov2026}{...}
 {viewerjumpto "Syntax" "gpolish##syntax"}{...}
 {viewerjumpto "Description" "gpolish##description"}{...}
 {viewerjumpto "Subcommands" "gpolish##subcommands"}{...}
@@ -18,11 +18,13 @@
 {p 8 16 2}{cmd:gpolish} [{cmd:style}] [{cmd:,} {opt name(graphname)} {opt nobold} {opt keepyl:ine} {opt keepyt:icks}]
 
 {p 8 16 2}{cmd:gpolish endlabel} [{cmd:,} {opt name(graphname)} {opt plots(numlist)} {opt lab:els(strlist)} {opt val:ues}
-{opt for:mat(%fmt)} {opt dot:s} {opt dots:ize(#)} {opt siz:e(#)} {opt gap(#)} {opt xg:ap(#)} {opt wrap(#)} {opt nobold} {opt norepel}]
+{opt for:mat(%fmt)} {opt dot:s} {opt dots:ize(#)} {opt sid:e(right|left)} {opt col:or(rgb)} {opt keepl:egend}
+{opt siz:e(#)} {opt gap(#)} {opt xg:ap(#)} {opt wrap(#)} {opt nobold} {opt norepel}]
 
 {p 8 16 2}{cmd:gpolish callout} {it:"line 1"} [{it:"line 2"} ...]{cmd:,} {c -(}{opt at(x y)} | {opt to(x y)}{c )-}
 [{opt fr:om(x y)} {opt cur:ve(#)} {opt siz:e(#)} {opt col:or(rgb)} {opt lc:olor(rgb)} {opt lw:idth(str)} {opt al:ign(str)}
-{opt ang:le(#)} {opt halo} {opt noarrow} {opt name(graphname)}]
+{opt ang:le(#)} {opt halo} {opt noarrow} {opt head:size(#)} {opt seg:ments(#)} {opt fill(rgb)} {opt bor:der(rgb)} {opt pad(#)}
+{opt name(graphname)}]
 
 {p 8 16 2}{cmd:gpolish note} {it:"line 1"} [{it:"line 2"} ...]{cmd:,} {c -(}{opt at(x y)} | {opt to(x y)}{c )-}
 [{opt fill(rgb)} {opt bor:der(rgb)} {opt pad(#)} {it:callout_options}]
@@ -40,11 +42,16 @@
 
 {p 8 16 2}{cmd:gpolish legend} [{cmd:,} {opt plots(numlist)} {opt nobold} {opt name(graphname)}]
 
+{p 8 16 2}{cmd:gpolish clear} [{cmd:,} {opt name(graphname)}]
+
 {p 8 16 2}{cmd:gpolish render} [{cmd:,} {opt name(graphname)} {it:gr2mpl_options}]
 
 {p 8 16 2}{cmd:gpolish limits}
 
 {pstd}All sizes are in points. Positions are in the units of the graph's axes.
+Each value in {opt at()}, {opt to()} and {opt from()} may be a number or an expression written without spaces,
+such as {cmd:to(td(21sep2001) 966)} on a date axis.
+{opt name()} picks a graph in memory other than the current one.
 
 
 {marker description}{...}
@@ -79,13 +86,18 @@ and {cmd:gpolish render} redraws the finished graph with matplotlib (see {helpb 
 
 {phang}
 {cmd:gpolish endlabel} replaces the legend with a label at the end of each line, in the line's color.
-Labels that would overlap are moved apart. The right margin grows to fit the longest label.
-By default every line plot is labeled; {opt plots()} names the plots to label by number.
-Label text is the variable label; {opt labels()} overrides it.
-{opt values} adds the last value in a right-aligned column, formatted with {opt format()}.
-{opt dots} adds a marker at each line end.
+Labels that would overlap are moved apart, and the margin grows to fit the longest label.
+The legend is switched off; {opt keeplegend} keeps it.
+By default every line plot is labeled; {opt plots()} names the plots to label by number, and series with no
+nonmissing values are skipped with a note.
+Label text is the variable label; {opt labels()} overrides it, one label per plot in the order of {opt plots()}.
+{opt values} adds the last value in a column, formatted with {opt format()}.
+{opt dots} adds a marker at each line end. {opt color()} sets one text color for all labels instead of each line's color.
+{opt side(left)} labels the left ends of the lines instead of the right; on a reversed axis
+({cmd:xscale(reverse)}) the labels follow the screen, not the data.
 {opt wrap(#)} wraps long labels on word boundaries at about # characters, measured by rendered width.
 {opt gap(#)} is the minimum spacing between labels in line heights (default 1.3).
+Running {cmd:gpolish endlabel} again replaces the earlier labels instead of adding a second set.
 
 {phang}
 {cmd:gpolish callout} adds a note of one or more lines, with a curved arrow to {opt to()}.
@@ -123,6 +135,11 @@ labels least. {opt x()} and {opt y()} name the plotted variables. Log axes are d
 If the legend uses {cmd:order()}, give the plot numbers in the same order in {opt plots()}.
 
 {phang}
+{cmd:gpolish clear} removes every added text box, line and marker from the graph and undoes the margin and legend
+changes of {cmd:gpolish endlabel}. It keeps the title and axis edits of plain {cmd:gpolish}. It also removes anything
+added by hand in the Graph Editor.
+
+{phang}
 {cmd:gpolish render} passes the graph to {helpb gr2mpl} for a matplotlib PNG. {cmd:gpolish limits} lists what needs it.
 
 
@@ -152,11 +169,20 @@ If the legend uses {cmd:order()}, give the plot numbers in the same order in {op
 {phang2}{cmd:. gpolish}{p_end}
 {phang2}{cmd:. gpolish endlabel, values dots}{p_end}
 {phang2}{cmd:. gpolish callout "1918 influenza" "pandemic", to(1918.6 30.6)}{p_end}
-{phang2}{cmd:. graph export life.png, width(2400)}{p_end}
+{phang2}{cmd:. graph export life.png, width(2400) replace}{p_end}
 
 {pstd}A graph from another command:{p_end}
+{phang2}{cmd:. sysuse nlsw88, clear}{p_end}
+{phang2}{cmd:. regress wage c.ttl_exp##i.collgrad}{p_end}
+{phang2}{cmd:. margins collgrad, at(ttl_exp=(0(4)28))}{p_end}
 {phang2}{cmd:. marginsplot, scheme(pypolish) recast(line) recastci(rarea) legend(off)}{p_end}
-{phang2}{cmd:. gpolish endlabel, labels("No degree" "College graduate") values}{p_end}
+{phang2}{cmd:. gpolish endlabel, labels("No degree" "College graduate") values format(%4.2f)}{p_end}
+
+{pstd}A note on a date axis, then undo everything and start again:{p_end}
+{phang2}{cmd:. sysuse sp500, clear}{p_end}
+{phang2}{cmd:. line close date, scheme(pypolish)}{p_end}
+{phang2}{cmd:. gpolish callout "Low of 966", to(td(21sep2001) 966)}{p_end}
+{phang2}{cmd:. gpolish clear}{p_end}
 
 
 {marker technical}{...}
@@ -174,7 +200,17 @@ For any other font it uses Arial's widths and says so; spacing is then approxima
 
 {pstd}
 Set {opt xsize()} and {opt ysize()} to the size the graph will be printed at, and give text sizes in points.
-Run {cmd:gpolish} after the graph has its final size, because positions are solved for that size.
+Run {cmd:gpolish} after the graph has its final size, because positions are solved for that size: resizing
+afterwards with {cmd:graph display, xsize() ysize()} moves the plot but not the labels. To resize, redraw the
+graph, or run {cmd:gpolish clear} and the layout commands again.
+
+{pstd}
+Text keeps {cmd:$} and backtick characters literally; they are stored as {cmd:{c -(}c 36{c )-}} and {cmd:{c -(}c 96{c )-}}.
+
+{pstd}
+The record that lets {cmd:gpolish endlabel} replace its own earlier labels, and lets {cmd:gpolish clear} restore
+the margin, lasts for the Stata session. After {cmd:graph use} or {cmd:clear all}, {cmd:gpolish clear} still removes
+the added objects but cannot restore the margin.
 
 
 {title:Author}

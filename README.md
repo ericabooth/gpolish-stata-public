@@ -45,14 +45,14 @@ gpolish                                    // bold title, drop the y-axis line a
 gpolish endlabel, values dots              // direct labels, pushed apart where they collide
 gpolish callout "1918 influenza" "pandemic", to(1918.6 30.6)   // placed automatically
 
-graph export life.png, width(2400)         // still a Stata graph
+graph export life.png, width(2400) replace // still a Stata graph
 gpolish render, saving(life_mpl.png) replace    // optional matplotlib version
 ```
 
 | Command | Use |
 |---|---|
 | `gpolish` | Bold title; remove the y-axis line and tick marks. |
-| `gpolish endlabel` | Label each line at its end in the line's colour; `values`, `dots`, `wrap()`. |
+| `gpolish endlabel` | Label each line at its end in the line's colour; `values`, `dots`, `wrap()`, `side(left)`, `color()`. Running it again replaces the earlier labels. |
 | `gpolish callout` | A note with a curved arrow. Leave out `at()` and it finds its own place. |
 | `gpolish note` | A shaded box for a finding or call-out, with an optional arrow. |
 | `gpolish brace` | A curly brace with a label: mark a confidence interval, a gap or a range. |
@@ -60,8 +60,11 @@ gpolish render, saving(life_mpl.png) replace    // optional matplotlib version
 | `gpolish ptlabel` | Label chosen scatter points, each in the least crowded of eight positions. |
 | `gpolish bracket` | A square bracket between two y values. |
 | `gpolish legend` | Colour legend text to match its keys. |
+| `gpolish clear` | Remove everything the layout commands added, and undo `endlabel`'s margin and legend changes. |
 | `gpolish render` | Hand the finished graph to `gr2mpl`. |
 | `gpolish limits` | List what Stata's renderer cannot draw. |
+
+Positions in `at()`, `to()` and `from()` may be expressions, so a note on a date axis can be written `to(td(21sep2001) 966)`.
 
 Because `gpolish` reads the drawn graph and not your command, it also works on graphs made by other commands that produce twoway graphs, such as `marginsplot`.
 

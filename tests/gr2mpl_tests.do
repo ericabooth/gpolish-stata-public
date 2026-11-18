@@ -13,7 +13,7 @@ capture program drop both
 program both
     args tag opts
     graph export "tests/out/`tag'_stata.png", replace width(1600)
-    capture noisily gr2mpl, saving("tests/out/`tag'_mpl.png") specdir("tests/spec/`tag'") keepspec lwscale(1.7) msscale(1.5) `opts'
+    capture noisily gr2mpl, saving("tests/out/`tag'_mpl.png") specdir("tests/spec/`tag'") keepspec lwscale(1.7) msscale(1.5) replace `opts'
     if _rc di as err "FAILED: `tag' rc=" _rc
     else di as res "OK: `tag'"
 end
@@ -343,4 +343,23 @@ twoway (pcarrowi 3 1.6 3 2.4  3 3.6 3 4.4  2.75 5 1.4 5, lcolor(gs6) mcolor(gs6)
     xscale(off range(0.3 5.7)) yscale(off range(0.6 3.5)) legend(off) ///
     title("A four-step pipeline") xsize(6.5) ysize(3)
 both 38_flowchart_axes_off
+
+* -- file handling and messages ---------------------------------------------------
+sysuse auto, clear
+scatter mpg weight, name(fh, replace)
+capture erase "tests/out/fh_mpl.png"
+gr2mpl, name(fh) saving("tests/out/fh_mpl.png")
+capture gr2mpl, name(fh) saving("tests/out/fh_mpl.png")
+assert _rc==602
+gr2mpl, name(fh) saving("tests/out/fh_noext") replace
+confirm file "tests/out/fh_noext.png"
+capture gr2mpl, name(fh) saving("tests/out/nodir/x.png") replace
+assert _rc==603
+capture gr2mpl, name(fh) saving("tests/out/x.png") replace python("/no/such/python")
+assert _rc==601
+global foo X
+gpolish callout "Cost \$foo", at(3000 30)
+gr2mpl, name(fh) saving("tests/out/fh_dollar.png") replace keepspec specdir("tests/spec/fh")
+gr2mpl, name(fh) saving("tests/out/fh_font.png") replace font("NoSuchFont")
+di "FILE HANDLING OK"
 

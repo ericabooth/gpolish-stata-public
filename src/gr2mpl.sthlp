@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 0.3.0  14nov2026}{...}
+{* *! version 0.5.0  17nov2026}{...}
 {viewerjumpto "Syntax" "gr2mpl##syntax"}{...}
 {viewerjumpto "Description" "gr2mpl##description"}{...}
 {viewerjumpto "Options" "gr2mpl##options"}{...}
@@ -47,7 +47,9 @@ text angles that Stata stores but cannot draw. {cmd:gpolish render} calls {cmd:g
 
 {phang}{opt name(graphname)} names the graph to redraw. The default is the current graph.
 
-{phang}{opt saving(filename)} names the PNG to write; {opt replace} allows overwriting. The default is {it:graphname}{cmd:_mpl.png} in the current directory.
+{phang}{opt saving(filename)} names the file to write. The extension sets the format: {cmd:.png} (the default when there is none), {cmd:.pdf}, {cmd:.svg} or {cmd:.jpg}. The default file is {it:graphname}{cmd:_mpl.png} in the current directory. The folder must exist.
+
+{phang}{opt replace} allows an existing file to be overwritten; without it {cmd:gr2mpl} stops with an error, as {helpb graph export} does. The image is rendered to a temporary file first, so a failed render leaves an existing file untouched.
 
 {phang}{opt width(#)} sets the image width in pixels; {opt dpi(#)} sets the resolution (default 200). The figure keeps the graph's {cmd:xsize()} and {cmd:ysize()}.
 
