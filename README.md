@@ -4,7 +4,7 @@
 
 <img width="1000" alt="A Stata line chart before and after gpolish" src="images/before_after.png" />
 
-*Left: the default graph. Right: the same data with `scheme(pypolish)` and three `gpolish` commands. Both are Stata graphs.*
+*Left: Stata's default look. Right: the same graph with `scheme(pypolish)`, a few graph options (line colours, subtitle, note, axis labels) and four `gpolish` commands: the title edit, end labels and two callouts. Both are Stata graphs, and both use the series labels set with `label var`. The code is [gallery example 04](gallery/README.md#multi-series-lines).*
 
 ## What is in the package
 
@@ -12,7 +12,7 @@
 |---|---|---|
 | `scheme(pypolish)` | Static defaults: white background, left-aligned titles, light horizontal grid, horizontal axis labels, a restrained palette. | Stata graph |
 | `gpolish` | Reads the drawn graph and adds direct labels, callouts, point labels and brackets, placed by a layout step that avoids markers, lines and other text. | Stata graph |
-| `gr2mpl` | Redraws the graph held in memory with matplotlib, including every `gpolish` edit. Handles `graph bar`, box, dot, `by()` and combined graphs too. | PNG |
+| `gr2mpl` | Redraws the graph held in memory with matplotlib, including every `gpolish` edit. Handles `graph bar`, box, dot, `by()` and combined graphs too. | PNG, PDF, SVG or JPG image |
 
 `gpolish` needs only Stata. `gr2mpl` needs Python with matplotlib and numpy.
 
@@ -94,7 +94,7 @@ All gallery images come from one script, [gallery/gallery.do](gallery/gallery.do
 
 | | `pypolish` + `gpolish` | `gr2mpl` |
 |---|---|---|
-| Result | A Stata graph: editable, combinable, exports to any format | A PNG |
+| Result | A Stata graph: editable, combinable, exports to any format | An image file: PNG, PDF, SVG or JPG, set by the `saving()` extension |
 | Needs | Stata 16+ | Stata 16+, Python, matplotlib, numpy |
 | Graph families | twoway (title edit on any family) | twoway, bar, box, dot, matrix, `by()`, combine |
 | Ceiling | Stata's renderer | Anything matplotlib can draw |

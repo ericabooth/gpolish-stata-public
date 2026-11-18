@@ -5,10 +5,13 @@ graph object, not the command syntax, so it works on output from commands it kno
 nothing about (`marginsplot`, `coefplot`). Tested on StataNow 19.5 and Stata 16.1; written for
 Stata 16+ (`version 16`).
 
-    gr2mpl [, name(graph) saving(file.png) width(#) dpi(#) endlabels nolegend
-              palette(house) font(name) python(path) specdir(dir) keepspec
-              nogrid nohalo noticks lwscale(#) msscale(#)]
+    gr2mpl [, name(graph) saving(file) replace width(#) dpi(#) endlabels nolegend
+              palette(house) font(name) nogrid nohalo noticks roundbox
+              lwscale(#) msscale(#) python(path) keepspec specdir(dir)]
     gr2mpl doctor [, python(path) font(name)]
+
+`saving()` takes a `.png`, `.pdf`, `.svg` or `.jpg` file name; with no extension the
+output is a PNG. The output is an image file, not a Stata graph.
 
 Saved results: `r(filename)`, `r(python)`, `r(pymode)` (`embedded` or `shell`),
 `r(unsupported)` (layers that were skipped, `;`-separated), `r(specdir)`. Each skipped
@@ -36,9 +39,11 @@ is exported by Stata and by gr2mpl into `tests/out/` for side-by-side comparison
 ## Object-model facts (verified)
 
 Graph level (`.g` = `.graphname`)
-- `.g.graphfamily`: `twoway`, `bar` (graph bar/hbar/dot/box and pie all say `bar`), `by`, `combine`
+- `.g.graphfamily`: `twoway`, `bar` (graph bar/hbar/dot/box and pie all say `bar`), `by`,
+  `combine`, `matrix`. A pie chart is told apart by `.g.classname == "piegraph_g"`.
 - `.g.n_views`: number of plots; `.g.n_text`: number of `text()` boxes
-- `.g.style.declared_xsize.val`, `.declared_ysize.val`: size in inches (stcolor default 7.5 x 4.5)
+- `.g.style.declared_xsize.val`, `.declared_ysize.val`: size in inches (default 7.5 x 4.5 with
+  stcolor in Stata 19.5, 5.5 x 4 with s2color in Stata 16.1)
 - `.g.title.text[k]`, `.subtitle`, `.note`, `.caption`: arrays of lines (`.text.arrnels`)
 - `.g.command`: the original command string
 - `.g.legend.draw_view.setting` (yes/no); `.g.legend.map[k]` = plot index of entry k;
@@ -81,8 +86,9 @@ Sizes
 - Every size object (`linewidth`, `symbolsize`, `gsize`) has `.val` (the number as
   typed, in whatever unit) and `.gmval` (converted to relative units). Read `.gmval`:
   `msize(6pt)` has `.val = 6` but `.gmval = 1.67` on a 5-inch-tall graph.
-- points = gmval / 100 * min(xsize, ysize) * 72. Widths and marker sizes are now mapped
-  exactly; `lwscale()` / `msscale()` multiply them (the test battery uses 1.7 / 1.5).
+- points = gmval / 100 * min(xsize, ysize) * 72. Line widths and marker sizes are mapped
+  with this rule; `lwscale()` / `msscale()` multiply them (`tests/gr2mpl_tests.do` uses
+  1.7 / 1.5).
 
 Objects added with gr_edit or the Graph Editor (what gpolish creates)
 - counts: `.g.plotregion1.added_text.arrnels`, `.added_lines.arrnels`,
@@ -112,7 +118,7 @@ Other
 | twoway line, connected, scatter (+ `mlabel`, value labels) | yes | serset |
 | twoway bar, rbar, histogram | yes | histogram is an `rbar` plot |
 | twoway area, rarea, lfitci, qfitci | yes | |
-| twoway rcap, rspike, rcapsym, rline, rconnected, rscatter | yes | caps drawn as plain spikes |
+| twoway rcap, rspike, rcapsym, rline, rconnected, rscatter | yes | rcap caps are sized by the plot's marker size; rcapsym is drawn as plain spikes, without its end symbols |
 | twoway spike, dropline, dot | yes | |
 | kdensity, lowess, lfit, `function` | yes | all resolve to `line` |
 | pcspike, pcarrow, pcbarrow, pccapsym, pcscatter | yes | class `yxyxview_g`, `.x2var/.y2var` |
@@ -130,8 +136,9 @@ Other
 | contour, contourline | no, skipped with a note | |
 | graph pie | no, exits 198 | class `piegraph_g` (its family says `bar`) |
 | `x2axis`, `yaxis(3+)` | no | only xaxis1, yaxis1, yaxis2 are read |
-| supergroup labels (second `over()`) in graph bar | no | bars draw, labels dropped |
-| `blabel()` bar labels, marker weights, jitter | no | |
+| supergroup labels (second `over()`) in graph bar | yes | `.supaxis`, drawn bold |
+| `blabel()` bar labels | yes | `.plotregion1.barlabels[k]` |
+| marker weights, jitter | no | weighted markers draw at one size |
 | `{it:}`, `{fontface}` text tags | stripped | `{bf:}` renders as bold |
 | nested combine, by() inside combine | no, panel skipped with a note | |
 | tri-panel sharing in `by(, total)` / `holes()` | untested | |
@@ -171,22 +178,23 @@ More object paths
 - Short outside tick marks on the x axis (off with `noticks`); none on the y axis.
 - Annotation text has a thin white halo (1.6 pt stroke; off with `nohalo`).
 - Box-plot outside values are hollow circles; whisker caps are not drawn.
-- Filled layers on the second y axis are drawn behind the first axis.
+- When every layer on the second y axis is filled (bar, rbar, area, rarea, spike), the
+  second axis is drawn behind the first.
 - Line widths and marker sizes follow Stata exactly unless `lwscale()`/`msscale()` is set.
 - Graph-margin edits made by gpolish are ignored; the layout is refit around whatever
   text extends past the axes, so end labels are never clipped.
 
 ## Known weaknesses
 
-- Stata 16-18 not tested. All member paths are undocumented and could change.
+- Stata 17 and 18 are not tested, nor is Windows. All member paths are undocumented and
+  could change.
 - Marker-label collisions are not resolved (only end-of-line labels are repelled).
 - Curved callout arrows arrive as many short straight segments, which is how they are
   stored.
 - In combine, a panel with both a title and a legend stacks them above the plot, which
   costs height.
-- The returned PNG is not a Stata graph: no further `graph combine`, no Graph Editor.
-- compare/head_to_head.do currently stops at `gpolish ptlabel ..., xlog` with
-  "option xlog not allowed"; that is a gpolish option change, not a gr2mpl failure.
+- The output image (PNG, PDF, SVG or JPG) is not a Stata graph: no further
+  `graph combine`, no Graph Editor.
 
 ## What gpolish adds to the same object model
 
@@ -224,8 +232,9 @@ boxes added through the Graph Editor interface (`.plotregion1.added_text[k]`):
 
 `linestyle(color(none) width(none))` reads back as colour `0 0 0 %100` with width `0`,
 so the width, not the colour, says whether there is an outline. gr2mpl draws a filled
-rectangle with the two paddings added; a white fill with no outline is treated as a
-halo and drawn as a thin stroke around the glyphs. Boxed text is not rotated.
+rectangle with the two paddings added (square corners, or rounded with `roundbox`); a
+white fill with no outline is treated as a halo and drawn as a thin stroke around the
+glyphs. Boxed text is not rotated.
 
 ## graph matrix
 
