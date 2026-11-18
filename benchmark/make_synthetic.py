@@ -1,6 +1,7 @@
 """Synthetic label-placement scenarios for the benchmark.
 
-Writes data/<scenario>.csv (x, y, label, lab) and appends rows to data/manifest_synthetic.csv.
+Writes data/<scenario>.csv (x, y, label, lab), data/manifest_synthetic.csv (test seeds 1-20)
+and data/manifest_tuning.csv (tuning seeds 101-110, kept apart from the test seeds).
 Points come from a mixture of three Gaussian clusters in the unit square, so labels
 crowd in some places and not others. Labels are made-up names of 4 to 14 characters.
 Run from the benchmark folder:  python make_synthetic.py
@@ -12,7 +13,8 @@ import numpy as np
 SYL = ["ka", "lo", "mi", "ren", "sa", "tor", "vel", "an", "bri", "cho", "dun", "el",
        "fa", "gor", "hal", "is", "jun", "kir", "lum", "mor", "nel", "ost", "pra", "qui"]
 DESIGNS = [("syn30all", 30, 30), ("syn60all", 60, 60), ("syn60sub", 60, 20)]
-SEEDS = range(1, 21)
+SEEDS = range(1, 21)          # test seeds: used only to report results
+TUNE_SEEDS = range(101, 111)  # tuning seeds: used only to choose gpolish's placement settings
 
 
 def names(rng, n):
@@ -35,27 +37,32 @@ def points(rng, n):
 
 
 def main():
+    write(SEEDS, "", "data/manifest_synthetic.csv")
+    write(TUNE_SEEDS, "t", "data/manifest_tuning.csv")
+
+
+def write(seeds, tag, manifest_path):
     os.makedirs("data", exist_ok=True)
     rows = []
     for design, n, nlab in DESIGNS:
-        for seed in SEEDS:
+        for seed in seeds:
             rng = np.random.default_rng(1000 * n + 100 * nlab + seed)
             xy = points(rng, n)
             labs = names(rng, n)
             rng.shuffle(labs)
             chosen = set(rng.choice(n, size=nlab, replace=False))
-            scen = f"{design}_s{seed:02d}"
+            scen = f"{design}_{tag or 's'}{seed:02d}"
             with open(f"data/{scen}.csv", "w", newline="") as fh:
                 w = csv.writer(fh)
                 w.writerow(["x", "y", "label", "lab"])
                 for i in range(n):
                     w.writerow([f"{xy[i, 0]:.6f}", f"{xy[i, 1]:.6f}", labs[i], int(i in chosen)])
             rows.append([scen, design, seed, n, nlab, 0, "", "", "", ""])
-    with open("data/manifest_synthetic.csv", "w", newline="") as fh:
+    with open(manifest_path, "w", newline="") as fh:
         w = csv.writer(fh)
         w.writerow(["scenario", "design", "seed", "n", "nlab", "fit", "fa", "fb", "fx0", "fx1"])
         w.writerows(rows)
-    print(len(rows), "synthetic scenarios")
+    print(len(rows), "synthetic scenarios ->", manifest_path)
 
 
 if __name__ == "__main__":

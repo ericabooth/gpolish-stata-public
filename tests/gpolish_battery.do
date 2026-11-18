@@ -320,6 +320,21 @@ gpolish ptlabel country if inlist(country, "Haiti", "Bolivia", "Canada"), x(gnpp
 ntext ld3 added_lines
 chk sparse_noleader r(k)==0
 
+* ---- 22. leader search where a leader's path crosses no obstacle --------------------
+clear
+set obs 400
+set seed 2026
+gen double x = rnormal()
+gen double y = rnormal()
+gen double r = x^2 + y^2
+sort r
+gen str12 nm = "Point " + string(_n)
+scatter y x, name(cc, replace)
+capture noisily gpolish ptlabel nm in 1/2, x(x) y(y)
+chk lead_empty_path _rc==0
+ntext cc added_text
+chk lead_empty_text r(k)==2
+
 gpolish limits
 
 di as res _n "gpolish battery: $NCHK checks passed (Stata `c(stata_version)')"

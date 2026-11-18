@@ -18,7 +18,8 @@ DESIGNS = [("life12", "Life expectancy, 12 of 63 labelled"), ("autosub", "Auto, 
            ("lifeall", "Life expectancy, all 63 labelled"), ("autoall", "Auto, all 74 labelled"),
            ("syn30all", "Synthetic, 30 of 30 labelled"), ("syn60sub", "Synthetic, 20 of 60 labelled"),
            ("syn60all", "Synthetic, 60 of 60 labelled")]
-METRICS = [("clean_share", "Clean labels (share)", "{:.2f}"), ("overlap_pairs", "Overlapping label pairs", "{:.1f}"),
+METRICS = [("clean_share", "Clean labels (share)", "{:.2f}"),
+           ("clean_near_share", "Clean labels within 3 ems of their point (share)", "{:.2f}"), ("overlap_pairs", "Overlapping label pairs", "{:.1f}"),
            ("on_marker_share", "Labels touching a marker (share)", "{:.2f}"),
            ("on_line_share", "Labels crossing the fit line (share)", "{:.2f}"),
            ("outside_share", "Labels outside the plot (share)", "{:.3f}"),
@@ -43,7 +44,9 @@ def main():
     out = ["# Label-placement benchmark: results", "",
            "Each cell is one graph for the real-data scenarios, and the mean ± 95% interval over 20 random",
            "seeds for the synthetic designs. A *clean* label overlaps no other label, no data marker and",
-           "not the fit line, and stays inside the plot region. See README.md for the design.", ""]
+           "not the fit line, and stays inside the plot region; *clean and near* also requires it to be within",
+           "3 ems of its own point. Synthetic results use test seeds 1-20, which were not used to choose",
+           "gpolish's settings. See README.md for the design.", ""]
     stats = {}
     for key, title, fmt in METRICS:
         out += [f"## {title}", "", "| Scenario | " + " | ".join(NAMES[m] for m in METHODS) + " |",
@@ -60,9 +63,10 @@ def main():
     open("results/summary.md", "w").write("\n".join(out) + "\n")
 
     plt.rcParams.update({"font.family": "Open Sans", "font.size": 9})
-    fig, axes = plt.subplots(1, 2, figsize=(10, 4.6), gridspec_kw={"width_ratios": [1.6, 1], "wspace": 0.08})
+    fig, axes = plt.subplots(1, 3, figsize=(13, 4.6), gridspec_kw={"width_ratios": [1.3, 1.3, 1], "wspace": 0.08})
     for ax, key, xlab, logx in ((axes[0], "clean_share", "Share of labels that are clean", False),
-                                (axes[1], "seconds", "Seconds per graph, log scale\n(mlabel() has no placement step; drawn at 0.001)", True)):
+                                (axes[1], "clean_near_share", "Clean and within 3 ems of their point", False),
+                                (axes[2], "seconds", "Seconds per graph, log scale\n(mlabel() has no placement step; drawn at 0.001)", True)):
         for j, m in enumerate(METHODS):
             ys = [i + (j - 2) * 0.14 for i in range(len(DESIGNS))]
             xs = [stats[(key, d, m)][0] for d, _ in DESIGNS]
@@ -84,9 +88,9 @@ def main():
         for s in ("top", "right", "left"):
             ax.spines[s].set_visible(False)
         ax.tick_params(axis="y", length=0)
-    axes[0].legend(loc="lower center", bbox_to_anchor=(0.8, 1.0), ncol=5, frameon=False, fontsize=8.5,
+    axes[0].legend(loc="lower center", bbox_to_anchor=(1.3, 1.0), ncol=5, frameon=False, fontsize=8.5,
                    handletextpad=0.2, columnspacing=1.2)
-    fig.suptitle("Label placement: share of clean labels and time, five methods", x=0.01, ha="left", fontweight="bold", y=1.02)
+    fig.suptitle("Label placement: clean labels, clean and near labels, and time, five methods", x=0.01, ha="left", fontweight="bold", y=1.02)
     fig.savefig("results/benchmark.png", dpi=180, bbox_inches="tight", facecolor="white")
     print(open("results/summary.md").read())
 

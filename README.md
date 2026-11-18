@@ -63,6 +63,7 @@ gpolish render, saving(life_mpl.png) replace    // optional matplotlib version
 | `gpolish clear` | Remove everything the layout commands added, and undo `endlabel`'s margin and legend changes. |
 | `gpolish render` | Hand the finished graph to `gr2mpl`. |
 | `gpolish limits` | List what Stata's renderer cannot draw. |
+| `gpolish geom` | Report the drawn geometry (size, plot box, data-to-device transform) in `r()`, for programmers. |
 
 Positions in `at()`, `to()` and `from()` may be expressions, so a note on a date axis can be written `to(td(21sep2001) 966)`.
 
@@ -102,12 +103,12 @@ Start with the scheme and `gpolish`. Use `gr2mpl` when a chart needs something f
 
 ## Limits
 
-Stata's graph renderer cannot draw the following. `gpolish` prints a note that names `gpolish render` when a request meets one of them.
+Stata's graph renderer cannot draw the following. `gpolish` prints a note for text at an unsupported angle, for inline colour tags in the graph title, and when `ptlabel` or an automatically placed callout cannot place every label without overlap; it names `gpolish render` where that can help.
 
 - **Text at an angle other than 0, 90 or 270 degrees.** The angle is stored in the graph and applied by `gr2mpl`.
 - **A soft halo behind text.** `halo` draws a white box in Stata, which can cover a nearby marker; `gr2mpl` draws a thin outline instead.
 - **Different colours inside one line of text**, and **filled arrow heads**.
-- **Layout commands on non-twoway graphs.** `endlabel`, `callout` and `ptlabel` are twoway only.
+- **Layout commands on non-twoway graphs.** `endlabel`, `callout`, `note`, `arrow`, `brace`, `bracket`, `ptlabel`, `legend` and `clear` stop with an error on graphs that are not twoway graphs. Plain `gpolish` (or `gpolish style`) still makes the title bold, and `gpolish render` (gr2mpl) can redraw bar, box, dot, `by()` and combined graphs.
 
 `gr2mpl` does not draw contour plots or pie charts, and does not read a second x axis or a third y axis. Skipped layers are named in a note and in `r(unsupported)`.
 
@@ -141,9 +142,9 @@ Tested on StataNow 19.5 and Stata 16.1 on macOS. Stata 17 and 18 and Windows are
 
 ## How well does the placement work?
 
-The [benchmark](benchmark/) scores `gpolish ptlabel` against Stata's own `mlabel()`, `labrepel`, adjustText (Python) and ggrepel (R) on four real-data scenarios and 60 synthetic ones, with every label measured by the same rule. When a subset of points is labelled, the usual case in a report, `gpolish` places the largest share of labels cleanly of all five methods: 77 to 100 percent. When every point in a crowded scatter is labelled, ggrepel does somewhat better; `gpolish` moves a label out on a leader line only when every spot next to its point is taken.
+The [benchmark](benchmark/) scores `gpolish ptlabel` against Stata's own `mlabel()`, `labrepel`, adjustText (Python) and ggrepel (R) on four real-data scenarios and 60 synthetic ones, with every label measured by the same rule. When a subset of points is labelled, the usual case in a report, `gpolish` places the largest share of labels cleanly of all five methods: 84 to 100 percent. When every point in a crowded scatter is labelled, it leads ggrepel in three of four scenarios and trails it badly in the fourth, and ggrepel usually keeps labels nearer their points. `gpolish`'s placement settings were tuned on separate scenarios from the ones reported.
 
-<img width="900" alt="Benchmark: share of clean labels and seconds per graph" src="benchmark/results/benchmark.png" />
+<img width="1000" alt="Benchmark: share of clean labels, share of clean labels near their point, and seconds per graph" src="benchmark/results/benchmark.png" />
 
 ## Works with other graph commands
 

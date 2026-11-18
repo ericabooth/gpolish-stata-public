@@ -1,13 +1,26 @@
 # Changelog
 
+## 0.6.1 (2026-11-17)
+
+- `gpolish ptlabel`'s placement settings (search rings and their spacing, the cost of moving a label away from its
+  point, box height and padding) were chosen on separate tuning scenarios; `benchmark/tune.py` reproduces the choice.
+  Compared with 0.6.0, the clean share on the real-data benchmark graphs rose from 0.54 to 0.70 with every country
+  labelled, stayed at 1.00 for 12 countries, and fell from 0.89 to 0.84 for 19 cars and from 0.47 to 0.34 with every
+  car labelled; on the synthetic test designs it rose (for example from 0.68 to 0.93 with 60 points labelled).
+- Fixed: `gpolish ptlabel` could stop with error 3301 when a candidate leader line crossed no obstacle.
+- `gpolish geom` checks that the graph exists and is a twoway graph, and returns `r(name)`.
+- Help and `gpolish limits`: `segments()` documented for `gpolish arrow`, `gpolish geom` documented, the `plots()`
+  abbreviation shown, the description of when a label moves out on a leader line made exact, and the list of what
+  `gpolish render` can draw corrected (it does not draw coloured words inside a line or filled arrow heads either).
+- Benchmark: a second headline measure, labels that are clean and within 3 ems of their point; tuning seeds kept
+  apart from the test seeds.
+
 ## 0.6.0 (2026-11-17)
 
 - `gpolish ptlabel` moves a label out on a thin leader line when all eight spots next to its point collide.
   Leaders avoid crossing other labels and each other. New options `noleader`, `lcolor()` and `lwidth()`.
 - `gpolish ptlabel` sizes label boxes to the font's full line height with a small pad, so labels that only
   touch are treated as colliding.
-- Benchmark: the share of clean labels rises to 0.47-0.54 (from 0.14-0.32) when every point of the real-data
-  scatters is labelled, and to 0.89-1.00 (from 0.58-0.92) when a subset is labelled.
 
 ## 0.5.1 (2026-11-17)
 

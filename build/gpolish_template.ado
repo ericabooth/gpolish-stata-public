@@ -1,4 +1,4 @@
-*! gpolish 0.6.0  post-hoc polish + layout layer for Stata graphs
+*! gpolish 0.6.1  post-hoc polish + layout layer for Stata graphs
 *! gpolish [style] | endlabel | callout | note | arrow | brace | bracket | ptlabel | legend | clear | render | limits | geom
 *! Requires Stata 16+. Uses undocumented graph-object members and gr_edit.
 program gpolish
@@ -18,7 +18,7 @@ program gpolish
     else if "`sub'"=="clear"    _gpl_clear `rest'
     else if "`sub'"=="render"   _gpl_render `rest'
     else if "`sub'"=="limits"   _gpl_limits `rest'
-    else if "`sub'"=="geom"     _gpl_geom `rest'
+    else if "`sub'"=="geom"     _gpl_geomuser `rest'
     else if "`sub'"=="style"    _gpl_style `rest'
     else                        _gpl_style `0'
     * edits are applied without redrawing; draw the finished graph once
@@ -43,7 +43,7 @@ program _gpl_name, rclass
     }
     if "`fam'"!="twoway" {
         di as err "gpolish: graph `name' is a `fam' graph; the layout commands support twoway graphs only."
-        di as err "         {bf:gpolish render} (gr2mpl) can redraw bar graphs in the same style."
+        if inlist("`fam'", "bar", "by", "combine", "matrix") di as err "         {bf:gpolish render} (gr2mpl) can redraw this `fam' graph in the same style."
         exit 198
     }
     quietly graph display `name'
@@ -175,6 +175,15 @@ program _gpl_ge
     _gm_edit .`name'.`0'
 end
 
+* gpolish geom, as typed by a user: check the graph first, then report its geometry
+program _gpl_geomuser, rclass
+    syntax [, name(string)]
+    _gpl_name `name'
+    local name `r(name)'
+    _gpl_geom, name(`name')
+    return add
+end
+
 program _gpl_count, rclass
     args name what
     local k `.`name'.plotregion1.`what'.arrnels'
@@ -244,7 +253,7 @@ program _gpl_note
     }
     else if "`what'"=="inlinecolor" {
         di as txt "note: Stata text has no inline colour markup; the tag was left as typed. Colour whole labels instead"
-        di as txt "      ({bf:gpolish legend}, {bf:gpolish endlabel}), or finish in matplotlib with {bf:gpolish render}."
+        di as txt "      ({bf:gpolish legend}, {bf:gpolish endlabel})."
     }
 end
 
@@ -887,12 +896,14 @@ program _gpl_limits
     di as txt _n "{bf:What gpolish can and cannot draw inside Stata}" _n
     di as txt "  Works in Stata                          Needs {bf:gpolish render} (matplotlib PNG)"
     di as txt "  {hline 38}  {hline 44}"
-    di as txt "  bold, left-aligned titles               words in different colours inside one line"
-    di as txt "  end-of-line labels with repel            text at angles other than 0/90/270 degrees"
-    di as txt "  value columns, end dots                 soft white halo behind text (Stata: {bf:halo} = white box)"
-    di as txt "  auto-placed point labels and callouts   by(), box, dot graphs in the same house style"
-    di as txt "  curved arrows (open heads), brackets    filled arrow heads, gradients, rounded bars"
+    di as txt "  bold, left-aligned titles               text at angles other than 0/90/270 degrees"
+    di as txt "  end-of-line labels with repel            soft white halo behind text (Stata: {bf:halo} = white box)"
+    di as txt "  value columns, end dots                 by(), bar, box, dot and combined graphs in the same style"
+    di as txt "  auto-placed point labels and callouts   rounded corners on boxed text ({bf:gr2mpl, roundbox})"
+    di as txt "  curved arrows (open heads), brackets    "
     di as txt "  legend text coloured like its keys      " _n
+    di as txt "  Neither draws different colours inside one line of text (colour whole labels instead)"
+    di as txt "  or filled arrow heads." _n
     di as txt "  The output of gpolish is still a Stata graph (edit, combine, export to any format)."
     di as txt "  {bf:gpolish render} carries every gpolish edit into the matplotlib version; its output is a PNG only."
 end
@@ -1158,8 +1169,9 @@ real scalar _gpl_obscost(real rowvector b, real matrix O)
 }
 
 // ---------------------------------------------------------------- 2-D point labels
-// Each label first tries eight spots next to its point. If every one of them collides and leaders
-// are allowed, it also tries spots on rings farther out, joined to the point by a leader line.
+// Each label first tries eight spots next to its point. If the best of them still has an overlap
+// cost above 2% of its box area and leaders are allowed, it also tries spots on rings farther out,
+// joined to the point by a leader line.
 // result rows: obs, anchor x, anchor y, halign (-1 left, 0 centre, 1 right), box alignment
 // (1 E, 2 W, 3 N, 4 S, 5 centre), overlap flag, leader flag, leader x0 y0 x1 y1 (device units)
 void _gpl_place(string scalar gxv, string scalar gyv, string scalar labv, string scalar selv, string scalar out,
@@ -1201,8 +1213,10 @@ void _gpl_place(string scalar gxv, string scalar gyv, string scalar labv, string
     real rowvector own
     real rowvector seg
     real rowvector bestseg
+    real rowvector P
     string scalar font
 
+    P = _gpl_placeparms()
     font = st_global("GPL_FONT")
     gx = st_data(., gxv)
     gy = st_data(., gyv)
@@ -1212,8 +1226,8 @@ void _gpl_place(string scalar gxv, string scalar gyv, string scalar labv, string
     O = *_gpl_ext("_gpl_OBS")
     w = J(m, 1, 0)
     // boxes carry a small pad so labels that merely touch count as colliding
-    for (i=1; i<=m; i++) w[i] = _gpl_textw(font, lab[i], 0)*fs + 2*0.6*fs/8.6
-    h = fs*1.4 + 2*0.6*fs/8.6
+    for (i=1; i<=m; i++) w[i] = _gpl_textw(font, lab[i], 0)*fs + 2*P[6]*fs/8.6
+    h = fs*P[5] + 2*P[6]*fs/8.6
     d = rad + off
     // columns: side, dx, dy of box centre, halign, penalty, dy of anchor, box alignment (1 E, 2 W, 3 N, 4 S)
     C = (  1,  d,  0, -1, 0,    0, 1 \
@@ -1250,14 +1264,14 @@ void _gpl_place(string scalar gxv, string scalar gyv, string scalar labv, string
                     far[i] = 0
                 }
             }
-            // leader fallback: only when every adjacent spot collides
+            // leader fallback: only when the best adjacent spot's overlap cost exceeds 2% of its box area
             if (leader & resid[i] > 0.02*w[i]*h) {
-                for (q=1; q<=6; q++) {
-                    rr = d + q*0.9*h
+                for (q=1; q<=P[1]; q++) {
+                    rr = d + q*P[2]*h
                     for (a=0; a<360; a=a+22.5) {
                         b = (px + cos(a*pi()/180)*(rr + w[i]/2) - w[i]/2, py + sin(a*pi()/180)*(rr + h/2) - h/2,
                              px + cos(a*pi()/180)*(rr + w[i]/2) + w[i]/2, py + sin(a*pi()/180)*(rr + h/2) + h/2)
-                        base = (0.6 + 0.08*rr/h)*h*h
+                        base = (P[3] + P[4]*rr/h)*h*h
                         if (base >= bc) continue
                         hardc = _gpl_hard(b, O, own, B, i, pass, w[i], h, x0, x1, y0, y1)
                         if (hardc + base >= bc) continue
@@ -1300,6 +1314,13 @@ void _gpl_place(string scalar gxv, string scalar gyv, string scalar labv, string
     }
     st_matrix(out, R)
     _gpl_obs_add(B)
+}
+// placement settings: number of rings, ring step (label heights), base cost of a far spot,
+// extra cost per label height of distance, box height (font sizes), box pad (points at 8.6 pt).
+// Chosen on held-out tuning scenarios; see benchmark/tune.py.
+real rowvector _gpl_placeparms()
+{
+    return((9, 0.4, 0.05, 0.005, 0.4, 3))
 }
 // overlap cost of a candidate box: obstacles, other labels, plot edges
 real scalar _gpl_hard(real rowvector b, real matrix O, real rowvector own, real matrix B, real scalar i,
@@ -1369,8 +1390,9 @@ real scalar _gpl_seghitn(real rowvector s, real matrix O)
     if (rows(O) == 0) return(0)
     sel = selectindex((O[,3] :>= min((s[1], s[3]))) :& (O[,1] :<= max((s[1], s[3]))) :&
                       (O[,4] :>= min((s[2], s[4]))) :& (O[,2] :<= max((s[2], s[4]))))
+    // selectindex() returns a 1 x 0 result when nothing matches, so count with length()
     n = 0
-    for (k=1; k<=rows(sel); k++) n = n + _gpl_seghit(s, O[sel[k],])
+    for (k=1; k<=length(sel); k++) n = n + _gpl_seghit(s, O[sel[k],])
     return(n)
 }
 // does segment s = (x0, y0, x1, y1) touch box b? (Liang-Barsky)

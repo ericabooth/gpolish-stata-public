@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 0.6.0  17nov2026}{...}
+{* *! version 0.6.1  17nov2026}{...}
 {viewerjumpto "Syntax" "gpolish##syntax"}{...}
 {viewerjumpto "Description" "gpolish##description"}{...}
 {viewerjumpto "Subcommands" "gpolish##subcommands"}{...}
@@ -17,7 +17,7 @@
 
 {p 8 16 2}{cmd:gpolish} [{cmd:style}] [{cmd:,} {opt name(graphname)} {opt nobold} {opt keepyl:ine} {opt keepyt:icks}]
 
-{p 8 16 2}{cmd:gpolish endlabel} [{cmd:,} {opt name(graphname)} {opt plots(numlist)} {opt lab:els(strlist)} {opt val:ues}
+{p 8 16 2}{cmd:gpolish endlabel} [{cmd:,} {opt name(graphname)} {opt plot:s(numlist)} {opt lab:els(strlist)} {opt val:ues}
 {opt for:mat(%fmt)} {opt dot:s} {opt dots:ize(#)} {opt sid:e(right|left)} {opt col:or(rgb)} {opt keepl:egend}
 {opt siz:e(#)} {opt gap(#)} {opt xg:ap(#)} {opt wrap(#)} {opt nobold} {opt norepel}]
 
@@ -33,20 +33,22 @@
 [{opt w:idth(#)} {opt flip} {opt gap(#)} {opt siz:e(#)} {opt col:or(rgb)} {opt lc:olor(rgb)} {opt lw:idth(str)} {opt name(graphname)}]
 
 {p 8 16 2}{cmd:gpolish arrow,} {opt fr:om(x y)} {opt to(x y)}
-[{opt cur:ve(#)} {opt head:size(#)} {opt shr:ink(#)} {opt lc:olor(rgb)} {opt lw:idth(str)} {opt name(graphname)}]
+[{opt cur:ve(#)} {opt head:size(#)} {opt seg:ments(#)} {opt shr:ink(#)} {opt lc:olor(rgb)} {opt lw:idth(str)} {opt name(graphname)}]
 
 {p 8 16 2}{cmd:gpolish ptlabel} {it:strvar} {ifin}{cmd:,} {opt x(varname)} {opt y(varname)}
 [{opt siz:e(#)} {opt col:or(rgb)} {opt off:set(#)} {opt ms:ize(#)} {opt halo} {opt nolead:er} {opt lc:olor(rgb)} {opt lw:idth(str)} {opt name(graphname)}]
 
 {p 8 16 2}{cmd:gpolish bracket,} {opt x(#)} {opt y0(#)} {opt y1(#)} [{opt tick(#)} {opt left} {opt lc:olor(rgb)} {opt lw:idth(str)} {opt name(graphname)}]
 
-{p 8 16 2}{cmd:gpolish legend} [{cmd:,} {opt plots(numlist)} {opt nobold} {opt name(graphname)}]
+{p 8 16 2}{cmd:gpolish legend} [{cmd:,} {opt plot:s(numlist)} {opt nobold} {opt name(graphname)}]
 
 {p 8 16 2}{cmd:gpolish clear} [{cmd:,} {opt name(graphname)}]
 
 {p 8 16 2}{cmd:gpolish render} [{cmd:,} {opt name(graphname)} {it:gr2mpl_options}]
 
 {p 8 16 2}{cmd:gpolish limits}
+
+{p 8 16 2}{cmd:gpolish geom} [{cmd:,} {opt name(graphname)}]
 
 {pstd}All sizes are in points. Positions are in the units of the graph's axes.
 Each value in {opt at()}, {opt to()} and {opt from()} may be a number or an expression written without spaces,
@@ -96,7 +98,7 @@ Label text is the variable label; {opt labels()} overrides it, one label per plo
 {opt side(left)} labels the left ends of the lines instead of the right; on a reversed axis
 ({cmd:xscale(reverse)}) the labels follow the screen, not the data.
 {opt wrap(#)} wraps long labels on word boundaries at about # characters, measured by rendered width.
-{opt gap(#)} is the minimum spacing between labels in line heights (default 1.3).
+{opt gap(#)} sets the minimum distance between the centres of neighbouring labels, in multiples of the font size per text line (default 1.3); wrapped labels get proportionally more room.
 Running {cmd:gpolish endlabel} again replaces the earlier labels instead of adding a second set.
 
 {phang}
@@ -108,7 +110,9 @@ If {opt at()} is omitted, the note is placed automatically near the target, clea
 
 {phang}
 {cmd:gpolish note} adds a shaded box of text, for a finding or a call-out. It takes the same options as
-{cmd:gpolish callout}, plus {opt fill()} and {opt border()} for the box colors and {opt pad(#)} for the padding in points.
+{cmd:gpolish callout}; the difference is that it draws a shaded box by default. {opt fill()} and {opt border()}
+change the box colors (the default border is used only when {opt fill()} is not given), and {opt pad(#)} sets the
+padding in points. {cmd:gpolish callout} draws the same box when {opt fill()} is given.
 With {opt to()} it draws an arrow from the box; with {opt at()} alone it is a plain box.
 With {opt align(center)} the box is centered on {opt at()}, which suits flow charts.
 
@@ -125,8 +129,9 @@ Together with {cmd:gpolish note} it builds simple flow charts on an empty plot.
 {phang}
 {cmd:gpolish ptlabel} labels selected points of a scatterplot with the string variable {it:strvar}.
 Each label is tried in eight positions next to its point and placed where it overlaps markers, lines and other
-labels least. If all eight collide, the label is also tried farther out, on rings around its point, and joined
-to the point by a thin leader line; it moves out only when that is clearly better. {opt noleader} keeps every
+labels least. If even the best of the eight still overlaps something, the label is also tried farther out, on
+rings around its point, and joined to the point by a thin leader line; it moves out only when that spot costs less
+than the best spot next to the point. {opt noleader} keeps every
 label next to its point; {opt lcolor()} and {opt lwidth()} style the leader lines.
 {opt x()} and {opt y()} name the plotted variables. Log axes are detected.
 
@@ -145,11 +150,18 @@ added by hand in the Graph Editor.
 {phang}
 {cmd:gpolish render} passes the graph to {helpb gr2mpl} for a matplotlib PNG. {cmd:gpolish limits} lists what needs it.
 
+{phang}
+{cmd:gpolish geom} reports the drawn geometry of a graph for programmers: the size in inches in {cmd:r(xsize)} and
+{cmd:r(ysize)}, the plot box in device units in {cmd:r(gx0)}, {cmd:r(gx1)}, {cmd:r(gy0)} and {cmd:r(gy1)}, the
+data-to-device transform in {cmd:r(xa)}, {cmd:r(xb)}, {cmd:r(ya)} and {cmd:r(yb)} (device = a + b * data, with the
+natural log of the data on a log axis, flagged in {cmd:r(xlog)} and {cmd:r(ylog)}), device units per inch in
+{cmd:r(gpi)}, relative size units per point in {cmd:r(relperpt)}, and the graph's name in {cmd:r(name)}.
+
 
 {marker limits}{...}
 {title:Limits}
 
-{pstd}Stata's renderer cannot draw the following. {cmd:gpolish} prints a note when a request meets one of them.
+{pstd}Stata's renderer cannot draw the following. {cmd:gpolish} prints a note for text at an unsupported angle, for inline color tags in the graph title, and when {cmd:ptlabel} or an automatically placed callout or note cannot place every label without overlap. It stops with an error when a layout command is used on a graph that is not a twoway graph.
 
 {p2colset 8 46 48 2}{...}
 {p2col:Limit}What happens{p_end}
@@ -158,7 +170,7 @@ added by hand in the Graph Editor.
 {p2col:Soft halo behind text}{opt halo} draws a white box, which can cover nearby markers{p_end}
 {p2col:Different colors inside one line of text}not possible; color whole labels{p_end}
 {p2col:Filled arrow heads}arrow heads are open{p_end}
-{p2col:Labels that cannot all fit}a note reports how many overlap{p_end}
+{p2col:Labels that cannot all fit}{cmd:ptlabel} and automatic callouts report how many labels still overlap noticeably{p_end}
 {p2col:{cmd:graph bar}, {cmd:by()} and combined graphs}layout commands are refused with a message; plain {cmd:gpolish} still makes the title bold; {helpb gr2mpl} redraws them{p_end}
 {p2line}
 

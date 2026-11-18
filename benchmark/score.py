@@ -5,7 +5,9 @@ For Stata methods the label position and alignment come from the exported SVG; f
 adjustText from the figure; for ggrepel from the label centres read back from grid.
 Per label it records: overlap with other labels, with any data marker (6 pt circles),
 with the fitted line, whether it leaves the plot region, its distance from its own point,
-and whether another point is closer to it than its own point (ambiguous).
+and whether another point is closer to it than its own point (ambiguous). A label is *clean* when it
+touches no other label, marker or line and stays in the plot; *clean and near* also requires it to be
+within 3 ems of its own point.
 Writes results/labels.csv and results/graphs.csv.  python score.py [--check scen ...]
 """
 import csv
@@ -72,7 +74,7 @@ def seg_hits_box(p, q, b):
     return True
 
 
-def score_graph(boxes, pts, idx, line, plot):
+def score_graph(boxes, pts, idx, line, plot, near_em=3.0):
     rows = []
     names = list(boxes)
     for i, s in enumerate(names):
@@ -96,7 +98,9 @@ def score_graph(boxes, pts, idx, line, plot):
         rows.append(dict(label=s, area=area, overlap_area=o_area, overlap_n=o_n, on_marker=on_mark,
                          on_line=int(on_line), outside=int(outside), dist_em=d_own / LABEL_PT,
                          ambiguous=int(d_other < d_own - 1.0),
-                         clean=int(o_n == 0 and on_mark == 0 and not on_line and not outside)))
+                         clean=int(o_n == 0 and on_mark == 0 and not on_line and not outside),
+                         clean_near=int(o_n == 0 and on_mark == 0 and not on_line and not outside
+                                        and d_own / LABEL_PT <= near_em)))
     return rows
 
 
@@ -155,6 +159,7 @@ def main(check):
             graph_rows.append(dict(
                 scenario=scen, design=m["design"], seed=m["seed"], method=meth, n_points=len(d), n_labels=n,
                 drawn=len(rows), clean_share=sum(r["clean"] for r in rows) / n,
+                clean_near_share=sum(r["clean_near"] for r in rows) / n,
                 overlap_pairs=sum(r["overlap_n"] for r in rows) / 2,
                 overlap_area_share=sum(r["overlap_area"] for r in rows) / 2 / tot_area,
                 on_marker_share=sum(r["on_marker"] > 0 for r in rows) / n,
