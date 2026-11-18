@@ -4,8 +4,11 @@
 # while drawing, so the final centres are read back from the drawn grid objects.
 # Writes out/ggrepel/results.csv (label centres in points, y up) and timing.csv.
 # Run from the benchmark folder after run_stata.do:  Rscript run_ggrepel.R [scenario ...]
+# With no scenarios named, the environment variable BENCH_SCENARIOS (if set) names them.
 suppressPackageStartupMessages({ library(ggplot2); library(ggrepel); library(grid) })
 args <- commandArgs(trailingOnly = TRUE)
+if (!length(args)) args <- strsplit(trimws(Sys.getenv("BENCH_SCENARIOS")), "[[:space:]]+")[[1]]
+args <- args[nzchar(args)]
 dir.create("out/ggrepel", showWarnings = FALSE, recursive = TRUE)
 man <- rbind(read.csv("data/manifest_synthetic.csv", colClasses = c(scenario = "character")),
              read.csv("data/manifest_real.csv", colClasses = c(scenario = "character")))

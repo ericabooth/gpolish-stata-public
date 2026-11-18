@@ -2,17 +2,27 @@
 * Draws every scenario three ways and records where the labels landed:
 *   default   Stata's own marker labels, mlabel() at position 3
 *   gpolish   gpolish ptlabel (this package)
-*   labrepel  labrepel from Asjad Naqvi's graphfunctions (SSC), drawn as its help file shows
+*   labrepel  labrepel from Asjad Naqvi's graphfunctions (SSC), labels drawn at _xcoord/_ycoord
+*             with leader lines back to their points
 * Run from the benchmark folder after make_synthetic.py:
 *   stata-mp -b do run_stata.do
 * labrepel must be installed (ssc install graphfunctions); if the environment variable
-* BENCH_PLUS names another ado folder, it is searched first.
+* BENCH_PLUS names another ado folder, it is added to the end of the ado path to find it.
+* The gpolish under test is always this package's src folder, which is put first on the ado
+* path; the run stops if another copy of gpolish would be used.
 version 16
 set more off
 clear all
-adopath ++ "`c(pwd)'/../src"
+local src "`c(pwd)'/../src"
+adopath ++ "`src'"
 local bp : environment BENCH_PLUS
-if `"`bp'"' != "" adopath ++ `"`bp'"'
+if `"`bp'"' != "" adopath + `"`bp'"'
+quietly findfile gpolish.ado
+if `"`r(fn)'"' != `"`src'/gpolish.ado"' {
+    di as err `"gpolish.ado resolves to `r(fn)', not to this package's src folder"'
+    exit 498
+}
+which gpolish
 graph set svg fontface "Open Sans"
 graph set window fontface "Open Sans"
 capture mkdir "out"
@@ -67,6 +77,16 @@ tempfile real
 save `real'
 import delimited using "data/manifest_synthetic.csv", clear varnames(1) stringcols(1 2)
 append using `real'
+* BENCH_SCENARIOS limits the run to some scenarios, e.g. "life12 syn60all_s01 syn60all_s02"
+local only_s : environment BENCH_SCENARIOS
+if `"`only_s'"' != "" {
+    gen byte keep_s = 0
+    foreach s of local only_s {
+        quietly replace keep_s = 1 if scenario == "`s'"
+    }
+    quietly keep if keep_s
+    drop keep_s
+}
 local N = _N
 forvalues r = 1/`N' {
     local scen`r' = scenario[`r']
@@ -113,6 +133,10 @@ foreach method of local methods {
             timer off 1
         }
         else {
+            * labrepel 1.0 accepts seed() but does not apply it; its random jitter draws from the
+            * session's random-number stream. Setting the seed here makes each graph's result the
+            * same whichever scenarios ran before it.
+            set seed 12345
             timer on 1
             capture noisily labrepel y x if lab == 1, label(label) mlabsize(2.6) xsize(7) ysize(4.6) seed(12345)
             local rc = _rc

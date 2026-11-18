@@ -7,6 +7,12 @@ clear all
 local dir : environment TUNE_DIR
 adopath ++ "`c(pwd)'/../src"
 adopath ++ "`dir'"
+* the candidate copy in TUNE_DIR must be the gpolish that runs
+quietly findfile gpolish.ado
+if `"`r(fn)'"' != `"`dir'/gpolish.ado"' {
+    di as err `"gpolish.ado resolves to `r(fn)', not to the candidate in `dir'"'
+    exit 498
+}
 graph set svg fontface "Open Sans"
 graph set window fontface "Open Sans"
 tempname gf
