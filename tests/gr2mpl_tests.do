@@ -597,6 +597,9 @@ rchk y3_plot
 ok strpos(`"$R_UNSUP"', "plot 3 (type scatter): y axis 3")
 has "panel1.plot2.axis=y2"
 has "panel1.legend=Mileage (mpg)|Price"
+* Stata stacks the axes on the left; gr2mpl puts the second on the right
+has "panel1.yside=left"
+has "panel1.y2side=right"
 
 * -- graph box: a group without whiskers still gets its box
 graph box mpg, over(rep78) title("box without whiskers")
@@ -627,6 +630,123 @@ line le_wfemale le_bmale year, xscale(reverse) title("reversed x axis")
 rchk reversed_endlabels endlabels
 has "panel1.endlabel=White women|clear"
 has "panel1.endlabel=Black men|clear"
+
+* -- plot 1 on yaxis(2): plots, reference lines and text on y axis 1 keep their own scale
+sysuse auto, clear
+twoway (line price weight, sort yaxis(2)) (scatter mpg weight), yline(20) title("plot 1 on y axis 2")
+rchk y2_plot1
+has "panel1.plot1.axis=y2"
+has "panel1.plot2.axis=y1"
+has "panel1.refline=y1:y:20"
+has "panel1.yticks=10|20|30|40"
+getv panel1.ylim
+ok real(word(subinstr(`"`r(val)'"', ",", " ", .), 2)) < 100
+* Stata draws the axis of the first plot on the left
+has "panel1.yside=right"
+has "panel1.y2side=left"
+* a graph whose only y axis is axis 2 draws it as its main axis, on the left
+sysuse uslifeexp, clear
+twoway line le year, yaxis(2) title("only y axis 2")
+rchk y2_only
+has "panel1.plot1.axis=y1"
+has "panel1.yside=left"
+has "panel1.yticks=40|50|60|70|80"
+* yscale(alt) puts the y axis on the right
+line le year, yscale(alt) title("yscale(alt)")
+rchk yalt
+has "panel1.yside=right"
+
+* -- gpolish endlabel next to a y axis: the plot-region margin is kept, so the labels
+*    sit between the axis and the lines, as in Stata's export
+line le_wfemale le_wmale year, scheme(pypolish) legend(off) title("end labels on the left")
+gpolish
+gpolish endlabel, side(left) values
+rchk endlabel_left
+has "panel1.ann_overlaps=0"
+has "panel1.ann_tick_overlaps=0"
+getv panel1.xdata_pts
+ok real(word(subinstr(`"`r(val)'"', ",", " ", .), 1)) > 100
+line le_wfemale le_wmale year, scheme(pypolish) legend(off) yscale(alt) title("end labels, y axis on the right")
+gpolish
+gpolish endlabel, values
+rchk endlabel_alt
+has "panel1.ann_overlaps=0"
+has "panel1.ann_tick_overlaps=0"
+getv panel1.xdata_pts
+ok real(word(subinstr(`"`r(val)'"', ",", " ", .), 2)) > 100
+twoway (line le_wfemale year) (line le_wmale year, yaxis(2)), scheme(pypolish) legend(off) title("end labels, two y axes")
+gpolish
+gpolish endlabel, values
+rchk endlabel_y2
+has "panel1.ann_tick_overlaps=0"
+has "panel1.y2side=right"
+getv panel1.xdata_pts
+ok real(word(subinstr(`"`r(val)'"', ",", " ", .), 2)) > 100
+* gpolish's objects on a graph whose plot 1 is on yaxis(2) are drawn on that axis
+twoway (line le_wfemale year, yaxis(2)) (line le_bmale year), scheme(pypolish) legend(off) title("plot 1 on y axis 2, end labels")
+gpolish
+gpolish endlabel, values
+rchk endlabel_plot1y2
+has "panel1.ann=79.9|left|0|y2|in"
+has "panel1.ann=67.8|left|0|y2|in"
+has "panel1.ann_overlaps=0"
+* a default plot-region margin keeps gr2mpl's padding (no change from earlier renders)
+line le year, title("default margin")
+rchk margin_default
+getv panel1.xdata_pts
+ok real(word(subinstr(`"`r(val)'"', ",", " ", .), 1)) < 20
+
+* -- gpolish endlabel, values on a reversed x axis: each value is paired on screen
+line le_wfemale le_wmale year, scheme(pypolish) legend(off) xscale(reverse) title("reversed, values")
+gpolish
+gpolish endlabel, values
+rchk endlabel_reversed
+has "panel1.ann_overlaps=0"
+getv panel1.endpair_mingap
+ok real(`"`r(val)'"') > 4
+
+* -- the README quick start: values clear of the labels
+line le_wfemale le_wmale le_bfemale le_bmale year, scheme(pypolish) legend(off) ///
+    xsize(7) ysize(4.6) title("Life expectancy rose for every group", size(13.5pt))
+gpolish
+gpolish endlabel, values dots
+gpolish callout "1918 influenza" "pandemic", to(1918.6 30.6)
+rchk quickstart
+has "panel1.ann_overlaps=0"
+getv panel1.endpair_mingap
+ok real(`"`r(val)'"') > 4
+
+* -- legend: text-only entries and a plot listed twice keep their place in order()
+sysuse auto, clear
+twoway (scatter mpg weight if foreign) (scatter mpg weight if !foreign) (lfit mpg weight), ///
+    legend(order(1 "A" - "group" 2 "B" 1 "A again")) title("text-only and repeated entries")
+rchk legend_text
+has "panel1.legend=A|group|B|A again"
+
+* -- matplotlib version: gr2mpl needs 3.6 or later
+gr2mpl doctor
+ok "`r(mplok)'" == "1"
+if c(os) != "Windows" {
+    * a stand-in Python that reports matplotlib 3.5.3
+    tempname fk
+    file open `fk' using "tests/out/oldmpl.sh", write text replace
+    file write `fk' "#!/bin/sh" _n `"echo "MPLOK 3.5.3""' _n
+    file close `fk'
+    shell chmod +x "tests/out/oldmpl.sh"
+    scatter mpg weight, name(mv, replace)
+    capture gr2mpl, name(mv) saving("tests/out/r_old.png") replace python("`c(pwd)'/tests/out/oldmpl.sh")
+    ok _rc == 601
+    capture confirm file "tests/out/r_old.png"
+    ok _rc != 0
+    gr2mpl doctor, python("`c(pwd)'/tests/out/oldmpl.sh")
+    ok "`r(mplok)'" == "0"
+    ok "`r(mplversion)'" == "3.5.3"
+    * the old Python is not remembered: the next call uses the working one
+    gr2mpl, name(mv) saving("tests/out/r_old.png") replace
+    ok "`r(python)'" != "`c(pwd)'/tests/out/oldmpl.sh"
+    erase "tests/out/oldmpl.sh"
+    capture erase "tests/out/r_old.png"
+}
 
 * -- options and temporary files
 sysuse auto, clear

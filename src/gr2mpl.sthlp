@@ -10,7 +10,7 @@
 {title:Title}
 
 {phang}
-{bf:gr2mpl} {hline 2} Redraw a Stata graph held in memory with matplotlib and save it as a PNG
+{bf:gr2mpl} {hline 2} Redraw a Stata graph held in memory with matplotlib and save it as a PNG, PDF, SVG or JPG image
 
 
 {marker syntax}{...}
@@ -37,7 +37,7 @@ and community commands that build on them.
 The data come from the graph itself. The dataset in memory can have changed since the graph was drawn.
 
 {pstd}
-The result is a PNG file. It is not a Stata graph: it cannot be edited in the Graph Editor or combined.
+The result is an image file (PNG, PDF, SVG or JPG, set by the {opt saving()} extension). It is not a Stata graph: it cannot be edited in the Graph Editor or combined.
 For edits that stay inside Stata, see {helpb gpolish}. {cmd:gr2mpl} carries every {cmd:gpolish} edit
 (end labels, callouts, point labels, colored legend text) into the matplotlib version.
 It applies the angles that Stata stores for text boxes, marker labels and x-axis tick labels,
@@ -85,7 +85,7 @@ gives the same proportions as Stata's own export. Panels of {cmd:by()}, {cmd:gra
 {title:Python setup}
 
 {pstd}
-{cmd:gr2mpl} needs Python 3 with {bf:matplotlib} and {bf:numpy}. It looks for an interpreter in this order:
+{cmd:gr2mpl} needs Python 3 with {bf:matplotlib} 3.6 or later and {bf:numpy}. It looks for an interpreter in this order:
 
 {p 8 12 2}1. the {opt python()} option;{p_end}
 {p 8 12 2}2. the global macro {cmd:$GR2MPL_PYTHON};{p_end}
@@ -93,8 +93,11 @@ gives the same proportions as Stata's own export. Panels of {cmd:by()}, {cmd:gra
 {p 8 12 2}4. {cmd:python3} or {cmd:python} on the system path.{p_end}
 
 {pstd}
-{cmd:gr2mpl doctor} reports which interpreter will be used, its matplotlib version, and whether the font is installed.
+{cmd:gr2mpl doctor} reports which interpreter will be used, its matplotlib version and whether that version
+is new enough, and whether the font is installed.
 If no interpreter has matplotlib, {cmd:gr2mpl} stops and prints the {cmd:pip install} command to run.
+If the interpreter's matplotlib is older than 3.6, {cmd:gr2mpl} stops with error 601, names the version it found,
+and prints the {cmd:pip install --upgrade} command to run.
 To set the interpreter once, put {cmd:global GR2MPL_PYTHON "/path/to/python"} in your profile.do.
 
 
@@ -112,10 +115,13 @@ To set the interpreter once, put {cmd:global GR2MPL_PYTHON "/path/to/python"} in
 {p2col:horizontal spike, dropline, area, rbar, rcap}yes{p_end}
 {p2col:lfit, lfitci, qfitci, lowess, kdensity, function}yes{p_end}
 {p2col:pcspike, pcarrow, pccapsym}yes{p_end}
-{p2col:second y axis, log and reversed scales, dates}yes{p_end}
+{p2col:second y axis (also when plot 1 is on it), yscale(alt)}yes{p_end}
+{p2col:log and reversed scales, dates}yes{p_end}
 {p2col:xline(), yline(), text(), also on the second y axis}yes{p_end}
 {p2col:gpolish edits}yes{p_end}
 {p2col:legend order(), subtitle, repeated labels}yes{p_end}
+{p2col:order() with text-only entries or a plot listed twice}yes{p_end}
+{p2col:plot-region margin wider than 4}kept (see {help gr2mpl##limits:Limits}){p_end}
 {p2col:SMCL superscripts, subscripts, Greek, bold}yes (see {help gr2mpl##limits:Limits}){p_end}
 {p2col:two-line tick labels, non-Latin scripts}yes{p_end}
 {p2col:boxed text: text(, box), shaded note boxes}yes{p_end}
@@ -154,6 +160,8 @@ Other differences are limits of the translation:
 {p 8 12 2}o {cmd:{c -(}sup:{c )-}} and {cmd:{c -(}sub:{c )-}} use Unicode superscript and subscript characters; text that has none (most capital letters in subscripts, punctuation) is drawn on the line.{p_end}
 {p 8 12 2}o Characters that no installed font can draw appear as empty boxes; {cmd:gr2mpl} tries the CJK fonts that come with macOS, Windows and Noto.{p_end}
 {p 8 12 2}o With {cmd:gpolish endlabel, values}, the value column is spaced from the widths matplotlib measures, so it can sit a little further right than in Stata.{p_end}
+{p 8 12 2}o Plot-region margins of 4 or less (in Stata's relative units; the default margins of Stata's schemes and of {cmd:pypolish} are 3 or less) are replaced by {cmd:gr2mpl}'s own padding of about 2.5% of the axis range at each end (none below a y axis that starts at 0). A wider margin is kept, in points, as Stata draws it: for example the room {cmd:gpolish endlabel} makes between a y axis and the lines with {cmd:side(left)}, {cmd:yscale(alt)} or {cmd:yaxis(2)}, or {cmd:plotregion(margin(large))}.{p_end}
+{p 8 12 2}o {cmd:xscale(alt)} is not followed: the x axis stays at the bottom. When Stata draws both y axes on one side (as it does with a third y axis), the second is drawn on the other side.{p_end}
 
 
 {marker examples}{...}
@@ -171,6 +179,9 @@ Other differences are limits of the translation:
 
 {pstd}{cmd:r(filename)}, {cmd:r(python)}, {cmd:r(pymode)} ({cmd:embedded} or {cmd:shell}), {cmd:r(unsupported)}
 (skipped layers, panels and annotations, separated by semicolons), and, with {opt keepspec}, {cmd:r(specdir)} (the folder that holds the intermediate files).
+
+{pstd}{cmd:gr2mpl doctor} returns {cmd:r(python)}, {cmd:r(pymode)}, {cmd:r(mplversion)} (the matplotlib version)
+and {cmd:r(mplok)} (1 when that version is 3.6 or later, 0 when it is older).
 
 
 {title:Technical note}

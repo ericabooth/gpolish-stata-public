@@ -32,6 +32,12 @@ from matplotlib.transforms import Bbox  # noqa: E402
 from matplotlib.offsetbox import AnnotationBbox, DrawingArea  # noqa: E402
 from matplotlib.patches import FancyBboxPatch, Polygon, Rectangle  # noqa: E402
 
+# oldest matplotlib the renderer supports: Axes.legend(alignment=) arrived in 3.6
+MIN_MPL = (3, 6)
+# a plot-region margin wider than this (Stata's relative units) is kept exactly;
+# narrower ones, which include the default margins of Stata's schemes and of
+# pypolish (3 or less), give way to gr2mpl's own padding
+MARGIN_KEEP = 4.0
 INK = "#1F2328"
 MUTED = "#6B7280"
 GRID = "#E5E7EB"
@@ -354,9 +360,9 @@ class Panel:
         self.infos = []
         self.horizontal = False
         self.has_legend = False
-        self.legend_style = {}
         self.axis_off = set()
         self._slots = {}
+        self._margins = []
         self.leg = None
         self._leg_args = None
         # text sizes Stata used for this panel; graph combine shrinks its members
@@ -456,11 +462,19 @@ class Panel:
             ax = self.axis_for(t, "text()")
             if ax is not None:
                 self.draw_text(t, keep_color=False, ax=ax)
-        added = s.get("added_text", [])
-        self.pair_end_values(added)
-        for t in added:
-            self.draw_text(t, keep_color=True)
-        self.added_shapes()
+        # gpolish adds its objects to Stata's first plot region, which belongs to the
+        # second y axis when plot 1 is on yaxis(2)
+        added = [t for t in s.get("added_text", []) if t.get("draw") != "no"]
+        any_added = added or any(o.get("draw") != "no" for o in
+                                 s.get("added_lines", []) + s.get("added_markers", []))
+        added_ax = self.axis_for({"yaxis": s.get("added_yaxis", "1"),
+                                  "xaxis": s.get("added_xaxis", "1")},
+                                 "added text, lines and markers") if any_added else None
+        if added_ax is not None:
+            self.pair_end_values(added, added_ax)
+            for t in added:
+                self.draw_text(t, keep_color=True, ax=added_ax)
+            self.added_shapes(added_ax)
 
     def axis_for(self, obj, what):
         """The Axes an object on yaxis(#)/xaxis(#) belongs to, or None (skipped)."""
@@ -844,6 +858,14 @@ class Panel:
                         w = self.bar_width()
                         lo2, hi2 = lo - 0.75 * w, hi + 0.75 * w
                 (ax.set_xlim if which == "x" else ax.set_ylim)(lo2, hi2)
+                # a wide plot-region margin (gpolish endlabel makes room this way when a
+                # y axis is on the labelled side) is applied once the axes size is known
+                mlo, mhi = num(a.get("mlo"), 0.0) or 0.0, num(a.get("mhi"), 0.0) or 0.0
+                if max(mlo, mhi) > MARGIN_KEEP and self.s.get("role") != "matrix":
+                    self._margins.append(dict(ax=ax, which=which, lo=lo, hi=hi, lo2=lo2,
+                                              hi2=hi2, log=is_log and lo > 0,
+                                              rev=a.get("reverse") == "yes",
+                                              mlo=mlo, mhi=mhi))
             if ticks:
                 self.set_ticks(ax, which, ticks, self.axis_format(key if key != "y2axis" else key),
                                parse_angle({"angle": a.get("tickangle", "")}))
@@ -892,10 +914,64 @@ class Panel:
         if (min(ylo, yhi) < 0 < max(ylo, yhi) and not horizontal_any
                 and "y" not in self.axis_off and not is_matrix):
             ax.axhline(0, color=AXIS, lw=0.9, zorder=1.8)
+        # the side Stata drew each y axis on: yscale(alt) moves it, and with two y
+        # axes the axis of the first plot goes on the left
+        self.yside = "right" if (s.get("yaxis") or {}).get("position") == "right" else "left"
+        self.y2side = None
         if self.ax2 is not None:
-            self.ax2.tick_params(axis="y", labelright=True, labelleft=False,
+            self.y2side = "left" if (s.get("y2axis") or {}).get("position") == "left" else "right"
+            if self.y2side == self.yside:
+                # Stata stacks two axes on one side (with a third y axis, for example);
+                # here the second goes on the other side so the labels do not overprint
+                self.y2side = "right" if self.yside == "left" else "left"
+        if self.yside == "right":
+            ax.yaxis.tick_right()
+            ax.yaxis.set_label_position("right")
+            ax.tick_params(axis="y", labelleft=False,
+                           labelright=(s.get("yaxis") or {}).get("draw") != "no")
+        if self.ax2 is not None:
+            r2 = self.y2side == "right"
+            if not r2:
+                self.ax2.yaxis.tick_left()
+                self.ax2.yaxis.set_label_position("left")
+            self.ax2.tick_params(axis="y", labelright=r2, labelleft=not r2,
                                  labelcolor=MUTED)
             self.ax2.grid(False)
+
+    def apply_margins(self):
+        """Keep a wide plot-region margin: the data range is drawn that many points
+        inside the axes edge, as in Stata. Called by the layout once the axes size
+        is known. The other side keeps the padding set by apply_axes()."""
+        if not self._margins:
+            return
+        pos = self.ax.get_position()
+        W, H = pos.width * self.f.xs * 72.0, pos.height * self.f.ys * 72.0
+        for m in self._margins:
+            A = W if m["which"] == "x" else H
+            f = (lambda v: math.log(v)) if m["log"] else (lambda v: v)
+            lo, hi, lo2, hi2 = f(m["lo"]), f(m["hi"]), f(m["lo2"]), f(m["hi2"])
+            if not (hi > lo and hi2 > lo2 and A > 0):
+                continue
+            # padding now in points at the low and high data ends
+            p_lo = (lo - lo2) / (hi2 - lo2) * A
+            p_hi = (hi2 - hi) / (hi2 - lo2) * A
+            # screen sides: a reversed axis puts the high data end on the low side
+            s_lo, s_hi = (m["mhi"], m["mlo"]) if m["rev"] else (m["mlo"], m["mhi"])
+            unit = self.f.unit * self.gmult
+            if s_lo > MARGIN_KEEP:
+                p_lo = max(p_lo, s_lo * unit)
+            if s_hi > MARGIN_KEEP:
+                p_hi = max(p_hi, s_hi * unit)
+            if p_lo + p_hi >= 0.85 * A:  # leave the data at least 15% of the axis
+                k = 0.85 * A / (p_lo + p_hi)
+                p_lo, p_hi = p_lo * k, p_hi * k
+            per = (hi - lo) / (A - p_lo - p_hi)
+            a0, a1 = lo - p_lo * per, hi + p_hi * per
+            if m["log"]:
+                a0, a1 = math.exp(a0), math.exp(a1)
+            if m["rev"]:
+                a0, a1 = a1, a0
+            (m["ax"].set_xlim if m["which"] == "x" else m["ax"].set_ylim)(a0, a1)
 
     def reflines(self):
         for r in self.s.get("reflines", []):
@@ -938,11 +1014,14 @@ class Panel:
             out = max(out, w)
         return out
 
-    def pair_end_values(self, added):
+    def pair_end_values(self, added, ax=None):
         """gpolish endlabel, values: a label (placed east of the line end) and a
-        value (placed west of a point further right) on the same line. Stata
-        spaced them for its own text widths; here the value column is set from
-        the widths measured with matplotlib, so the two never overprint."""
+        value (placed west of a point further right on screen) on the same line.
+        Stata spaced them for its own text widths; here the value column is set
+        from the widths measured with matplotlib, so the two never overprint.
+        Pairs are matched on screen x, so a reversed x axis pairs the same way."""
+        ax = ax if ax is not None else self.ax
+        sgn = -1.0 if ax.xaxis_inverted() else 1.0
         def is_value(t):
             txt = " ".join(t.get("text") or []).strip()
             return bool(re.fullmatch(r"[-+\u2212]?[\d.,]+%?", txt.replace("$", "").replace("\\", "")))
@@ -966,10 +1045,13 @@ class Panel:
                     lx = num(lab.get("x"))
                     if lplace == vplace:
                         continue
-                    # right side: label east of x, value west of a larger x (and mirrored)
-                    if (lplace == "east" and vx > lx) or (lplace == "west" and vx < lx):
+                    # right side: label east of x, value west of a point to its right
+                    # on screen (and mirrored)
+                    d = sgn * (vx - lx)
+                    if (lplace == "east" and d > 0) or (lplace == "west" and d < 0):
                         pairs.append((lab, v))
                         break
+        self._end_pairs = pairs
         if not pairs:
             return
         wl = max(self.text_width(lab) for lab, _ in pairs)
@@ -1078,10 +1160,11 @@ class Panel:
                                      annotation_clip=False, zorder=8)
                 if not box:
                     self.halo(a)
+                t.setdefault("_artists", []).append(a)
                 lx += w
 
-    def added_shapes(self):
-        ax = self.ax
+    def added_shapes(self, ax=None):
+        ax = ax if ax is not None else self.ax
         for l in self.s.get("added_lines", []):
             if l.get("draw") == "no":
                 continue
@@ -1123,39 +1206,57 @@ class Panel:
 
     # ---- legend / end labels -------------------------------------------------
     def series_labels(self, leg=None):
-        """Legend entries in the order of Stata's legend map: {plot index: label}."""
-        leg = leg if leg is not None else self.s.get("legend", {})
+        """The first legend label of each plot: {plot index: label}."""
         out = {}
+        for k, lab, _col, _bold in self.legend_entries(leg):
+            if k > 0 and k not in out:
+                out[k] = lab
+        return out
+
+    def legend_entries(self, leg=None):
+        """Legend entries in the order of Stata's legend map, as (plot index, label,
+        label colour, bold). A text-only entry ("-" in order()) has index 0; a plot
+        listed twice keeps both entries."""
+        leg = leg if leg is not None else self.s.get("legend", {})
+        out = []
         if leg.get("draw") != "no":
             for e in leg.get("entries", []):
                 k = num(e[0])
-                if k is not None and e[1] and int(k) not in out:
-                    lab = clean_text(e[1])
-                    out[int(k)] = lab
-                    col = stata_color(e[2], None) if len(e) > 2 else None
-                    bold = bool(re.fullmatch(r"\s*\{bf:[^}]*\}\s*", e[1]))
-                    self.legend_style[int(k)] = (col, bold)
+                if k is None or not e[1]:
+                    continue
+                col = stata_color(e[2], None) if len(e) > 2 else None
+                bold = bool(re.fullmatch(r"\s*\{bf:[^}]*\}\s*", e[1]))
+                out.append((int(k), clean_text(e[1]), col, bold))
         return out
 
-    def legend_items(self, labels):
-        """One key per legend entry, in legend order; repeated label text is kept."""
+    def legend_items(self, entries):
+        """One key per legend entry, in legend order. Repeated plots and repeated
+        label text are kept; a text-only entry gets an empty key."""
         by_idx = {i["p"]["index"]: i for i in self.infos}
-        handles, texts, self._legend_keys = [], [], []
-        for k, lab in labels.items():
-            info = by_idx.get(k)
-            if not lab or info is None or info["handle"] is None:
+        handles, texts, self._legend_styles = [], [], []
+        nplot = 0
+        for k, lab, col, bold in entries:
+            if not lab:
                 continue
-            handles.append(info["handle"])
+            if k == 0:
+                h = Rectangle((0, 0), 1, 1, fill=False, edgecolor="none", visible=False)
+            else:
+                info = by_idx.get(k)
+                if info is None or info["handle"] is None:
+                    continue
+                h = info["handle"]
+                nplot += 1
+            handles.append(h)
             texts.append(lab)
-            self._legend_keys.append(k)
-        if len(handles) == 1 and len(self.infos) == 1:
+            self._legend_styles.append((col, bold))
+        if nplot == 0 or (len(handles) == 1 and len(self.infos) == 1):
             return [], []
         return handles, texts
 
     def restyle_legend(self, leg):
-        keys = getattr(self, "_legend_keys", [])
+        styles = getattr(self, "_legend_styles", [])
         for k, txt in enumerate(leg.get_texts()):
-            col, bold = self.legend_style.get(keys[k] if k < len(keys) else None, (None, False))
+            col, bold = styles[k] if k < len(styles) else (None, False)
             if col is not None and col[:3] != (0, 0, 0) and col[3] > 0:
                 txt.set_color(col)
             if bold:
@@ -1216,7 +1317,7 @@ class Panel:
         polys = [i for i in self.infos if i.get("poly") and i["p"]["index"] in labels]
         if len(polys) >= 5 and len(polys) == len(labels):
             return self.ramp_legend(labels)
-        handles, texts = self.legend_items(labels)
+        handles, texts = self.legend_items(self.legend_entries())
         if not handles:
             return False
         leg = self.s.get("legend", {})
@@ -1478,7 +1579,7 @@ class Panel:
             else:
                 handles.append(plt.Rectangle((0, 0), 1, 1, facecolor=c, edgecolor="none"))
         texts = [clean_text(e[1]) for e in entries]
-        self._legend_keys = []
+        self._legend_styles = []
         self._leg_args = dict(handles=handles, texts=texts, title="",
                               fs=self.f.tsize(leg.get("size"), 9.0, self.gmult))
         self.make_legend(min(len(handles), 4))
@@ -1656,8 +1757,10 @@ class Figure:
                 p.ax.set_ylabel(p.axis_title("y"), fontsize=p.axis_title_size("y"), color=MUTED,
                                 labelpad=6 * self.k)
             if p.ax2 is not None and p.axis_title("y2"):
+                right = getattr(p, "y2side", "right") != "left"
                 p.ax2.set_ylabel(p.axis_title("y2"), fontsize=p.axis_title_size("y2"), color=MUTED,
-                                 rotation=270, labelpad=14 * self.k)
+                                 rotation=270 if right else 90,
+                                 labelpad=(14 if right else 6) * self.k)
         if two_axes:
             self.ytitle = ""
 
@@ -1693,7 +1796,7 @@ class Figure:
                                    pad=(24 if p.has_legend else 7) * self.k)
             if is_by and not s.get("nolegend") and self.panels:
                 p0 = self.panels[0]
-                handles, texts = p0.legend_items(p0.series_labels(s.get("legend", {})))
+                handles, texts = p0.legend_items(p0.legend_entries(s.get("legend", {})))
                 if len(handles) > 1:
                     self.fig_legend = (handles, texts, p0)
         self.layout()
@@ -1800,6 +1903,7 @@ class Figure:
                 y1 = T - sum(dt_[j] + h + db[j] + gapy for j in range(r_)) - dt_[r_]
                 rects[k] = [x0, y1 - h, w, h]
                 p.set_position(rects[k])
+                p.apply_margins()
             fig.canvas.draw()
             rr = fig.canvas.get_renderer()
             ndl, ndr = [0.0] * cols, [0.0] * cols
@@ -1871,6 +1975,47 @@ class Figure:
                        and min(anns[m].x1, anns[n].x1) - max(anns[m].x0, anns[n].x0) > 1
                        and min(anns[m].y1, anns[n].y1) - max(anns[m].y0, anns[n].y0) > 1)
             out.append(f"{tag}.ann_overlaps={over}")
+            # text that runs into tick labels (an end label over a y axis drawn on its side)
+            ticks = []
+            for t_ax in (ax, p.ax2):
+                if t_ax is None:
+                    continue
+                for t in t_ax.get_yticklabels() + t_ax.get_xticklabels():
+                    if t.get_visible() and t.get_text():
+                        ticks.append(t.get_window_extent(r))
+            tover = sum(1 for a in anns for b in ticks
+                        if min(a.x1, b.x1) - max(a.x0, b.x0) > 1
+                        and min(a.y1, b.y1) - max(a.y0, b.y0) > 1)
+            out.append(f"{tag}.ann_tick_overlaps={tover}")
+            out.append(f"{tag}.yside={getattr(p, 'yside', 'left')}")
+            ylo, yhi = sorted(ax.get_ylim())
+            out.append(f"{tag}.ylim={ylo:g},{yhi:g}")
+            if p.ax2 is not None:
+                out.append(f"{tag}.y2side={p.y2side}")
+            # gpolish endlabel, values: the gap (points) between each label and its value
+            gaps = []
+            for lab, v in getattr(p, "_end_pairs", []):
+                la, va = lab.get("_artists", []), v.get("_artists", [])
+                if not la or not va:
+                    continue
+                lb = Bbox.union([a.get_window_extent(r) for a in la])
+                vb = Bbox.union([a.get_window_extent(r) for a in va])
+                g = (vb.x0 - lb.x1) if vb.x0 >= lb.x0 else (lb.x0 - vb.x1)
+                gaps.append(g * 72.0 / fig.dpi)
+            if gaps:
+                out.append(f"{tag}.endpair_mingap={min(gaps):.1f}")
+            # where the data range sits inside the axes, in points from the left and
+            # bottom edges (shows a kept plot-region margin)
+            if p.infos:
+                bb = ax.get_window_extent(r)
+                fin = [i["x"][np.isfinite(i["x"])] for i in p.infos]
+                xs_ = [v.min() for v in fin if v.size]
+                xe_ = [v.max() for v in fin if v.size]
+                if xs_:
+                    px = ax.transData.transform([(min(xs_), 0), (max(xe_), 0)])[:, 0]
+                    k72 = 72.0 / fig.dpi
+                    out.append(f"{tag}.xdata_pts={(px.min() - bb.x0) * k72:.1f},"
+                               f"{(bb.x1 - px.max()) * k72:.1f}")
             # end labels: clear of their line when they start right of every point of it
             for lab, pts in getattr(p, "_end_series", []):
                 for c in ax.texts:
@@ -1952,9 +2097,19 @@ class Figure:
         print("saved", out)
 
 
+def mpl_too_old():
+    """The installed matplotlib version when it is older than MIN_MPL, else ''."""
+    m = re.match(r"(\d+)\.(\d+)", matplotlib.__version__)
+    if m and (int(m.group(1)), int(m.group(2))) < MIN_MPL:
+        return matplotlib.__version__
+    return ""
+
+
 def doctor(font):
     print(f"  python      : {sys.executable} ({sys.version.split()[0]})")
-    print(f"  matplotlib  : {matplotlib.__version__}")
+    old = mpl_too_old()
+    need = f"{MIN_MPL[0]}.{MIN_MPL[1]} or later needed"
+    print(f"  matplotlib  : {matplotlib.__version__} ({'TOO OLD: ' + need if old else need + ': OK'})")
     print(f"  numpy       : {np.__version__}")
     want = font or FONT_FALLBACKS[0]
     got = pick_font(want)
@@ -1966,6 +2121,12 @@ def main(argv):
     if len(argv) >= 2 and argv[1] == "--doctor":
         doctor(" ".join(argv[2:]).strip().strip('"'))
         return
+    old = mpl_too_old()
+    if old:
+        print(f"gr2mpl needs matplotlib {MIN_MPL[0]}.{MIN_MPL[1]} or later; this Python "
+              f"({sys.executable}) has matplotlib {old}.")
+        print("fix: python -m pip install --upgrade matplotlib")
+        raise SystemExit(1)
     # Stata's `python script, args()` passes quotes through and splits on spaces
     path = " ".join(argv[1:]).strip().strip('"')
     with open(path, encoding="utf-8") as fh:

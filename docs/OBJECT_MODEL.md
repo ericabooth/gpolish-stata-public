@@ -14,11 +14,18 @@ Stata 16+ (`version 16`).
 output is a PNG. The output is an image file, not a Stata graph.
 
 Saved results: `r(filename)`, `r(python)`, `r(pymode)` (`embedded` or `shell`),
-`r(unsupported)` (layers that were skipped, `;`-separated), `r(specdir)`. Each skipped
-layer also prints `note: gr2mpl skipped ...`.
+`r(unsupported)` (layers that were skipped, `;`-separated), and, with `keepspec` only,
+`r(specdir)`. Without `keepspec` the spec folder is deleted when gr2mpl finishes, so no
+folder is returned. Each skipped layer also prints `note: gr2mpl skipped ...`.
+`gr2mpl doctor` returns `r(python)`, `r(pymode)`, `r(mplversion)` and `r(mplok)` (1 when
+matplotlib is 3.6 or later, 0 when it is older).
 
 Pipeline: the ado writes `spec.json` plus one CSV per serset to a spec folder, then runs
-`gr2mpl_render.py`, which needs matplotlib and numpy only (no pandas).
+`gr2mpl_render.py`, which needs matplotlib 3.6 or later and numpy only (no pandas).
+`Axes.legend(alignment=)`, which the renderer uses, arrived in matplotlib 3.6. With an
+older matplotlib, gr2mpl stops with error 601 before writing anything, names the version
+and prints the `pip install --upgrade matplotlib` line; `gr2mpl doctor` marks the version
+as too old. A Python whose matplotlib is too old is not cached for the session.
 
 ## Python discovery
 
@@ -47,15 +54,31 @@ Graph level (`.g` = `.graphname`)
 - `.g.title.text[k]`, `.subtitle`, `.note`, `.caption`: arrays of lines (`.text.arrnels`)
 - `.g.command`: the original command string
 - `.g.legend.draw_view.setting` (yes/no); `.g.legend.map[k]` = plot index of entry k;
-  `.g.legend.plotregion1.label[k].text[1]` = its label
+  `.g.legend.plotregion1.label[k].text[1]` = its label. A text-only entry (`-` in
+  `order()`) has index 0, and a plot listed twice in `order()` has two entries; gr2mpl
+  keeps both, with an empty key for the text-only entry.
 
 Axes (`.g.xaxis1`, `.g.yaxis1`)
 - `.title.text[k]`
 - `.major.dlg_tickpos[k]`, `.major.dlg_ticklabel[k]`: drawn tick positions and labels
   (value labels and date formats already applied); `.major.label_format`
 - `.style.draw_major_grid.setting`
-- scale: `.g.plotregion1.xscale.curmin/.curmax` (axis range), `.min/.max` (data range),
-  `.reverse.setting`, `.transform.setting` (`linear`/`log`)
+- `.position.setting`: the side the axis is drawn on (`left`/`right` for a y axis,
+  `below`/`above` for an x axis). `yscale(alt)` gives `right`. With two y axes, Stata
+  puts the axis of the first plot on the left: `twoway (line price weight, yaxis(2))
+  (scatter mpg weight)` has `.yaxis2` on the left and `.yaxis1` on the right. With a
+  third y axis Stata stacks the axes on one side; gr2mpl then draws the second y axis
+  on the other side.
+- scale: `.g.plotregionJ.xscale.curmin/.curmax` (axis range), `.min/.max` (data range),
+  `.reverse.setting`, `.transform.setting` (`linear`/`log`), read from the region that
+  holds y axis 1 and x axis 1. That is `.plotregion1` unless plot 1 is on `yaxis(2)`;
+  then `.plotregion1` is the second axis's region. A graph whose only y axis is axis 2
+  has no `.yaxis1`; gr2mpl then draws `.yaxis2` as its main axis.
+- plot-region margin: `.g.plotregionJ.style.margin.gleft/.gright/.gbottom/.gtop.gmval`
+  (relative units), the space between the axis ends and the data range. Defaults are
+  2.2 on each side in s2color and stcolor, 0.6 in economist, and 3 2 3 2 (left, right,
+  bottom, top) in pypolish. `gpolish endlabel` widens it when a y axis is on the labelled
+  side.
 
 Plots (`.g.plotregion1.plotN`)
 - `.type.setting`: scatter, line, connected, bar, area, rarea, rcap, ...
@@ -93,6 +116,8 @@ Sizes
 Objects added with gr_edit or the Graph Editor (what gpolish creates)
 - counts: `.g.plotregion1.added_text.arrnels`, `.added_lines.arrnels`,
   `.added_markers.arrnels` (empty string, not 0, when there are none)
+- positions are in the coordinates of `.plotregion1`, so they belong to the second y axis
+  when plot 1 is on `yaxis(2)`; gr2mpl draws them on that axis
 - text: `.added_text[k].text[i]`, `.xpos.val`, `.ypos.val`, `.style.size.gmval`,
   `.style.color.setting`, `.style.horizontal.setting`, `.style.box_alignment.setting`
   (east = text starts at the point, west = ends at it, north/south = above/below)
@@ -123,7 +148,9 @@ Other
 | kdensity, lowess, lfit, `function` | yes | all resolve to `line` |
 | pcspike, pcarrow, pcbarrow, pccapsym, pcscatter | yes | class `yxyxview_g`, `.x2var/.y2var` |
 | `horizontal` bar / rcap / rspike / rarea | yes | `.bar_drop_to.setting == "y"` |
-| second y axis (`yaxis(2)`) | yes | plot lives in `.plotregion2`, axis in `.yaxis2` |
+| second y axis (`yaxis(2)`) | yes | plot is in the region of its axis (`.plotregion2` when plot 1 is on y axis 1), axis in `.yaxis2`; sides from `.position.setting` |
+| `yscale(alt)` | yes | `.yaxis1.position.setting == "right"` |
+| `xscale(alt)` | no | the x axis stays at the bottom |
 | `xline()`, `yline()`, `text()`, rotated text | yes | |
 | gr_edit / gpolish added text, lines, markers | yes | |
 | log and reversed scales, date and value-labelled ticks | yes | |
@@ -135,7 +162,7 @@ Other
 | marginsplot, coefplot | yes | twoway underneath |
 | contour, contourline | no, skipped with a note | |
 | graph pie | no, exits 198 | class `piegraph_g` (its family says `bar`) |
-| `x2axis`, `yaxis(3+)` | no | only xaxis1, yaxis1, yaxis2 are read |
+| `x2axis`, `yaxis(3+)` | no, layer skipped with a note | only xaxis1, yaxis1, yaxis2 are read |
 | supergroup labels (second `over()`) in graph bar | yes | `.supaxis`, drawn bold |
 | `blabel()` bar labels | yes | `.plotregion1.barlabels[k]` |
 | marker weights, jitter | no | weighted markers draw at one size |
@@ -154,8 +181,9 @@ More object paths
   .adjl .adjh .width2 .horizontal`, colour in `.rect.style.shadestyle.color.setting`;
   outside values in `.plotregion1.outsides[k].x/.y`.
 - dot: `.plotregion1.points[k].x/.y` and `.style.marker.fillcolor.setting`.
-- second axis: `.g.n_plotregions`, `.g.y_scales` (one quoted axis number per plot);
-  plot i is `.plotregionJ.plotI` for the region that has it.
+- second axis: `.g.n_plotregions`, `.g.y_scales` and `.g.x_scales` (one quoted axis
+  number per plot region, not per plot); plot i is `.plotregionJ.plotI` for the region
+  that has it.
 - text rotation: `.textboxK.style.angle.setting` (a number, or `horizontal`/`vertical`)
   and `.orientation.setting`; the same members on `.added_text[k]`. Stata itself draws
   `text(, angle(30))` flat; gr2mpl honours the stored angle.
@@ -180,9 +208,15 @@ More object paths
 - Box-plot outside values are hollow circles; whisker caps are not drawn.
 - When every layer on the second y axis is filled (bar, rbar, area, rarea, spike), the
   second axis is drawn behind the first.
-- Line widths and marker sizes follow Stata exactly unless `lwscale()`/`msscale()` is set.
+- Line widths and marker sizes are converted from Stata's sizes with the rule under
+  Sizes, then multiplied by `lwscale()`/`msscale()` when set.
 - Graph-margin edits made by gpolish are ignored; the layout is refit around whatever
   text extends past the axes, so end labels are never clipped.
+- Plot-region margins of 4 relative units or less (the scheme defaults) are replaced by
+  gr2mpl's padding of about 2.5% of the axis range at each end (none below a y axis that
+  starts at 0). A wider margin is kept: the data range is drawn that many points inside
+  the axes, as in Stata. This is how `gpolish endlabel` keeps its labels between a y axis
+  and the lines (`side(left)`, `yscale(alt)`, `yaxis(2)`).
 
 ## Known weaknesses
 
@@ -212,7 +246,9 @@ More object paths
   left, `north` and `south` above and below. `angle()` is stored but only quarter turns draw
   (`.orientation.setstyle, style(vertical)`).
 - Stata does not report text width. `gpolish` embeds advance-width tables for common fonts
-  (see `build/make_fontwidths.py`) and picks one from `graph set window fontface`.
+  (see `build/make_fontwidths.py`) and picks one from `graph set window fontface`, or,
+  in batch mode and console Stata, from `graph set svg fontface`; `$GPOLISH_FONT`
+  overrides both.
 - Scheme note: in the s2color family, `draw_major_vgrid yes` switches on the horizontal
   gridlines (the entry is named for the axis the lines come from).
 

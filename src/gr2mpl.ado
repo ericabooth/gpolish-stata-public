@@ -1,7 +1,8 @@
 *! gr2mpl 0.5.1  redraw a Stata graph held in memory with matplotlib
 *! Walks the graph object (not the syntax), writes a JSON spec + serset CSVs,
 *! then runs gr2mpl_render.py (embedded Python if it has matplotlib, else a shell
-*! call). Returns a PNG. Families: twoway, graph bar/hbar/dot/box, graph matrix, by(), combine.
+*! call). Writes a PNG, PDF, SVG or JPG image. Needs matplotlib 3.6 or later.
+*! Families: twoway, graph bar/hbar/dot/box, graph matrix, by(), combine.
 program gr2mpl, rclass
     version 16
     syntax [anything(name=sub)] [, name(string) SAVing(string) Width(integer 0) ///
@@ -56,6 +57,15 @@ program gr2mpl, rclass
     _g2m_python, python(`"`python'"')
     local pymode `s(mode)'
     local pyexe `"`s(python)'"'
+    local mplv `s(mplversion)'
+    _g2m_mplok "`mplv'"
+    if "`s(ok)'" == "0" {
+        local who = cond("`pymode'" == "embedded", "Stata's Python", `"`pyexe'"')
+        di as err `"gr2mpl: needs matplotlib 3.6 or later; `who' has matplotlib `mplv'"'
+        if "`pymode'" == "embedded" di as err "        fix: python -m pip install --upgrade matplotlib (for Stata's Python)"
+        else di as err `"        fix: "`pyexe'" -m pip install --upgrade matplotlib"'
+        exit 601
+    }
 
     * ---- output locations --------------------------------------------------
     if `"`saving'"' == "" local saving "`name'_mpl.png"
@@ -302,9 +312,13 @@ program _g2m_python, sclass
         local tried `"`tried' `"`c'"'"'
         if "`s(ok)'" == "1" {
             local v `s(v)'
-            global GR2MPL_PYMODE "shell"
-            global GR2MPL_PYRESOLVED `"`c'"'
-            global GR2MPL_MPLVERSION "`v'"
+            * a Python whose matplotlib is too old is reported, not remembered
+            _g2m_mplok "`v'"
+            if "`s(ok)'" != "0" {
+                global GR2MPL_PYMODE "shell"
+                global GR2MPL_PYRESOLVED `"`c'"'
+                global GR2MPL_MPLVERSION "`v'"
+            }
             sreturn local mode "shell"
             sreturn local python `"`c'"'
             sreturn local mplversion "`v'"
@@ -318,9 +332,12 @@ program _g2m_python, sclass
     capture python: import matplotlib, numpy
     if !_rc {
         capture python: import matplotlib, sfi; sfi.Macro.setLocal("v", matplotlib.__version__)
-        global GR2MPL_PYMODE "embedded"
-        global GR2MPL_PYRESOLVED "embedded"
-        global GR2MPL_MPLVERSION "`v'"
+        _g2m_mplok "`v'"
+        if "`s(ok)'" != "0" {
+            global GR2MPL_PYMODE "embedded"
+            global GR2MPL_PYRESOLVED "embedded"
+            global GR2MPL_MPLVERSION "`v'"
+        }
         sreturn local mode "embedded"
         sreturn local python "embedded"
         sreturn local mplversion "`v'"
@@ -332,9 +349,12 @@ program _g2m_python, sclass
         _g2m_trypy `"`c'"'
         if "`s(ok)'" == "1" {
             local v `s(v)'
-            global GR2MPL_PYMODE "shell"
-            global GR2MPL_PYRESOLVED "`c'"
-            global GR2MPL_MPLVERSION "`v'"
+            _g2m_mplok "`v'"
+            if "`s(ok)'" != "0" {
+                global GR2MPL_PYMODE "shell"
+                global GR2MPL_PYRESOLVED "`c'"
+                global GR2MPL_MPLVERSION "`v'"
+            }
             sreturn local mode "shell"
             sreturn local python "`c'"
             sreturn local mplversion "`v'"
@@ -372,6 +392,17 @@ program _g2m_trypy, sclass
     }
 end
 
+* matplotlib 3.6 or later (Axes.legend(alignment=) arrived in 3.6). s(ok) is 1 when
+* the version is new enough, 0 when it is older, and empty when it cannot be read.
+program _g2m_mplok, sclass
+    args v
+    sreturn local ok ""
+    if !ustrregexm(`"`v'"', "^([0-9]+)\.([0-9]+)") exit
+    local maj = real(ustrregexs(1))
+    local min = real(ustrregexs(2))
+    sreturn local ok = cond(`maj' > 3 | (`maj' == 3 & `min' >= 6), "1", "0")
+end
+
 program _g2m_doctor, rclass
     syntax [, python(string) font(string)]
     di as txt _n "gr2mpl doctor"
@@ -393,7 +424,16 @@ program _g2m_doctor, rclass
     local mode `s(mode)'
     local exe `"`s(python)'"'
     di as txt "  will use    : " as res cond("`mode'" == "embedded", "Stata's embedded Python (no shell)", `"`exe' (shell call)"')
-    di as txt "  matplotlib  : " as res "`s(mplversion)'"
+    local mplv `s(mplversion)'
+    _g2m_mplok "`mplv'"
+    local mplok `s(ok)'
+    local need = cond("`mplok'" == "1", "(3.6 or later needed: OK)", ///
+        cond("`mplok'" == "0", "(TOO OLD: gr2mpl needs 3.6 or later)", "(3.6 or later needed)"))
+    di as txt "  matplotlib  : " as res "`mplv' " as txt "`need'"
+    if "`mplok'" == "0" {
+        if "`mode'" == "embedded" di as err "  fix         : python -m pip install --upgrade matplotlib (for Stata's Python)"
+        else di as err `"  fix         : "`exe'" -m pip install --upgrade matplotlib"'
+    }
     if "`mode'" == "embedded" {
         capture noisily python script `"`render'"', args(--doctor `"`font'"')
     }
@@ -405,7 +445,8 @@ program _g2m_doctor, rclass
     di as txt "{hline 60}"
     return local pymode "`mode'"
     return local python `"`exe'"'
-    return local mplversion "`s(mplversion)'"
+    return local mplversion "`mplv'"
+    return local mplok "`mplok'"
 end
 
 * ---------------------------------------------------------------------------
@@ -465,6 +506,25 @@ program _g2m_twoway
         local rx`j' : word `j' of `xsc'
         if "`rx`j''" == "" local rx`j' 1
     }
+    * the main axes are those of the first region on y axis 1 and x axis 1. A
+    * graph whose only y axis is axis 2 (all plots on yaxis(2)) uses that axis as
+    * its main y axis. Plot 1 may sit on yaxis(2), so .plotregion1 is not always
+    * the main region.
+    local mainj 0
+    forvalues j = 1/`npr' {
+        if "`ry`j''" == "1" & "`rx`j''" == "1" & `mainj' == 0 local mainj `j'
+    }
+    local ymain 1
+    if `mainj' == 0 {
+        forvalues j = 1/`npr' {
+            if "`rx`j''" == "1" & `mainj' == 0 {
+                local mainj `j'
+                local ymain `ry`j''
+            }
+        }
+    }
+    if `mainj' == 0 local mainj 1
+    local prm `g'.plotregion`mainj'
     local pr2
     local np = ``g'.n_views'
     forvalues i = 1/`np' {
@@ -479,18 +539,27 @@ program _g2m_twoway
         }
         local yax`i' `ry`rj''
         local xax`i' `rx`rj''
-        if "`yax`i''" == "2" & "`xax`i''" == "1" & "`pr2'" == "" local pr2 `preg`i''
+        if "`ymain'" == "1" & "`yax`i''" == "2" & "`xax`i''" == "1" & "`pr2'" == "" local pr2 `preg`i''
     }
+    * objects added with gr_edit (gpolish) live in .plotregion1, in its coordinates
+    file write `fh' `"  "added_yaxis": "`ry1'", "added_xaxis": "`rx1'","' _n
 
     foreach a in x y y2 {
         if "`a'" == "y2" {
             if "`pr2'" == "" continue
             local ax `g'.yaxis2
             local sc `pr2'.yscale
+            local rg `pr2'
+        }
+        else if "`a'" == "y" {
+            local ax `g'.yaxis`ymain'
+            local sc `prm'.yscale
+            local rg `prm'
         }
         else {
-            local ax `g'.`a'axis1
-            local sc `pr'.`a'scale
+            local ax `g'.xaxis1
+            local sc `prm'.xscale
+            local rg `prm'
         }
         file write `fh' `"  "`a'axis": {"' _n
         _g2m_textarr `fh' "title" "`ax'.title" 4
@@ -498,25 +567,30 @@ program _g2m_twoway
         _g2m_pairs `fh' "`ax'" "format major.label_format" "grid style.draw_major_grid.setting" ///
             "draw draw_view.setting" "linecolor style.linestyle.color.setting" ///
             "tsize title.style.size.gmval" "ticksize style.majorstyle.tickstyle.textstyle.size.gmval" ///
-            "tickangle style.majorstyle.tickangle.setting"
+            "tickangle style.majorstyle.tickangle.setting" "position position.setting"
         _g2m_pairs `fh' "`sc'" "reverse reverse.setting" "transform transform.setting" ///
             "min curmin" "max curmax" "datamin min" "datamax max"
+        * the plot-region margin on the two screen sides of this axis (left/right for
+        * x, bottom/top for y): the space between the axis ends and the data range
+        if "`a'" == "x" _g2m_pairs `fh' "`rg'" "mlo style.margin.gleft.gmval" "mhi style.margin.gright.gmval"
+        else _g2m_pairs `fh' "`rg'" "mlo style.margin.gbottom.gmval" "mhi style.margin.gtop.gmval"
         * xscale(noline) leaves the line style members unchanged; it is recorded
         * only as an edit in the graph's construction log
         local noline 0
         if "`a'" != "y2" {
+            local an = cond("`a'" == "y", "`ymain'", "1")
             local nlog ``g'.__LOG.arrnels'
             if "`nlog'" == "" local nlog 0
             forvalues q = 1/`nlog' {
                 local ll `"``g'.__LOG[`q']'"'
-                if strpos(`"`ll'"', ".`a'axis1.style.editstyle") & strpos(`"`ll'"', "linestyle(none)") local noline 1
+                if strpos(`"`ll'"', ".`a'axis`an'.style.editstyle") & strpos(`"`ll'"', "linestyle(none)") local noline 1
             }
         }
         file write `fh' `""noline": `noline', "'
         file write `fh' `""e": 1"' _n "  }," _n
     }
 
-    * reference lines, from every plot region (yline(, axis(2)) lives in the
+    * reference lines, from every plot region (yline(, axis(2)) is stored in the
     * region of the second y axis)
     file write `fh' `"  "reflines": ["' _n
     local first 1
@@ -535,7 +609,7 @@ program _g2m_twoway
     }
     file write `fh' _n "  ]," _n
 
-    * text boxes placed with text(); text(, yaxis(2)) lives in another region
+    * text boxes placed with text(); text(, yaxis(2)) is stored in another region
     local nt ``g'.n_text'
     if "`nt'" == "" local nt 0
     file write `fh' `"  "textboxes": ["' _n
