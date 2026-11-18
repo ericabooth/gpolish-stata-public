@@ -1,4 +1,4 @@
-*! gr2mpl 0.5.1  redraw a Stata graph held in memory with matplotlib
+*! gr2mpl 0.6.0  redraw a Stata graph held in memory with matplotlib
 *! Walks the graph object (not the syntax), writes a JSON spec + serset CSVs,
 *! then runs gr2mpl_render.py (embedded Python if it has matplotlib, else a shell
 *! call). Writes a PNG, PDF, SVG or JPG image. Needs matplotlib 3.6 or later.
@@ -167,7 +167,10 @@ program gr2mpl, rclass
             _g2m_pairs `fh' "`g'.style" "indiv_yrescale indiv_yrescale.setting" ///
                 "indiv_xrescale indiv_xrescale.setting"
             file write `fh' _n
-            _g2m_legend `fh' "`g'"
+            * a by() legend numbers its keys by the plot regions of the panels
+            local lrg
+            if "`fam'" == "by" local lrg `g'.graphs[1]
+            _g2m_legend `fh' "`g'" "`lrg'"
             * by() and graph combine shrink the text and markers of their panels
             * (iscale()); the multiplier is stored on the grid that holds them
             local gm ``g'.plotregion1.gmetric_mult'
@@ -278,7 +281,9 @@ end
 * ---------------------------------------------------------------------------
 * Python discovery
 *   1 python() option  2 $GR2MPL_PYTHON  3 Stata's embedded Python
-*   4 python3 on PATH.  The working choice is cached in $GR2MPL_PYRESOLVED.
+*   4 python3, then python, on PATH.  In 3 and 4 a Python whose matplotlib is
+*   older than 3.6 is passed over for the next one. The working choice is
+*   cached in $GR2MPL_PYRESOLVED.
 * ---------------------------------------------------------------------------
 program _g2m_python, sclass
     syntax [, python(string) REPORT]
@@ -328,44 +333,69 @@ program _g2m_python, sclass
         di as err `"        fix: "`c'" -m pip install matplotlib"'
         exit 601
     }
-    * Stata's own Python
-    capture python: import matplotlib, numpy
-    if !_rc {
-        capture python: import matplotlib, sfi; sfi.Macro.setLocal("v", matplotlib.__version__)
-        _g2m_mplok "`v'"
-        if "`s(ok)'" != "0" {
-            global GR2MPL_PYMODE "embedded"
-            global GR2MPL_PYRESOLVED "embedded"
-            global GR2MPL_MPLVERSION "`v'"
+    * the default search: Stata's own Python, then python3 and python on the
+    * PATH ($GR2MPL_SEARCH can replace this list; "embedded" names Stata's
+    * Python). A candidate whose matplotlib is older than 3.6 is passed over;
+    * gr2mpl reports it (error 601) only when no candidate is new enough.
+    local search `"$GR2MPL_SEARCH"'
+    if `"`search'"' == "" local search embedded python3 python
+    local embexe
+    capture python: import sys, sfi; sfi.Macro.setLocal("embexe", sys.executable)
+    local oldmode
+    foreach c of local search {
+        local v
+        local found 0
+        if `"`c'"' == "embedded" {
+            capture python: import matplotlib, numpy
+            if !_rc {
+                capture python: import matplotlib, sfi; sfi.Macro.setLocal("v", matplotlib.__version__)
+                local found 1
+            }
+            local mode embedded
         }
-        sreturn local mode "embedded"
-        sreturn local python "embedded"
+        else {
+            _g2m_trypy `"`c'"'
+            if "`s(ok)'" == "1" {
+                local v `s(v)'
+                local found 1
+            }
+            local mode shell
+        }
+        if !`found' continue
+        local who = cond("`mode'" == "embedded", "Stata's Python", `"`c'"')
+        _g2m_mplok "`v'"
+        if "`s(ok)'" == "0" {
+            di as txt `"(gr2mpl: `who' has matplotlib `v'; 3.6 or later is needed, so it is passed over)"'
+            if "`oldmode'" == "" {
+                local oldmode `mode'
+                local oldpy `"`c'"'
+                local oldv `v'
+            }
+            continue
+        }
+        global GR2MPL_PYMODE "`mode'"
+        global GR2MPL_PYRESOLVED `"`c'"'
+        global GR2MPL_MPLVERSION "`v'"
+        sreturn local mode "`mode'"
+        sreturn local python `"`c'"'
         sreturn local mplversion "`v'"
         exit
     }
-    local embexe
-    capture python: import sys, sfi; sfi.Macro.setLocal("embexe", sys.executable)
-    foreach c in python3 python {
-        _g2m_trypy `"`c'"'
-        if "`s(ok)'" == "1" {
-            local v `s(v)'
-            _g2m_mplok "`v'"
-            if "`s(ok)'" != "0" {
-                global GR2MPL_PYMODE "shell"
-                global GR2MPL_PYRESOLVED "`c'"
-                global GR2MPL_MPLVERSION "`v'"
-            }
-            sreturn local mode "shell"
-            sreturn local python "`c'"
-            sreturn local mplversion "`v'"
-            exit
-        }
+    * none is new enough: report the first one found, which the caller stops on
+    if "`oldmode'" != "" {
+        sreturn local mode "`oldmode'"
+        sreturn local python `"`oldpy'"'
+        sreturn local mplversion "`oldv'"
+        exit
     }
     di as err "gr2mpl: no Python with matplotlib was found."
     di as err "  tried, in order:"
-    if `"`embexe'"' != "" di as err `"    Stata's Python (`embexe')"'
-    else di as err "    Stata's Python (none configured; see {help python})"
-    di as err "    python3 and python on the system PATH"
+    if `"$GR2MPL_SEARCH"' != "" di as err `"    $GR2MPL_SEARCH   (from \$GR2MPL_SEARCH)"'
+    else {
+        if `"`embexe'"' != "" di as err `"    Stata's Python (`embexe')"'
+        else di as err "    Stata's Python (none configured; see {help python})"
+        di as err "    python3 and python on the system PATH"
+    }
     di as err "  fix one of these ways:"
     if `"`embexe'"' != "" di as err `"    "`embexe'" -m pip install matplotlib"'
     di as err "    python3 -m pip install matplotlib"
@@ -435,11 +465,12 @@ program _g2m_doctor, rclass
         else di as err `"  fix         : "`exe'" -m pip install --upgrade matplotlib"'
     }
     if "`mode'" == "embedded" {
-        capture noisily python script `"`render'"', args(--doctor `"`font'"')
+        * --doctor-ado: the renderer leaves out the matplotlib line printed above
+        capture noisily python script `"`render'"', args(--doctor-ado `"`font'"')
     }
     else {
         tempfile out
-        shell "`exe'" "`render'" --doctor "`font'" > "`out'" 2>&1
+        shell "`exe'" "`render'" --doctor-ado "`font'" > "`out'" 2>&1
         capture noisily type "`out'"
     }
     di as txt "{hline 60}"
@@ -494,17 +525,32 @@ program _g2m_twoway
     capture local npr = ``g'.n_plotregions'
     if _rc | "`npr'" == "" local npr 1
 
-    * .y_scales and .x_scales hold one entry per plot region (not per plot):
-    * a plot's axes are those of the region that holds it
-    local ysc ``g'.y_scales'
-    local ysc : subinstr local ysc `"""' "", all
-    local xsc ``g'.x_scales'
-    local xsc : subinstr local xsc `"""' "", all
+    * .y_scales and .x_scales hold one quoted entry per plot region (not per
+    * plot). An entry lists every axis that shares the region's scale: yaxis(1 2)
+    * gives the single entry "2 1". A plot's axes are those of the region that
+    * holds it; a region that lists axis 1 is drawn on axis 1.
+    local ysc `"``g'.y_scales'"'
+    local xsc `"``g'.x_scales'"'
+    local j 0
+    foreach e of local ysc {
+        local ++j
+        local yl`j' `e'
+    }
+    local j 0
+    foreach e of local xsc {
+        local ++j
+        local xl`j' `e'
+    }
     forvalues j = 1/`npr' {
-        local ry`j' : word `j' of `ysc'
-        if "`ry`j''" == "" local ry`j' 1
-        local rx`j' : word `j' of `xsc'
-        if "`rx`j''" == "" local rx`j' 1
+        if "`yl`j''" == "" local yl`j' 1
+        if "`xl`j''" == "" local xl`j' 1
+        local ry`j' : word 1 of `yl`j''
+        local rx`j' : word 1 of `xl`j''
+        local in1 : list posof "1" in yl`j'
+        if `in1' local ry`j' 1
+        local in1 : list posof "1" in xl`j'
+        if `in1' local rx`j' 1
+        local h2`j' : list posof "2" in yl`j'
     }
     * the main axes are those of the first region on y axis 1 and x axis 1. A
     * graph whose only y axis is axis 2 (all plots on yaxis(2)) uses that axis as
@@ -525,7 +571,21 @@ program _g2m_twoway
     }
     if `mainj' == 0 local mainj 1
     local prm `g'.plotregion`mainj'
+    * the second y axis takes its scale from a region of its own; when it only
+    * shares a region with axis 1 (yaxis(1 2)), from that region
     local pr2
+    local y2shared 0
+    if "`ymain'" == "1" {
+        forvalues j = 1/`npr' {
+            if `h2`j'' & "`ry`j''" == "2" & "`rx`j''" == "1" & "`pr2'" == "" local pr2 `g'.plotregion`j'
+        }
+        forvalues j = 1/`npr' {
+            if `h2`j'' & "`rx`j''" == "1" & "`pr2'" == "" {
+                local pr2 `g'.plotregion`j'
+                local y2shared 1
+            }
+        }
+    }
     local np = ``g'.n_views'
     forvalues i = 1/`np' {
         local preg`i' `pr'
@@ -539,7 +599,6 @@ program _g2m_twoway
         }
         local yax`i' `ry`rj''
         local xax`i' `rx`rj''
-        if "`ymain'" == "1" & "`yax`i''" == "2" & "`xax`i''" == "1" & "`pr2'" == "" local pr2 `preg`i''
     }
     * objects added with gr_edit (gpolish) live in .plotregion1, in its coordinates
     file write `fh' `"  "added_yaxis": "`ry1'", "added_xaxis": "`rx1'","' _n
@@ -587,6 +646,8 @@ program _g2m_twoway
             }
         }
         file write `fh' `""noline": `noline', "'
+        * yaxis(1 2): the second axis repeats the scale of axis 1, with no plot of its own
+        if "`a'" == "y2" file write `fh' `""shared": `y2shared', "'
         file write `fh' `""e": 1"' _n "  }," _n
     }
 
@@ -939,8 +1000,41 @@ end
 * helpers
 * ---------------------------------------------------------------------------
 * legend: [plot index, label, label colour] per entry
+* Stata numbers the plots in its legend map region by region: the plots of
+* .plotregion1 first, then those of .plotregion2. s(rord) lists the plot numbers
+* in that order (empty when it is 1, 2, 3, ...), so map entry k is plot
+* word k of s(rord).
+program _g2m_rorder, sclass
+    args g
+    sreturn local rord ""
+    if `"``g'.graphfamily'"' != "twoway" exit
+    capture local npr = ``g'.n_plotregions'
+    if _rc | "`npr'" == "" exit
+    if `npr' < 2 exit
+    local np = ``g'.n_views'
+    if "`np'" == "" exit
+    local rord
+    local same 1
+    local n 0
+    forvalues j = 1/`npr' {
+        forvalues i = 1/`np' {
+            if "``g'.plotregion`j'.plot`i'.type.setting'" != "" {
+                local ++n
+                local rord `rord' `i'
+                if `i' != `n' local same 0
+            }
+        }
+    }
+    if !`same' sreturn local rord "`rord'"
+end
+
 program _g2m_legend
-    args fh g
+    args fh g rg
+    * rg: the graph whose plot regions number the legend map (a by() graph's
+    * first panel); by default the graph itself
+    if "`rg'" == "" local rg `g'
+    _g2m_rorder `rg'
+    local rord `s(rord)'
     local ldraw ``g'.legend.draw_view.setting'
     local nk ``g'.legend.map.arrnels'
     if "`nk'" == "" local nk 0
@@ -952,6 +1046,10 @@ program _g2m_legend
         `""cols": "``g'.legend.style.cols.val'", "position": "``g'.style.legend_position.setting'", "entries": ["'
     forvalues k = 1/`nk' {
         local m ``g'.legend.map[`k']'
+        if "`rord'" != "" & real("`m'") >= 1 & real("`m'") < . {
+            local mm : word `m' of `rord'
+            if "`mm'" != "" local m `mm'
+        }
         local lab `"``g'.legend.plotregion1.label[`k'].text[1]'"'
         local lcol ``g'.legend.plotregion1.label[`k'].style.color.setting'
         local lcol : list retokenize lcol

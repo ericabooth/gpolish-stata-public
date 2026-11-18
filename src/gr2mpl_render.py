@@ -383,6 +383,12 @@ class Panel:
     def pts(self, v):
         return v * self.f.unit
 
+    def text_fs(self, t):
+        """Font size of a text box in points. graph combine and by() shrink the text
+        of their panels (gmult), text() and gr_edit text included."""
+        size = num(t.get("size"))
+        return (self.pts(size) if size else 9.0 * self.f.k) * self.gmult
+
     def lw(self, p, key="lwidth", floor=0.6):
         v = num(p.get(key))
         if v is None:
@@ -436,16 +442,17 @@ class Panel:
     # ---- twoway -------------------------------------------------------------
     def draw_twoway(self):
         s = self.s
-        if s.get("y2axis") and any(str(p.get("yaxis")) == "2"
-                                   and str(p.get("xaxis", "1") or "1") == "1"
-                                   for p in s.get("plots", [])):
+        # yaxis(1 2) puts no plot on the second axis but still draws it
+        if s.get("y2axis") and (s["y2axis"].get("shared") or any(
+                str(p.get("yaxis")) == "2" and str(p.get("xaxis", "1") or "1") == "1"
+                for p in s.get("plots", []))):
             self.ax2 = self.ax.twinx()
             self.style_axes(self.ax2)
             self.ax2.spines["bottom"].set_visible(False)
             # filled layers on the second axis go behind the first axis
             fills = {"bar", "rbar", "area", "rarea", "spike"}
-            behind = all(p.get("type") in fills for p in s.get("plots", [])
-                         if str(p.get("yaxis")) == "2")
+            on2 = [p for p in s.get("plots", []) if str(p.get("yaxis")) == "2"]
+            behind = bool(on2) and all(p.get("type") in fills for p in on2)
             if behind:
                 self.ax2.set_zorder(self.ax.get_zorder() - 1)
                 self.ax.patch.set_visible(False)
@@ -1000,8 +1007,7 @@ class Panel:
         lines = [l for l in lines if l]
         if not lines:
             return 0.0
-        size = num(t.get("size"))
-        fs = self.pts(size) if size else 9.0 * self.f.k
+        fs = self.text_fs(t)
         fig = self.f.fig
         r = fig.canvas.get_renderer()
         out = 0.0
@@ -1057,8 +1063,7 @@ class Panel:
         wl = max(self.text_width(lab) for lab, _ in pairs)
         wv = max(self.text_width(v) for _, v in pairs)
         for lab, v in pairs:
-            size = num(lab.get("size"))
-            fs = self.pts(size) if size else 9.0 * self.f.k
+            fs = self.text_fs(lab)
             side = 1.0 if str(lab.get("place", "")).strip().lower() == "east" else -1.0
             # the value's outer edge sits one column (widest label + gap + widest value)
             # beyond the label's anchor
@@ -1082,8 +1087,7 @@ class Panel:
         if not keep_color and col[:3] == (0, 0, 0):
             col = to_rgba(INK)
         ha, va = ALIGN.get(str(t.get("place", "")).strip().lower(), ("center", "center"))
-        size = num(t.get("size"))
-        fs = self.pts(size) if size else 9.0 * self.f.k
+        fs = self.text_fs(t)
         ml = {"left": "left", "right": "right", "center": "center"}.get(
             str(t.get("horizontal", "")).strip().lower(), ha)
         theta = parse_angle(t)
@@ -1114,7 +1118,7 @@ class Panel:
             white = min(fill[:3]) > 0.97
             if not (white and edge[3] == 0) and (fill[3] > 0 or edge[3] > 0):
                 pads = [self.pts((num(t.get("bm" + k), 0.0) or 0.0)
-                                 + (num(t.get("m" + k), 0.0) or 0.0))
+                                 + (num(t.get("m" + k), 0.0) or 0.0)) * self.gmult
                         for k in ("l", "r", "b", "t")]
                 box = dict(fill=fill, edge=edge, lw=max(0.5, self.pts(blw)) if blw > 0 else 0,
                            pads=pads)
@@ -1234,6 +1238,7 @@ class Panel:
         label text are kept; a text-only entry gets an empty key."""
         by_idx = {i["p"]["index"]: i for i in self.infos}
         handles, texts, self._legend_styles = [], [], []
+        self._legend_plots = []
         nplot = 0
         for k, lab, col, bold in entries:
             if not lab:
@@ -1249,6 +1254,7 @@ class Panel:
             handles.append(h)
             texts.append(lab)
             self._legend_styles.append((col, bold))
+            self._legend_plots.append(k)
         if nplot == 0 or (len(handles) == 1 and len(self.infos) == 1):
             return [], []
         return handles, texts
@@ -1838,17 +1844,31 @@ class Figure:
         fs_x = p0.axis_title_size("x") if p0 is not None else self.tsize(None, 9.5)
         if sub_is_ytitle:
             fs_sub = fs_y
+        # the y-axis title goes above the plot on the side of the y axis: on the
+        # right with yscale(alt) or a y axis Stata drew on the right (in by() graphs
+        # Stata keeps the shared title on the left)
+        yt_right = (bool(self.ytitle) and not self.multi and p0 is not None
+                    and getattr(p0, "yside", "left") == "right")
+        self._ytitle_artist = None
         if title:
             arts.append(fig.text(left, ycur / H, title, fontsize=fs_title, fontweight="bold",
                                  color=INK, ha="left", va="top", linespacing=1.15))
             ycur -= fs_title * 1.22 * (title.count("\n") + 1) + 3 * k
         if subtitle:
-            arts.append(fig.text(left, ycur / H, subtitle, fontsize=fs_sub, color=MUTED,
-                                 ha="left", va="top", linespacing=1.2))
+            right = sub_is_ytitle and yt_right
+            a = fig.text(1 - left if right else left, ycur / H, subtitle, fontsize=fs_sub,
+                         color=MUTED, ha="right" if right else "left", va="top",
+                         linespacing=1.2)
+            arts.append(a)
+            if right:
+                self._ytitle_artist = a
             ycur -= fs_sub * 1.3 * (subtitle.count("\n") + 1) + 2 * k
         if ytitle:
-            arts.append(fig.text(left, ycur / H, ytitle, fontsize=fs_y, color=MUTED,
-                                 ha="left", va="top"))
+            a = fig.text(1 - left if yt_right else left, ycur / H, ytitle, fontsize=fs_y,
+                         color=MUTED, ha="right" if yt_right else "left", va="top")
+            arts.append(a)
+            if yt_right:
+                self._ytitle_artist = a
             ycur -= fs_y * 1.35
         if self.fig_legend:
             handles, texts, lp = self.fig_legend
@@ -1891,17 +1911,29 @@ class Figure:
         gapy = ((5.0 if tight else 14.0) * k / H) if rows > 1 else 0.0
         dl, dr = [0.0] * cols, [0.0] * cols
         dt_, db = [0.0] * rows, [0.0] * rows
+        # graph combine gives each member an equal cell and does not line up the
+        # members' axes: a member's plot is its cell less its own tick labels, end
+        # labels and titles. by() panels share one plot width.
+        percell = s.get("family") == "combine"
+        n = len(self.panels)
+        pl, pr_ = [0.0] * n, [0.0] * n
         rects = {}
         for _ in range(4):
             w = ((R - L) - sum(dl) - sum(dr) - gapx * (cols - 1)) / cols
             h = ((T - B) - sum(dt_) - sum(db) - gapy * (rows - 1)) / rows
             if w < 0.08 or h < 0.08:
                 w, h = max(w, 0.08), max(h, 0.08)
+            cw = ((R - L) - gapx * (cols - 1)) / cols
             for k, p in enumerate(self.panels):
                 r_, c_ = divmod(k, cols)
-                x0 = L + sum(dl[j] + w + dr[j] + gapx for j in range(c_)) + dl[c_]
                 y1 = T - sum(dt_[j] + h + db[j] + gapy for j in range(r_)) - dt_[r_]
-                rects[k] = [x0, y1 - h, w, h]
+                if percell:
+                    wk = max(cw - pl[k] - pr_[k], 0.08)
+                    x0 = L + c_ * (cw + gapx) + pl[k]
+                    rects[k] = [x0, y1 - h, wk, h]
+                else:
+                    x0 = L + sum(dl[j] + w + dr[j] + gapx for j in range(c_)) + dl[c_]
+                    rects[k] = [x0, y1 - h, w, h]
                 p.set_position(rects[k])
                 p.apply_margins()
             fig.canvas.draw()
@@ -1912,14 +1944,20 @@ class Figure:
                 r_, c_ = divmod(k, cols)
                 bb = p.tightbbox(rr)
                 x0, y0, w0, h0 = rects[k]
-                ndl[c_] = max(ndl[c_], x0 - bb.x0)
-                ndr[c_] = max(ndr[c_], bb.x1 - (x0 + w0))
+                pl[k], pr_[k] = x0 - bb.x0, bb.x1 - (x0 + w0)
+                ndl[c_] = max(ndl[c_], pl[k])
+                ndr[c_] = max(ndr[c_], pr_[k])
                 ndb[r_] = max(ndb[r_], y0 - bb.y0)
                 ndt[r_] = max(ndt[r_], bb.y1 - (y0 + h0))
             dl, dr, dt_, db = ndl, ndr, ndt, ndb
         if self._xtitle_artist is not None and self.panels:
             xs = [rects[k][0] for k in rects] + [rects[k][0] + rects[k][2] for k in rects]
             self._xtitle_artist.set_x((min(xs) + max(xs)) / 2)
+        if self._ytitle_artist is not None and self.panels:
+            # right-aligned with the outer edge of the y-axis tick labels
+            fig.canvas.draw()
+            rr = fig.canvas.get_renderer()
+            self._ytitle_artist.set_x(max(p.tightbbox(rr).x1 for p in self.panels))
 
     def info_lines(self):
         """A plain-text record of what was drawn (render_info.txt in the spec
@@ -1934,6 +1972,9 @@ class Figure:
             out.append(f"title_fs={texts[0].get_fontsize():.2f}")
         for a in texts:
             out.append(f"figtext={a.get_text()}|{a.get_fontsize():.2f}")
+        ya = getattr(self, "_ytitle_artist", None)
+        if self.ytitle:
+            out.append("ytitle_side=" + ("right" if ya is not None else "left"))
         out.append("font_family=" + ",".join(plt.rcParams["font.family"]))
         out.append("glyphs_missing=" + self.missing_glyphs())
         for k, p in enumerate(self.panels):
@@ -1952,9 +1993,16 @@ class Figure:
             fs = [t.get_fontsize() for t in ax.get_xticklabels()]
             out.append(f"{tag}.xtickfs={fs[0] if fs else 0:.2f}")
             out.append(f"{tag}.xlabel={ax.get_xlabel()}")
+            out.append(f"{tag}.ylabel={ax.get_ylabel()}")
+            out.append(f"{tag}.ygrid={int(any(g.get_visible() for g in ax.yaxis.get_gridlines()))}")
+            if p.ax2 is not None:
+                out.append(f"{tag}.y2ticks=" + "|".join(t.get_text() for t in p.ax2.get_yticklabels()))
+                out.append(f"{tag}.y2label={p.ax2.get_ylabel()}")
             if p.leg is not None:
                 lb = p.leg.get_window_extent(r)
                 out.append(f"{tag}.legend=" + "|".join(t.get_text() for t in p.leg.get_texts()))
+                out.append(f"{tag}.legend_plots=" + "|".join(
+                    str(k) for k in getattr(p, "_legend_plots", [])))
                 out.append(f"{tag}.legend_title={p.leg.get_title().get_text()}")
                 out.append(f"{tag}.legend_inside={int(lb.x0 >= -0.5 and lb.x1 <= fig.bbox.width + 0.5)}")
             anns = []
@@ -2016,6 +2064,8 @@ class Figure:
                     k72 = 72.0 / fig.dpi
                     out.append(f"{tag}.xdata_pts={(px.min() - bb.x0) * k72:.1f},"
                                f"{(bb.x1 - px.max()) * k72:.1f}")
+                    out.append(f"{tag}.xdata_frac={(px.max() - px.min()) / max(bb.width, 1e-9):.3f}")
+                out.append(f"{tag}.axes_wpts={bb.width * 72.0 / fig.dpi:.1f}")
             # end labels: clear of their line when they start right of every point of it
             for lab, pts in getattr(p, "_end_series", []):
                 for c in ax.texts:
@@ -2105,11 +2155,14 @@ def mpl_too_old():
     return ""
 
 
-def doctor(font):
+def doctor(font, mpl_line=True):
+    """Print the setup report. `gr2mpl doctor` prints the matplotlib line itself
+    and passes --doctor-ado, which leaves it out here."""
     print(f"  python      : {sys.executable} ({sys.version.split()[0]})")
-    old = mpl_too_old()
-    need = f"{MIN_MPL[0]}.{MIN_MPL[1]} or later needed"
-    print(f"  matplotlib  : {matplotlib.__version__} ({'TOO OLD: ' + need if old else need + ': OK'})")
+    if mpl_line:
+        need = f"{MIN_MPL[0]}.{MIN_MPL[1]} or later"
+        status = f"TOO OLD: gr2mpl needs {need}" if mpl_too_old() else f"{need} needed: OK"
+        print(f"  matplotlib  : {matplotlib.__version__} ({status})")
     print(f"  numpy       : {np.__version__}")
     want = font or FONT_FALLBACKS[0]
     got = pick_font(want)
@@ -2118,8 +2171,8 @@ def doctor(font):
 
 
 def main(argv):
-    if len(argv) >= 2 and argv[1] == "--doctor":
-        doctor(" ".join(argv[2:]).strip().strip('"'))
+    if len(argv) >= 2 and argv[1] in ("--doctor", "--doctor-ado"):
+        doctor(" ".join(argv[2:]).strip().strip('"'), mpl_line=argv[1] == "--doctor")
         return
     old = mpl_too_old()
     if old:
