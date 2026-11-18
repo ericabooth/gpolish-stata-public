@@ -14,7 +14,7 @@
 | `gpolish` | Reads the drawn graph and adds direct labels, callouts, point labels and brackets. A layout step places them clear of markers, lines, bars, shaded areas, range plots, `xline()` and `yline()` reference lines, labels added earlier and the edges of the plot. | Stata graph |
 | `gr2mpl` | Redraws the graph held in memory with matplotlib, including every `gpolish` edit. Handles `graph bar`, box, dot, `graph matrix`, `by()` and combined graphs too. | PNG, PDF, SVG or JPG image |
 
-`gpolish` needs only Stata. `gr2mpl` needs Python with matplotlib and numpy.
+`gpolish` needs only Stata. `gr2mpl` needs Python with matplotlib 3.6 or later and numpy.
 
 ## Install
 
@@ -31,13 +31,15 @@ For `gr2mpl`, check the Python setup once:
 gr2mpl doctor
 ```
 
-It reports which interpreter it will use and prints the `pip install` line if matplotlib is missing. To choose an interpreter, put `global GR2MPL_PYTHON "/path/to/python"` in your `profile.do`.
+It reports which interpreter it will use and whether its matplotlib is 3.6 or later, and prints the `pip install` line if matplotlib is missing. With an older matplotlib, `gr2mpl` stops with error 601 and prints the `pip install --upgrade` line. To choose an interpreter, put `global GR2MPL_PYTHON "/path/to/python"` in your `profile.do`.
 
 ## Quick start
 
+The second line sets the font of the Graph window. Stata saves every `graph set` setting, so the new font stays in force in later sessions, and Stata has no form of the command that lasts for one session only. To keep your current font, leave the line out; to see it first, type `graph set window`.
+
 ```stata
 sysuse uslifeexp, clear
-graph set window fontface "Open Sans"      // any installed font
+graph set window fontface "Open Sans"      // saved for later sessions; any installed font
 line le_wfemale le_wmale le_bfemale le_bmale year, scheme(pypolish) legend(off) ///
     xsize(7) ysize(4.6) title("Life expectancy rose for every group", size(13.5pt))
 
@@ -49,7 +51,7 @@ graph export life.png, width(2400) replace // still a Stata graph
 gpolish render, saving(life_mpl.png) replace    // optional matplotlib version
 ```
 
-In batch mode (`stata -b`) and console Stata there is no Graph window, so `graph set window fontface` is not available. Stata then exports PNG files with the font set by `graph set svg fontface`, and `gpolish` reads that setting instead; to use Open Sans there, run `graph set svg fontface "Open Sans"`. To name the font yourself, for example for PDF export, set `global GPOLISH_FONT "Open Sans"`, which overrides both settings. Each `graph set` setting is saved between Stata sessions.
+In batch mode (`stata -b`) and console Stata there is no Graph window, so `graph set window fontface` is not available. Stata then exports PNG files with the font set by `graph set svg fontface`, and `gpolish` reads that setting instead; to use Open Sans there, run `graph set svg fontface "Open Sans"`. To name the font yourself, for example for PDF export, set `global GPOLISH_FONT "Open Sans"`, which overrides both settings. Like the window font, the svg font is saved for later sessions; a global macro lasts for the current session only.
 
 | Command | Use |
 |---|---|
@@ -97,7 +99,7 @@ All gallery images come from one script, [gallery/gallery.do](gallery/gallery.do
 | | `pypolish` + `gpolish` | `gr2mpl` |
 |---|---|---|
 | Result | A Stata graph: editable, combinable, exports to any format | An image file: PNG, PDF, SVG or JPG, set by the `saving()` extension |
-| Needs | Stata 16+ | Stata 16+, Python, matplotlib, numpy |
+| Needs | Stata 16+ | Stata 16+, Python, matplotlib 3.6+, numpy |
 | Graph families | twoway (title edit on any family) | twoway, bar, box, dot, matrix, `by()`, combine |
 | Ceiling | Stata's renderer | Anything matplotlib can draw |
 
@@ -112,7 +114,7 @@ Stata's graph renderer cannot draw the following. `gpolish` prints a note for te
 - **Different colours inside one line of text**, and **filled arrow heads**.
 - **Layout commands on non-twoway graphs.** `endlabel`, `callout`, `note`, `arrow`, `brace`, `bracket`, `ptlabel`, `legend` and `clear` stop with an error on graphs that are not twoway graphs. Plain `gpolish` (or `gpolish style`) still makes the title bold, and `gpolish render` (gr2mpl) can redraw bar, box, dot, matrix, `by()` and combined graphs.
 
-`gr2mpl` does not draw contour plots or pie charts. It skips a layer on a second x axis or a third y axis, reference lines and `text()` on those axes, and a `by()` graph inside `graph combine`. Each skipped item is named in a note, and skipped layers are also listed in `r(unsupported)`.
+`gr2mpl` does not draw contour plots or pie charts. It skips a layer on a second x axis or a third y axis, reference lines and `text()` on those axes, and a `by()` graph inside `graph combine`. Each skipped item is named in a note, and skipped layers are also listed in `r(unsupported)`. With two y axes, `gr2mpl` draws each axis on the side Stata used, and `yscale(alt)` puts the y axis on the right. It does not follow `xscale(alt)`: the x axis stays at the bottom. When Stata draws both y axes on one side, as it does with a third y axis, `gr2mpl` draws the second on the other side.
 
 Three further cautions:
 
