@@ -39,7 +39,7 @@ Synthetic labels are made-up names of 4 to 14 characters. Every graph is 7 × 4.
 | Method | Call |
 |---|---|
 | Stata `mlabel()` | `scatter ..., mlabel() mlabposition(3)`: Stata's default label position |
-| `labrepel` 1.7 (graphfunctions, SSC) | `labrepel y x, label() mlabsize() xsize() ysize() seed()`, drawn at the repelled positions with leader lines, as its help file shows |
+| `labrepel` 1.0 (in graphfunctions 1.7, SSC) | `labrepel y x, label() mlabsize() xsize() ysize() seed()`, drawn at the repelled positions with leader lines, as its help file shows |
 | `gpolish ptlabel` 0.6.1 | `gpolish ptlabel label, x(x) y(y) size(8.6) msize(6)` |
 | adjustText 1.4.0 | `adjust_text(texts, x=..., y=..., arrowprops=...)`, told about every data point; `arrowprops` only draws its leader lines |
 | ggrepel 0.9.8 | `geom_text_repel(..., max.overlaps = Inf)`, so it drops no labels |

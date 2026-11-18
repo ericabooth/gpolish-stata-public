@@ -1,0 +1,29 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+type: software
+title: "gpolish: post-draw layout and polish for Stata graphs, with gr2mpl, a Stata-to-matplotlib translator"
+abstract: >-
+  gpolish edits a Stata twoway graph after it is drawn: it labels lines at
+  their ends, places point labels where they fit (with leader lines when a
+  point is crowded), adds callouts, notes, arrows, braces and brackets, and
+  tidies the axes, title and legend. The result is still a Stata graph.
+  gr2mpl redraws a Stata graph held in memory with matplotlib, including every
+  gpolish edit. The repository includes a reproducible label-placement
+  benchmark against Stata's mlabel(), labrepel, adjustText and ggrepel.
+authors:
+  - family-names: Booth
+    given-names: Eric A.
+    affiliation: Texas 2036
+    email: eric.a.booth@gmail.com
+version: 0.6.1
+date-released: "2026-11-17"
+license: MIT
+repository-code: "https://github.com/ericabooth/gpolish-stata-public"
+url: "https://ericabooth.github.io/gpolish-stata-public/gallery/"
+keywords:
+  - Stata
+  - data visualization
+  - label placement
+  - direct labeling
+  - matplotlib
+  - statistical graphics
