@@ -4,7 +4,7 @@ Twenty-two Stata graphs, each drawn three ways: Stata's default look, the same g
 
 Every image is produced by [gallery.do](gallery.do). A browsable version is at <https://ericabooth.github.io/gpolish-stata-public/gallery/>.
 
-Each code block runs as it stands in a fresh Stata session, as a do-file (paste it into the Do-file Editor: the `///` line breaks and local macros need one). A block loads its data, runs any estimation the graph needs, draws the polished graph, and saves the matplotlib version as `figure.png`. The examples that use the community commands coefplot, statplot and heatplot name the `ssc install` lines they need. In batch mode (`stata -b`) the first line, `graph set window fontface`, only prints a note, and Stata exports with the font set by `graph set svg fontface` instead.
+Each code block runs as it stands in a fresh Stata session, as a do-file (paste it into the Do-file Editor: the `///` line breaks and local macros need one). A block loads its data, runs any estimation the graph needs, draws the polished graph, and saves the matplotlib version as `figure.png`. The examples that use the community commands coefplot, statplot and heatplot name the `ssc install` lines they need. The first line, `graph set window fontface`, changes a saved preference that stays in force in later Stata sessions; type `graph set window` first to see your current font, or leave the line out to keep it. In batch mode (`stata -b`) that line only prints a note, and Stata exports with the font set by `graph set svg fontface` instead.
 
 ## Added-variable plot
 
@@ -15,7 +15,7 @@ A regression diagnostic from avplot, with the coefficient stated in a finding bo
 <details><summary>Stata code for the polished versions</summary>
 
 ```stata
-graph set window fontface "Open Sans"   // font used for the images; any installed font works
+graph set window fontface "Open Sans"   // font used for the images; saved for later sessions
 sysuse auto, clear
 quietly regress price mpg weight foreign
 local b = strtrim("`: display %4.2f _b[weight]'")
@@ -40,7 +40,7 @@ Tiles drawn with twoway rbar, cell values as marker labels, and a legend used as
 <details><summary>Stata code for the polished versions</summary>
 
 ```stata
-graph set window fontface "Open Sans"   // font used for the images; any installed font works
+graph set window fontface "Open Sans"   // font used for the images; saved for later sessions
 sysuse auto, clear
 local vars price mpg weight length displacement gear_ratio headroom turn
 local labs `""Price" "Mileage" "Weight" "Length" "Displacement" "Gear ratio" "Headroom" "Turn circle""'
@@ -92,7 +92,7 @@ Two regressions drawn with the community command coefplot: lines for the estimat
 <details><summary>Stata code for the polished versions</summary>
 
 ```stata
-graph set window fontface "Open Sans"   // font used for the images; any installed font works
+graph set window fontface "Open Sans"   // font used for the images; saved for later sessions
 * needs the community command coefplot (ssc install coefplot)
 sysuse nlsw88, clear
 gen expcat = min(floor(ttl_exp/3), 7)
@@ -128,7 +128,7 @@ Direct end labels with a value column replace the legend. The two notes are plac
 <details><summary>Stata code for the polished versions</summary>
 
 ```stata
-graph set window fontface "Open Sans"   // font used for the images; any installed font works
+graph set window fontface "Open Sans"   // font used for the images; saved for later sessions
 sysuse uslifeexp, clear
 label var le_wfemale "White women"
 label var le_wmale   "White men"
@@ -158,7 +158,7 @@ Point labels pick the least crowded of eight positions and avoid the fit line. L
 <details><summary>Stata code for the polished versions</summary>
 
 ```stata
-graph set window fontface "Open Sans"   // font used for the images; any installed font works
+graph set window fontface "Open Sans"   // font used for the images; saved for later sessions
 sysuse lifeexp, clear
 drop if missing(gnppc, lexp)
 gen lngnp = ln(gnppc)
@@ -196,7 +196,7 @@ A graph built by another command. gpolish reads the drawn graph, so the same end
 <details><summary>Stata code for the polished versions</summary>
 
 ```stata
-graph set window fontface "Open Sans"   // font used for the images; any installed font works
+graph set window fontface "Open Sans"   // font used for the images; saved for later sessions
 sysuse nlsw88, clear
 quietly regress wage c.ttl_exp##i.collgrad i.race
 quietly margins collgrad, at(ttl_exp=(0(4)28))
@@ -221,7 +221,7 @@ Context series in gray, one in colour, and only that one labelled.
 <details><summary>Stata code for the polished versions</summary>
 
 ```stata
-graph set window fontface "Open Sans"   // font used for the images; any installed font works
+graph set window fontface "Open Sans"   // font used for the images; saved for later sessions
 sysuse uslifeexp, clear
 label var le_bfemale "Black women"
 local g "205 205 205"
@@ -247,7 +247,7 @@ Three overlays on one scatter: a shaded finding box, a curly brace marking a ran
 <details><summary>Stata code for the polished versions</summary>
 
 ```stata
-graph set window fontface "Open Sans"   // font used for the images; any installed font works
+graph set window fontface "Open Sans"   // font used for the images; saved for later sessions
 sysuse auto, clear
 quietly regress mpg weight
 local slope = strtrim("`: display %3.1f -1000*_b[weight]'")
@@ -274,7 +274,7 @@ One brace names the confidence interval; another measures the gap between the tw
 <details><summary>Stata code for the polished versions</summary>
 
 ```stata
-graph set window fontface "Open Sans"   // font used for the images; any installed font works
+graph set window fontface "Open Sans"   // font used for the images; saved for later sessions
 sysuse nlsw88, clear
 drop if missing(union)
 collapse (mean) m=wage (semean) se=wage (count) n=wage, by(union)
@@ -309,7 +309,7 @@ Boxes and arrows on an empty plot, built from gpolish note and gpolish arrow. Th
 <details><summary>Stata code for the polished versions</summary>
 
 ```stata
-graph set window fontface "Open Sans"   // font used for the images; any installed font works
+graph set window fontface "Open Sans"   // font used for the images; saved for later sessions
 sysuse nlsw88, clear
 local n0 = _N
 quietly count if missing(union)
@@ -365,7 +365,7 @@ Selected points labelled; the legend becomes a coloured key above the plot.
 <details><summary>Stata code for the polished versions</summary>
 
 ```stata
-graph set window fontface "Open Sans"   // font used for the images; any installed font works
+graph set window fontface "Open Sans"   // font used for the images; saved for later sessions
 sysuse auto, clear
 twoway (lfitci mpg weight, lcolor("60 60 60") lwidth(medium) fcolor("225 225 225") alcolor("225 225 225")) ///
        (scatter mpg weight if !foreign, mcolor("11 93 122%85") mlcolor(white) mlwidth(vthin) msize(6pt)) ///
@@ -393,7 +393,7 @@ A callout placed by the layout step at the series minimum.
 <details><summary>Stata code for the polished versions</summary>
 
 ```stata
-graph set window fontface "Open Sans"   // font used for the images; any installed font works
+graph set window fontface "Open Sans"   // font used for the images; saved for later sessions
 sysuse sp500, clear
 quietly summarize close
 local lo = r(min)
@@ -419,7 +419,7 @@ Built from twoway rcap and scatter. The scheme and the title edit do the work.
 <details><summary>Stata code for the polished versions</summary>
 
 ```stata
-graph set window fontface "Open Sans"   // font used for the images; any installed font works
+graph set window fontface "Open Sans"   // font used for the images; saved for later sessions
 sysuse nlsw88, clear
 quietly regress wage i.collgrad i.union i.married i.south i.smsa c.tenure
 tempname M
@@ -466,7 +466,7 @@ A note with a curved arrow; text position given by hand here.
 <details><summary>Stata code for the polished versions</summary>
 
 ```stata
-graph set window fontface "Open Sans"   // font used for the images; any installed font works
+graph set window fontface "Open Sans"   // font used for the images; saved for later sessions
 sysuse nlsw88, clear
 quietly summarize wage, detail
 local med = r(p50)
@@ -490,7 +490,7 @@ graph hbar is not a twoway graph: the scheme and the bold title apply, the layou
 <details><summary>Stata code for the polished versions</summary>
 
 ```stata
-graph set window fontface "Open Sans"   // font used for the images; any installed font works
+graph set window fontface "Open Sans"   // font used for the images; saved for later sessions
 * graph bar is not a twoway graph: the scheme applies and gpolish bolds the title,
 * but the layout commands (endlabel, callout, ptlabel) are twoway only. gr2mpl redraws it.
 sysuse nlsw88, clear
@@ -512,7 +512,7 @@ Same split as the bar chart: scheme and title inside Stata, full restyle from gr
 <details><summary>Stata code for the polished versions</summary>
 
 ```stata
-graph set window fontface "Open Sans"   // font used for the images; any installed font works
+graph set window fontface "Open Sans"   // font used for the images; saved for later sessions
 sysuse nlsw88, clear
 graph box wage, over(race, label(labsize(9pt))) scheme(pypolish) xsize(7) ysize(4.6) ///
     title("Wage distributions overlap far more than their means suggest", size(13.5pt)) ///
@@ -533,7 +533,7 @@ The scheme removes the shaded panel strips. gr2mpl gives bold panel titles and s
 <details><summary>Stata code for the polished versions</summary>
 
 ```stata
-graph set window fontface "Open Sans"   // font used for the images; any installed font works
+graph set window fontface "Open Sans"   // font used for the images; saved for later sessions
 sysuse nlsw88, clear
 keep if inlist(industry, 4, 6, 7, 11, 12) & inrange(age, 34, 45)
 collapse (mean) wage, by(age industry)
@@ -556,7 +556,7 @@ graph combine of four graphs, each styled by the scheme; gr2mpl redraws every pa
 <details><summary>Stata code for the polished versions</summary>
 
 ```stata
-graph set window fontface "Open Sans"   // font used for the images; any installed font works
+graph set window fontface "Open Sans"   // font used for the images; saved for later sessions
 sysuse auto, clear
 local o scheme(pypolish) nodraw
 scatter mpg weight, `o' mcolor("11 93 122%85") mlcolor(white) mlwidth(vthin) title("Mileage and weight", size(10pt)) xtitle("Weight (lbs.)") ytitle("") name(c1, replace)
@@ -580,7 +580,7 @@ graph matrix is its own graph family: the scheme and the bold title apply, and g
 <details><summary>Stata code for the polished versions</summary>
 
 ```stata
-graph set window fontface "Open Sans"   // font used for the images; any installed font works
+graph set window fontface "Open Sans"   // font used for the images; saved for later sessions
 sysuse auto, clear
 graph matrix price mpg weight length, half scheme(pypolish) xsize(7) ysize(4.6) mcolor("11 93 122%70") msize(3.5pt) ///
     title("Four measures of a car, two at a time", size(13.5pt)) subtitle("Price, mileage, weight and length, 74 cars", size(10pt)) ///
@@ -600,7 +600,7 @@ cluster dendrogram produces a twoway graph, so the scheme and gpolish apply dire
 <details><summary>Stata code for the polished versions</summary>
 
 ```stata
-graph set window fontface "Open Sans"   // font used for the images; any installed font works
+graph set window fontface "Open Sans"   // font used for the images; saved for later sessions
 sysuse auto, clear
 keep if foreign
 foreach v of varlist price mpg weight length {
@@ -628,7 +628,7 @@ statplot output is a graph hbar. The scheme and title edit apply inside Stata; g
 <details><summary>Stata code for the polished versions</summary>
 
 ```stata
-graph set window fontface "Open Sans"   // font used for the images; any installed font works
+graph set window fontface "Open Sans"   // font used for the images; saved for later sessions
 * needs the community command statplot (ssc install statplot)
 sysuse nlsw88, clear
 statplot wage hours tenure, over(collgrad) scheme(pypolish) xsize(7) ysize(4.6) ///
@@ -649,7 +649,7 @@ A two-way density from the community command heatplot, with its colour key.
 <details><summary>Stata code for the polished versions</summary>
 
 ```stata
-graph set window fontface "Open Sans"   // font used for the images; any installed font works
+graph set window fontface "Open Sans"   // font used for the images; saved for later sessions
 * needs the community command heatplot (ssc install heatplot, ssc install palettes and ssc install colrspace)
 sysuse nlsw88, clear
 heatplot wage tenure if wage < 25, scheme(pypolish) xsize(7) ysize(4.6) color(viridis, reverse) levels(8) ///

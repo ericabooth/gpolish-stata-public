@@ -5,13 +5,31 @@ and gallery/README.md (rendered on GitHub). Run from the repository root:
     python gallery/make_page.py --check    write nothing; exit 1 if either page differs from
                                            what this script would write
     python gallery/make_page.py --blocks DIR
-                                           also write each example's code block to DIR/<key>.do,
-                                           for running every block in a fresh Stata session
+                                           write both pages and each example's code block to
+                                           DIR/<key>.do, for running every block in a fresh
+                                           Stata session
+
+Any other argument, or --blocks without a folder, stops with a usage message and exit
+status 2 before anything is written.
 
 Each code block runs as it stands: the section's setup lines (sysuse, estimation, label var,
 locals), without the default-look graph drawn before shotA, then the polished code between
 shotA and shotBC, with the shared size macros written out and a gr2mpl line at the end."""
-import html, os, re, sys, textwrap
+import argparse, html, os, re, sys, textwrap
+
+# read the arguments before anything is written, so a mistyped option changes no file
+ap = argparse.ArgumentParser(prog="python gallery/make_page.py", allow_abbrev=False,
+                             description="Build gallery/index.html and gallery/README.md from gallery/gallery.do.")
+mode = ap.add_mutually_exclusive_group()
+mode.add_argument("--check", action="store_true",
+                  help="write nothing; exit 1 if either page differs from what this script writes")
+mode.add_argument("--blocks", metavar="DIR",
+                  help="also write each example's code block to DIR/<key>.do")
+opts = ap.parse_args()
+if opts.blocks is not None and not opts.blocks.strip():
+    ap.error("--blocks needs a folder name")
+if not os.path.isfile("gallery/gallery.do"):
+    ap.error("gallery/gallery.do not found; run the script from the repository's top folder")
 INFO = {
  "04_lines": ("Multi-series lines", "Direct end labels with a value column replace the legend. The two notes are placed automatically."),
  "05_scatter": ("Labelled scatter on a log axis", "Point labels pick the least crowded of eight positions and avoid the fit line. Legend text takes the colour of its key."),
@@ -41,14 +59,16 @@ GRAPH_CMDS = ("avplot", "twoway", "coefplot", "line", "scatter", "marginsplot", 
 COMMUNITY = {"coefplot": "ssc install coefplot",
              "statplot": "ssc install statplot",
              "heatplot": "ssc install heatplot, ssc install palettes and ssc install colrspace"}
-FONT = 'graph set window fontface "Open Sans"   // font used for the images; any installed font works'
+FONT = 'graph set window fontface "Open Sans"   // font used for the images; saved for later sessions'
 INTRO_MD = ("Each code block runs as it stands in a fresh Stata session, as a do-file "
             "(paste it into the Do-file Editor: the `///` line breaks and local macros need one). "
             "A block loads its data, runs any estimation the graph needs, draws the polished graph, "
             "and saves the matplotlib version as `figure.png`. The examples that use the community "
             "commands coefplot, statplot and heatplot name the `ssc install` lines they need. "
-            "In batch mode (`stata -b`) the first line, `graph set window fontface`, only prints a note, "
-            "and Stata exports with the font set by `graph set svg fontface` instead.")
+            "The first line, `graph set window fontface`, changes a saved preference that stays in force in "
+            "later Stata sessions; type `graph set window` first to see your current font, or leave the line out "
+            "to keep it. In batch mode (`stata -b`) that line only prints a note, and Stata exports with the "
+            "font set by `graph set svg fontface` instead.")
 
 
 def statements(lines):
@@ -155,8 +175,7 @@ for k in sorted(code):
     md += [f"## {t}", "", blurb, "", f"![{t}](sheets/{k}.png)", "", "<details><summary>Stata code for the polished versions</summary>", "", "```stata", code[k], "```", "", "</details>", ""]
 h.append("<footer>gpolish, gr2mpl and the pypolish scheme are MIT licensed. Data: datasets shipped with Stata.</footer></main></body></html>")
 pages = {"gallery/index.html": "\n".join(h), "gallery/README.md": "\n".join(md)}
-args = sys.argv[1:]
-if args[:1] == ["--check"]:
+if opts.check:
     # regression check: the committed pages must be what this script writes
     stale = [f for f, t in pages.items() if not os.path.exists(f) or open(f, encoding="utf-8").read() != t]
     for f in stale:
@@ -166,9 +185,9 @@ if args[:1] == ["--check"]:
 for f, t in pages.items():
     with open(f, "w", encoding="utf-8") as fh:
         fh.write(t)
-if args[:1] == ["--blocks"] and len(args) == 2:
-    os.makedirs(args[1], exist_ok=True)
+if opts.blocks:
+    os.makedirs(opts.blocks, exist_ok=True)
     for k, c in code.items():
-        with open(os.path.join(args[1], k + ".do"), "w", encoding="utf-8") as fh:
+        with open(os.path.join(opts.blocks, k + ".do"), "w", encoding="utf-8") as fh:
             fh.write(c + "\n")
 print(len(code), "examples")
