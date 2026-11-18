@@ -1,4 +1,4 @@
-*! gr2mpl 0.5.0  redraw a Stata graph held in memory with matplotlib
+*! gr2mpl 0.5.1  redraw a Stata graph held in memory with matplotlib
 *! Walks the graph object (not the syntax), writes a JSON spec + serset CSVs,
 *! then runs gr2mpl_render.py (embedded Python if it has matplotlib, else a shell
 *! call). Returns a PNG. Families: twoway, graph bar/hbar/dot/box, graph matrix, by(), combine.
@@ -16,6 +16,11 @@ program gr2mpl, rclass
     }
     if "`sub'" != "" {
         di as err "gr2mpl: unknown subcommand `sub'"
+        exit 198
+    }
+    local palette = strlower(strtrim(`"`palette'"'))
+    if !inlist(`"`palette'"', "", "house") {
+        di as err `"gr2mpl: palette() must be house (got `palette')"'
         exit 198
     }
 
@@ -54,6 +59,13 @@ program gr2mpl, rclass
 
     * ---- output locations --------------------------------------------------
     if `"`saving'"' == "" local saving "`name'_mpl.png"
+    * saving() that names a folder ("out/") gets the default file name in it
+    local sbase = ustrregexra(`"`saving'"', "^.*[/\\\\]", "")
+    if `"`sbase'"' == "" local saving `"`saving'`name'_mpl.png"'
+    else if usubstr(`"`sbase'"', 1, 1) == "." {
+        di as err `"gr2mpl: saving() needs a file name (got `saving')"'
+        exit 198
+    }
     mata: st_local("sfx", strlower(pathsuffix(st_local("saving"))))
     if `"`sfx'"' == "" {
         local sfx ".png"
@@ -82,98 +94,123 @@ program gr2mpl, rclass
         tempfile tf
         local specdir "`tf'_g2m"
     }
+    mata: st_local("predir", strofreal(direxists(st_local("specdir"))))
     capture mkdir "`specdir'"
+    mata: st_local("dok", strofreal(direxists(st_local("specdir"))))
+    if "`dok'" != "1" {
+        di as err `"gr2mpl: could not create the spec folder `specdir'"'
+        exit 603
+    }
     local spec "`specdir'/spec.json"
     local outtmp "`specdir'/render_out`sfx'"
-    capture erase "`specdir'/skipped.txt"
-    capture erase "`specdir'/notes.txt"
+    foreach f in skipped.txt notes.txt render_info.txt render.log {
+        capture erase "`specdir'/`f'"
+    }
     capture erase "`outtmp'"
     capture erase "`spec'"
 
     tempname fh
-    file open `fh' using "`spec'", write text
-    file write `fh' "{" _n
-
-    * ---- graph-level -------------------------------------------------------
-    _g2m_kv `fh' "family" `"`fam'"'
-    _g2m_kv `fh' "name" `"`name'"'
-    _g2m_kv `fh' "command" `"``g'.command'"'
-    capture local xs = ``g'.style.declared_xsize.val'
-    if _rc local xs = 5.5
-    capture local ys = ``g'.style.declared_ysize.val'
-    if _rc local ys = 4
-    file write `fh' `"  "xsize": `xs', "ysize": `ys', "dpi": `dpi', "width": `width',"' _n
-    _g2m_kv `fh' "saving" `"`outtmp'"'
-    _g2m_kv `fh' "font" `"`font'"'
-    _g2m_kv `fh' "palette" `"`palette'"'
-    _g2m_kv `fh' "specdir" `"`specdir'"'
-    file write `fh' `"  "lwscale": `lwscale', "msscale": `msscale',"' _n
-    file write `fh' `"  "endlabels": `=("`endlabels'"!="")', "nolegend": `=("`legend'"!="")', "' ///
-        `""nogrid": `=("`grid'"!="")', "nohalo": `=("`halo'"!="")', "noticks": `=("`ticks'"!="")', "' ///
-        `""roundbox": `=("`roundbox'"!="")',"' _n
-
-    foreach t in title subtitle note caption {
-        _g2m_textarr `fh' "`t'" "`g'.`t'"
-    }
-
     global G2M_DONE
-    if "`fam'" == "matrix" {
-        _g2m_matrix `fh' "`g'" "`specdir'"
-    }
-    else if inlist("`fam'", "by", "combine") {
-        local np = ``g'.graphs.arrnels'
-        capture local rows = ``g'.rows'
-        capture local cols = ``g'.cols'
-        file write `fh' `"  "rows": "`rows'", "cols": "`cols'","' _n
-        foreach t in b1title b2title l1title l2title {
+    capture noisily {
+        file open `fh' using "`spec'", write text
+        file write `fh' "{" _n
+
+        * ---- graph-level ---------------------------------------------------
+        _g2m_kv `fh' "family" `"`fam'"'
+        _g2m_kv `fh' "name" `"`name'"'
+        _g2m_kv `fh' "command" `"``g'.command'"'
+        capture local xs = ``g'.style.declared_xsize.val'
+        if _rc local xs = 5.5
+        capture local ys = ``g'.style.declared_ysize.val'
+        if _rc local ys = 4
+        file write `fh' `"  "xsize": `xs', "ysize": `ys', "dpi": `dpi', "width": `width',"' _n
+        _g2m_kv `fh' "saving" `"`outtmp'"'
+        _g2m_kv `fh' "font" `"`font'"'
+        _g2m_kv `fh' "palette" `"`palette'"'
+        _g2m_kv `fh' "specdir" `"`specdir'"'
+        file write `fh' `"  "lwscale": `lwscale', "msscale": `msscale',"' _n
+        file write `fh' `"  "endlabels": `=("`endlabels'"!="")', "nolegend": `=("`legend'"!="")', "' ///
+            `""nogrid": `=("`grid'"!="")', "nohalo": `=("`halo'"!="")', "noticks": `=("`ticks'"!="")', "' ///
+            `""roundbox": `=("`roundbox'"!="")',"' _n
+
+        foreach t in title subtitle note caption {
             _g2m_textarr `fh' "`t'" "`g'.`t'"
         }
-        _g2m_pairs `fh' "`g'.style" "indiv_yrescale indiv_yrescale.setting" ///
-            "indiv_xrescale indiv_xrescale.setting"
+        * text sizes, in Stata's relative units (percent of the shorter graph side)
+        file write `fh' "  "
+        _g2m_pairs `fh' "`g'" "title_size title.style.size.gmval" ///
+            "subtitle_size subtitle.style.size.gmval" "note_size note.style.size.gmval" ///
+            "caption_size caption.style.size.gmval"
         file write `fh' _n
-        _g2m_legend `fh' "`g'"
-        file write `fh' `"  "panels": ["' _n
-        forvalues k = 1/`np' {
-            _g2m_panel `fh' "`g'.graphs[`k']" "`specdir'" "`fam'"
-            if `k' < `np' file write `fh' ","
-            file write `fh' _n
+
+        if "`fam'" == "matrix" {
+            _g2m_matrix `fh' "`g'" "`specdir'"
         }
-        file write `fh' "  ]," _n
-    }
-    else {
-        file write `fh' `"  "rows": "1", "cols": "1","' _n
-        file write `fh' `"  "panels": ["' _n
-        _g2m_panel `fh' "`g'" "`specdir'" "single"
-        file write `fh' _n "  ]," _n
-    }
+        else if inlist("`fam'", "by", "combine") {
+            local np = ``g'.graphs.arrnels'
+            capture local rows = ``g'.rows'
+            capture local cols = ``g'.cols'
+            file write `fh' `"  "rows": "`rows'", "cols": "`cols'","' _n
+            foreach t in b1title b2title l1title l2title {
+                _g2m_textarr `fh' "`t'" "`g'.`t'"
+            }
+            _g2m_pairs `fh' "`g'.style" "indiv_yrescale indiv_yrescale.setting" ///
+                "indiv_xrescale indiv_xrescale.setting"
+            file write `fh' _n
+            _g2m_legend `fh' "`g'"
+            * by() and graph combine shrink the text and markers of their panels
+            * (iscale()); the multiplier is stored on the grid that holds them
+            local gm ``g'.plotregion1.gmetric_mult'
+            if "`gm'" == "" | "`gm'" == "." local gm 1
+            file write `fh' `"  "panels": ["' _n
+            forvalues k = 1/`np' {
+                _g2m_panel `fh' "`g'.graphs[`k']" "`specdir'" "`fam'" "`gm'"
+                if `k' < `np' file write `fh' ","
+                file write `fh' _n
+            }
+            file write `fh' "  ]," _n
+        }
+        else {
+            file write `fh' `"  "rows": "1", "cols": "1","' _n
+            file write `fh' `"  "panels": ["' _n
+            _g2m_panel `fh' "`g'" "`specdir'" "single"
+            file write `fh' _n "  ]," _n
+        }
 
-    file write `fh' `"  "end": 1"' _n "}" _n
-    file close `fh'
+        file write `fh' `"  "end": 1"' _n "}" _n
+        file close `fh'
 
-    * ---- render (to a temporary file, so a failure leaves an existing file alone)
-    if "`pymode'" == "embedded" {
-        capture noisily python script `"`render'"', args(`""`spec'""')
-    }
-    else {
-        shell "`pyexe'" "`render'" "`spec'" > "`specdir'/render.log" 2>&1
-    }
-    capture confirm file `"`outtmp'"'
-    if !_rc {
+        * ---- render (to a temporary file, so a failure leaves an existing file alone)
+        if "`pymode'" == "embedded" {
+            capture noisily python script `"`render'"', args(`""`spec'""')
+        }
+        else {
+            shell "`pyexe'" "`render'" "`spec'" > "`specdir'/render.log" 2>&1
+        }
+        capture confirm file `"`outtmp'"'
+        if _rc {
+            di as err "gr2mpl: rendering failed"
+            if "`pymode'" != "embedded" capture noisily type "`specdir'/render.log"
+            exit 698
+        }
         capture copy `"`outtmp'"' `"`saving'"', replace
         if _rc {
             di as err `"gr2mpl: could not write `saving'"'
             exit 603
         }
     }
-    capture confirm file `"`outtmp'"'
-    if _rc {
-        di as err "gr2mpl: rendering failed"
-        if "`pymode'" != "embedded" {
-            di as err "        see `specdir'/render.log"
-            capture noisily type "`specdir'/render.log"
+    local rc = _rc
+    capture file close `fh'
+    global G2M_DONE
+    if `rc' {
+        if "`keepspec'" != "" di as txt "(spec kept in `specdir')"
+        else {
+            _g2m_cleanup "`specdir'" "`predir'"
+            if `rc' == 698 di as txt "        (add the keepspec option to keep the spec folder for checking)"
         }
-        exit 698
+        exit `rc'
     }
+
     * layers the renderer could not draw
     local unsupported
     capture confirm file "`specdir'/skipped.txt"
@@ -202,12 +239,30 @@ program gr2mpl, rclass
         file close `nt'
     }
     di as txt "(matplotlib version of graph `name' written to " as res `"`saving'"' as txt ")"
-    if "`keepspec'" != "" di as txt "(spec kept in `specdir')"
+    if "`keepspec'" != "" {
+        di as txt "(spec kept in " as res `"`specdir'"' as txt ")"
+        return local specdir `"`specdir'"'
+    }
+    else _g2m_cleanup "`specdir'" "`predir'"
     return local unsupported `"`unsupported'"'
     return local pymode "`pymode'"
     return local python `"`pyexe'"'
-    return local specdir `"`specdir'"'
     return local filename `"`saving'"'
+end
+
+* remove the files gr2mpl wrote into the spec folder, and the folder itself when
+* gr2mpl created it (a folder that already existed is left in place)
+program _g2m_cleanup
+    args specdir predir
+    foreach f in spec.json render.log skipped.txt notes.txt render_info.txt ///
+        render_out.png render_out.pdf render_out.svg render_out.jpg render_out.jpeg {
+        capture erase "`specdir'/`f'"
+    }
+    local fl : dir "`specdir'" files "serset*.csv"
+    foreach f of local fl {
+        capture erase "`specdir'/`f'"
+    }
+    if "`predir'" != "1" capture rmdir "`specdir'"
 end
 
 * ---------------------------------------------------------------------------
@@ -358,18 +413,27 @@ end
 * sub-graph, or a member of graph combine)
 * ---------------------------------------------------------------------------
 program _g2m_panel
-    args fh g specdir role
+    args fh g specdir role gm
+    if "`gm'" == "" local gm 1
     local fam `"``g'.graphfamily'"'
     if "``g'.classname'" == "piegraph_g" local fam pie
     file write `fh' "    {" _n
     _g2m_kv `fh' "family" `"`fam'"' 6
     _g2m_kv `fh' "role" "`role'" 6
+    _g2m_kv `fh' "classname" "``g'.classname'" 6
+    _g2m_kv `fh' "gmult" "`gm'" 6
     if "`role'" == "by" {
         _g2m_textarr `fh' "ptitle" "`g'.subtitle" 6
+        file write `fh' "      "
+        _g2m_pairs `fh' "`g'" "ptitle_size subtitle.style.size.gmval"
+        file write `fh' _n
     }
     else if "`role'" == "combine" {
         _g2m_textarr `fh' "ptitle" "`g'.title" 6
         _g2m_textarr `fh' "psubtitle" "`g'.subtitle" 6
+        file write `fh' "      "
+        _g2m_pairs `fh' "`g'" "ptitle_size title.style.size.gmval"
+        file write `fh' _n
     }
     if "`fam'" == "twoway" {
         _g2m_twoway `fh' "`g'" "`specdir'"
@@ -389,19 +453,33 @@ program _g2m_twoway
     capture local npr = ``g'.n_plotregions'
     if _rc | "`npr'" == "" local npr 1
 
-    * which plot region carries the second y axis, if any
+    * .y_scales and .x_scales hold one entry per plot region (not per plot):
+    * a plot's axes are those of the region that holds it
     local ysc ``g'.y_scales'
     local ysc : subinstr local ysc `"""' "", all
+    local xsc ``g'.x_scales'
+    local xsc : subinstr local xsc `"""' "", all
+    forvalues j = 1/`npr' {
+        local ry`j' : word `j' of `ysc'
+        if "`ry`j''" == "" local ry`j' 1
+        local rx`j' : word `j' of `xsc'
+        if "`rx`j''" == "" local rx`j' 1
+    }
     local pr2
     local np = ``g'.n_views'
     forvalues i = 1/`np' {
-        local yax`i' : word `i' of `ysc'
-        if "`yax`i''" == "" local yax`i' 1
         local preg`i' `pr'
+        local rj 1
         forvalues j = 1/`npr' {
-            if "``g'.plotregion`j'.plot`i'.type.setting'" != "" local preg`i' `g'.plotregion`j'
+            if "``g'.plotregion`j'.plot`i'.type.setting'" != "" {
+                local preg`i' `g'.plotregion`j'
+                local rj `j'
+                continue, break
+            }
         }
-        if "`yax`i''" == "2" & "`pr2'" == "" local pr2 `preg`i''
+        local yax`i' `ry`rj''
+        local xax`i' `rx`rj''
+        if "`yax`i''" == "2" & "`xax`i''" == "1" & "`pr2'" == "" local pr2 `preg`i''
     }
 
     foreach a in x y y2 {
@@ -418,7 +496,9 @@ program _g2m_twoway
         _g2m_textarr `fh' "title" "`ax'.title" 4
         _g2m_ticks `fh' "ticks" "`ax'"
         _g2m_pairs `fh' "`ax'" "format major.label_format" "grid style.draw_major_grid.setting" ///
-            "draw draw_view.setting" "linecolor style.linestyle.color.setting"
+            "draw draw_view.setting" "linecolor style.linestyle.color.setting" ///
+            "tsize title.style.size.gmval" "ticksize style.majorstyle.tickstyle.textstyle.size.gmval" ///
+            "tickangle style.majorstyle.tickangle.setting"
         _g2m_pairs `fh' "`sc'" "reverse reverse.setting" "transform transform.setting" ///
             "min curmin" "max curmax" "datamin min" "datamax max"
         * xscale(noline) leaves the line style members unchanged; it is recorded
@@ -436,30 +516,44 @@ program _g2m_twoway
         file write `fh' `""e": 1"' _n "  }," _n
     }
 
-    * reference lines
-    local nl ``pr'._xylines.arrnels'
-    if "`nl'" == "" local nl 0
+    * reference lines, from every plot region (yline(, axis(2)) lives in the
+    * region of the second y axis)
     file write `fh' `"  "reflines": ["' _n
-    forvalues k = 1/`nl' {
-        local o `pr'._xylines[`k']
-        file write `fh' "    {"
-        _g2m_pairs `fh' "`o'" "z z" "ord ord.setting" "color style.linestyle.color.setting" ///
-            "lw style.linestyle.width.gmval" "pattern style.linestyle.pattern.setting"
-        file write `fh' `""e": 1}`=cond(`k' < `nl', ",", "")'"' _n
+    local first 1
+    forvalues j = 1/`npr' {
+        local nl ``g'.plotregion`j'._xylines.arrnels'
+        if "`nl'" == "" local nl 0
+        forvalues k = 1/`nl' {
+            local o `g'.plotregion`j'._xylines[`k']
+            if !`first' file write `fh' "," _n
+            local first 0
+            file write `fh' `"    {"yaxis": "`ry`j''", "xaxis": "`rx`j''", "'
+            _g2m_pairs `fh' "`o'" "z z" "ord ord.setting" "color style.linestyle.color.setting" ///
+                "lw style.linestyle.width.gmval" "pattern style.linestyle.pattern.setting"
+            file write `fh' `""e": 1}"'
+        }
     }
-    file write `fh' "  ]," _n
+    file write `fh' _n "  ]," _n
 
-    * text boxes placed with text()
+    * text boxes placed with text(); text(, yaxis(2)) lives in another region
     local nt ``g'.n_text'
     if "`nt'" == "" local nt 0
     file write `fh' `"  "textboxes": ["' _n
     local first 1
     forvalues k = 1/`nt' {
-        local o `pr'.textbox`k'
-        if "``o'.xpos.val'" == "" continue
+        local o
+        forvalues j = 1/`npr' {
+            if "``g'.plotregion`j'.textbox`k'.xpos.val'" != "" {
+                local o `g'.plotregion`j'.textbox`k'
+                local tj `j'
+                continue, break
+            }
+        }
+        if "`o'" == "" continue
         if !`first' file write `fh' "," _n
         local first 0
-        file write `fh' "    {"
+        file write `fh' `"    {"yaxis": "`ry`tj''", "xaxis": "`rx`tj''", "'
+
         _g2m_pairs `fh' "`o'" "x xpos.val" "y ypos.val" "color style.color.setting" ///
             "size style.size.gmval" "place style.box_alignment.setting" ///
             "horizontal style.horizontal.setting" "angle style.angle.setting" ///
@@ -541,7 +635,7 @@ program _g2m_twoway
     * plots
     file write `fh' `"  "plots": ["' _n
     forvalues i = 1/`np' {
-        _g2m_plot `fh' "`preg`i''.plot`i'" `i' "`yax`i''" "`specdir'"
+        _g2m_plot `fh' "`preg`i''.plot`i'" `i' "`yax`i''" "`specdir'" "`xax`i''"
         if `i' < `np' file write `fh' ","
         file write `fh' _n
     }
@@ -554,11 +648,15 @@ program _g2m_matrix
     args fh g specdir
     local nv = ``g'.nvars'
     local m `g'.plotregion1
+    * graph matrix shrinks text and markers with the number of variables
+    local gm ``m'.gmetric_mult'
+    if "`gm'" == "" | "`gm'" == "." local gm 1
     file write `fh' `"  "rows": "`nv'", "cols": "`nv'","' _n
     file write `fh' `"  "panels": ["' _n
     forvalues i = 1/`nv' {
         forvalues j = 1/`nv' {
             file write `fh' "    {" _n
+            _g2m_kv `fh' "gmult" "`gm'" 6
             local pr `m'.plotregion`i'_`j'
             if `i' == `j' {
                 _g2m_kv `fh' "family" "diag" 6
@@ -583,7 +681,7 @@ program _g2m_matrix
                 }
                 file write `fh' `"  "legend": {"draw": "no", "entries": []},"' _n
                 file write `fh' `"  "plots": ["' _n
-                _g2m_plot `fh' "`pr'.plot1" 1 "1" "`specdir'"
+                _g2m_plot `fh' "`pr'.plot1" 1 "1" "`specdir'" "1"
                 file write `fh' _n "  ]," _n
             }
             file write `fh' `"      "end": 1"' _n "    }"
@@ -596,12 +694,13 @@ end
 
 * one plot record; the serset behind it is exported once per gr2mpl call
 program _g2m_plot
-    args fh p i yax specdir
+    args fh p i yax specdir xax
+        if "`xax'" == "" local xax 1
         local type ``p'.type.setting'
         if "`type'" == "" local type unknown
         local sid ``p'.serset.id'
         if "`sid'" == "" local sid -1
-        foreach v in xvar yvar y2var x2var lvar wvar {
+        foreach v in xvar yvar y2var x2var lvar wvar pvar {
             local `v'i 0
             local `v'lab ""
             local `v'fmt ""
@@ -612,10 +711,10 @@ program _g2m_plot
                 local `v'fmt ``p'.serset.sers[`idx'].format'
             }
         }
-        file write `fh' `"    {"index": `i', "type": "`type'", "serset": `sid', "yaxis": "`yax'", "' _n
-        file write `fh' `"     "xi": `xvari', "yi": `yvari', "y2i": `y2vari', "x2i": `x2vari', "labeli": `lvari', "weighti": `wvari',"' _n
+        file write `fh' `"    {"index": `i', "type": "`type'", "serset": `sid', "yaxis": "`yax'", "xaxis": "`xax'", "' _n
+        file write `fh' `"     "xi": `xvari', "yi": `yvari', "y2i": `y2vari', "x2i": `x2vari', "labeli": `lvari', "weighti": `wvari', "posi": `pvari',"' _n
         _g2m_esc `"`yvarlab'"'
-        file write `fh' `"     "ylabel": "`s(esc)'", "xformat": "`xvarfmt'", "yformat": "`yvarfmt'", "' _n
+        file write `fh' `"     "ylabel": "`s(esc)'", "xformat": "`xvarfmt'", "yformat": "`yvarfmt'", "labelvarfmt": "`lvarfmt'", "' _n
         * value labels of the marker-label variable live in the class, not the serset
         file write `fh' `"     "labelmap": {"'
         if `lvari' > 0 {
@@ -646,6 +745,8 @@ program _g2m_plot
             "alwidth style.area.linestyle.width.gmval" "connect style.connect.setting" ///
             "labpos style.label.position.setting" "labcolor style.label.textstyle.color.setting" ///
             "labsize style.label.textstyle.size.gmval" "draw draw_view.setting" ///
+            "labfmt style.label.format" "labangle style.label.textstyle.angle.setting" ///
+            "cmissing style.connect_missings.setting" ///
             "barsize bar_size" "base base" "drawnbase drawn_base" "dropto bar_drop_to.setting" ///
             "dropbase drop_base.setting"
         file write `fh' `""csv": "serset`sid'.csv"}"'
@@ -673,6 +774,13 @@ program _g2m_bar
         "boxplot boxplot.setting" "stack stack.setting" "percentages percentages.setting"
     file write `fh' _n
     _g2m_textarr `fh' "scaletitle" "`g'.scaleaxis.title"
+    file write `fh' "  "
+    _g2m_pairs `fh' "`g'" "stitle_size scaleaxis.title.style.size.gmval" ///
+        "stick_size scaleaxis.style.majorstyle.tickstyle.textstyle.size.gmval" ///
+        "gtick_size grpaxis.style.majorstyle.tickstyle.textstyle.size.gmval" ///
+        "gtickangle grpaxis.style.majorstyle.tickangle.setting" ///
+        "stickangle scaleaxis.style.majorstyle.tickangle.setting"
+    file write `fh' _n
     _g2m_ticks `fh' "scaleaxis" "`g'.scaleaxis"
     _g2m_ticks `fh' "grpaxis" "`g'.grpaxis"
     _g2m_ticks `fh' "supaxis" "`g'.supaxis"
@@ -740,7 +848,8 @@ program _g2m_bar
     local ldraw ``g'.legend.draw_view.setting'
     local nk ``g'.legend.map.arrnels'
     if "`nk'" == "" local nk 0
-    file write `fh' `"  "legend": {"draw": "`ldraw'", "entries": ["'
+    local lsize ``g'.legend.plotregion1.label[1].style.size.gmval'
+    file write `fh' `"  "legend": {"draw": "`ldraw'", "size": "`lsize'", "entries": ["'
     forvalues k = 1/`nk' {
         local lab `"``g'.legend.plotregion1.label[`k'].text[1]'"'
         local c ``g'.barstyles[`k'].area.shadestyle.color.setting'
@@ -764,7 +873,8 @@ program _g2m_legend
     local ltitle `"``g'.legend.subtitle.text[1]'"'
     if `"`ltitle'"' == "" local ltitle `"``g'.legend.title.text[1]'"'
     _g2m_esc `"`ltitle'"'
-    file write `fh' `"  "legend": {"draw": "`ldraw'", "title": "`s(esc)'", "rows": "``g'.legend.style.rows.val'", "' ///
+    local lsize ``g'.legend.plotregion1.label[1].style.size.gmval'
+    file write `fh' `"  "legend": {"draw": "`ldraw'", "title": "`s(esc)'", "size": "`lsize'", "rows": "``g'.legend.style.rows.val'", "' ///
         `""cols": "``g'.legend.style.cols.val'", "position": "``g'.style.legend_position.setting'", "entries": ["'
     forvalues k = 1/`nk' {
         local m ``g'.legend.map[`k']'
