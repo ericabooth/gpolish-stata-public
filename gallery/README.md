@@ -4,7 +4,7 @@ Twenty-two Stata graphs, each drawn three ways: Stata's default look, the same g
 
 Every image is produced by [gallery.do](gallery.do). A browsable version is at <https://ericabooth.github.io/gpolish-stata-public/gallery/>.
 
-Each code block runs as it stands in a fresh Stata session, as a do-file (paste it into the Do-file Editor: the `///` line breaks and local macros need one). A block loads its data, runs any estimation the graph needs, draws the polished graph, and saves the matplotlib version as `figure.png`. The examples that use the community commands coefplot, statplot and heatplot name the `ssc install` lines they need.
+Each code block runs as it stands in a fresh Stata session, as a do-file (paste it into the Do-file Editor: the `///` line breaks and local macros need one). A block loads its data, runs any estimation the graph needs, draws the polished graph, and saves the matplotlib version as `figure.png`. The examples that use the community commands coefplot, statplot and heatplot name the `ssc install` lines they need. In batch mode (`stata -b`) the first line, `graph set window fontface`, only prints a note, and Stata exports with the font set by `graph set svg fontface` instead.
 
 ## Added-variable plot
 

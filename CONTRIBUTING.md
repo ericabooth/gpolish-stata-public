@@ -25,7 +25,9 @@ Questions about how to get a particular look are welcome as issues too. Please s
   do tests/gr2mpl_tests.do
   ```
 
-  `gpolish_battery.do` ends with "checks passed" when everything works. `gr2mpl_tests.do` needs Python with matplotlib and numpy; set the environment variable `GR2MPL_PYTHON` to that Python, or install the packages into the Python Stata uses.
+  Each script ends with a line giving the number of checks passed when everything works. `gr2mpl_tests.do` needs Python with matplotlib and numpy; set the environment variable `GR2MPL_PYTHON` to that Python, or install the packages into the Python Stata uses.
+- Some test, gallery and benchmark scripts set `graph set window fontface` or `graph set svg fontface`. Stata saves these settings between sessions, so note your own values first (`graph set window`, `graph set svg`) if you want to put them back afterwards.
+- `gallery/README.md` and `gallery/index.html` are generated from `gallery/gallery.do` by `python gallery/make_page.py`, run from the repository's top folder. Change `gallery.do` or `make_page.py`, not the two pages. `python gallery/make_page.py --check` reports whether the pages match what the script writes, and `python gallery/make_page.py --blocks <folder>` writes each example's code block to its own do-file, so every block can be run in a fresh Stata session. `python gallery/make_sheets.py` rebuilds the three-panel images in `gallery/sheets/`.
 - If a change affects how labels are placed, rerun the benchmark in `benchmark/` (see `benchmark/README.md`) and report the before and after numbers in the pull request.
 - Describe the change in `CHANGELOG.md`.
 
