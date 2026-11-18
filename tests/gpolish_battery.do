@@ -29,6 +29,9 @@ program ntext, rclass
     return scalar k = `v'
     return scalar all = `k'
 end
+* the window font is a saved preference: note it here and put it back at the end
+quietly graph set window
+local _wf0 `"`r(fontface)'"'
 graph set window fontface "Open Sans"
 
 * ---- 1. style ---------------------------------------------------------------
@@ -585,6 +588,149 @@ forvalues k = 1/25 {
 }
 chk repel_inside `ok'==1
 
+* ---- 33b. the endlabel note counts overlapping pairs and close pairs apart ----------
+capture program drop shownote
+* runs a command with its output logged; r(note) is 1 when the output contains the text
+program shownote, rclass
+    gettoken what 0 : 0
+    tempfile f
+    quietly log using "`f'", text replace name(_shownote)
+    `0'
+    quietly log close _shownote
+    tempname fh
+    local found 0
+    file open `fh' using "`f'", read text
+    file read `fh' line
+    while r(eof)==0 {
+        if strpos(`"`macval(line)'"', `"`what'"') local found 1
+        file read `fh' line
+    }
+    file close `fh'
+    return scalar note = `found'
+end
+capture program drop endgaps
+* r(min) and r(max): the smallest and largest distance between neighbouring visible end labels,
+* in text sizes
+program endgaps, rclass
+    args g
+    gpolish geom, name(`g')
+    local em = 9.5/72*r(gpi)
+    local yb = r(yb)
+    local k `.`g'.plotregion1.added_text.arrnels'
+    clear
+    quietly set obs `k'
+    quietly gen double gy = .
+    forvalues j = 1/`k' {
+        if "`.`g'.plotregion1.added_text[`j'].draw_view.setting'"=="no" continue
+        quietly replace gy = `yb'*`.`g'.plotregion1.added_text[`j'].ypos.val' in `j'
+    }
+    quietly drop if missing(gy)
+    sort gy
+    quietly gen double d = (gy - gy[_n-1])/`em'
+    summarize d, meanonly
+    return scalar min = r(min)
+    return scalar max = r(max)
+end
+clear
+set obs 10
+gen t = _n
+forvalues i = 1/25 {
+    gen s`i' = 5 + 0.01*`i'*(t==10)
+}
+line s* t, scheme(pypolish) name(cl, replace)
+shownote "are closer than gap() asks but do not overlap" gpolish endlabel
+chk note_close r(note)==1
+shownote "of end labels overlap" gpolish endlabel
+chk note_close_noovl r(note)==0
+endgaps cl
+chk note_close_premise r(min) > 0.95 & r(min) < 1.3
+* not enough height: the labels are spread evenly and the note says they overlap
+clear
+set obs 10
+gen t = _n
+forvalues i = 1/25 {
+    gen s`i' = 5 + 0.01*`i'*(t==10)
+    label var s`i' "Sg`i'y"
+}
+line s* t, scheme(pypolish) ysize(2.8) name(ov, replace)
+shownote "24 pair(s) of end labels overlap" gpolish endlabel
+chk note_ovl r(note)==1
+endgaps ov
+chk ovl_even r(max) - r(min) < 0.01 & r(max) < 0.95
+* a roomy graph gives no note
+sysuse uslifeexp, clear
+line le_wfemale le_bmale year, name(nn, replace)
+shownote "pair(s)" gpolish endlabel
+chk note_none r(note)==0
+
+* ---- 33c. a graph keeps at most one endlabel record box -------------------------------
+sysuse uslifeexp, clear
+line le_wfemale le_wmale le_bfemale year, name(rb, replace)
+forvalues r = 1/4 {
+    gpolish endlabel, values
+}
+local nrec 0
+local k `.rb.plotregion1.added_text.arrnels'
+forvalues j = 1/`k' {
+    if substr(`"`.rb.plotregion1.added_text[`j'].text[1]'"', 1, 16)=="gpolish-endlabel" local ++nrec
+}
+chk rec_one `nrec'==1
+ntext rb added_text
+chk rec_visible r(k)==6
+* the reused record still undoes the latest labels
+gpolish endlabel
+ntext rb added_text
+chk rec_rerun r(k)==3
+gpolish clear
+ntext rb added_text
+chk rec_clear r(all)==0
+chk rec_clear_legend "`.rb.legend.draw_view.setting'"=="yes"
+
+* ---- 33d. ptlabel stops when y() or x() is drawn on another axis only -----------------
+sysuse auto, clear
+twoway (scatter mpg weight) (scatter price weight, yaxis(2)), name(ax2, replace)
+capture gpolish ptlabel make if price > 12000, x(weight) y(price)
+chk ax_y_rc _rc==198
+ntext ax2 added_text
+chk ax_y_noedit r(all)==0
+capture gpolish ptlabel make if price > 12000, x(weight) y(price) yaxis(2)
+chk ax_y_ok _rc==0
+capture gpolish ptlabel make in 1, x(weight) y(mpg)
+chk ax_y1_ok _rc==0
+twoway (scatter mpg weight) (scatter mpg length, xaxis(2)), name(ax3, replace)
+capture gpolish ptlabel make in 1, x(length) y(mpg)
+chk ax_x_rc _rc==198
+capture gpolish ptlabel make in 1, x(length) y(mpg) xaxis(2)
+chk ax_x_ok _rc==0
+* a variable that is not plotted is not checked
+gen w2 = weight
+twoway scatter mpg weight, name(ax4, replace)
+capture gpolish ptlabel make in 1, x(w2) y(mpg)
+chk ax_unplotted _rc==0
+
+* ---- 33e. obstacle boxes cover the whole of a long band and line --------------------
+clear
+set obs 30000
+gen x = _n
+gen hi = cond(x > 28000 & x < 29000, 9, 1)
+gen lo = 0
+gen y = cond(x > 29000, 5, 1)
+twoway (rarea lo hi x) (line y x), yscale(range(0 10)) name(lb, replace)
+gpolish callout "x", to(15000 0.5)
+gpolish geom, name(lb)
+local gx = r(xa) + r(xb)*28500
+local gy = r(ya) + r(yb)*8
+local gxl = r(xa) + r(xb)*29500
+local gl = r(ya) + r(yb)*5
+mata: O = *findexternal("_gpl_OBS")
+mata: st_local("cov", strofreal(sum((O[,1] :<= `gx') :& (O[,3] :>= `gx') :& (O[,2] :<= `gy') :& (O[,4] :>= `gy'))))
+chk long_band `cov' > 0
+mata: st_local("cov", strofreal(sum((O[,1] :<= `gxl') :& (O[,3] :>= `gxl') :& (O[,2] :<= `gl') :& (O[,4] :>= `gl'))))
+chk long_line `cov' > 0
+mata: st_local("nobs", strofreal(rows(O)))
+chk long_rows `nobs' <= 40010
+mata: mata drop O
+
 * ---- 34. placement avoids bars and reference lines ---------------------------------
 clear
 set obs 12
@@ -617,4 +763,5 @@ if "`c(mode)'"=="batch" {
 
 gpolish limits
 
+if `"`_wf0'"'!="" graph set window fontface `"`_wf0'"'
 di as res _n "gpolish battery: $NCHK checks passed (Stata `c(stata_version)')"
