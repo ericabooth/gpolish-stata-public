@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.6.0 (2026-11-17)
+
+- `gpolish ptlabel` moves a label out on a thin leader line when all eight spots next to its point collide.
+  Leaders avoid crossing other labels and each other. New options `noleader`, `lcolor()` and `lwidth()`.
+- `gpolish ptlabel` sizes label boxes to the font's full line height with a small pad, so labels that only
+  touch are treated as colliding.
+- Benchmark: the share of clean labels rises to 0.47-0.54 (from 0.14-0.32) when every point of the real-data
+  scatters is labelled, and to 0.89-1.00 (from 0.58-0.92) when a subset is labelled.
+
 ## 0.5.1 (2026-11-17)
 
 - New `benchmark/` folder: a reproducible comparison of point-label placement against Stata's `mlabel()`,

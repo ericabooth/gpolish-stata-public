@@ -8,10 +8,10 @@ Full tables are in [results/summary.md](results/summary.md); per-graph and per-l
 
 ## What it shows
 
-- **Against the other Stata options, `gpolish` is clearly better.** It gives the highest share of clean labels of the three Stata methods in every scenario. Against Stata's default `mlabel()`, the share of clean labels rises by between 45 percent and elevenfold.
-- **When a subset of points is labelled, `gpolish` is the best of all five methods.** That is the common case in a report: 12 of 63 countries, 19 of 74 cars, or 20 of 60 synthetic points. There it places 58 to 92 percent of labels cleanly, against 37 to 68 percent for ggrepel.
-- **When every point is labelled, ggrepel is best.** With all 60 synthetic points labelled, ggrepel places 86 percent of labels cleanly and `gpolish` 65 percent; on the real data with every point labelled, ggrepel reaches about 60 percent and `gpolish` 14 to 32 percent. ggrepel moves labels well away from their points and draws leader lines; `gpolish` keeps every label next to its point, which fails when the space around a point is full.
-- **`gpolish` is fast enough to use routinely.** It takes 0.1 to 0.5 seconds per graph, in the same range as ggrepel and adjustText.
+- **Against the other Stata options, `gpolish` is clearly better.** It gives the highest share of clean labels of the three Stata methods in every scenario. Against Stata's default `mlabel()`, the share of clean labels rises by between 55 percent and about eighteenfold.
+- **When a subset of points is labelled, `gpolish` is the best of all five methods.** That is the common case in a report: 12 of 63 countries, 19 of 74 cars, or 20 of 60 synthetic points. There it places 77 to 100 percent of labels cleanly, against 37 to 68 percent for ggrepel.
+- **When every point is labelled, ggrepel is still best, but the gap is small on real data.** On the real data with every point labelled, ggrepel places 59 to 60 percent of labels cleanly and `gpolish` 47 to 54 percent. With all 60 synthetic points labelled, ggrepel reaches 86 percent and `gpolish` 68 percent. `gpolish` keeps a label next to its point when it can and moves it out on a leader line only when every spot next to the point is taken; ggrepel moves labels more freely.
+- **`gpolish` is fast enough to use routinely.** It takes 0.1 to 1.6 seconds per graph, in the same range as ggrepel and adjustText.
 
 ## Design
 
@@ -37,7 +37,7 @@ Synthetic labels are made-up names of 4 to 14 characters. Every graph is 7 × 4.
 |---|---|
 | Stata `mlabel()` | `scatter ..., mlabel() mlabposition(3)`: Stata's default label position |
 | `labrepel` 1.7 (graphfunctions, SSC) | `labrepel y x, label() mlabsize() xsize() ysize() seed()`, drawn at the repelled positions with leader lines, as its help file shows |
-| `gpolish ptlabel` 0.5.1 | `gpolish ptlabel label, x(x) y(y) size(8.6) msize(6)` |
+| `gpolish ptlabel` 0.6.0 | `gpolish ptlabel label, x(x) y(y) size(8.6) msize(6)`; leader lines on (the default) |
 | adjustText 1.4.0 | `adjust_text(texts, x=..., y=...)`, told about every data point |
 | ggrepel 0.9.8 | `geom_text_repel(..., max.overlaps = Inf)`, so it drops no labels |
 
@@ -65,7 +65,8 @@ The headline figure is the share of clean labels.
 - **`labrepel` is shown at its defaults.** It starts each label centred on its point and moves it only when labels collide. With few labels nothing collides, so labels stay on top of their markers. That is why its clean share is near zero in the 12-label case. Its `nudgex()`, `nudgey()` and `direction()` options would change this, and a user tuning it would do better.
 - **adjustText was not told about the fit line.** Only `gpolish` treats plotted lines as obstacles by default. ggrepel and adjustText can be given extra obstacles, but not by default.
 - **Timings are not strictly comparable.** For `gpolish` they cover the whole command: reading the graph, placement and adding the labels. For `labrepel` they cover the placement only. For ggrepel they cover drawing the whole plot, because ggrepel places labels while it draws. For adjustText they cover `adjust_text()` only. All runs were on one Mac.
-- **`gpolish` never moves a label away from its point.** It tries eight positions next to the point and picks the least crowded. That gives short, unambiguous distances and no leader lines, but it cannot escape a crowded neighbourhood. This explains its weaker results when every point is labelled.
+- **`gpolish` moves a label away from its point only as a last resort.** It first tries eight positions next to the point. Only if all of them collide does it try spots farther out, on a leader line. That keeps most labels short and close, but it leaves some labels touching a neighbour where ggrepel would move them out.
+- **The ambiguity measure ignores leader lines.** A label far from its point can sit nearer another point and count as ambiguous, even though its leader line shows which point it belongs to. Every method except `mlabel()` draws leader lines for labels it moves.
 - **Text widths in `gpolish` come from built-in tables.** Stata reports no text metrics, so `gpolish` estimates widths from per-font character tables. The benchmark measures the real rendered boxes, so any error in those estimates shows up in the scores.
 
 ## Running it

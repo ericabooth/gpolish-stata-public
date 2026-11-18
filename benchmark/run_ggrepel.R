@@ -10,8 +10,7 @@ dir.create("out/ggrepel", showWarnings = FALSE, recursive = TRUE)
 man <- rbind(read.csv("data/manifest_synthetic.csv", colClasses = c(scenario = "character")),
              read.csv("data/manifest_real.csv", colClasses = c(scenario = "character")))
 if (length(args)) man <- man[man$scenario %in% args, ]
-geo <- read.csv("out/stata/geometry.csv")
-geo <- geo[geo$method == "default", ]
+geo <- read.csv("out/stata/geometry_default.csv")
 PT <- 72.27 / 72                      # ggplot sizes are in TeX points; Stata and matplotlib use 1/72 in
 labsize <- 8.6 * PT / .pt
 ptsize <- 6.0 * PT / .pt

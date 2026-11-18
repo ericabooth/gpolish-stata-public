@@ -82,12 +82,14 @@ capture which labrepel
 local methods default gpolish
 if !_rc local methods `methods' labrepel
 else di as txt "note: labrepel is not installed; that method is skipped"
+* BENCH_METHODS limits the run to some methods, e.g. "gpolish"
+local only : environment BENCH_METHODS
+if `"`only'"' != "" local methods `only'
 
 tempname gf
-file open `gf' using "out/stata/geometry.csv", write text replace
-file write `gf' "scenario,method,W,H,px0,py0,px1,py1,xA,xB,yA,yB,seconds,rc" _n
-
 foreach method of local methods {
+    file open `gf' using "out/stata/geometry_`method'.csv", write text replace
+    file write `gf' "scenario,method,W,H,px0,py0,px1,py1,xA,xB,yA,yB,seconds,rc" _n
     forvalues r = 1/`N' {
         local scen `scen`r''
         import delimited using "data/`scen'.csv", clear varnames(1) stringcols(3) encoding("utf-8")
@@ -144,6 +146,6 @@ foreach method of local methods {
         local py1 = max(``pr'.gdi_y0', ``pr'.gdi_y1')/`G1y'*`H'
         file write `gf' "`scen',`method',`W',`H',`px0',`py0',`px1',`py1',`xA',`xB',`yA',`yB',`secs',`rc'" _n
     }
+    file close `gf'
 }
-file close `gf'
 di as res "stata benchmark done"

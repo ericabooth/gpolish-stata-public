@@ -30,11 +30,13 @@ def data(scen):
 
 @functools.lru_cache(maxsize=None)
 def geometry_table():
+    import glob
     out = {}
-    with open("out/stata/geometry.csv") as fh:
-        for r in csv.DictReader(fh):
-            out[(r["scenario"], r["method"])] = {k: (float(v) if k not in ("scenario", "method") else v)
-                                                 for k, v in r.items()}
+    for f in sorted(glob.glob("out/stata/geometry_*.csv")):
+        with open(f) as fh:
+            for r in csv.DictReader(fh):
+                out[(r["scenario"], r["method"])] = {k: (float(v) if k not in ("scenario", "method") else v)
+                                                     for k, v in r.items()}
     return out
 
 

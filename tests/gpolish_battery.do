@@ -301,6 +301,25 @@ chk save_markers r(k)==2
 chk save_box "`.sv2.plotregion1.added_text[5].style.drawbox.setting'"=="yes"
 chk save_title substr(`"`.sv2.title.text[1]'"',1,4)=="{bf:" | `"`.sv2.title.text[1]'"'==""
 
+* ---- 21. leader lines in crowded point labels ---------------------------------------
+sysuse auto, clear
+scatter mpg weight, name(ld1, replace)
+gpolish ptlabel make, x(weight) y(mpg)
+ntext ld1 added_text
+chk lead_all r(k)==74
+ntext ld1 added_lines
+chk lead_some r(k) > 0
+local nlead = r(k)
+scatter mpg weight, name(ld2, replace)
+gpolish ptlabel make, x(weight) y(mpg) noleader
+ntext ld2 added_lines
+chk noleader r(k)==0
+sysuse lifeexp, clear
+scatter lexp gnppc, xscale(log) name(ld3, replace)
+gpolish ptlabel country if inlist(country, "Haiti", "Bolivia", "Canada"), x(gnppc) y(lexp)
+ntext ld3 added_lines
+chk sparse_noleader r(k)==0
+
 gpolish limits
 
 di as res _n "gpolish battery: $NCHK checks passed (Stata `c(stata_version)')"

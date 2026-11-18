@@ -1,4 +1,4 @@
-*! gpolish 0.5.1  post-hoc polish + layout layer for Stata graphs
+*! gpolish 0.6.0  post-hoc polish + layout layer for Stata graphs
 *! gpolish [style] | endlabel | callout | note | arrow | brace | bracket | ptlabel | legend | clear | render | limits | geom
 *! Requires Stata 16+. Uses undocumented graph-object members and gr_edit.
 program gpolish
@@ -807,7 +807,7 @@ end
 * ================================================================ ptlabel
 program _gpl_ptlabel
     syntax varname(string) [if] [in], x(varname numeric) y(varname numeric) [name(string) SIZe(real 8.6) ///
-        COLor(string) OFFset(real 3) MSize(real 6) HALO]
+        COLor(string) OFFset(real 3) MSize(real 6) HALO noLEADer LColor(string) LWidth(string)]
     _gpl_name `name'
     local name `r(name)'
     marksample touse, novarlist strok
@@ -833,8 +833,11 @@ program _gpl_ptlabel
     }
     tempname R
     mata: _gpl_place("`gx'", "`gy'", "`varlist'", "`sel'", "`R'", `size'/72*`gpi', `msize'/72*`gpi'/2, ///
-        `offset'/72*`gpi', `r(gx0)', `r(gx1)', `r(gy0)', `r(gy1)')
+        `offset'/72*`gpi', `r(gx0)', `r(gx1)', `r(gy0)', `r(gy1)', "`leader'"=="")
+    if "`lcolor'"=="" local lcolor "150 150 150"
+    if "`lwidth'"=="" local lwidth vthin
     local nl = rowsof(`R')
+    local nlead 0
     local bad 0
     forvalues i = 1/`nl' {
         local obs = `R'[`i',1]
@@ -844,11 +847,23 @@ program _gpl_ptlabel
         if `ylog' local py = exp(`py')
         local h = `R'[`i',4]
         local hz = cond(`h'==-1, "left", cond(`h'==1, "right", "center"))
-        local ba : word `=`R'[`i',5]' of east west north south
+        local ba : word `=`R'[`i',5]' of east west north south center
         local t = `varlist'[`obs']
         mata: st_local("t", _gpl_esc(st_local("t")))
         local bad = `bad' + (`R'[`i',6] > 0)
         _gpl_addtext, name(`name') x(`px') y(`py') lines(`"`t'"') size(`size') color("`color'") hz(`hz') ba(`ba') `halo'
+        if `R'[`i',7] == 1 {
+            * leader line from the point to a label placed farther out
+            local s
+            forvalues c = 8/11 {
+                local v = `R'[`i',`c']
+                if inlist(`c', 8, 10) local v = cond(`xlog', exp((`v'-`xa')/`xb'), (`v'-`xa')/`xb')
+                else local v = cond(`ylog', exp((`v'-`ya')/`yb'), (`v'-`ya')/`yb')
+                local s `s' `v'
+            }
+            _gpl_addline, name(`name') seg(`s') lcolor(`lcolor') lwidth(`lwidth')
+            local ++nlead
+        }
     }
     if `bad' > 0 _gpl_note crowded `bad'
 end
@@ -1143,10 +1158,13 @@ real scalar _gpl_obscost(real rowvector b, real matrix O)
 }
 
 // ---------------------------------------------------------------- 2-D point labels
-// result rows: obs, anchor x, anchor y, halign (-1 left, 0 centre, 1 right), box alignment, overlap flag
+// Each label first tries eight spots next to its point. If every one of them collides and leaders
+// are allowed, it also tries spots on rings farther out, joined to the point by a leader line.
+// result rows: obs, anchor x, anchor y, halign (-1 left, 0 centre, 1 right), box alignment
+// (1 E, 2 W, 3 N, 4 S, 5 centre), overlap flag, leader flag, leader x0 y0 x1 y1 (device units)
 void _gpl_place(string scalar gxv, string scalar gyv, string scalar labv, string scalar selv, string scalar out,
                 real scalar fs, real scalar rad, real scalar off,
-                real scalar x0, real scalar x1, real scalar y0, real scalar y1)
+                real scalar x0, real scalar x1, real scalar y0, real scalar y1, real scalar leader)
 {
     real colvector gx
     real colvector gy
@@ -1156,23 +1174,33 @@ void _gpl_place(string scalar gxv, string scalar gyv, string scalar labv, string
     real matrix C
     real matrix R
     real matrix O
-    real matrix Oi
+    real matrix L
     real colvector w
     real colvector choice
     real colvector resid
+    real colvector far
+    real matrix FB
     real scalar m
     real scalar i
     real scalar j
     real scalar k
+    real scalar q
     real scalar pass
     real scalar c
     real scalar hardc
     real scalar bc
     real scalar h
     real scalar d
+    real scalar px
+    real scalar py
+    real scalar a
+    real scalar rr
+    real scalar base
     real rowvector b
     real rowvector best
     real rowvector own
+    real rowvector seg
+    real rowvector bestseg
     string scalar font
 
     font = st_global("GPL_FONT")
@@ -1183,8 +1211,9 @@ void _gpl_place(string scalar gxv, string scalar gyv, string scalar labv, string
     lab = st_sdata(idx, labv)
     O = *_gpl_ext("_gpl_OBS")
     w = J(m, 1, 0)
-    for (i=1; i<=m; i++) w[i] = _gpl_textw(font, lab[i], 0)*fs
-    h = fs*1.15
+    // boxes carry a small pad so labels that merely touch count as colliding
+    for (i=1; i<=m; i++) w[i] = _gpl_textw(font, lab[i], 0)*fs + 2*0.6*fs/8.6
+    h = fs*1.4 + 2*0.6*fs/8.6
     d = rad + off
     // columns: side, dx, dy of box centre, halign, penalty, dy of anchor, box alignment (1 E, 2 W, 3 N, 4 S)
     C = (  1,  d,  0, -1, 0,    0, 1 \
@@ -1197,50 +1226,202 @@ void _gpl_place(string scalar gxv, string scalar gyv, string scalar labv, string
           -1, -d*0.7, -d*0.7 - h/3,  1, 0.5, -d*0.7 - h/3, 2 )
     choice = J(m, 1, 1)
     resid = J(m, 1, 0)
+    far = J(m, 1, 0)
+    FB = J(m, 4, .)
+    L = J(m, 4, .)
     B = J(m, 4, .)
     for (i=1; i<=m; i++) B[i,] = _gpl_box(gx[idx[i]], gy[idx[i]], w[i], h, C[1,])
     for (pass=1; pass<=4; pass++) {
         for (i=1; i<=m; i++) {
+            px = gx[idx[i]]
+            py = gy[idx[i]]
             // the point's own marker is not an obstacle for its own label
-            own = (gx[idx[i]]-rad*1.01, gy[idx[i]]-rad*1.01, gx[idx[i]]+rad*1.01, gy[idx[i]]+rad*1.01)
-            Oi = O
+            own = (px-rad*1.01, py-rad*1.01, px+rad*1.01, py+rad*1.01)
             bc = .
             for (k=1; k<=rows(C); k++) {
-                b = _gpl_box(gx[idx[i]], gy[idx[i]], w[i], h, C[k,])
-                hardc = 2*(_gpl_obscost(b, Oi) - _gpl_ov(b, own))
-                if (hardc < 0) hardc = 0
-                for (j=1; j<=m; j++) {
-                    if (j==i) continue
-                    if (pass==1 & j>i) continue
-                    hardc = hardc + 4*_gpl_ov(b, B[j,])
-                }
-                if (b[1] < x0) hardc = hardc + 1000*(x0-b[1])*h
-                if (b[3] > x1) hardc = hardc + 1000*(b[3]-x1)*h
-                if (b[2] < y0) hardc = hardc + 1000*(y0-b[2])*w[i]
-                if (b[4] > y1) hardc = hardc + 1000*(b[4]-y1)*w[i]
+                b = _gpl_box(px, py, w[i], h, C[k,])
+                hardc = _gpl_hard(b, O, own, B, i, pass, w[i], h, x0, x1, y0, y1)
                 c = hardc + C[k,5]*h*h
                 if (c < bc) {
                     bc = c
                     choice[i] = k
                     best = b
                     resid[i] = hardc
+                    far[i] = 0
+                }
+            }
+            // leader fallback: only when every adjacent spot collides
+            if (leader & resid[i] > 0.02*w[i]*h) {
+                for (q=1; q<=6; q++) {
+                    rr = d + q*0.9*h
+                    for (a=0; a<360; a=a+22.5) {
+                        b = (px + cos(a*pi()/180)*(rr + w[i]/2) - w[i]/2, py + sin(a*pi()/180)*(rr + h/2) - h/2,
+                             px + cos(a*pi()/180)*(rr + w[i]/2) + w[i]/2, py + sin(a*pi()/180)*(rr + h/2) + h/2)
+                        base = (0.6 + 0.08*rr/h)*h*h
+                        if (base >= bc) continue
+                        hardc = _gpl_hard(b, O, own, B, i, pass, w[i], h, x0, x1, y0, y1)
+                        if (hardc + base >= bc) continue
+                        seg = _gpl_leader(px, py, b, rad*1.3, 0.12*h)
+                        c = hardc + base + _gpl_leadcost(seg, O, own, B, L, i, h)
+                        if (c < bc) {
+                            bc = c
+                            best = b
+                            resid[i] = hardc
+                            far[i] = 1
+                            bestseg = seg
+                        }
+                    }
                 }
             }
             B[i,] = best
+            if (far[i]) L[i,] = bestseg
+            else L[i,] = J(1, 4, .)
         }
     }
-    R = J(m, 6, .)
+    R = J(m, 11, .)
     for (i=1; i<=m; i++) {
         k = choice[i]
         R[i,1] = idx[i]
-        R[i,2] = gx[idx[i]] + C[k,2]
-        R[i,3] = gy[idx[i]] + C[k,6]
-        R[i,4] = C[k,4]
-        R[i,5] = C[k,7]
         R[i,6] = (resid[i] > 0.35*w[i]*h)
+        R[i,7] = far[i]
+        if (far[i]) {
+            R[i,2] = (B[i,1] + B[i,3])/2
+            R[i,3] = (B[i,2] + B[i,4])/2
+            R[i,4] = 0
+            R[i,5] = 5
+            R[i,8..11] = L[i,]
+        }
+        else {
+            R[i,2] = gx[idx[i]] + C[k,2]
+            R[i,3] = gy[idx[i]] + C[k,6]
+            R[i,4] = C[k,4]
+            R[i,5] = C[k,7]
+        }
     }
     st_matrix(out, R)
     _gpl_obs_add(B)
+}
+// overlap cost of a candidate box: obstacles, other labels, plot edges
+real scalar _gpl_hard(real rowvector b, real matrix O, real rowvector own, real matrix B, real scalar i,
+                      real scalar pass, real scalar w, real scalar h,
+                      real scalar x0, real scalar x1, real scalar y0, real scalar y1)
+{
+    real scalar hardc
+    real colvector ox
+    real colvector oy
+    real colvector use
+    hardc = 2*(_gpl_obscost(b, O) - _gpl_ov(b, own))
+    if (hardc < 0) hardc = 0
+    ox = rowmin((J(rows(B), 1, b[3]), B[,3])) - rowmax((J(rows(B), 1, b[1]), B[,1]))
+    oy = rowmin((J(rows(B), 1, b[4]), B[,4])) - rowmax((J(rows(B), 1, b[2]), B[,2]))
+    use = J(rows(B), 1, 1)
+    use[i] = 0
+    if (pass==1 & i < rows(B)) use[(i+1)::rows(B)] = J(rows(B)-i, 1, 0)
+    hardc = hardc + 4*sum((ox :* oy) :* ((ox :> 0) :& (oy :> 0)) :* use)
+    if (b[1] < x0) hardc = hardc + 1000*(x0-b[1])*h
+    if (b[3] > x1) hardc = hardc + 1000*(b[3]-x1)*h
+    if (b[2] < y0) hardc = hardc + 1000*(y0-b[2])*w
+    if (b[4] > y1) hardc = hardc + 1000*(b[4]-y1)*w
+    return(hardc)
+}
+// leader from just outside the marker to just short of the nearest point of the box
+real rowvector _gpl_leader(real scalar px, real scalar py, real rowvector b, real scalar r0, real scalar gap)
+{
+    real scalar qx
+    real scalar qy
+    real scalar dx
+    real scalar dy
+    real scalar len
+    qx = max((b[1], min((px, b[3]))))
+    qy = max((b[2], min((py, b[4]))))
+    dx = qx - px
+    dy = qy - py
+    len = sqrt(dx^2 + dy^2)
+    if (len < r0 + gap + 1) return((px, py, qx, qy))
+    return((px + dx/len*r0, py + dy/len*r0, qx - dx/len*gap, qy - dy/len*gap))
+}
+// penalty for a leader that crosses other labels, markers, line pieces or other leaders
+real scalar _gpl_leadcost(real rowvector s, real matrix O, real rowvector own, real matrix B, real matrix L,
+                          real scalar i, real scalar h)
+{
+    real scalar c
+    real scalar j
+    real matrix Bo
+    real matrix Lo
+    real colvector keep
+    c = 0
+    keep = (1::rows(B)) :!= i
+    Bo = select(B, keep)
+    c = c + 2*h*h*_gpl_seghitn(s, Bo)
+    Lo = select(L, keep :& (L[,1] :< .))
+    for (j=1; j<=rows(Lo); j++) {
+        if (_gpl_segx(s, Lo[j,])) c = c + 1.5*h*h
+    }
+    c = c + 0.15*h*h*_gpl_seghitn(s, O)
+    return(c)
+}
+// how many boxes in O does segment s touch? (bounding-box prefilter, then exact test)
+real scalar _gpl_seghitn(real rowvector s, real matrix O)
+{
+    real colvector sel
+    real scalar n
+    real scalar k
+    if (rows(O) == 0) return(0)
+    sel = selectindex((O[,3] :>= min((s[1], s[3]))) :& (O[,1] :<= max((s[1], s[3]))) :&
+                      (O[,4] :>= min((s[2], s[4]))) :& (O[,2] :<= max((s[2], s[4]))))
+    n = 0
+    for (k=1; k<=rows(sel); k++) n = n + _gpl_seghit(s, O[sel[k],])
+    return(n)
+}
+// does segment s = (x0, y0, x1, y1) touch box b? (Liang-Barsky)
+real scalar _gpl_seghit(real rowvector s, real rowvector b)
+{
+    real scalar t0
+    real scalar t1
+    real scalar dx
+    real scalar dy
+    real scalar k
+    real scalar p
+    real scalar q
+    real scalar t
+    real matrix PQ
+    dx = s[3] - s[1]
+    dy = s[4] - s[2]
+    if (max((s[1], s[3])) < b[1] | min((s[1], s[3])) > b[3] | max((s[2], s[4])) < b[2] | min((s[2], s[4])) > b[4]) return(0)
+    PQ = (-dx, s[1] - b[1] \ dx, b[3] - s[1] \ -dy, s[2] - b[2] \ dy, b[4] - s[2])
+    t0 = 0
+    t1 = 1
+    for (k=1; k<=4; k++) {
+        p = PQ[k,1]
+        q = PQ[k,2]
+        if (p == 0) {
+            if (q < 0) return(0)
+        }
+        else {
+            t = q/p
+            if (p < 0) {
+                if (t > t0) t0 = t
+            }
+            else {
+                if (t < t1) t1 = t
+            }
+            if (t0 > t1) return(0)
+        }
+    }
+    return(1)
+}
+// do two segments cross?
+real scalar _gpl_segx(real rowvector a, real rowvector b)
+{
+    real scalar d1
+    real scalar d2
+    real scalar d3
+    real scalar d4
+    d1 = (b[3]-b[1])*(a[2]-b[2]) - (b[4]-b[2])*(a[1]-b[1])
+    d2 = (b[3]-b[1])*(a[4]-b[2]) - (b[4]-b[2])*(a[3]-b[1])
+    d3 = (a[3]-a[1])*(b[2]-a[2]) - (a[4]-a[2])*(b[1]-a[1])
+    d4 = (a[3]-a[1])*(b[4]-a[2]) - (a[4]-a[2])*(b[3]-a[1])
+    return(d1*d2 < 0 & d3*d4 < 0)
 }
 real rowvector _gpl_box(real scalar x, real scalar y, real scalar w, real scalar h, real rowvector c)
 {

@@ -109,8 +109,10 @@ def main(check):
     for r in read_csv("out/ggrepel/results.csv"):
         gg.setdefault(r["scenario"], []).append(r)
     times = {}
-    for r in read_csv("out/stata/geometry.csv"):
-        times[(r["scenario"], r["method"])] = float(r["seconds"])
+    import glob
+    for f in sorted(glob.glob("out/stata/geometry_*.csv")):
+        for r in read_csv(f):
+            times[(r["scenario"], r["method"])] = float(r["seconds"])
     for meth, f in (("adjusttext", "out/adjusttext/timing.csv"), ("ggrepel", "out/ggrepel/timing.csv")):
         for r in read_csv(f):
             times[(r["scenario"], meth)] = float(r["seconds"])

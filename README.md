@@ -57,7 +57,7 @@ gpolish render, saving(life_mpl.png) replace    // optional matplotlib version
 | `gpolish note` | A shaded box for a finding or call-out, with an optional arrow. |
 | `gpolish brace` | A curly brace with a label: mark a confidence interval, a gap or a range. |
 | `gpolish arrow` | A straight or curved arrow; with `note` it builds simple flow charts. |
-| `gpolish ptlabel` | Label chosen scatter points, each in the least crowded of eight positions. |
+| `gpolish ptlabel` | Label chosen scatter points, each in the least crowded of eight positions; crowded labels move out on a leader line. |
 | `gpolish bracket` | A square bracket between two y values. |
 | `gpolish legend` | Colour legend text to match its keys. |
 | `gpolish clear` | Remove everything the layout commands added, and undo `endlabel`'s margin and legend changes. |
@@ -141,7 +141,7 @@ Tested on StataNow 19.5 and Stata 16.1 on macOS. Stata 17 and 18 and Windows are
 
 ## How well does the placement work?
 
-The [benchmark](benchmark/) scores `gpolish ptlabel` against Stata's own `mlabel()`, `labrepel`, adjustText (Python) and ggrepel (R) on four real-data scenarios and 60 synthetic ones, with every label measured by the same rule. When a subset of points is labelled, the usual case in a report, `gpolish` places the largest share of labels cleanly of all five methods. When every point in a crowded scatter is labelled, ggrepel does better, because it moves labels away from their points and draws leader lines.
+The [benchmark](benchmark/) scores `gpolish ptlabel` against Stata's own `mlabel()`, `labrepel`, adjustText (Python) and ggrepel (R) on four real-data scenarios and 60 synthetic ones, with every label measured by the same rule. When a subset of points is labelled, the usual case in a report, `gpolish` places the largest share of labels cleanly of all five methods: 77 to 100 percent. When every point in a crowded scatter is labelled, ggrepel does somewhat better; `gpolish` moves a label out on a leader line only when every spot next to its point is taken.
 
 <img width="900" alt="Benchmark: share of clean labels and seconds per graph" src="benchmark/results/benchmark.png" />
 

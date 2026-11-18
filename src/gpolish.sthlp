@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 0.5.1  17nov2026}{...}
+{* *! version 0.6.0  17nov2026}{...}
 {viewerjumpto "Syntax" "gpolish##syntax"}{...}
 {viewerjumpto "Description" "gpolish##description"}{...}
 {viewerjumpto "Subcommands" "gpolish##subcommands"}{...}
@@ -36,7 +36,7 @@
 [{opt cur:ve(#)} {opt head:size(#)} {opt shr:ink(#)} {opt lc:olor(rgb)} {opt lw:idth(str)} {opt name(graphname)}]
 
 {p 8 16 2}{cmd:gpolish ptlabel} {it:strvar} {ifin}{cmd:,} {opt x(varname)} {opt y(varname)}
-[{opt siz:e(#)} {opt col:or(rgb)} {opt off:set(#)} {opt ms:ize(#)} {opt halo} {opt name(graphname)}]
+[{opt siz:e(#)} {opt col:or(rgb)} {opt off:set(#)} {opt ms:ize(#)} {opt halo} {opt nolead:er} {opt lc:olor(rgb)} {opt lw:idth(str)} {opt name(graphname)}]
 
 {p 8 16 2}{cmd:gpolish bracket,} {opt x(#)} {opt y0(#)} {opt y1(#)} [{opt tick(#)} {opt left} {opt lc:olor(rgb)} {opt lw:idth(str)} {opt name(graphname)}]
 
@@ -124,8 +124,11 @@ Together with {cmd:gpolish note} it builds simple flow charts on an empty plot.
 
 {phang}
 {cmd:gpolish ptlabel} labels selected points of a scatterplot with the string variable {it:strvar}.
-Each label is tried in eight positions around its point and placed where it overlaps markers, lines and other
-labels least. {opt x()} and {opt y()} name the plotted variables. Log axes are detected.
+Each label is tried in eight positions next to its point and placed where it overlaps markers, lines and other
+labels least. If all eight collide, the label is also tried farther out, on rings around its point, and joined
+to the point by a thin leader line; it moves out only when that is clearly better. {opt noleader} keeps every
+label next to its point; {opt lcolor()} and {opt lwidth()} style the leader lines.
+{opt x()} and {opt y()} name the plotted variables. Log axes are detected.
 
 {phang}
 {cmd:gpolish bracket} draws a square bracket from {opt y0()} to {opt y1()} at {opt x()}.
