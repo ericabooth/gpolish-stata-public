@@ -17,11 +17,17 @@ program chk
     global NCHK = $NCHK + 1
 end
 capture program drop ntext
+* r(k) counts the visible objects (endlabel keeps a hidden record box); r(all) counts all
 program ntext, rclass
     args g arr
     local k `.`g'.plotregion1.`arr'.arrnels'
     if "`k'"=="" local k 0
-    return scalar k = `k'
+    local v 0
+    forvalues j = 1/`k' {
+        if "`.`g'.plotregion1.`arr'[`j'].draw_view.setting'"!="no" local ++v
+    }
+    return scalar k = `v'
+    return scalar all = `k'
 end
 graph set window fontface "Open Sans"
 
@@ -138,13 +144,15 @@ chk angle_stored "`.g8.plotregion1.added_text[6].style.angle.setting'"=="20"
 graph bar (mean) lexp, over(region) name(g9, replace)
 capture noisily gpolish endlabel
 chk refuse_bar _rc==198
-graph set window fontface "Comic Sans MS"
+* a font without a width table (set through GPOLISH_FONT, which also works in batch mode)
+global GPOLISH_FONT "Comic Sans MS"
 sysuse uslifeexp, clear
 line le_wfemale le_bmale year, legend(off) name(g10, replace)
 gpolish endlabel
 ntext g10 added_text
 chk unknown_font r(k)==2
-graph set window fontface "Open Sans"
+chk font_override "$GPL_FONT"=="comic sans ms"
+global GPOLISH_FONT
 scatter le year, name(g11, replace)
 capture noisily gpolish endlabel
 chk no_lines _rc==198
@@ -188,7 +196,7 @@ line le_wfemale le_bmale year, name(e2, replace)
 gpolish endlabel
 chk esc_varlabel strpos(`"`.e2.plotregion1.added_text[2].text[1]'"', "{c 36}foo")>0
 gpolish endlabel, labels("A \$foo" "B")
-chk esc_labels strpos(`"`.e2.plotregion1.added_text[3].text[1]'"', "{c 36}foo")>0
+chk esc_labels strpos(`"`.e2.plotregion1.added_text[4].text[1]'"', "{c 36}foo")>0
 label var le_bmale "Black men"
 sysuse auto, clear
 replace make = "Car \$foo" in 1
@@ -232,11 +240,7 @@ local mg1 = `.c1.style.margin.gright.val'
 gpolish endlabel, values dots
 chk rerun_margin abs(`.c1.style.margin.gright.val' - `mg1') < 1e-6
 ntext c1 added_text
-local vis 0
-forvalues k = 1/`r(k)' {
-    if "`.c1.plotregion1.added_text[`k'].draw_view.setting'"!="no" local ++vis
-}
-chk rerun_visible `vis'==4
+chk rerun_visible r(k)==4
 gpolish callout "extra", at(1950 40)
 gpolish clear
 ntext c1 added_text
@@ -298,7 +302,7 @@ ntext sv2 added_text
 chk save_text r(k)==5
 ntext sv2 added_markers
 chk save_markers r(k)==2
-chk save_box "`.sv2.plotregion1.added_text[5].style.drawbox.setting'"=="yes"
+chk save_box "`.sv2.plotregion1.added_text[6].style.drawbox.setting'"=="yes"
 chk save_title substr(`"`.sv2.title.text[1]'"',1,4)=="{bf:" | `"`.sv2.title.text[1]'"'==""
 
 * ---- 21. leader lines in crowded point labels ---------------------------------------
@@ -334,6 +338,282 @@ capture noisily gpolish ptlabel nm in 1/2, x(x) y(y)
 chk lead_empty_path _rc==0
 ntext cc added_text
 chk lead_empty_text r(k)==2
+
+* ---- 23. the endlabel record belongs to one graph and survives other edits ---------
+sysuse uslifeexp, clear
+* a graph redrawn under the same name (in the same second) has no record: notes stay
+line le_wfemale le_bmale year, name(rg, replace)
+gpolish endlabel
+line le_wfemale le_bmale year, name(rg, replace) title("Second")
+local mg0 = `.rg.style.margin.gright.val'
+gpolish note "Note A", at(1910 75)
+gpolish note "Note B", at(1910 70)
+gpolish endlabel
+chk samename_notes "`.rg.plotregion1.added_text[1].draw_view.setting'`.rg.plotregion1.added_text[2].draw_view.setting'"=="yesyes"
+ntext rg added_text
+chk samename_count r(k)==4
+* a re-run after an arrow (which adds lines) still replaces the labels
+line le_wfemale le_bmale year, name(ra, replace)
+local mg0 = `.ra.style.margin.gright.val'
+gpolish endlabel, values
+local mg1 = `.ra.style.margin.gright.val'
+gpolish arrow, from(1950 50) to(1960 60)
+gpolish callout "Flu", to(1918 36.6)
+gpolish endlabel, values
+ntext ra added_text
+chk rerun_after_arrow r(k)==5
+chk rerun_after_arrow_margin abs(`.ra.style.margin.gright.val' - `mg1') < 1e-6
+gpolish clear
+chk clear_after_arrow_margin abs(`.ra.style.margin.gright.val' - `mg0') < 1e-6
+chk clear_after_arrow_legend "`.ra.legend.draw_view.setting'"=="yes"
+* graph save and graph use under another name: the record travels with the graph
+line le_wfemale le_bmale year, name(su, replace)
+local mg0 = `.su.style.margin.gright.val'
+gpolish endlabel
+tempfile gsu
+graph save su "`gsu'", replace
+graph drop su
+graph use "`gsu'", name(su2)
+gpolish endlabel, values
+ntext su2 added_text
+chk use_rerun r(k)==4
+gpolish clear
+chk use_clear_margin abs(`.su2.style.margin.gright.val' - `mg0') < 1e-6
+chk use_clear_legend "`.su2.legend.draw_view.setting'"=="yes"
+* a recorded label changed by other means makes the record stale: nothing is hidden
+line le_wfemale le_bmale year, name(st, replace)
+gpolish endlabel
+_gm_edit .st.plotregion1.added_text[1].text = {}
+_gm_edit .st.plotregion1.added_text[1].text.Arrpush "Edited by hand"
+gpolish endlabel
+chk stale_kept "`.st.plotregion1.added_text[1].draw_view.setting'"!="no"
+
+* ---- 24. plots() counts plots, not added objects ------------------------------------
+line le_wfemale le_bmale year, name(pc, replace)
+gpolish callout "x", to(1950 60)
+capture gpolish endlabel, plots(3)
+chk plots_count_range _rc==198
+ntext pc added_text
+chk plots_count_noedit r(k)==1
+gpolish endlabel, plots(2)
+ntext pc added_text
+chk plots_count_ok r(k)==2
+
+* ---- 25. second y axis --------------------------------------------------------------
+gen pop = 1000 + 20*(year-1900)
+label var pop "Population"
+twoway (line le year) (line pop year, yaxis(2)), name(y2, replace)
+local mg0 = `.y2.style.margin.gright.val'
+local pm0 = `.y2.plotregion1.style.margin.gright.val'
+gpolish endlabel, values
+ntext y2 added_text
+chk y2_both r(k)==4
+* the y2 label sits at the last population value, read on the second axis
+gpolish geom, name(y2)
+local gy = r(ya) + r(yb)*`.y2.plotregion1.added_text[3].ypos.val'
+local want = `.y2.plotregion2.drawn_yalpha' + `.y2.plotregion2.drawn_ybeta'*2980
+chk y2_ypos abs(`gy' - `want') < 1.3*9.5/72*r(gpi)
+* the room is made inside the plot regions, so the labels clear the y2 axis
+chk y2_inner abs(`.y2.style.margin.gright.val' - `mg0') < 1e-6 & `.y2.plotregion2.style.margin.gright.val' > `pm0'
+local gx = r(xa) + r(xb)*`.y2.plotregion1.added_text[4].xpos.val'
+chk y2_clear_axis `gx' < `.y2.yaxis2.gdi_x0'
+gpolish clear
+chk y2_clear abs(`.y2.plotregion2.style.margin.gright.val' - `pm0') < 1e-6
+twoway (line le year) (line pop year, yaxis(2)), name(y2l, replace)
+gpolish legend
+local c1 `.y2l.plotregion2.plot2.style.line.color.rgb'
+local c2 `.y2l.legend.plotregion1.label[2].style.color.rgb'
+chk y2_legend "`: list retokenize c1'"=="`: list retokenize c2'"
+gpolish callout "Index 2000", to(1950 2000) yaxis(2)
+gpolish geom, name(y2l)
+local gtx = `.y2l.plotregion1.added_lines[24].x1'
+local gty = r(ya) + r(yb)*`.y2l.plotregion1.added_lines[24].y1'
+local want = `.y2l.plotregion2.drawn_yalpha' + `.y2l.plotregion2.drawn_ybeta'*2000
+chk y2_callout abs(`gty' - `want') < 0.1*r(gpi) & abs(`gtx' - 1950) < 3
+capture gpolish callout "x", to(1950 2000) yaxis(3)
+chk y2_noaxis _rc==198
+* a graph whose only y axis is yaxis(2)
+line le year, yaxis(2) title("Only axis 2") name(o2, replace)
+capture noisily gpolish
+chk only_y2 _rc==0
+chk only_y2_bold substr(`"`.o2.title.text[1]'"',1,4)=="{bf:"
+gpolish endlabel
+ntext o2 added_text
+chk only_y2_endlabel r(k)==1
+* ptlabel on a second axis
+sysuse auto, clear
+twoway (scatter mpg weight) (scatter price weight, yaxis(2)), name(y2p, replace)
+gpolish ptlabel make if make=="Cad. Seville", x(weight) y(price) yaxis(2)
+gpolish geom, name(y2p)
+local gy = r(ya) + r(yb)*`.y2p.plotregion1.added_text[1].ypos.val'
+local want = `.y2p.plotregion2.drawn_yalpha' + `.y2p.plotregion2.drawn_ybeta'*15906
+chk y2_ptlabel abs(`gy' - `want') < 0.4*r(gpi)
+
+* ---- 26. side(left) and an axis on the labelled side ------------------------------
+sysuse uslifeexp, clear
+line le_wfemale le_bmale year, name(sl, replace)
+local pm0 = `.sl.plotregion1.style.margin.gleft.val'
+gpolish endlabel, side(left) values
+gpolish geom, name(sl)
+local gx = r(xa) + r(xb)*`.sl.plotregion1.added_text[2].xpos.val'
+chk left_clear_axis `gx' > `.sl.yaxis1.gdi_x1'
+chk left_inner `.sl.plotregion1.style.margin.gleft.val' > `pm0'
+line le_wfemale le_bmale year, yscale(alt) name(sa, replace)
+gpolish endlabel, values
+gpolish geom, name(sa)
+local gx = r(xa) + r(xb)*`.sa.plotregion1.added_text[2].xpos.val'
+chk alt_clear_axis `gx' < `.sa.yaxis1.gdi_x0'
+
+* ---- 27. legend keeps multi-line labels; a literal } is not wrapped -------------------
+line le_male le_female year, legend(label(1 "Men," "all races") label(2 "Women: a}b")) name(lg2, replace)
+gpolish legend
+chk legend_lines `.lg2.legend.plotregion1.label[1].text.arrnels'==2
+chk legend_line2 `"`.lg2.legend.plotregion1.label[1].text[2]'"'=="{bf:all races}"
+chk legend_brace `"`.lg2.legend.plotregion1.label[2].text[1]'"'=="Women: a}b"
+label var le_female "Women: a}b"
+line le_male le_female year, name(lb, replace)
+gpolish endlabel
+chk endlabel_brace `"`.lb.plotregion1.added_text[2].text[1]'"'=="Women: a}b"
+chk endlabel_bold substr(`"`.lb.plotregion1.added_text[1].text[1]'"',1,4)=="{bf:"
+label var le_female ""
+
+* ---- 28. arrows with no length, bad segments(), unknown subcommands -----------------
+line le year, name(z0, replace)
+capture gpolish arrow, from(1950 50) to(1950 50)
+chk arrow_zero _rc==198
+ntext z0 added_lines
+chk arrow_zero_noedit r(k)==0
+capture noisily gpolish callout "Influenza pandemic", at(1915 40) to(1920 40)
+chk callout_inside _rc==0
+ntext z0 added_text
+chk callout_inside_text r(k)==1
+ntext z0 added_lines
+chk callout_inside_noarrow r(k)==0
+capture gpolish callout "seg0", to(1950 60) segments(0)
+chk seg_zero _rc==198
+capture gpolish arrow, from(1930 50) to(1960 60) segments(-3)
+chk seg_neg _rc==198
+ntext z0 added_text
+chk seg_noedit r(k)==1
+capture gpolish endlable, values
+chk unknown_sub _rc==199
+capture gpolish , nobold
+chk comma_style _rc==0
+
+* ---- 29. r() is kept, and expressions may read it -----------------------------------
+summarize le
+local mx = r(max)
+gpolish callout "max", to(1999 r(max))
+chk r_kept r(max)==`mx'
+chk r_expr abs(`.z0.plotregion1.added_lines[24].x1' - 1999) < 3
+gpolish
+chk r_kept_style r(max)==`mx'
+gpolish geom
+chk geom_returns r(gpi) > 0
+
+* ---- 30. friendly errors ---------------------------------------------------------------
+graph pie le_male if year > 1995, over(year) name(pie, replace)
+capture gpolish callout "x", at(1 1)
+chk pie_refused _rc==198
+graph drop _all
+capture gpolish render
+chk render_nograph _rc==111
+clear
+set obs 5
+gen x = _n - 1
+gen y = _n
+gen lab = "p" + string(_n)
+scatter y x, xscale(log) name(lz, replace)
+capture noisily gpolish ptlabel lab if x==0, x(x) y(y)
+chk ptlabel_log0 _rc==0
+ntext lz added_text
+chk ptlabel_log0_none r(k)==0
+
+* ---- 31. bracket: expressions, label, ticks follow the screen -----------------------
+sysuse sp500, clear
+line close date, name(bd, replace)
+capture noisily gpolish bracket "Drop", x(td(21sep2001)) y0(966) y1(1100)
+chk bracket_expr _rc==0
+chk bracket_expr_x abs(`.bd.plotregion1.added_lines[1].x0' - td(21sep2001)) < 1e-6
+ntext bd added_text
+chk bracket_label r(k)==1
+clear
+set obs 30
+gen x = _n
+gen y = 10 + mod(_n*7, 13)
+scatter y x, xscale(reverse) name(br, replace)
+gpolish bracket, x(25) y0(12) y1(20)
+gpolish geom, name(br)
+local sp = r(xa) + r(xb)*`.br.plotregion1.added_lines[2].x0'
+local tk = r(xa) + r(xb)*`.br.plotregion1.added_lines[2].x1'
+chk bracket_screen_right `tk' > `sp'
+gpolish bracket, x(5) y0(12) y1(20) left
+local sp = r(xa) + r(xb)*`.br.plotregion1.added_lines[5].x0'
+local tk = r(xa) + r(xb)*`.br.plotregion1.added_lines[5].x1'
+chk bracket_screen_left `tk' < `sp'
+
+* ---- 32. a filled box's edge sits on at() ---------------------------------------------
+scatter y x, xline(12 18) name(bxa, replace)
+gpolish note "Left-aligned", at(12 16)
+gpolish note "Right-aligned", at(18 18) align(right)
+chk box_left abs(`.bxa.plotregion1.added_text[1].xpos.val' - 12) < 1e-6
+chk box_right abs(`.bxa.plotregion1.added_text[2].xpos.val' - 18) < 1e-6
+
+* ---- 33. end labels: CJK widths, and labels kept inside the plot height -------------
+sysuse uslifeexp, clear
+label var le_male "男性预期寿命增长率"
+line le_male le_female year, name(cj, replace)
+gpolish endlabel, values
+gpolish geom, name(cj)
+local d = (`.cj.plotregion1.added_text[2].xpos.val' - `.cj.plotregion1.added_text[1].xpos.val')*r(xb)
+chk cjk_width `d' > 9*9.5/72*r(gpi)
+clear
+set obs 20
+gen t = _n
+forvalues k = 1/25 {
+    gen s`k' = t + `k'/100
+    label var s`k' "Series `k'"
+}
+line s* t, legend(off) name(mn, replace)
+gpolish endlabel
+gpolish geom, name(mn)
+local h = 1.3*9.5/72*r(gpi)
+local ok 1
+forvalues k = 1/25 {
+    local gy = r(ya) + r(yb)*`.mn.plotregion1.added_text[`k'].ypos.val'
+    if `gy' - 0.45*`h' < r(gy0) | `gy' + 0.45*`h' > r(gy1) local ok 0
+}
+chk repel_inside `ok'==1
+
+* ---- 34. placement avoids bars and reference lines ---------------------------------
+clear
+set obs 12
+gen m = _n
+gen v = 80 - 3*abs(m-6)
+replace v = 40 if m==6
+twoway bar v m, base(0) yscale(range(0 110)) ylabel(0(20)100) name(ob1, replace)
+gpolish callout "Strike month", to(6 40)
+chk avoid_bars `.ob1.plotregion1.added_text[1].ypos.val' > 80
+sysuse auto, clear
+twoway (scatter price weight) (lfit price weight), xline(2500) name(ob2, replace)
+gpolish ptlabel make if make=="BMW 320i", x(weight) y(price)
+* the label's box (its width estimated from 8 characters) must not reach over the line
+gpolish geom, name(ob2)
+local gx = r(xa) + r(xb)*`.ob2.plotregion1.added_text[1].xpos.val'
+local gl = r(xa) + r(xb)*2500
+local w = 8*0.55*8.6/72*r(gpi)
+local hz `.ob2.plotregion1.added_text[1].style.horizontal.setting'
+local x0 = cond("`hz'"=="left", `gx', cond("`hz'"=="right", `gx' - `w', `gx' - `w'/2))
+chk avoid_xline `gl' < `x0' | `gl' > `x0' + `w' 
+
+* ---- 35. font detection in batch mode -------------------------------------------------
+if "`c(mode)'"=="batch" {
+    sysuse uslifeexp, clear
+    line le year, name(fb, replace)
+    gpolish endlabel
+    quietly graph set svg
+    chk batch_font "$GPL_FONT"==lower("`r(fontface)'") | ("`r(fontface)'"=="" & "$GPL_FONT"=="helvetica")
+}
 
 gpolish limits
 

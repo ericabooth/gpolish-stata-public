@@ -7,22 +7,44 @@ program gpolish
     * store them as SMCL character codes, which graph text renders literally
     mata: st_local("0", _gpl_esc(st_local("0")))
     gettoken sub rest : 0, parse(" ,")
-    if "`sub'"=="endlabel"      _gpl_endlabel `rest'
-    else if "`sub'"=="callout"  _gpl_callout `rest'
-    else if "`sub'"=="note"     _gpl_callout `rest' isnote
-    else if "`sub'"=="arrow"    _gpl_arrow `rest'
-    else if "`sub'"=="brace"    _gpl_brace `rest'
-    else if "`sub'"=="bracket"  _gpl_bracket `rest'
-    else if "`sub'"=="ptlabel"  _gpl_ptlabel `rest'
-    else if "`sub'"=="legend"   _gpl_legend `rest'
-    else if "`sub'"=="clear"    _gpl_clear `rest'
-    else if "`sub'"=="render"   _gpl_render `rest'
-    else if "`sub'"=="limits"   _gpl_limits `rest'
-    else if "`sub'"=="geom"     _gpl_geomuser `rest'
-    else if "`sub'"=="style"    _gpl_style `rest'
-    else                        _gpl_style `0'
-    * edits are applied without redrawing; draw the finished graph once
-    if !inlist("`sub'", "render", "limits", "geom") capture gr_draw
+    local subs endlabel callout note arrow brace bracket ptlabel legend clear render limits geom style
+    mata: st_local("known", strofreal(anyof(tokens(st_local("subs")), st_local("sub"))))
+    if `"`sub'"'!="" & `"`sub'"'!="," & !`known' {
+        di as err `"gpolish: unknown subcommand {bf:`sub'}"'
+        di as err "  valid subcommands: style endlabel callout note arrow brace bracket ptlabel legend clear render limits geom"
+        exit 199
+    }
+    * gpolish is not r-class: the caller's r() is held and given back at the end. Until then it
+    * stays readable, so at(), to() and from() may use it, for example to(1999 r(max))
+    local keepr = !inlist("`sub'", "geom", "render")
+    tempname rhold
+    if `keepr' {
+        _return hold `rhold'
+        _return restore `rhold', hold
+        global GPL_RHOLD `rhold'
+    }
+    if "`sub'"=="endlabel"      capture noisily _gpl_endlabel `rest'
+    else if "`sub'"=="callout"  capture noisily _gpl_callout `rest'
+    else if "`sub'"=="note"     capture noisily _gpl_callout `rest' isnote
+    else if "`sub'"=="arrow"    capture noisily _gpl_arrow `rest'
+    else if "`sub'"=="brace"    capture noisily _gpl_brace `rest'
+    else if "`sub'"=="bracket"  capture noisily _gpl_bracket `rest'
+    else if "`sub'"=="ptlabel"  capture noisily _gpl_ptlabel `rest'
+    else if "`sub'"=="legend"   capture noisily _gpl_legend `rest'
+    else if "`sub'"=="clear"    capture noisily _gpl_clear `rest'
+    else if "`sub'"=="render"   capture noisily _gpl_render `rest'
+    else if "`sub'"=="limits"   capture noisily _gpl_limits `rest'
+    else if "`sub'"=="geom"     capture noisily _gpl_geomuser `rest'
+    else if "`sub'"=="style"    capture noisily _gpl_style `rest'
+    else                        capture noisily _gpl_style `0'
+    local rc = _rc
+    * edits are recorded without redrawing; the finished graph is drawn once here
+    if !`rc' & !inlist("`sub'", "render", "limits", "geom") capture gr_draw
+    if `keepr' {
+        global GPL_RHOLD
+        _return restore `rhold'
+    }
+    exit `rc'
 end
 
 * ================================================================ utilities
@@ -41,26 +63,54 @@ program _gpl_name, rclass
         di as err "gpolish: graph {bf:`name'} not found in memory"
         exit 111
     }
+    * a pie chart reports the bar family; gr2mpl cannot redraw it either
+    if "`.`name'.classname'"=="piegraph_g" local fam pie
     if "`fam'"!="twoway" {
         di as err "gpolish: graph `name' is a `fam' graph; the layout commands support twoway graphs only."
         if inlist("`fam'", "bar", "by", "combine", "matrix") di as err "         {bf:gpolish render} (gr2mpl) can redraw this `fam' graph in the same style."
         exit 198
     }
     quietly graph display `name'
-    * font used for PNG export decides the width table
-    capture quietly graph set window
-    if !_rc & "`r(fontface)'"!="" global GPL_FONT = lower("`r(fontface)'")
-    else global GPL_FONT "helvetica"
+    _gpl_font
+    return local name `name'
+end
+
+* the font Stata exports with decides the width table. With a graph window, PNG export uses
+* graph set window fontface; in batch or console mode there is no window and Stata exports
+* with graph set svg fontface. A global GPOLISH_FONT set by the user overrides both.
+program _gpl_font
+    if `"$GPOLISH_FONT"'!="" {
+        global GPL_FONT = lower(`"$GPOLISH_FONT"')
+    }
+    else {
+        local src window
+        if "`c(mode)'"=="batch" | "`c(console)'"=="console" local src svg
+        local ff
+        * clear r() first, so a value left by an earlier command cannot be mistaken for the font
+        mata: st_rclear()
+        capture quietly graph set `src'
+        if !_rc local ff `"`r(fontface)'"'
+        if `"`ff'"'!="" global GPL_FONT = lower(`"`ff'"')
+        else {
+            global GPL_FONT "helvetica"
+            if "$GPL_FONTWARNED"!="(unread)" {
+                di as txt "note: gpolish cannot read the graph font (graph set `src'); label spacing assumes Helvetica."
+                di as txt `"      Set {bf:global GPOLISH_FONT "Open Sans"} (or the font your exports use) to match it."'
+                global GPL_FONTWARNED "(unread)"
+            }
+        }
+    }
     mata: st_local("known", strofreal(_gpl_fontknown("$GPL_FONT")))
     if !`known' & "$GPL_FONTWARNED"!="$GPL_FONT" {
         di as txt "note: gpolish has no width table for font {bf:$GPL_FONT}; using Arial metrics, so label spacing is approximate."
         global GPL_FONTWARNED "$GPL_FONT"
     }
-    return local name `name'
 end
 
+* region(#) reads plot region # instead of the first; a plot on a second axis lives in its own
+* plot region, with its own data-to-device transform
 program _gpl_geom, rclass
-    syntax [, name(string)]
+    syntax [, name(string) REGion(integer 1)]
     if "`name'"=="" {
         quietly graph describe
         local name `r(fn)'
@@ -72,7 +122,7 @@ program _gpl_geom, rclass
         local xs 5.5
         local ys 4
     }
-    local pr .`name'.plotregion1
+    local pr .`name'.plotregion`region'
     return scalar xsize = `xs'
     return scalar ysize = `ys'
     return scalar gpi = `.`name'.gdi_y1'/`ys'
@@ -90,8 +140,10 @@ program _gpl_geom, rclass
     return local name `name'
 end
 
-* evaluate an x y pair; each may be a number or an expression without spaces, e.g. td(01sep2001)
-program _gpl_xy, rclass
+* evaluate an x y pair; each may be a number or an expression without spaces, e.g. td(01sep2001).
+* Results come back in the caller's locals <opt>x and <opt>y. The caller's r() is put back first,
+* so an expression may read it, e.g. to(1999 r(max)).
+program _gpl_xy
     args opt val
     tokenize `"`val'"'
     if `"`2'"'=="" | `"`3'"'!="" {
@@ -99,6 +151,7 @@ program _gpl_xy, rclass
         di as err "         write each value without spaces"
         exit 198
     }
+    if "$GPL_RHOLD"!="" capture _return restore $GPL_RHOLD, hold
     forvalues i = 1/2 {
         capture local v`i' = ``i''
         if _rc | missing(real("`v`i''")) {
@@ -106,53 +159,160 @@ program _gpl_xy, rclass
             exit 198
         }
     }
-    return scalar x = `v1'
-    return scalar y = `v2'
+    c_local `opt'x `v1'
+    c_local `opt'y `v2'
 end
 
-* session record of what endlabel added to a graph, so a re-run or gpolish clear can undo it
+* evaluate one value the same way; the result comes back in the caller's local <opt>v
+program _gpl_val
+    args opt val
+    if `"`val'"'=="" exit
+    if "$GPL_RHOLD"!="" capture _return restore $GPL_RHOLD, hold
+    capture local v = `val'
+    if _rc | missing(real("`v'")) {
+        di as err `"gpolish: `opt'(): cannot read {bf:`val'} as a number or expression"'
+        exit 198
+    }
+    c_local `opt'v `v'
+end
+
+* how many plots the graph has, and the plot region that holds each (plots on a second
+* axis live in their own region); r(n), r(regs) = region of plot 1, 2, ...
+program _gpl_plots, rclass
+    args name
+    local n `.`name'.n_views'
+    if "`n'"=="" {
+        local n 0
+        while "`.`name'.plotregion1.plot`=`n'+1'.isa'"!="" {
+            local ++n
+        }
+    }
+    local npr `.`name'.n_plotregions'
+    if "`npr'"=="" local npr 1
+    local regs
+    forvalues i = 1/`n' {
+        local r 1
+        forvalues j = 1/`npr' {
+            if "`.`name'.plotregion`j'.plot`i'.isa'"!="" local r `j'
+        }
+        local regs `regs' `r'
+    }
+    return scalar n = `n'
+    return scalar npr = `npr'
+    return local regs `regs'
+end
+
+* the plot region whose plots use x axis # and y axis # (either may be empty); r(region)
+program _gpl_axregion, rclass
+    args name xax yax
+    if "`xax'`yax'"=="" {
+        return scalar region = 1
+        exit
+    }
+    local ysc `.`name'.y_scales'
+    local ysc : subinstr local ysc `"""' "", all
+    local xsc `.`name'.x_scales'
+    local xsc : subinstr local xsc `"""' "", all
+    _gpl_plots `name'
+    local n = r(n)
+    local regs `r(regs)'
+    forvalues i = 1/`n' {
+        local ya : word `i' of `ysc'
+        local xa : word `i' of `xsc'
+        if "`ya'"=="" local ya 1
+        if "`xa'"=="" local xa 1
+        if ("`yax'"=="" | "`yax'"=="`ya'") & ("`xax'"=="" | "`xax'"=="`xa'") {
+            return scalar region = `: word `i' of `regs''
+            exit
+        }
+    }
+    local what = trim(cond("`xax'"!="", "xaxis(`xax')", "") + " " + cond("`yax'"!="", "yaxis(`yax')", ""))
+    di as err "gpolish: graph {bf:`name'} has no plot on `what'"
+    exit 198
+end
+
+* convert a point from the data units of plot region `reg' to those of plot region 1, where
+* gpolish adds its objects; the result comes back in the caller's locals <p>x and <p>y
+program _gpl_toreg1
+    args name reg p x y
+    if "`reg'"=="1" | "`reg'"=="" exit
+    _gpl_geom, name(`name') region(`reg')
+    local gx = r(xa) + r(xb)*cond(r(xlog), ln(`x'), `x')
+    local gy = r(ya) + r(yb)*cond(r(ylog), ln(`y'), `y')
+    _gpl_geom, name(`name')
+    local x1 = (`gx' - r(xa))/r(xb)
+    local y1 = (`gy' - r(ya))/r(yb)
+    if r(xlog) local x1 = exp(`x1')
+    if r(ylog) local y1 = exp(`y1')
+    c_local `p'x `x1'
+    c_local `p'y `y1'
+end
+
+* an endlabel record, kept in the graph itself as a hidden text box so that it lasts through
+* graph save and graph use and belongs to this graph only. Its text is
+* gpolish-endlabel|<text boxes>|<markers>|<side>|<margin>|<legend>|<where>|<first-line lengths>
 program _gpl_regget, rclass
     args name
-    local sig `"`.`name'.date' `.`name'.time' `.`name'.plotregion1.dynamicmv.arrnels'"'
-    mata: st_local("rsig", _gpl_reg_get("`name'|sig"))
     return local ok 0
-    if `"`rsig'"'!=`"`sig'"' exit
-    mata: st_local("txt", _gpl_reg_get("`name'|txt"))
-    mata: st_local("mk", _gpl_reg_get("`name'|mk"))
     _gpl_count `name' added_text
     local nt = r(k)
+    local rec 0
+    forvalues k = `nt'(-1)1 {
+        if substr(`"`.`name'.plotregion1.added_text[`k'].text[1]'"', 1, 17)=="gpolish-endlabel|" {
+            local rec `k'
+            continue, break
+        }
+    }
+    if `rec'==0 exit
+    local s `"`.`name'.plotregion1.added_text[`rec'].text[1]'"'
+    mata: _gpl_recparse(st_local("s"))
     _gpl_count `name' added_markers
     local nm = r(k)
+    * the record is stale if a recorded object is gone or no longer holds the same text
     local stale 0
+    local q 0
     foreach k of local txt {
-        if `k' > `nt' local stale 1
+        local ++q
+        if `k' >= `rec' {
+            local stale 1
+            continue, break
+        }
+        local L : word `q' of `lens'
+        local t `"`.`name'.plotregion1.added_text[`k'].text[1]'"'
+        if `"`L'"'!="`=strlen(`"`t'"')'" local stale 1
     }
     foreach k of local mk {
         if `k' > `nm' local stale 1
     }
+    return local rec `rec'
     if `stale' exit
     return local ok 1
     return local txt `txt'
     return local mk `mk'
-    mata: st_local("v", _gpl_reg_get("`name'|side"))
-    return local side `v'
-    mata: st_local("v", _gpl_reg_get("`name'|m"))
-    return local m `v'
-    mata: st_local("v", _gpl_reg_get("`name'|leg"))
-    return local leg `v'
+    return local side `side'
+    return local m `m'
+    return local leg `leg'
+    return local pm `pm'
 end
 
 * undo a recorded endlabel: hide its objects, give back its margin, restore the legend
 program _gpl_regundo
     args name
     _gpl_regget `name'
-    if "`r(ok)'"!="1" exit
     * copy the record first: an edit clears r()
+    local ok `r(ok)'
+    local rec `r(rec)'
     local txt `r(txt)'
     local mk `r(mk)'
     local m `r(m)'
     local side `r(side)'
     local leg `r(leg)'
+    local pm `r(pm)'
+    if "`rec'"=="" exit
+    * a record is used once: mark it spent, whether or not it could be applied
+    _gpl_ge `name' .plotregion1.added_text[`rec'].text = {}
+    _gpl_ge `name' .plotregion1.added_text[`rec'].text.Arrpush "gpolish-endlabel-spent"
+    if "`ok'"!="1" exit
     foreach k of local txt {
         _gpl_ge `name' .plotregion1.added_text[`k'].draw_view.setstyle, style(no)
     }
@@ -161,10 +321,15 @@ program _gpl_regundo
     }
     if "`m'"!="" {
         local s = cond("`side'"=="left", "l", "r")
-        _gpl_ge `name' .style.editstyle margin(`s'-`m') editcopy
+        if "`pm'"=="1" {
+            _gpl_plots `name'
+            forvalues j = 1/`r(npr)' {
+                _gpl_ge `name' .plotregion`j'.style.editstyle margin(`s'-`m') editcopy
+            }
+        }
+        else _gpl_ge `name' .style.editstyle margin(`s'-`m') editcopy
     }
     if "`leg'"=="1" _gpl_ge `name' .legend.draw_view.setstyle, style(yes)
-    mata: _gpl_reg_drop("`name'")
 end
 
 * apply one graph edit; the edit is recorded in the graph, and the graph is drawn once
@@ -260,6 +425,16 @@ end
 * collect what is already drawn: marker points, line paths, text boxes (device units, Mata externals)
 program _gpl_obstacles
     args name
+    _gpl_plots `name'
+    local n = r(n)
+    local npr = r(npr)
+    local regs `r(regs)'
+    forvalues j = 1/`npr' {
+        _gpl_geom, name(`name') region(`j')
+        foreach v in xa xb ya yb xlog ylog {
+            local `v'`j' = r(`v')
+        }
+    }
     _gpl_geom, name(`name')
     local xa = r(xa)
     local xb = r(xb)
@@ -269,16 +444,22 @@ program _gpl_obstacles
     local ylog = r(ylog)
     local gprel = r(gpi)/72/r(relperpt)
     local gpi = r(gpi)
-    local pr .`name'.plotregion1
     mata: _gpl_obs_reset()
-    local n = ``pr'.dynamicmv.arrnels'
     forvalues i = 1/`n' {
+        local j : word `i' of `regs'
+        local pr .`name'.plotregion`j'
+        local T `xlog`j'', `ylog`j'', `xa`j'', `xb`j'', `ya`j'', `yb`j''
         local t ``pr'.plot`i'.type.setting'
-        if !inlist("`t'","scatter","connected","line","rline","dot","function","spike","dropline") continue
+        if "``pr'.plot`i'.draw_view.setting'"=="no" continue
+        local isrange = inlist("`t'","rbar","rarea","rcap","rspike","rcapsym")
+        if !inlist("`t'","scatter","connected","line","rline","dot","function","spike","dropline") ///
+            & !inlist("`t'","bar","area") & !`isrange' continue
         capture {
             local yv = ``pr'.plot`i'.yvar'
             local xv = ``pr'.plot`i'.xvar'
             local sid = ``pr'.plot`i'.serset.id'
+            local y2v
+            if `isrange' local y2v = ``pr'.plot`i'.y2var'
         }
         if _rc continue
         local rad = 0
@@ -289,6 +470,12 @@ program _gpl_obstacles
             local rad = `ms'*`gprel'/2
             if inlist("`sym'","none","i","point") local rad = 0
         }
+        * bars, areas and range plots: which axis the values run along, the base, the bar width
+        local horiz = ("``pr'.plot`i'.bar_drop_to.setting'"=="y")
+        local base ``pr'.plot`i'.drawn_base'
+        if "`base'"=="" | "`base'"=="." local base 0
+        local bw ``pr'.plot`i'.bar_size'
+        if "`bw'"=="" | "`bw'"=="." local bw 0
         preserve
         capture {
             serset set `sid'
@@ -296,13 +483,31 @@ program _gpl_obstacles
             unab all : *
             local yname : word `yv' of `all'
             local xname : word `xv' of `all'
-            if `rad' > 0 mata: _gpl_obs_points("`xname'", "`yname'", `xlog', `ylog', `xa', `xb', `ya', `yb', `rad')
+            local y2name
+            if "`y2v'"!="" local y2name : word `y2v' of `all'
+            if `rad' > 0 mata: _gpl_obs_points("`xname'", "`yname'", `T', `rad')
             if inlist("`t'","connected","line","rline","function") ///
-                mata: _gpl_obs_path("`xname'", "`yname'", `xlog', `ylog', `xa', `xb', `ya', `yb', 4/72*`gpi')
+                mata: _gpl_obs_path("`xname'", "`yname'", `T', 4/72*`gpi')
+            * kind: 1 bars (width bw in data units), 2 shaded band, 3 thin range spike
+            if inlist("`t'","bar","rbar") mata: _gpl_obs_range("`xname'", "`yname'", "`y2name'", `base', `horiz', 1, `bw', `T', 2/72*`gpi')
+            if inlist("`t'","area","rarea") mata: _gpl_obs_range("`xname'", "`yname'", "`y2name'", `base', `horiz', 2, 0, `T', 4/72*`gpi')
+            if inlist("`t'","rcap","rspike","rcapsym") mata: _gpl_obs_range("`xname'", "`yname'", "`y2name'", `base', `horiz', 3, 0, `T', 3/72*`gpi')
         }
         restore
     }
+    * reference lines drawn by xline() and yline(), read in device units
+    forvalues j = 1/`npr' {
+        local pr .`name'.plotregion`j'
+        local k ``pr'._xylines.arrnels'
+        if "`k'"=="" local k 0
+        forvalues q = 1/`k' {
+            if "``pr'._xylines[`q'].draw_view.setting'"=="no" continue
+            capture mata: _gpl_obs_add(_gpl_thin((``pr'._xylines[`q'].gdi_x0', ``pr'._xylines[`q'].gdi_y0', ///
+                ``pr'._xylines[`q'].gdi_x1', ``pr'._xylines[`q'].gdi_y1'), 2/72*`gpi'))
+        }
+    }
     * text boxes already on the graph
+    local pr .`name'.plotregion1
     foreach arr in added_text {
         _gpl_count `name' `arr'
         local k = r(k)
@@ -347,8 +552,12 @@ program _gpl_style
     }
     quietly graph display `name'
     if "`fam'"=="twoway" {
-        if "`keepyline'"==""  _gpl_ge `name' .yaxis1.style.editstyle linestyle(color(none)) editcopy
-        if "`keepyticks'"=="" _gpl_ge `name' .yaxis1.style.editstyle majorstyle(tickstyle(show_ticks(no))) editcopy
+        * every y axis the graph has; a graph drawn with yaxis(2) alone has no yaxis1
+        forvalues a = 1/9 {
+            if "`.`name'.yaxis`a'.isa'"=="" continue
+            if "`keepyline'"==""  capture _gpl_ge `name' .yaxis`a'.style.editstyle linestyle(color(none)) editcopy
+            if "`keepyticks'"=="" capture _gpl_ge `name' .yaxis`a'.style.editstyle majorstyle(tickstyle(show_ticks(no))) editcopy
+        }
     }
     local nt `.`name'.title.text.arrnels'
     if "`nt'"=="" local nt 0
@@ -379,11 +588,15 @@ program _gpl_endlabel
         di as err "gpolish endlabel: side() must be right or left"
         exit 198
     }
-    local pr .`name'.plotregion1
-    local n = ``pr'.dynamicmv.arrnels'
+    * plots are numbered across plot regions; a plot on a second axis lives in its own region
+    _gpl_plots `name'
+    local n = r(n)
+    local npr = r(npr)
+    local regs `r(regs)'
     if "`plots'"=="" {
         forvalues i = 1/`n' {
-            if inlist("``pr'.plot`i'.type.setting'","line","connected","rline") local plots `plots' `i'
+            local j : word `i' of `regs'
+            if inlist("`.`name'.plotregion`j'.plot`i'.type.setting'","line","connected","rline") local plots `plots' `i'
         }
         if "`plots'"=="" {
             di as err "gpolish endlabel: no line plots found; use plots() to name the plots to label"
@@ -399,18 +612,22 @@ program _gpl_endlabel
     * a second endlabel replaces the first instead of stacking on it
     _gpl_regundo `name'
     * which end of each line sits on the chosen side of the plot, whatever the axis direction
-    _gpl_geom, name(`name')
-    local dir = cond("`side'"=="right", 1, -1)*sign(r(xb))
     local s = cond("`side'"=="right", 1, -1)
+    forvalues j = 1/`npr' {
+        _gpl_geom, name(`name') region(`j')
+        local dir`j' = `s'*sign(r(xb))
+    }
     local np : word count `plots'
     tempname Y
-    matrix `Y' = J(`np', 5, 1)
+    matrix `Y' = J(`np', 6, 1)
     local j 0
     local maxn 0
     local maxv 0
     local q 0
     foreach i of local plots {
         local ++q
+        local rg : word `i' of `regs'
+        local pr .`name'.plotregion`rg'
         local yv = ``pr'.plot`i'.yvar'
         local xv = ``pr'.plot`i'.xvar'
         local sid = ``pr'.plot`i'.serset.id'
@@ -426,7 +643,7 @@ program _gpl_endlabel
             local xname : word `xv' of `all'
             summarize `xname' if !missing(`yname', `xname'), meanonly
             local nobs = r(N)
-            local xl = cond(`dir' > 0, r(max), r(min))
+            local xl = cond(`dir`rg'' > 0, r(max), r(min))
             if `nobs' > 0 {
                 summarize `yname' if `xname'==`xl', meanonly
                 local yl = r(mean)
@@ -452,6 +669,9 @@ program _gpl_endlabel
             local ll : word `q' of `labels'
             if `"`ll'"'!="" local lab`j' `"`ll'"'
         }
+        * bold wraps the label in {bf:...}; a literal } in the label would close it early,
+        * so such a label is left as typed
+        mata: st_local("bf`j'", strofreal("`bold'"=="" & _gpl_bfok(st_local("lab`j'"))))
         local col`j' ``pr'.plot`i'.style.line.color.rgb'
         if "``pr'.plot`i'.type.setting'"=="scatter" local col`j' ``pr'.plot`i'.style.marker.fillcolor.rgb'
         local col`j' : list retokenize col`j'
@@ -461,8 +681,9 @@ program _gpl_endlabel
         local val`j' = strtrim("`val`j''")
         matrix `Y'[`j',1] = `yl'
         matrix `Y'[`j',4] = `xl'
+        matrix `Y'[`j',6] = `rg'
         * wrap long labels on word boundaries; wrap() is in characters, measured by rendered width
-        mata: _gpl_wrap("lab`j'", "nl`j'", "w", 0.5*`wrap', "`bold'"=="")
+        mata: _gpl_wrap("lab`j'", "nl`j'", "w", 0.5*`wrap', `bf`j'')
         matrix `Y'[`j',5] = `nl`j''
         local maxn = max(`maxn', `w')
         local w2 0
@@ -484,29 +705,54 @@ program _gpl_endlabel
         di as txt "note: the end labels take about `=round(100*`m'/`plotw')'% of the graph width. Shorten them, use wrap(),"
         di as txt "      a smaller size(), or a wider graph (xsize())."
     }
+    * Outside the plot the labels would sit on a y axis drawn on that side (its line, ticks and
+    * labels). Then the room is made inside the plot region instead, between the axis and the lines.
+    local inner 0
+    local pc = (r(gx0) + r(gx1))/2
+    forvalues a = 1/9 {
+        if "`.`name'.yaxis`a'.isa'"=="" | "`.`name'.yaxis`a'.draw_view.setting'"=="no" continue
+        local ax0 `.`name'.yaxis`a'.gdi_x0'
+        local ax1 `.`name'.yaxis`a'.gdi_x1'
+        if "`ax0'"=="" | "`ax1'"=="" continue
+        if `s'*((`ax0' + `ax1')/2 - `pc') > 0 local inner 1
+    }
     local mside = cond("`side'"=="right", "r", "l")
-    _gpl_ge `name' .style.editstyle margin(`mside'+`m') editcopy
+    if `inner' {
+        forvalues rg = 1/`npr' {
+            _gpl_ge `name' .plotregion`rg'.style.editstyle margin(`mside'+`m') editcopy
+        }
+    }
+    else _gpl_ge `name' .style.editstyle margin(`mside'+`m') editcopy
     local leg 0
     if "`keeplegend'"=="" & "`.`name'.legend.draw_view.setting'"=="yes" {
         _gpl_ge `name' .legend.draw_view.setstyle, style(no)
         local leg 1
     }
-    * the plot region moved: redraw so the transform below is current
+    * the plot region moved: redraw so the transforms below are current
     gr_draw `name'
+    forvalues rg = 1/`npr' {
+        _gpl_geom, name(`name') region(`rg')
+        foreach v in xa xb ya yb xlog ylog {
+            local `v'`rg' = r(`v')
+        }
+    }
     _gpl_geom, name(`name')
-    local ya = r(ya)
-    local yb = r(yb)
-    local xa = r(xa)
-    local xb = r(xb)
     local gpi = r(gpi)
-    local xlog = r(xlog)
-    local ylog = r(ylog)
+    local gy0 = r(gy0)
+    local gy1 = r(gy1)
+    * device position of each line end, each on its own region's scale
     forvalues j = 1/`np' {
-        matrix `Y'[`j',2] = `ya' + `yb'*cond(`ylog', ln(`Y'[`j',1]), `Y'[`j',1])
+        local rg = `Y'[`j',6]
+        matrix `Y'[`j',2] = `ya`rg'' + `yb`rg''*cond(`ylog`rg'', ln(`Y'[`j',1]), `Y'[`j',1])
         matrix `Y'[`j',3] = `Y'[`j',2]
     }
     local sep = `gap'*`size'/72*`gpi'
-    if "`repel'"=="" mata: _gpl_repel("`Y'", `sep', `r(gy0)', `r(gy1)')
+    local ncrowd 0
+    if "`repel'"=="" mata: _gpl_repel("`Y'", `sep', `gy0', `gy1')
+    if `ncrowd' > 0 {
+        di as txt "note: `ncrowd' pair(s) of end labels still overlap; there is not enough height for all of them."
+        di as txt "      Label fewer plots (plots()), use a smaller size() or gap(), or a taller graph (ysize())."
+    }
     _gpl_count `name' added_markers
     local km = r(k)
     local regtxt
@@ -516,21 +762,27 @@ program _gpl_endlabel
     local bal = cond(`s' > 0, "east", "west")
     local hzv = cond(`s' > 0, "right", "left")
     local bav = cond(`s' > 0, "west", "east")
+    * every object goes into plot region 1, so positions are given in its data units
     forvalues j = 1/`np' {
-        local ynew = (`Y'[`j',3] - `ya')/`yb'
-        if `ylog' local ynew = exp(`ynew')
+        local rg = `Y'[`j',6]
+        local ynew = (`Y'[`j',3] - `ya1')/`yb1'
+        if `ylog1' local ynew = exp(`ynew')
         local xl = `Y'[`j',4]
         local yl = `Y'[`j',1]
-        local gxl = `xa' + `xb'*cond(`xlog', ln(`xl'), `xl')
-        local xpos = (`gxl' + `s'*`xgap'/72*`gpi' - `xa')/`xb'
-        local xval = (`gxl' + `s'*(`xgap' + `maxw'*`size')/72*`gpi' - `xa')/`xb'
-        if `xlog' {
+        local gxl = `xa`rg'' + `xb`rg''*cond(`xlog`rg'', ln(`xl'), `xl')
+        local xpos = (`gxl' + `s'*`xgap'/72*`gpi' - `xa1')/`xb1'
+        local xval = (`gxl' + `s'*(`xgap' + `maxw'*`size')/72*`gpi' - `xa1')/`xb1'
+        local xdot = (`gxl' - `xa1')/`xb1'
+        local ydot = (`Y'[`j',2] - `ya1')/`yb1'
+        if `xlog1' {
             local xpos = exp(`xpos')
             local xval = exp(`xval')
+            local xdot = exp(`xdot')
         }
+        if `ylog1' local ydot = exp(`ydot')
         if "`dots'"!="" {
             local ++km
-            _gpl_ge `name' .plotregion1.AddMarker added_markers editor `xl' `yl'
+            _gpl_ge `name' .plotregion1.AddMarker added_markers editor `xdot' `ydot'
             _gpl_ge `name' .plotregion1.added_markers_new = `km'
             _gpl_ge `name' .plotregion1.added_markers_rec = `km'
             _gpl_ge `name' .plotregion1.added_markers[`km'].style.editstyle marker(symbol(circle) size(`dotsize'pt) fillcolor("`col`j''") linestyle(color(white) width(vthin))) editcopy
@@ -538,7 +790,7 @@ program _gpl_endlabel
         }
         local lines
         forvalues q = 1/`nl`j'' {
-            if "`bold'"=="" local lines `"`lines' `"{bf:`lab`j'_`q''}"'"'
+            if `bf`j'' local lines `"`lines' `"{bf:`lab`j'_`q''}"'"'
             else local lines `"`lines' `"`lab`j'_`q''"'"'
         }
         _gpl_addtext, name(`name') x(`xpos') y(`ynew') lines(`lines') size(`size') color(`"`tcol`j''"') hz(`hzl') ba(`bal') linegap(1pt)
@@ -548,14 +800,15 @@ program _gpl_endlabel
             local regtxt `regtxt' `r(k)'
         }
     }
-    * record what was added, so a re-run or gpolish clear can undo it this session
-    local sig `"`.`name'.date' `.`name'.time' `.`name'.plotregion1.dynamicmv.arrnels'"'
-    mata: _gpl_reg_set("`name'|sig", st_local("sig"))
-    mata: _gpl_reg_set("`name'|txt", "`regtxt'")
-    mata: _gpl_reg_set("`name'|mk", "`regmk'")
-    mata: _gpl_reg_set("`name'|side", "`side'")
-    mata: _gpl_reg_set("`name'|m", "`m'")
-    mata: _gpl_reg_set("`name'|leg", "`leg'")
+    * record what was added, in the graph itself, so a re-run or gpolish clear can undo it
+    local lens
+    foreach k of local regtxt {
+        local t `"`.`name'.plotregion1.added_text[`k'].text[1]'"'
+        local lens `lens' `=strlen(`"`t'"')'
+    }
+    local rec `"gpolish-endlabel|`regtxt'|`regmk'|`side'|`m'|`leg'|`inner'|`lens'"'
+    _gpl_addtext, name(`name') x(`xpos') y(`ynew') lines(`"`rec'"') size(1)
+    _gpl_ge `name' .plotregion1.added_text[`r(k)'].draw_view.setstyle, style(no)
 end
 
 * ================================================================ clear
@@ -565,11 +818,17 @@ program _gpl_clear
     _gpl_name `name'
     local name `r(name)'
     _gpl_regundo `name'
-    local msg
     foreach a in added_text added_lines added_markers {
         _gpl_count `name' `a'
-        local k`a' = r(k)
-        if r(k) > 0 {
+        local n = r(k)
+        local k`a' = `n'
+        if "`a'"=="added_text" {
+            * endlabel's hidden records are not counted as text boxes
+            forvalues k = 1/`n' {
+                if substr(`"`.`name'.plotregion1.added_text[`k'].text[1]'"', 1, 16)=="gpolish-endlabel" local --k`a'
+            }
+        }
+        if `n' > 0 {
             _gpl_ge `name' .plotregion1.`a' = {}
             _gpl_ge `name' .plotregion1.`a'_new = 0
             _gpl_ge `name' .plotregion1.`a'_rec = 0
@@ -579,24 +838,52 @@ program _gpl_clear
     di as txt "  (this includes anything added in the Graph Editor; the title and axis edits of {bf:gpolish} stay)"
 end
 
+* ================================================================ positions on a second axis
+* xaxis(#) and yaxis(#) say which axes at(), to() and from() are given on; the caller's locals
+* local _gpl_reg is set to the plot region they belong to (left empty for region 1)
+program _gpl_axpos
+    args name xax yax
+    foreach a in xax yax {
+        if "``a''"!="" & !inlist("``a''", "1", "2", "3", "4", "5", "6", "7", "8", "9") {
+            local o = cond("`a'"=="xax", "xaxis", "yaxis")
+            di as err "gpolish: `o'() must be an axis number, 1 to 9"
+            exit 198
+        }
+    }
+    _gpl_axregion `name' "`xax'" "`yax'"
+    local reg = r(region)
+    if `reg'!=1 c_local _gpl_reg `reg'
+end
+
+program _gpl_segcheck
+    args segments
+    if `segments' < 1 {
+        di as err "gpolish: segments() must be a positive integer"
+        exit 198
+    }
+end
+
 * ================================================================ callout
 program _gpl_callout
     syntax anything(name=txt id="text" everything), [at(string) to(string) ///
         FRom(string) name(string) CURve(real 0.25) SIZe(real 8.8) COLor(string) ///
         LColor(string) ALign(string) HEADsize(real 4.5) SEGments(integer 24) LWidth(string) ANGle(real 0) HALO noARROW ///
-        FILL(string) BORder(string) PAD(real 5) ISNOTE]
-    _gpl_name `name'
-    local name `r(name)'
+        FILL(string) BORder(string) PAD(real 5) ISNOTE XAXis(string) YAXis(string)]
+    local cmd = cond("`isnote'"!="", "note", "callout")
     if `"`at'"'=="" & `"`to'"'=="" {
-        di as err "gpolish callout: give at(x y) for the text, to(x y) for the arrow target, or both"
+        di as err "gpolish `cmd': give at(x y) for the text, to(x y) for the arrow target, or both"
         exit 198
     }
+    _gpl_segcheck `segments'
+    * positions first: an expression in them may read the caller's r()
     foreach o in at to from {
-        if `"``o''"'!="" {
-            _gpl_xy `o' `"``o''"'
-            local `o'x = r(x)
-            local `o'y = r(y)
-        }
+        if `"``o''"'!="" _gpl_xy `o' `"``o''"'
+    }
+    _gpl_name `name'
+    local name `r(name)'
+    _gpl_axpos `name' "`xaxis'" "`yaxis'"
+    foreach o in at to from {
+        if `"``o''"'!="" _gpl_toreg1 `name' "`_gpl_reg'" `o' ``o'x' ``o'y'
     }
     if "`color'"=="" local color "26 26 26"
     if "`align'"=="" local align left
@@ -646,7 +933,9 @@ program _gpl_callout
         local x0 = `gax' - cond("`align'"=="right", `bw', cond("`align'"=="center", `bw'/2, 0))
         matrix `B' = (`x0', `gay' - `bh'/2, `x0' + `bw', `gay' + `bh'/2, 0)
     }
-    * anchor of the text box in data units (left-middle, centre or right-middle)
+    * anchor of the text box in data units (left-middle, centre or right-middle). Stata draws a
+    * boxed text with the box edge on the anchor and the text inset by the padding, so the drawn
+    * box is the rectangle B used for placement and for the arrow
     local gx = cond("`align'"=="right", `B'[1,3], cond("`align'"=="center", (`B'[1,1]+`B'[1,3])/2, `B'[1,1]))
     local gy = (`B'[1,2] + `B'[1,4])/2
     local px = (`gx' - `xa')/`xb'
@@ -654,12 +943,6 @@ program _gpl_callout
     if `xlog' local px = exp(`px')
     if `ylog' local py = exp(`py')
     local ba = cond("`align'"=="right", "west", cond("`align'"=="center", "center", "east"))
-    if "`fill'"!="" {
-        * Stata pads a boxed text outward from its anchor, so anchor the text inside the padding
-        local shift = cond("`align'"=="right", -1, cond("`align'"=="center", 0, 1))*`pad'/72*`gpi'
-        local px = (`gx' + `shift' - `xa')/`xb'
-        if `xlog' local px = exp(`px')
-    }
     _gpl_addtext, name(`name') x(`px') y(`py') lines(`txt') size(`size') color("`color'") hz(`align') ba(`ba') angle(`angle') `halo' fill(`fill') border(`border') pad(`pad')
     if `"`to'"'=="" | "`arrow'"!="" exit
     local gtx = `xa' + `xb'*cond(`xlog', ln(`tox'), `tox')
@@ -674,9 +957,15 @@ program _gpl_callout
         local gfx = max(`B'[1,1]-`pad', min(`gtx', `B'[1,3]+`pad'))
         local gfy = max(`B'[1,2]-`pad', min(`gty', `B'[1,4]+`pad'))
     }
+    if abs(`gtx'-`gfx') + abs(`gty'-`gfy') < 1 {
+        di as txt "note: gpolish `cmd': the arrow would start on its own target (to() lies inside the text, or from() equals to()); no arrow is drawn"
+        exit
+    }
     tempname P
     mata: _gpl_bezier("`P'", (`gfx', `gfy'), (`gtx', `gty'), `curve', `segments', `headsize'/72*`gpi', ///
         `xa', `xb', `ya', `yb', `xlog', `ylog', 0.3*`fs')
+    capture confirm matrix `P'
+    if _rc exit
     local rows = rowsof(`P')
     forvalues i = 1/`rows' {
         _gpl_addline, name(`name') seg(`=`P'[`i',1]' `=`P'[`i',2]' `=`P'[`i',3]' `=`P'[`i',4]') lcolor(`lcolor') lwidth(`lwidth')
@@ -686,23 +975,32 @@ end
 * ================================================================ arrow
 program _gpl_arrow
     syntax , FRom(string) to(string) [name(string) CURve(real 0) HEADsize(real 4.5) ///
-        SEGments(integer 24) LColor(string) LWidth(string) SHRink(real 0)]
+        SEGments(integer 24) LColor(string) LWidth(string) SHRink(real 0) XAXis(string) YAXis(string)]
+    _gpl_segcheck `segments'
+    _gpl_xy from `"`from'"'
+    _gpl_xy to `"`to'"'
     _gpl_name `name'
     local name `r(name)'
-    _gpl_xy from `"`from'"'
-    local fx = r(x)
-    local fy = r(y)
-    _gpl_xy to `"`to'"'
-    local tx = r(x)
-    local ty = r(y)
+    _gpl_axpos `name' "`xaxis'" "`yaxis'"
+    _gpl_toreg1 `name' "`_gpl_reg'" from `fromx' `fromy'
+    _gpl_toreg1 `name' "`_gpl_reg'" to `tox' `toy'
     _gpl_geom, name(`name')
-    local gfx = r(xa) + r(xb)*cond(r(xlog), ln(`fx'), `fx')
-    local gfy = r(ya) + r(yb)*cond(r(ylog), ln(`fy'), `fy')
-    local gtx = r(xa) + r(xb)*cond(r(xlog), ln(`tx'), `tx')
-    local gty = r(ya) + r(yb)*cond(r(ylog), ln(`ty'), `ty')
+    local gfx = r(xa) + r(xb)*cond(r(xlog), ln(`fromx'), `fromx')
+    local gfy = r(ya) + r(yb)*cond(r(ylog), ln(`fromy'), `fromy')
+    local gtx = r(xa) + r(xb)*cond(r(xlog), ln(`tox'), `tox')
+    local gty = r(ya) + r(yb)*cond(r(ylog), ln(`toy'), `toy')
+    if abs(`gtx'-`gfx') + abs(`gty'-`gfy') < 1 {
+        di as err "gpolish arrow: from() and to() are the same point; an arrow needs two different ends"
+        exit 198
+    }
     tempname P
     mata: _gpl_bezier("`P'", (`gfx', `gfy'), (`gtx', `gty'), `curve', `segments', `headsize'/72*`r(gpi)', ///
         `r(xa)', `r(xb)', `r(ya)', `r(yb)', `r(xlog)', `r(ylog)', `shrink'/72*`r(gpi)')
+    capture confirm matrix `P'
+    if _rc {
+        di as txt "note: gpolish arrow: shrink() leaves no arrow to draw"
+        exit
+    }
     local rows = rowsof(`P')
     forvalues i = 1/`rows' {
         _gpl_addline, name(`name') seg(`=`P'[`i',1]' `=`P'[`i',2]' `=`P'[`i',3]' `=`P'[`i',4]') lcolor(`lcolor') lwidth(`lwidth')
@@ -713,15 +1011,15 @@ end
 * a curly brace between two points, with an optional label at its tip
 program _gpl_brace
     syntax [anything(name=txt everything)], FRom(string) to(string) [name(string) ///
-        Width(real 7) FLIP SIZe(real 8.8) COLor(string) LColor(string) LWidth(string) GAP(real 4)]
+        Width(real 7) FLIP SIZe(real 8.8) COLor(string) LColor(string) LWidth(string) GAP(real 4) ///
+        XAXis(string) YAXis(string)]
+    _gpl_xy from `"`from'"'
+    _gpl_xy to `"`to'"'
     _gpl_name `name'
     local name `r(name)'
-    _gpl_xy from `"`from'"'
-    local fx = r(x)
-    local fy = r(y)
-    _gpl_xy to `"`to'"'
-    local tx = r(x)
-    local ty = r(y)
+    _gpl_axpos `name' "`xaxis'" "`yaxis'"
+    _gpl_toreg1 `name' "`_gpl_reg'" from `fromx' `fromy'
+    _gpl_toreg1 `name' "`_gpl_reg'" to `tox' `toy'
     _gpl_geom, name(`name')
     local gpi = r(gpi)
     local xa = r(xa)
@@ -730,10 +1028,10 @@ program _gpl_brace
     local yb = r(yb)
     local xlog = r(xlog)
     local ylog = r(ylog)
-    local gfx = `xa' + `xb'*cond(`xlog', ln(`fx'), `fx')
-    local gfy = `ya' + `yb'*cond(`ylog', ln(`fy'), `fy')
-    local gtx = `xa' + `xb'*cond(`xlog', ln(`tx'), `tx')
-    local gty = `ya' + `yb'*cond(`ylog', ln(`ty'), `ty')
+    local gfx = `xa' + `xb'*cond(`xlog', ln(`fromx'), `fromx')
+    local gfy = `ya' + `yb'*cond(`ylog', ln(`fromy'), `fromy')
+    local gtx = `xa' + `xb'*cond(`xlog', ln(`tox'), `tox')
+    local gty = `ya' + `yb'*cond(`ylog', ln(`toy'), `toy')
     if abs(`gtx'-`gfx') + abs(`gty'-`gfy') < 1 {
         di as err "gpolish brace: from() and to() are the same point; a brace needs two different ends"
         exit 198
@@ -762,18 +1060,42 @@ program _gpl_brace
 end
 
 * ================================================================ bracket
+* a square bracket from y0() to y1() at x(); its ticks point right on screen, or left with
+* left; an optional label sits on the other side of the spine
 program _gpl_bracket
-    syntax , x(real) y0(real) y1(real) [name(string) TICK(real 4) LColor(string) LWidth(string) LEFT]
+    syntax [anything(name=txt everything)], x(string) y0(string) y1(string) [name(string) TICK(real 4) ///
+        LColor(string) LWidth(string) LEFT SIZe(real 8.8) COLor(string) GAP(real 4) XAXis(string) YAXis(string)]
+    _gpl_val x `"`x'"'
+    _gpl_val y0 `"`y0'"'
+    _gpl_val y1 `"`y1'"'
     _gpl_name `name'
     local name `r(name)'
+    _gpl_axpos `name' "`xaxis'" "`yaxis'"
+    local b0x `xv'
+    local b0y `y0v'
+    local b1y `y1v'
+    _gpl_toreg1 `name' "`_gpl_reg'" b0 `xv' `y0v'
+    _gpl_toreg1 `name' "`_gpl_reg'" b1 `xv' `y1v'
     _gpl_geom, name(`name')
-    local dg = cond("`left'"!="", -1, 1)*sign(r(xb))*`tick'/72*r(gpi)
-    local gx = r(xa) + r(xb)*cond(r(xlog), ln(`x'), `x')
+    * device units run left to right on screen whatever the axis direction
+    local s = cond("`left'"!="", -1, 1)
+    local dg = `s'*`tick'/72*r(gpi)
+    local gx = r(xa) + r(xb)*cond(r(xlog), ln(`b0x'), `b0x')
     local x2 = (`gx' + `dg' - r(xa))/r(xb)
     if r(xlog) local x2 = exp(`x2')
-    local segs `" "`x' `y0' `x' `y1'" "`x' `y0' `x2' `y0'" "`x' `y1' `x2' `y1'" "'
-    foreach s of local segs {
-        _gpl_addline, name(`name') seg(`s') lcolor(`lcolor') lwidth(`lwidth')
+    local xt = (`gx' - `s'*`gap'/72*r(gpi) - r(xa))/r(xb)
+    if r(xlog) local xt = exp(`xt')
+    local ym = (r(ya) + r(yb)*cond(r(ylog), ln(`b0y'), `b0y') + r(ya) + r(yb)*cond(r(ylog), ln(`b1y'), `b1y'))/2
+    local ym = (`ym' - r(ya))/r(yb)
+    if r(ylog) local ym = exp(`ym')
+    local segs `" "`b0x' `b0y' `b0x' `b1y'" "`b0x' `b0y' `x2' `b0y'" "`b0x' `b1y' `x2' `b1y'" "'
+    foreach sg of local segs {
+        _gpl_addline, name(`name') seg(`sg') lcolor(`lcolor') lwidth(`lwidth')
+    }
+    if `"`txt'"'!="" {
+        local hz = cond(`s' > 0, "right", "left")
+        local ba = cond(`s' > 0, "west", "east")
+        _gpl_addtext, name(`name') x(`xt') y(`ym') lines(`txt') size(`size') color("`color'") hz(`hz') ba(`ba')
     }
 end
 
@@ -782,7 +1104,9 @@ program _gpl_legend
     syntax [, name(string) noBOLD PLOTs(numlist integer >0)]
     _gpl_name `name'
     local name `r(name)'
-    local n = `.`name'.plotregion1.dynamicmv.arrnels'
+    _gpl_plots `name'
+    local n = r(n)
+    local regs `r(regs)'
     if "`.`name'.legend.draw_view.setting'"!="yes" {
         di as txt "note: graph {bf:`name'} shows no legend; nothing to colour"
         exit
@@ -795,19 +1119,34 @@ program _gpl_legend
     local k 0
     foreach i of local plots {
         local ++k
-        local t `.`name'.plotregion1.plot`i'.type.setting'
-        if inlist("`t'","line","connected","rline","function") local c `.`name'.plotregion1.plot`i'.style.line.color.rgb'
-        else if inlist("`t'","bar","area","rarea","rbar") local c `.`name'.plotregion1.plot`i'.style.area.shadestyle.color.rgb'
-        else local c `.`name'.plotregion1.plot`i'.style.marker.fillcolor.rgb'
+        if `i' > `n' continue
+        local rg : word `i' of `regs'
+        local p .`name'.plotregion`rg'.plot`i'
+        local t ``p'.type.setting'
+        if inlist("`t'","line","connected","rline","function") local c ``p'.style.line.color.rgb'
+        else if inlist("`t'","bar","area","rarea","rbar") local c ``p'.style.area.shadestyle.color.rgb'
+        else local c ``p'.style.marker.fillcolor.rgb'
         local c : list retokenize c
         capture _gpl_ge `name' .legend.plotregion1.label[`k'].style.editstyle color("`c'") editcopy
         if _rc continue
         if "`bold'"=="" {
-            local s `"`.`name'.legend.plotregion1.label[`k'].text[1]'"'
-            mata: st_local("s", _gpl_esc(st_local("s")))
-            if substr(`"`s'"',1,4)!="{bf:" {
+            * every line of the label is kept; each is made bold unless it already is, or unless a
+            * literal } in it would close the bold tag early
+            local nl `.`name'.legend.plotregion1.label[`k'].text.arrnels'
+            if "`nl'"=="" local nl 0
+            local redo 0
+            forvalues q = 1/`nl' {
+                local s`q' `"`.`name'.legend.plotregion1.label[`k'].text[`q']'"'
+                mata: st_local("s`q'", _gpl_esc(st_local("s`q'")))
+                mata: st_local("ok`q'", strofreal(_gpl_bfok(st_local("s`q'"))))
+                if substr(`"`s`q''"',1,4)!="{bf:" & `ok`q'' local redo 1
+            }
+            if `redo' {
                 _gpl_ge `name' .legend.plotregion1.label[`k'].text = {}
-                _gpl_ge `name' .legend.plotregion1.label[`k'].text.Arrpush `"{bf:`s'}"'
+                forvalues q = 1/`nl' {
+                    if substr(`"`s`q''"',1,4)!="{bf:" & `ok`q'' _gpl_ge `name' .legend.plotregion1.label[`k'].text.Arrpush `"{bf:`s`q''}"'
+                    else _gpl_ge `name' .legend.plotregion1.label[`k'].text.Arrpush `"`s`q''"'
+                }
             }
         }
     }
@@ -816,7 +1155,8 @@ end
 * ================================================================ ptlabel
 program _gpl_ptlabel
     syntax varname(string) [if] [in], x(varname numeric) y(varname numeric) [name(string) SIZe(real 8.6) ///
-        COLor(string) OFFset(real 3) MSize(real 6) HALO noLEADer LColor(string) LWidth(string)]
+        COLor(string) OFFset(real 3) MSize(real 6) HALO noLEADer LColor(string) LWidth(string) ///
+        XAXis(string) YAXis(string)]
     _gpl_name `name'
     local name `r(name)'
     marksample touse, novarlist strok
@@ -825,7 +1165,18 @@ program _gpl_ptlabel
         di as txt "note: gpolish ptlabel: no observations to label (check the if/in condition and x(), y())"
         exit
     }
+    * x() and y() are read on the axes named by xaxis() and yaxis(); labels go into plot region 1
+    local _gpl_reg
+    _gpl_axpos `name' "`xaxis'" "`yaxis'"
+    if "`_gpl_reg'"=="" local _gpl_reg 1
     _gpl_obstacles `name'
+    _gpl_geom, name(`name') region(`_gpl_reg')
+    local ixa = r(xa)
+    local ixb = r(xb)
+    local iya = r(ya)
+    local iyb = r(yb)
+    local ixlog = r(xlog)
+    local iylog = r(ylog)
     _gpl_geom, name(`name')
     local gpi = r(gpi)
     local xa = r(xa)
@@ -836,10 +1187,16 @@ program _gpl_ptlabel
     local ylog = r(ylog)
     tempvar gx gy sel
     quietly {
-        gen double `gx' = `xa' + `xb'*cond(`xlog', ln(`x'), `x')
-        gen double `gy' = `ya' + `yb'*cond(`ylog', ln(`y'), `y')
+        gen double `gx' = `ixa' + `ixb'*cond(`ixlog', ln(`x'), `x')
+        gen double `gy' = `iya' + `iyb'*cond(`iylog', ln(`y'), `y')
         gen byte `sel' = `touse' & !missing(`gx', `gy') & `varlist'!=""
+        count if `sel'
     }
+    if r(N)==0 {
+        di as txt "note: gpolish ptlabel: none of the selected points is drawn (zero or negative values on a log axis); nothing to label"
+        exit
+    }
+    _gpl_geom, name(`name')
     tempname R
     mata: _gpl_place("`gx'", "`gy'", "`varlist'", "`sel'", "`R'", `size'/72*`gpi', `msize'/72*`gpi'/2, ///
         `offset'/72*`gpi', `r(gx0)', `r(gx1)', `r(gy0)', `r(gy1)', "`leader'"=="")
@@ -886,26 +1243,30 @@ program _gpl_render
         exit 111
     }
     if "`name'"=="" {
-        quietly graph describe
+        capture quietly graph describe
         local name `r(fn)'
+        if _rc | "`name'"=="" {
+            di as err "gpolish: no graph in memory"
+            exit 111
+        }
     }
     gr2mpl, name(`name') `options'
 end
 
 program _gpl_limits
     di as txt _n "{bf:What gpolish can and cannot draw inside Stata}" _n
-    di as txt "  Works in Stata                          Needs {bf:gpolish render} (matplotlib PNG)"
+    di as txt "  Works in Stata" _col(43) "Needs {bf:gpolish render} (matplotlib)"
     di as txt "  {hline 38}  {hline 44}"
-    di as txt "  bold, left-aligned titles               text at angles other than 0/90/270 degrees"
-    di as txt "  end-of-line labels with repel            soft white halo behind text (Stata: {bf:halo} = white box)"
-    di as txt "  value columns, end dots                 by(), bar, box, dot and combined graphs in the same style"
-    di as txt "  auto-placed point labels and callouts   rounded corners on boxed text ({bf:gr2mpl, roundbox})"
-    di as txt "  curved arrows (open heads), brackets    "
-    di as txt "  legend text coloured like its keys      " _n
-    di as txt "  Neither draws different colours inside one line of text (colour whole labels instead)"
-    di as txt "  or filled arrow heads." _n
+    di as txt "  bold, left-aligned titles" _col(43) "text at angles other than 0/90/270 degrees"
+    di as txt "  end-of-line labels with repel" _col(43) "soft white halo behind text (Stata: {bf:halo} = white box)"
+    di as txt "  value columns, end dots" _col(43) "by(), bar, box, dot and combined graphs in the same style"
+    di as txt "  auto-placed point labels and callouts" _col(43) "rounded corners on boxed text ({bf:gr2mpl, roundbox})"
+    di as txt "  curved arrows (open heads), brackets"
+    di as txt "  legend text coloured like its keys" _n
+    di as txt "  Neither draws different colours inside one line of text (colour whole labels instead),"
+    di as txt "  filled arrow heads, or pie charts." _n
     di as txt "  The output of gpolish is still a Stata graph (edit, combine, export to any format)."
-    di as txt "  {bf:gpolish render} carries every gpolish edit into the matplotlib version; its output is a PNG only."
+    di as txt "  {bf:gpolish render} carries every gpolish edit into the matplotlib version and writes a PNG, PDF, SVG or JPG file."
 end
 
 mata:
@@ -927,36 +1288,13 @@ string scalar _gpl_esc(string scalar s)
     return(out)
 }
 
-// ---------------------------------------------------------------- session registry
-void _gpl_reg_set(string scalar key, string scalar val)
+// a label can be wrapped in {bf:...} only if its braces balance; a literal } would close the tag early
+real scalar _gpl_bfok(string scalar s)
 {
-    pointer() scalar p
-    p = findexternal("_gpl_REG")
-    if (p == NULL) {
-        p = crexternal("_gpl_REG")
-        *p = asarray_create()
-    }
-    asarray(*p, key, val)
-}
-string scalar _gpl_reg_get(string scalar key)
-{
-    pointer() scalar p
-    p = findexternal("_gpl_REG")
-    if (p == NULL) return("")
-    if (!asarray_contains(*p, key)) return("")
-    return(asarray(*p, key))
-}
-void _gpl_reg_drop(string scalar name)
-{
-    pointer() scalar p
-    string colvector k
-    real scalar i
-    p = findexternal("_gpl_REG")
-    if (p == NULL) return
-    k = asarray_keys(*p)
-    for (i=1; i<=rows(k); i++) {
-        if (substr(k[i], 1, strlen(name)+1) == name + "|") asarray_remove(*p, k[i])
-    }
+    real colvector c
+    c = ascii(s)'
+    if (rows(c) == 0) return(1)
+    return(sum(c :== 123) == sum(c :== 125))
 }
 
 // ---------------------------------------------------------------- font metrics
@@ -1210,18 +1548,31 @@ real scalar _gpl_textw(string scalar font, string scalar s, real scalar bold)
     real rowvector c
     real scalar i
     real scalar w
+    real scalar p
+    real scalar q
 
     s = subinstr(subinstr(s, "{c 36}", char(36)), "{c 96}", char(96))
-    if (strpos(s, "{bf:")) {
+    // remove each {bf: tag and the } that closes it; other braces are text and are counted
+    p = strpos(s, "{bf:")
+    while (p > 0) {
         bold = 1
-        s = subinstr(subinstr(s, "{bf:", ""), "}", "")
+        q = strpos(substr(s, p + 4, .), "}")
+        if (q == 0) s = substr(s, 1, p - 1) + substr(s, p + 4, .)
+        else s = substr(s, 1, p - 1) + substr(s, p + 4, q - 1) + substr(s, p + 4 + q, .)
+        p = strpos(s, "{bf:")
     }
     W = _gpl_fontw(font, bold)
     c = ascii(s)
     w = 0
+    // UTF-8 lead bytes: 2-byte sequences (Latin, Greek, Cyrillic) average 0.57 em; 3-byte
+    // sequences from E3 to ED and EF (CJK, kana, Hangul, full-width forms) and 4-byte sequences
+    // are about 1 em; other 3-byte sequences (punctuation, symbols) average 0.6 em
     for (i=1; i<=cols(c); i++) {
         if (c[i] >= 32 & c[i] <= 126) w = w + W[c[i]-31]
-        else if (c[i] >= 192) w = w + 0.57
+        else if (c[i] >= 240 & c[i] <= 247) w = w + 1
+        else if ((c[i] >= 227 & c[i] <= 237) | c[i] == 239) w = w + 1
+        else if (c[i] >= 224 & c[i] <= 239) w = w + 0.6
+        else if (c[i] >= 192 & c[i] <= 223) w = w + 0.57
     }
     return(w)
 }
@@ -1293,10 +1644,17 @@ void _gpl_repel(string scalar nm, real scalar sep, real scalar lo, real scalar h
                 moved = 1
             }
         }
-        if (g[1] < lo) g[1] = lo
-        if (g[n] > hi) g[n] = hi
+        // keep the outer edges of the first and last labels inside the plot height
+        if (g[1] - sep*nl[1]/2 < lo) g[1] = lo + sep*nl[1]/2
+        if (g[n] + sep*nl[n]/2 > hi) g[n] = hi - sep*nl[n]/2
         if (moved==0) break
     }
+    // pairs that still overlap when there is not enough height for all labels
+    k = 0
+    for (i=1; i<n; i++) {
+        if (sep*(nl[i]+nl[i+1])/2 - (g[i+1]-g[i]) > 0.01*sep) k++
+    }
+    st_local("ncrowd", strofreal(k))
     Y[o,3] = g
     st_matrix(nm, Y)
 }
@@ -1370,6 +1728,113 @@ void _gpl_obs_path(string scalar xv, string scalar yv, real scalar xlog, real sc
         if (rows(S) > 20000) break
     }
     _gpl_obs_add(S)
+}
+// bars, shaded bands and range spikes as boxes. pos = position variable, val = value variable,
+// lov = second value variable ("" uses the constant base). horiz: values run along x.
+// kind 1: one box per bar, bw wide in data units; kind 2: strips between neighbouring positions,
+// at most `step' device units wide; kind 3: one spike per position, `step' device units wide.
+void _gpl_obs_range(string scalar posv, string scalar valv, string scalar lov, real scalar base,
+                    real scalar horiz, real scalar kind, real scalar bw,
+                    real scalar xlog, real scalar ylog, real scalar xa, real scalar xb,
+                    real scalar ya, real scalar yb, real scalar step)
+{
+    real matrix D
+    real colvector p
+    real colvector p0
+    real colvector p1
+    real colvector v1
+    real colvector v2
+    real colvector o
+    real scalar plog
+    real scalar vlog
+    real scalar pa
+    real scalar pb
+    real scalar va
+    real scalar vb
+    real scalar i
+    real scalar j
+    real scalar m
+    real scalar u0
+    real scalar u1
+    real scalar lo
+    real scalar hi
+    real matrix S
+
+    if (lov != "") D = st_data(., (posv, valv, lov))
+    else D = (st_data(., (posv, valv)), J(st_nobs(), 1, base))
+    D = select(D, rowmissing(D) :== 0)
+    if (rows(D) == 0) return
+    // map positions and values to device units on their own axes
+    plog = (horiz ? ylog : xlog)
+    vlog = (horiz ? xlog : ylog)
+    pa = (horiz ? ya : xa)
+    pb = (horiz ? yb : xb)
+    va = (horiz ? xa : ya)
+    vb = (horiz ? xb : yb)
+    v1 = va :+ vb*(vlog ? ln(D[,2]) : D[,2])
+    v2 = va :+ vb*(vlog ? ln(D[,3]) : D[,3])
+    if (kind == 1 & bw > 0) {
+        p0 = pa :+ pb*(plog ? ln(D[,1] :- bw/2) : D[,1] :- bw/2)
+        p1 = pa :+ pb*(plog ? ln(D[,1] :+ bw/2) : D[,1] :+ bw/2)
+    }
+    else {
+        p = pa :+ pb*(plog ? ln(D[,1]) : D[,1])
+        p0 = p :- step/2
+        p1 = p :+ step/2
+    }
+    if (kind == 2 & rows(D) > 1) {
+        p = pa :+ pb*(plog ? ln(D[,1]) : D[,1])
+        o = order(p, 1)
+        p = p[o]
+        v1 = v1[o]
+        v2 = v2[o]
+        S = J(0, 4, .)
+        for (i=1; i<rows(p); i++) {
+            m = max((1, ceil(abs(p[i+1]-p[i])/step)))
+            if (m > 200) m = 200
+            for (j=0; j<m; j++) {
+                u0 = j/m
+                u1 = (j+1)/m
+                lo = min((v1[i] + u0*(v1[i+1]-v1[i]), v1[i] + u1*(v1[i+1]-v1[i]),
+                          v2[i] + u0*(v2[i+1]-v2[i]), v2[i] + u1*(v2[i+1]-v2[i])))
+                hi = max((v1[i] + u0*(v1[i+1]-v1[i]), v1[i] + u1*(v1[i+1]-v1[i]),
+                          v2[i] + u0*(v2[i+1]-v2[i]), v2[i] + u1*(v2[i+1]-v2[i])))
+                S = S \ (p[i] + u0*(p[i+1]-p[i]), lo, p[i] + u1*(p[i+1]-p[i]), hi)
+            }
+            if (rows(S) > 20000) break
+        }
+    }
+    else S = (p0, rowmin((v1, v2)), p1, rowmax((v1, v2)))
+    S = select(S, rowmissing(S) :== 0)
+    if (rows(S) == 0) return
+    // boxes are (x0, y0, x1, y1) in device units, smaller corner first
+    if (horiz) S = (S[,2], S[,1], S[,4], S[,3])
+    S = (rowmin((S[,1], S[,3])), rowmin((S[,2], S[,4])), rowmax((S[,1], S[,3])), rowmax((S[,2], S[,4])))
+    _gpl_obs_add(S)
+}
+// a thin box around a line segment (x0, y0, x1, y1), w device units wide
+real rowvector _gpl_thin(real rowvector s, real scalar w)
+{
+    return((min((s[1], s[3])) - w/2, min((s[2], s[4])) - w/2, max((s[1], s[3])) + w/2, max((s[2], s[4])) + w/2))
+}
+// read an endlabel record into the caller's locals txt, mk, side, m, leg, pm and lens
+void _gpl_recparse(string scalar s)
+{
+    string rowvector f
+    string rowvector nm
+    real scalar p
+    real scalar i
+
+    f = J(1, 0, "")
+    p = strpos(s, "|")
+    while (p > 0) {
+        f = f, substr(s, 1, p-1)
+        s = substr(s, p+1, .)
+        p = strpos(s, "|")
+    }
+    f = f, s
+    nm = ("", "txt", "mk", "side", "m", "leg", "pm", "lens")
+    for (i=2; i<=8; i++) st_local(nm[i], (i <= cols(f) ? f[i] : ""))
 }
 void _gpl_obs_text(real scalar gx, real scalar gy, real scalar w, real scalar h, string scalar ba)
 {

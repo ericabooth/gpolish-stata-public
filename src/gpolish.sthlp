@@ -24,21 +24,22 @@
 {p 8 16 2}{cmd:gpolish callout} {it:"line 1"} [{it:"line 2"} ...]{cmd:,} {c -(}{opt at(x y)} | {opt to(x y)}{c )-}
 [{opt fr:om(x y)} {opt cur:ve(#)} {opt siz:e(#)} {opt col:or(rgb)} {opt lc:olor(rgb)} {opt lw:idth(str)} {opt al:ign(str)}
 {opt ang:le(#)} {opt halo} {opt noarrow} {opt head:size(#)} {opt seg:ments(#)} {opt fill(rgb)} {opt bor:der(rgb)} {opt pad(#)}
-{opt name(graphname)}]
+{opt xax:is(#)} {opt yax:is(#)} {opt name(graphname)}]
 
 {p 8 16 2}{cmd:gpolish note} {it:"line 1"} [{it:"line 2"} ...]{cmd:,} {c -(}{opt at(x y)} | {opt to(x y)}{c )-}
 [{opt fill(rgb)} {opt bor:der(rgb)} {opt pad(#)} {it:callout_options}]
 
 {p 8 16 2}{cmd:gpolish brace} [{it:"label line 1"} ...]{cmd:,} {opt fr:om(x y)} {opt to(x y)}
-[{opt w:idth(#)} {opt flip} {opt gap(#)} {opt siz:e(#)} {opt col:or(rgb)} {opt lc:olor(rgb)} {opt lw:idth(str)} {opt name(graphname)}]
+[{opt w:idth(#)} {opt flip} {opt gap(#)} {opt siz:e(#)} {opt col:or(rgb)} {opt lc:olor(rgb)} {opt lw:idth(str)} {opt xax:is(#)} {opt yax:is(#)} {opt name(graphname)}]
 
 {p 8 16 2}{cmd:gpolish arrow,} {opt fr:om(x y)} {opt to(x y)}
-[{opt cur:ve(#)} {opt head:size(#)} {opt seg:ments(#)} {opt shr:ink(#)} {opt lc:olor(rgb)} {opt lw:idth(str)} {opt name(graphname)}]
+[{opt cur:ve(#)} {opt head:size(#)} {opt seg:ments(#)} {opt shr:ink(#)} {opt lc:olor(rgb)} {opt lw:idth(str)} {opt xax:is(#)} {opt yax:is(#)} {opt name(graphname)}]
 
 {p 8 16 2}{cmd:gpolish ptlabel} {it:strvar} {ifin}{cmd:,} {opt x(varname)} {opt y(varname)}
-[{opt siz:e(#)} {opt col:or(rgb)} {opt off:set(#)} {opt ms:ize(#)} {opt halo} {opt nolead:er} {opt lc:olor(rgb)} {opt lw:idth(str)} {opt name(graphname)}]
+[{opt siz:e(#)} {opt col:or(rgb)} {opt off:set(#)} {opt ms:ize(#)} {opt halo} {opt nolead:er} {opt lc:olor(rgb)} {opt lw:idth(str)} {opt xax:is(#)} {opt yax:is(#)} {opt name(graphname)}]
 
-{p 8 16 2}{cmd:gpolish bracket,} {opt x(#)} {opt y0(#)} {opt y1(#)} [{opt tick(#)} {opt left} {opt lc:olor(rgb)} {opt lw:idth(str)} {opt name(graphname)}]
+{p 8 16 2}{cmd:gpolish bracket} [{it:"label line 1"} ...]{cmd:,} {opt x(#)} {opt y0(#)} {opt y1(#)} [{opt tick(#)} {opt left} {opt gap(#)} {opt siz:e(#)} {opt col:or(rgb)} {opt lc:olor(rgb)} {opt lw:idth(str)}
+{opt xax:is(#)} {opt yax:is(#)} {opt name(graphname)}]
 
 {p 8 16 2}{cmd:gpolish legend} [{cmd:,} {opt plot:s(numlist)} {opt nobold} {opt name(graphname)}]
 
@@ -51,9 +52,15 @@
 {p 8 16 2}{cmd:gpolish geom} [{cmd:,} {opt name(graphname)}]
 
 {pstd}All sizes are in points. Positions are in the units of the graph's axes.
-Each value in {opt at()}, {opt to()} and {opt from()} may be a number or an expression written without spaces,
-such as {cmd:to(td(21sep2001) 966)} on a date axis.
+Each value in {opt at()}, {opt to()}, {opt from()} and the {opt x()}, {opt y0()} and {opt y1()} of {cmd:bracket}
+may be a number or an expression written without spaces, such as {cmd:to(td(21sep2001) 966)} on a date axis.
+An expression may use the results of the previous command, such as {cmd:to(1999 r(max))} after {cmd:summarize}.
+Positions are read on the first x and y axes; on a graph with a second axis, {opt xaxis(#)} and {opt yaxis(#)}
+say which axis the positions (or the {opt x()} and {opt y()} variables of {cmd:ptlabel}) belong to.
 {opt name()} picks a graph in memory other than the current one.
+
+{pstd}{cmd:gpolish} is not an r-class command: it leaves {cmd:r()} as it found it, except {cmd:gpolish geom},
+which returns the geometry, and {cmd:gpolish render}, which returns the results of {helpb gr2mpl}.
 
 
 {marker description}{...}
@@ -97,14 +104,27 @@ Label text is the variable label; {opt labels()} overrides it, one label per plo
 {opt dots} adds a marker at each line end. {opt color()} sets one text color for all labels instead of each line's color.
 {opt side(left)} labels the left ends of the lines instead of the right; on a reversed axis
 ({cmd:xscale(reverse)}) the labels follow the screen, not the data.
+Normally the labels go into the graph margin beside the plot. When a y axis is drawn on the labeled side
+(the usual left axis with {opt side(left)}, or an axis moved right with {cmd:yscale(alt)} or {cmd:yaxis(2)}),
+the room is made inside the plot region instead, so the labels sit between the axis and the lines.
+Lines on a second y axis are labeled at their own scale.
 {opt wrap(#)} wraps long labels on word boundaries at about # characters, measured by rendered width.
 {opt gap(#)} sets the minimum distance between the centres of neighbouring labels, in multiples of the font size per text line (default 1.3); wrapped labels get proportionally more room.
+Labels are kept within the height of the plot; when they cannot all fit, {cmd:gpolish endlabel} says how many
+still overlap.
+Labels are bold unless {opt nobold} is given; a label with an unmatched {cmd:{c )-}} is shown as typed, because the
+brace would end the bold markup early.
 Running {cmd:gpolish endlabel} again replaces the earlier labels instead of adding a second set.
 
 {phang}
 {cmd:gpolish callout} adds a note of one or more lines, with a curved arrow to {opt to()}.
-If {opt at()} is omitted, the note is placed automatically near the target, clear of markers, lines and other text.
+If {opt at()} is omitted, the note is placed automatically near the target, clear of what is already drawn:
+the markers and lines of scatter, line, connected, rline, function, spike and dropline plots; bars, shaded areas
+and range plots (bar, rbar, area, rarea, rcap, rspike, rcapsym, which include histograms and confidence bands);
+reference lines from {opt xline()} and {opt yline()}; and other added text.
 {opt from()} moves the tail of the arrow; by default it starts at the edge of the text nearest the target.
+When the target lies inside the text, or {opt from()} equals {opt to()}, no arrow is drawn and {cmd:gpolish} says so.
+{opt segments(#)} must be 1 or more.
 {opt curve(#)} sets the bend (0 is straight; the sign sets the side).
 {opt halo} draws a white box behind the text.
 
@@ -114,7 +134,8 @@ If {opt at()} is omitted, the note is placed automatically near the target, clea
 change the box colors (the default border is used only when {opt fill()} is not given), and {opt pad(#)} sets the
 padding in points. {cmd:gpolish callout} draws the same box when {opt fill()} is given.
 With {opt to()} it draws an arrow from the box; with {opt at()} alone it is a plain box.
-With {opt align(center)} the box is centered on {opt at()}, which suits flow charts.
+With the default {opt align(left)} the left edge of the box sits on {opt at()}, with {opt align(right)} its right
+edge does, and with {opt align(center)} the box is centered on {opt at()}, which suits flow charts.
 
 {phang}
 {cmd:gpolish brace} draws a curly brace between two points, with an optional label at its tip.
@@ -124,6 +145,7 @@ The tip points to the left of the direction from {opt from()} to {opt to()}; {op
 
 {phang}
 {cmd:gpolish arrow} draws an arrow between two points, straight by default; {opt curve(#)} bends it.
+{opt from()} and {opt to()} must be different points.
 Together with {cmd:gpolish note} it builds simple flow charts on an empty plot.
 
 {phang}
@@ -133,14 +155,19 @@ labels least. If even the best of the eight still overlaps something, the label 
 rings around its point, and joined to the point by a thin leader line; it moves out only when that spot costs less
 than the best spot next to the point. {opt noleader} keeps every
 label next to its point; {opt lcolor()} and {opt lwidth()} style the leader lines.
-{opt x()} and {opt y()} name the plotted variables. Log axes are detected.
+{opt x()} and {opt y()} name the plotted variables; for points plotted on a second axis, add {opt yaxis(2)}
+(or {opt xaxis(2)}). Log axes are detected, and points with zero or negative values on a log axis are skipped.
+Placement avoids the same drawn objects as an automatic {cmd:gpolish callout}.
 
 {phang}
 {cmd:gpolish bracket} draws a square bracket from {opt y0()} to {opt y1()} at {opt x()}.
+Its ticks point right on the screen, whatever the axis direction; {opt left} points them left.
+{opt tick(#)} sets their length in points. An optional label sits beside the middle of the bracket, on the side
+away from the ticks, {opt gap(#)} points from it. For a labeled span across x, use {cmd:gpolish brace}.
 
 {phang}
-{cmd:gpolish legend} colors each legend label to match its key and makes it bold.
-If the legend uses {cmd:order()}, give the plot numbers in the same order in {opt plots()}.
+{cmd:gpolish legend} colors each legend label to match its key and makes it bold. Labels of more than one
+line keep every line. If the legend uses {cmd:order()}, give the plot numbers in the same order in {opt plots()}.
 
 {phang}
 {cmd:gpolish clear} removes every added text box, line and marker from the graph and undoes the margin and legend
@@ -148,7 +175,8 @@ changes of {cmd:gpolish endlabel}. It keeps the title and axis edits of plain {c
 added by hand in the Graph Editor.
 
 {phang}
-{cmd:gpolish render} passes the graph to {helpb gr2mpl} for a matplotlib PNG. {cmd:gpolish limits} lists what needs it.
+{cmd:gpolish render} passes the graph to {helpb gr2mpl}, which redraws it with matplotlib and writes a PNG, PDF,
+SVG or JPG file. {cmd:gpolish limits} lists what needs it.
 
 {phang}
 {cmd:gpolish geom} reports the drawn geometry of a graph for programmers: the size in inches in {cmd:r(xsize)} and
@@ -161,7 +189,10 @@ natural log of the data on a log axis, flagged in {cmd:r(xlog)} and {cmd:r(ylog)
 {marker limits}{...}
 {title:Limits}
 
-{pstd}Stata's renderer cannot draw the following. {cmd:gpolish} prints a note for text at an unsupported angle, for inline color tags in the graph title, and when {cmd:ptlabel} or an automatically placed callout or note cannot place every label without overlap. It stops with an error when a layout command is used on a graph that is not a twoway graph.
+{pstd}Stata's renderer cannot draw the first four items below; the others are limits of {cmd:gpolish} itself.
+{cmd:gpolish} prints a note for text at an unsupported angle, for inline color tags in the graph title, and when
+{cmd:endlabel}, {cmd:ptlabel} or an automatically placed callout or note cannot place every label without overlap.
+It stops with an error when a layout command is used on a graph that is not a twoway graph.
 
 {p2colset 8 46 48 2}{...}
 {p2col:Limit}What happens{p_end}
@@ -170,8 +201,11 @@ natural log of the data on a log axis, flagged in {cmd:r(xlog)} and {cmd:r(ylog)
 {p2col:Soft halo behind text}{opt halo} draws a white box, which can cover nearby markers{p_end}
 {p2col:Different colors inside one line of text}not possible; color whole labels{p_end}
 {p2col:Filled arrow heads}arrow heads are open{p_end}
-{p2col:Labels that cannot all fit}{cmd:ptlabel} and automatic callouts report how many labels still overlap noticeably{p_end}
+{p2col:Labels that cannot all fit}{cmd:endlabel}, {cmd:ptlabel} and automatic callouts report how many labels still overlap noticeably{p_end}
 {p2col:{cmd:graph bar}, {cmd:by()} and combined graphs}layout commands are refused with a message; plain {cmd:gpolish} still makes the title bold; {helpb gr2mpl} redraws them{p_end}
+{p2col:{cmd:graph pie}}layout commands are refused; {helpb gr2mpl} does not redraw pie charts either{p_end}
+{p2col:Positions on a second axis}{opt at()}, {opt to()} and {opt from()} use the first axes unless {opt xaxis()} or {opt yaxis()} says otherwise{p_end}
+{p2col:Graphs edited by {cmd:gpolish} 0.6.1 or earlier}these carry no {cmd:endlabel} record: run {cmd:gpolish clear} before {cmd:gpolish endlabel} again, or redraw the graph{p_end}
 {p2line}
 
 
@@ -185,6 +219,16 @@ natural log of the data on a log axis, flagged in {cmd:r(xlog)} and {cmd:r(ylog)
 {phang2}{cmd:. gpolish endlabel, values dots}{p_end}
 {phang2}{cmd:. gpolish callout "1918 influenza" "pandemic", to(1918.6 30.6)}{p_end}
 {phang2}{cmd:. graph export life.png, width(2400) replace}{p_end}
+
+{pstd}In batch mode ({cmd:stata -b}), {cmd:graph set window fontface} is not available; use
+{cmd:graph set svg fontface "Open Sans"} instead (see {help gpolish##technical:Technical notes}).{p_end}
+
+{pstd}A line on a second axis, labeled at its own scale, and a note placed on that axis:{p_end}
+{phang2}{cmd:. sysuse uslifeexp, clear}{p_end}
+{phang2}{cmd:. generate pop = 1000 + 20*(year-1900)}{p_end}
+{phang2}{cmd:. twoway (line le year) (line pop year, yaxis(2)), scheme(pypolish)}{p_end}
+{phang2}{cmd:. gpolish endlabel, values}{p_end}
+{phang2}{cmd:. gpolish callout "Index 2000", to(1950 2000) yaxis(2)}{p_end}
 
 {pstd}A graph from another command:{p_end}
 {phang2}{cmd:. sysuse nlsw88, clear}{p_end}
@@ -210,8 +254,15 @@ Requires Stata 16 or later. {cmd:gpolish} relies on undocumented members of Stat
 {pstd}
 Stata does not report how wide a piece of text is. {cmd:gpolish} uses built-in character-width tables for
 common fonts (Open Sans, Helvetica, Arial, Verdana, Tahoma, Trebuchet MS, Avenir, Gill Sans, Times, Georgia,
-Palatino, Courier New, Menlo and a few variants) and picks the table from {cmd:graph set window fontface}.
-For any other font it uses Arial's widths and says so; spacing is then approximate.
+Palatino, Courier New, Menlo and a few variants) and picks the table for the font Stata exports with.
+With a Graph window, that is the font set by {cmd:graph set window fontface}. In batch mode ({cmd:stata -b}) and
+in console Stata there is no Graph window, {cmd:graph set window fontface} is not available, and Stata exports
+PNG files with the font set by {cmd:graph set svg fontface}; {cmd:gpolish} then reads that setting.
+To name the font yourself, for example for PDF export, set {cmd:global GPOLISH_FONT "Open Sans"}; it overrides both.
+For a font without a table {cmd:gpolish} uses Arial's widths and says so; spacing is then approximate.
+If it cannot read the font at all, it assumes Helvetica and says so.
+Characters outside ASCII are measured by class: Chinese, Japanese and Korean characters as about 1 em,
+accented Latin, Greek and Cyrillic letters as an average width.
 
 {pstd}
 Set {opt xsize()} and {opt ysize()} to the size the graph will be printed at, and give text sizes in points.
@@ -223,9 +274,12 @@ graph, or run {cmd:gpolish clear} and the layout commands again.
 Text keeps {cmd:$} and backtick characters literally; they are stored as {cmd:{c -(}c 36{c )-}} and {cmd:{c -(}c 96{c )-}}.
 
 {pstd}
-The record that lets {cmd:gpolish endlabel} replace its own earlier labels, and lets {cmd:gpolish clear} restore
-the margin, lasts for the Stata session. After {cmd:graph use} or {cmd:clear all}, {cmd:gpolish clear} still removes
-the added objects but cannot restore the margin.
+{cmd:gpolish endlabel} keeps a record of what it added (the text boxes, markers, margin and legend change) in a
+hidden text box inside the graph. The record belongs to that graph only, and it is saved with the graph, so after
+{cmd:graph save} and {cmd:graph use} a second {cmd:gpolish endlabel} still replaces the first set of labels and
+{cmd:gpolish clear} still restores the margin and the legend. A graph redrawn under the same name starts with no
+record. If a recorded label was changed or removed by other means (for example in the Graph Editor), the record is
+ignored; run {cmd:gpolish clear} and start again.
 
 
 {title:Author}
