@@ -284,6 +284,23 @@ line le_wfemale le_bmale year, name(w1, replace)
 gpolish endlabel, wrap(20)
 chk wrap_chars `.w1.plotregion1.added_text[2].text.arrnels' >= 3
 
+* ---- 20. edits survive graph save and graph use --------------------------------
+sysuse uslifeexp, clear
+line le_wfemale le_bmale year, name(sv, replace)
+gpolish
+gpolish endlabel, values dots
+gpolish note "Saved note", at(1950 45)
+tempfile gph
+graph save sv "`gph'", replace
+graph drop sv
+graph use "`gph'", name(sv2)
+ntext sv2 added_text
+chk save_text r(k)==5
+ntext sv2 added_markers
+chk save_markers r(k)==2
+chk save_box "`.sv2.plotregion1.added_text[5].style.drawbox.setting'"=="yes"
+chk save_title substr(`"`.sv2.title.text[1]'"',1,4)=="{bf:" | `"`.sv2.title.text[1]'"'==""
+
 gpolish limits
 
 di as res _n "gpolish battery: $NCHK checks passed (Stata `c(stata_version)')"

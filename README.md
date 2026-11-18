@@ -139,6 +139,12 @@ Tested on StataNow 19.5 and Stata 16.1 on macOS. Stata 17 and 18 and Windows are
 | `docs/` | Technical notes on Stata's graph object model. |
 | `tests/` | Test scripts and reference charts. |
 
+## How well does the placement work?
+
+The [benchmark](benchmark/) scores `gpolish ptlabel` against Stata's own `mlabel()`, `labrepel`, adjustText (Python) and ggrepel (R) on four real-data scenarios and 60 synthetic ones, with every label measured by the same rule. When a subset of points is labelled, the usual case in a report, `gpolish` places the largest share of labels cleanly of all five methods. When every point in a crowded scatter is labelled, ggrepel does better, because it moves labels away from their points and draws leader lines.
+
+<img width="900" alt="Benchmark: share of clean labels and seconds per graph" src="benchmark/results/benchmark.png" />
+
 ## Works with other graph commands
 
 `gpolish` and `gr2mpl` read the finished graph, so they work with commands that build on Stata's own graph families. Checked in the gallery or the tests: `marginsplot`, `avplot`, `rvfplot`, `lvr2plot`, `cluster dendrogram`, `histogram`, `coefplot`, `heatplot` and `statplot`. `statplot` and other `graph bar` based commands take the scheme and the title edit inside Stata and the full restyle from `gr2mpl`.

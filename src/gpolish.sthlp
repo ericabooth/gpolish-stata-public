@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 0.5.0  17nov2026}{...}
+{* *! version 0.5.1  17nov2026}{...}
 {viewerjumpto "Syntax" "gpolish##syntax"}{...}
 {viewerjumpto "Description" "gpolish##description"}{...}
 {viewerjumpto "Subcommands" "gpolish##subcommands"}{...}

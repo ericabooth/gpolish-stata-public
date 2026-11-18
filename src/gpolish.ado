@@ -1,4 +1,4 @@
-*! gpolish 0.5.0  post-hoc polish + layout layer for Stata graphs
+*! gpolish 0.5.1  post-hoc polish + layout layer for Stata graphs
 *! gpolish [style] | endlabel | callout | note | arrow | brace | bracket | ptlabel | legend | clear | render | limits | geom
 *! Requires Stata 16+. Uses undocumented graph-object members and gr_edit.
 program gpolish
@@ -21,6 +21,8 @@ program gpolish
     else if "`sub'"=="geom"     _gpl_geom `rest'
     else if "`sub'"=="style"    _gpl_style `rest'
     else                        _gpl_style `0'
+    * edits are applied without redrawing; draw the finished graph once
+    if !inlist("`sub'", "render", "limits", "geom") capture gr_draw
 end
 
 * ================================================================ utilities
@@ -145,24 +147,32 @@ program _gpl_regundo
     args name
     _gpl_regget `name'
     if "`r(ok)'"!="1" exit
-    * copy the record first: gr_edit clears r()
+    * copy the record first: an edit clears r()
     local txt `r(txt)'
     local mk `r(mk)'
     local m `r(m)'
     local side `r(side)'
     local leg `r(leg)'
     foreach k of local txt {
-        gr_edit .plotregion1.added_text[`k'].draw_view.setstyle, style(no)
+        _gpl_ge `name' .plotregion1.added_text[`k'].draw_view.setstyle, style(no)
     }
     foreach k of local mk {
-        gr_edit .plotregion1.added_markers[`k'].draw_view.setstyle, style(no)
+        _gpl_ge `name' .plotregion1.added_markers[`k'].draw_view.setstyle, style(no)
     }
     if "`m'"!="" {
         local s = cond("`side'"=="left", "l", "r")
-        gr_edit .style.editstyle margin(`s'-`m') editcopy
+        _gpl_ge `name' .style.editstyle margin(`s'-`m') editcopy
     }
-    if "`leg'"=="1" gr_edit .legend.draw_view.setstyle, style(yes)
+    if "`leg'"=="1" _gpl_ge `name' .legend.draw_view.setstyle, style(yes)
     mata: _gpl_reg_drop("`name'")
+end
+
+* apply one graph edit; the edit is recorded in the graph, and the graph is drawn once
+* when the subcommand finishes
+program _gpl_ge
+    gettoken name 0 : 0
+    mata: st_local("0", strltrim(st_local("0")))
+    _gm_edit .`name'.`0'
 end
 
 program _gpl_count, rclass
@@ -182,9 +192,9 @@ program _gpl_addtext, rclass
     if "`linegap'"=="" local linegap 1.5pt
     _gpl_count `name' added_text
     local k = r(k) + 1
-    gr_edit .plotregion1.AddTextBox added_text editor `y' `x'
-    gr_edit .plotregion1.added_text_new = `k'
-    gr_edit .plotregion1.added_text_rec = `k'
+    _gpl_ge `name' .plotregion1.AddTextBox added_text editor `y' `x'
+    _gpl_ge `name' .plotregion1.added_text_new = `k'
+    _gpl_ge `name' .plotregion1.added_text_rec = `k'
     local box
     if "`fill'"!="" {
         if "`border'"=="" local border "`fill'"
@@ -194,16 +204,16 @@ program _gpl_addtext, rclass
         local box drawbox(yes) fillcolor("`fill'") linestyle(color("`border'") width(thin)) margin(`ph' `ph' `pv' `pv')
     }
     else if "`halo'"!="" local box drawbox(yes) fillcolor(white%80) linestyle(color(white%0) width(none)) boxmargin(0.5 0.5 0.2 0.2)
-    gr_edit .plotregion1.added_text[`k'].style.editstyle size(`size'pt) color("`color'") horizontal(`hz') vertical(middle) box_alignment(`ba') linegap(`linegap') `box' editcopy
-    gr_edit .plotregion1.added_text[`k'].text = {}
+    _gpl_ge `name' .plotregion1.added_text[`k'].style.editstyle size(`size'pt) color("`color'") horizontal(`hz') vertical(middle) box_alignment(`ba') linegap(`linegap') `box' editcopy
+    _gpl_ge `name' .plotregion1.added_text[`k'].text = {}
     foreach l of local lines {
-        gr_edit .plotregion1.added_text[`k'].text.Arrpush `"`l'"'
+        _gpl_ge `name' .plotregion1.added_text[`k'].text.Arrpush `"`l'"'
     }
     if `angle'!=0 {
         * store the request; Stata itself only draws quarter turns
-        capture gr_edit .plotregion1.added_text[`k'].style.editstyle angle(`angle') editcopy
-        if inlist(`angle', 90, -270) capture gr_edit .plotregion1.added_text[`k'].orientation.setstyle, style(vertical)
-        else if inlist(`angle', -90, 270) capture gr_edit .plotregion1.added_text[`k'].orientation.setstyle, style(rvertical)
+        capture _gpl_ge `name' .plotregion1.added_text[`k'].style.editstyle angle(`angle') editcopy
+        if inlist(`angle', 90, -270) capture _gpl_ge `name' .plotregion1.added_text[`k'].orientation.setstyle, style(vertical)
+        else if inlist(`angle', -90, 270) capture _gpl_ge `name' .plotregion1.added_text[`k'].orientation.setstyle, style(rvertical)
         else _gpl_note rotate `angle'
     }
     return scalar k = `k'
@@ -215,10 +225,10 @@ program _gpl_addline
     if "`lwidth'"=="" local lwidth thin
     _gpl_count `name' added_lines
     local k = r(k) + 1
-    gr_edit .plotregion1.AddLine added_lines editor `seg'
-    gr_edit .plotregion1.added_lines_new = `k'
-    gr_edit .plotregion1.added_lines_rec = `k'
-    gr_edit .plotregion1.added_lines[`k'].style.editstyle linestyle(width(`lwidth') color("`lcolor'")) headstyle(symbol(none)) editcopy
+    _gpl_ge `name' .plotregion1.AddLine added_lines editor `seg'
+    _gpl_ge `name' .plotregion1.added_lines_new = `k'
+    _gpl_ge `name' .plotregion1.added_lines_rec = `k'
+    _gpl_ge `name' .plotregion1.added_lines[`k'].style.editstyle linestyle(width(`lwidth') color("`lcolor'")) headstyle(symbol(none)) editcopy
 end
 
 * one-line notes for things Stata's renderer cannot draw
@@ -328,8 +338,8 @@ program _gpl_style
     }
     quietly graph display `name'
     if "`fam'"=="twoway" {
-        if "`keepyline'"==""  gr_edit .yaxis1.style.editstyle linestyle(color(none)) editcopy
-        if "`keepyticks'"=="" gr_edit .yaxis1.style.editstyle majorstyle(tickstyle(show_ticks(no))) editcopy
+        if "`keepyline'"==""  _gpl_ge `name' .yaxis1.style.editstyle linestyle(color(none)) editcopy
+        if "`keepyticks'"=="" _gpl_ge `name' .yaxis1.style.editstyle majorstyle(tickstyle(show_ticks(no))) editcopy
     }
     local nt `.`name'.title.text.arrnels'
     if "`nt'"=="" local nt 0
@@ -339,10 +349,10 @@ program _gpl_style
         if strpos(`"`t`i''"', "{color") | strpos(`"`t`i''"', "{c #") _gpl_note inlinecolor
     }
     if "`bold'"=="" & `nt' > 0 {
-        gr_edit .title.text = {}
+        _gpl_ge `name' .title.text = {}
         forvalues i = 1/`nt' {
-            if substr(`"`t`i''"',1,4)=="{bf:" gr_edit .title.text.Arrpush `"`t`i''"'
-            else gr_edit .title.text.Arrpush `"{bf:`t`i''}"'
+            if substr(`"`t`i''"',1,4)=="{bf:" _gpl_ge `name' .title.text.Arrpush `"`t`i''"'
+            else _gpl_ge `name' .title.text.Arrpush `"{bf:`t`i''}"'
         }
     }
 end
@@ -466,12 +476,14 @@ program _gpl_endlabel
         di as txt "      a smaller size(), or a wider graph (xsize())."
     }
     local mside = cond("`side'"=="right", "r", "l")
-    gr_edit .style.editstyle margin(`mside'+`m') editcopy
+    _gpl_ge `name' .style.editstyle margin(`mside'+`m') editcopy
     local leg 0
     if "`keeplegend'"=="" & "`.`name'.legend.draw_view.setting'"=="yes" {
-        gr_edit .legend.draw_view.setstyle, style(no)
+        _gpl_ge `name' .legend.draw_view.setstyle, style(no)
         local leg 1
     }
+    * the plot region moved: redraw so the transform below is current
+    gr_draw `name'
     _gpl_geom, name(`name')
     local ya = r(ya)
     local yb = r(yb)
@@ -509,10 +521,10 @@ program _gpl_endlabel
         }
         if "`dots'"!="" {
             local ++km
-            gr_edit .plotregion1.AddMarker added_markers editor `xl' `yl'
-            gr_edit .plotregion1.added_markers_new = `km'
-            gr_edit .plotregion1.added_markers_rec = `km'
-            gr_edit .plotregion1.added_markers[`km'].style.editstyle marker(symbol(circle) size(`dotsize'pt) fillcolor("`col`j''") linestyle(color(white) width(vthin))) editcopy
+            _gpl_ge `name' .plotregion1.AddMarker added_markers editor `xl' `yl'
+            _gpl_ge `name' .plotregion1.added_markers_new = `km'
+            _gpl_ge `name' .plotregion1.added_markers_rec = `km'
+            _gpl_ge `name' .plotregion1.added_markers[`km'].style.editstyle marker(symbol(circle) size(`dotsize'pt) fillcolor("`col`j''") linestyle(color(white) width(vthin))) editcopy
             local regmk `regmk' `km'
         }
         local lines
@@ -549,9 +561,9 @@ program _gpl_clear
         _gpl_count `name' `a'
         local k`a' = r(k)
         if r(k) > 0 {
-            gr_edit .plotregion1.`a' = {}
-            gr_edit .plotregion1.`a'_new = 0
-            gr_edit .plotregion1.`a'_rec = 0
+            _gpl_ge `name' .plotregion1.`a' = {}
+            _gpl_ge `name' .plotregion1.`a'_new = 0
+            _gpl_ge `name' .plotregion1.`a'_rec = 0
         }
     }
     di as txt "gpolish clear: removed `kadded_text' text box(es), `kadded_lines' line segment(s) and `kadded_markers' marker(s)"
@@ -779,14 +791,14 @@ program _gpl_legend
         else if inlist("`t'","bar","area","rarea","rbar") local c `.`name'.plotregion1.plot`i'.style.area.shadestyle.color.rgb'
         else local c `.`name'.plotregion1.plot`i'.style.marker.fillcolor.rgb'
         local c : list retokenize c
-        capture gr_edit .legend.plotregion1.label[`k'].style.editstyle color("`c'") editcopy
+        capture _gpl_ge `name' .legend.plotregion1.label[`k'].style.editstyle color("`c'") editcopy
         if _rc continue
         if "`bold'"=="" {
             local s `"`.`name'.legend.plotregion1.label[`k'].text[1]'"'
             mata: st_local("s", _gpl_esc(st_local("s")))
             if substr(`"`s'"',1,4)!="{bf:" {
-                gr_edit .legend.plotregion1.label[`k'].text = {}
-                gr_edit .legend.plotregion1.label[`k'].text.Arrpush `"{bf:`s'}"'
+                _gpl_ge `name' .legend.plotregion1.label[`k'].text = {}
+                _gpl_ge `name' .legend.plotregion1.label[`k'].text.Arrpush `"{bf:`s'}"'
             }
         }
     }

@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.5.1 (2026-11-17)
+
+- New `benchmark/` folder: a reproducible comparison of point-label placement against Stata's `mlabel()`,
+  `labrepel`, adjustText (Python) and ggrepel (R), with results in `benchmark/results/`.
+
 ## 0.5.0 (2026-11-17)
 
 Fixes found in a review of every subcommand and help example:
