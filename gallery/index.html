@@ -20,7 +20,8 @@ footer{color:var(--mute);font-size:13px;margin-top:30px}
 </style></head><body><main>
 <h1>gpolish gallery</h1>
 <p class="lead">Twenty-two Stata graphs, each drawn three ways: Stata's default look, the same graph with <code>scheme(pypolish)</code> and <code>gpolish</code> (still a Stata graph), and that graph redrawn in matplotlib by <code>gr2mpl</code>.</p>
-<p class="lead"><a href="https://github.com/ericabooth/gpolish-stata-public">Repository and installation</a> · every image on this page is produced by <a href="https://github.com/ericabooth/gpolish-stata-public/blob/main/gallery/gallery.do">gallery/gallery.do</a>.</p><nav>
+<p class="lead"><a href="https://github.com/ericabooth/gpolish-stata-public">Repository and installation</a> · every image on this page is produced by <a href="https://github.com/ericabooth/gpolish-stata-public/blob/main/gallery/gallery.do">gallery/gallery.do</a>.</p>
+<p class="lead">Each code block runs as it stands in a fresh Stata session, as a do-file (paste it into the Do-file Editor: the <code>///</code> line breaks and local macros need one). A block loads its data, runs any estimation the graph needs, draws the polished graph, and saves the matplotlib version as <code>figure.png</code>. The examples that use the community commands coefplot, statplot and heatplot name the <code>ssc install</code> lines they need. In batch mode (<code>stata -b</code>) the first line, <code>graph set window fontface</code>, only prints a note, and Stata exports with the font set by <code>graph set svg fontface</code> instead.</p><nav>
 <a href="#01_avplot">Added-variable plot</a>
 <a href="#02_heatmap">Correlation heatmap</a>
 <a href="#03_coefplot">coefplot with shaded confidence bands</a>
@@ -48,7 +49,10 @@ footer{color:var(--mute);font-size:13px;margin-top:30px}
 <figure><figcaption>Stata default</figcaption><a href="img/01_avplot_a.png"><img loading="lazy" src="img/01_avplot_a.png" alt="Added-variable plot: Stata default"></a></figure>
 <figure><figcaption>scheme(pypolish) + gpolish</figcaption><a href="img/01_avplot_b.png"><img loading="lazy" src="img/01_avplot_b.png" alt="Added-variable plot: scheme(pypolish) + gpolish"></a></figure>
 <figure><figcaption>+ gr2mpl (matplotlib render)</figcaption><a href="img/01_avplot_c.png"><img loading="lazy" src="img/01_avplot_c.png" alt="Added-variable plot: + gr2mpl (matplotlib render)"></a></figure>
-</div><details><summary>Stata code for the polished versions</summary><pre>local b = strtrim(&quot;`: display %4.2f _b[weight]&#x27;&quot;)
+</div><details><summary>Stata code for the polished versions</summary><pre>graph set window fontface &quot;Open Sans&quot;   // font used for the images; any installed font works
+sysuse auto, clear
+quietly regress price mpg weight foreign
+local b = strtrim(&quot;`: display %4.2f _b[weight]&#x27;&quot;)
 avplot weight, scheme(pypolish) xsize(7) ysize(4.6) mcolor(&quot;11 93 122%85&quot;) mlcolor(white) mlwidth(vthin) msize(6pt) ///
     rlopts(lcolor(&quot;184 67 15&quot;) lwidth(medthick)) note(&quot;Source: Stata auto dataset. Linear regression of price on mileage, weight and origin.&quot;, size(8pt)) ///
     title(&quot;Holding mileage and origin fixed, heavier cars cost more&quot;, size(13.5pt)) ///
@@ -61,7 +65,26 @@ gr2mpl, saving(figure.png) replace</pre></details></section>
 <figure><figcaption>Stata default</figcaption><a href="img/02_heatmap_a.png"><img loading="lazy" src="img/02_heatmap_a.png" alt="Correlation heatmap: Stata default"></a></figure>
 <figure><figcaption>scheme(pypolish) + gpolish</figcaption><a href="img/02_heatmap_b.png"><img loading="lazy" src="img/02_heatmap_b.png" alt="Correlation heatmap: scheme(pypolish) + gpolish"></a></figure>
 <figure><figcaption>+ gr2mpl (matplotlib render)</figcaption><a href="img/02_heatmap_c.png"><img loading="lazy" src="img/02_heatmap_c.png" alt="Correlation heatmap: + gr2mpl (matplotlib render)"></a></figure>
-</div><details><summary>Stata code for the polished versions</summary><pre>local c1 &quot;184 67 15&quot;
+</div><details><summary>Stata code for the polished versions</summary><pre>graph set window fontface &quot;Open Sans&quot;   // font used for the images; any installed font works
+sysuse auto, clear
+local vars price mpg weight length displacement gear_ratio headroom turn
+local labs `&quot;&quot;Price&quot; &quot;Mileage&quot; &quot;Weight&quot; &quot;Length&quot; &quot;Displacement&quot; &quot;Gear ratio&quot; &quot;Headroom&quot; &quot;Turn circle&quot;&quot;&#x27;
+quietly correlate `vars&#x27;
+matrix C = r(C)
+clear
+set obs 64
+gen i = ceil(_n/8)
+gen j = _n - 8*(i-1)
+gen r = C[i, j]
+gen y0 = j - 0.5
+gen y1 = j + 0.5
+gen str5 rtxt = strtrim(string(r, &quot;%4.2f&quot;))
+gen bin = 1 + (r &gt; -0.6) + (r &gt; -0.2) + (r &gt; 0.2) + (r &gt; 0.6)
+local al
+forvalues k = 1/8 {
+    local al `al&#x27; `k&#x27; `&quot;`: word `k&#x27; of `labs&#x27;&#x27;&quot;&#x27;
+}
+local c1 &quot;184 67 15&quot;
 local c2 &quot;240 163 94&quot;
 local c3 &quot;240 240 236&quot;
 local c4 &quot;111 177 199&quot;
@@ -85,7 +108,16 @@ gr2mpl, saving(figure.png) replace</pre></details></section>
 <figure><figcaption>Stata default</figcaption><a href="img/03_coefplot_a.png"><img loading="lazy" src="img/03_coefplot_a.png" alt="coefplot with shaded confidence bands: Stata default"></a></figure>
 <figure><figcaption>scheme(pypolish) + gpolish</figcaption><a href="img/03_coefplot_b.png"><img loading="lazy" src="img/03_coefplot_b.png" alt="coefplot with shaded confidence bands: scheme(pypolish) + gpolish"></a></figure>
 <figure><figcaption>+ gr2mpl (matplotlib render)</figcaption><a href="img/03_coefplot_c.png"><img loading="lazy" src="img/03_coefplot_c.png" alt="coefplot with shaded confidence bands: + gr2mpl (matplotlib render)"></a></figure>
-</div><details><summary>Stata code for the polished versions</summary><pre>local a &quot;11 93 122&quot;
+</div><details><summary>Stata code for the polished versions</summary><pre>graph set window fontface &quot;Open Sans&quot;   // font used for the images; any installed font works
+* needs the community command coefplot (ssc install coefplot)
+sysuse nlsw88, clear
+gen expcat = min(floor(ttl_exp/3), 7)
+forvalues g = 0/1 {
+    quietly regress wage ib0.expcat i.race i.collgrad i.union if south==`g&#x27;
+    estimates store m`g&#x27;
+}
+local cl 1.expcat=&quot;3-5&quot; 2.expcat=&quot;6-8&quot; 3.expcat=&quot;9-11&quot; 4.expcat=&quot;12-14&quot; 5.expcat=&quot;15-17&quot; 6.expcat=&quot;18-20&quot; 7.expcat=&quot;21+&quot;
+local a &quot;11 93 122&quot;
 local b &quot;184 67 15&quot;
 coefplot (m0, lcolor(&quot;`a&#x27;&quot;) ciopts(recast(rarea rarea rarea) fcolor(&quot;`a&#x27;%12&quot; &quot;`a&#x27;%20&quot; &quot;`a&#x27;%30&quot;) lwidth(none none none))) ///
          (m1, lcolor(&quot;`b&#x27;&quot;) ciopts(recast(rarea rarea rarea) fcolor(&quot;`b&#x27;%12&quot; &quot;`b&#x27;%20&quot; &quot;`b&#x27;%30&quot;) lwidth(none none none))) ///
@@ -103,7 +135,13 @@ gr2mpl, saving(figure.png) replace</pre></details></section>
 <figure><figcaption>Stata default</figcaption><a href="img/04_lines_a.png"><img loading="lazy" src="img/04_lines_a.png" alt="Multi-series lines: Stata default"></a></figure>
 <figure><figcaption>scheme(pypolish) + gpolish</figcaption><a href="img/04_lines_b.png"><img loading="lazy" src="img/04_lines_b.png" alt="Multi-series lines: scheme(pypolish) + gpolish"></a></figure>
 <figure><figcaption>+ gr2mpl (matplotlib render)</figcaption><a href="img/04_lines_c.png"><img loading="lazy" src="img/04_lines_c.png" alt="Multi-series lines: + gr2mpl (matplotlib render)"></a></figure>
-</div><details><summary>Stata code for the polished versions</summary><pre>line le_wfemale le_wmale le_bfemale le_bmale year, scheme(pypolish) legend(off) xsize(7) ysize(4.6) ///
+</div><details><summary>Stata code for the polished versions</summary><pre>graph set window fontface &quot;Open Sans&quot;   // font used for the images; any installed font works
+sysuse uslifeexp, clear
+label var le_wfemale &quot;White women&quot;
+label var le_wmale   &quot;White men&quot;
+label var le_bfemale &quot;Black women&quot;
+label var le_bmale   &quot;Black men&quot;
+line le_wfemale le_wmale le_bfemale le_bmale year, scheme(pypolish) legend(off) xsize(7) ysize(4.6) ///
     lcolor(&quot;11 93 122&quot; &quot;111 177 199&quot; &quot;184 67 15&quot; &quot;240 163 94&quot;) ///
     title(&quot;Life expectancy rose for every group, but the racial gap never closed&quot;, size(13.5pt)) ///
     subtitle(&quot;Life expectancy at birth in the United States, 1900–1999, in years&quot;, size(10pt)) ///
@@ -118,7 +156,14 @@ gr2mpl, saving(figure.png) replace</pre></details></section>
 <figure><figcaption>Stata default</figcaption><a href="img/05_scatter_a.png"><img loading="lazy" src="img/05_scatter_a.png" alt="Labelled scatter on a log axis: Stata default"></a></figure>
 <figure><figcaption>scheme(pypolish) + gpolish</figcaption><a href="img/05_scatter_b.png"><img loading="lazy" src="img/05_scatter_b.png" alt="Labelled scatter on a log axis: scheme(pypolish) + gpolish"></a></figure>
 <figure><figcaption>+ gr2mpl (matplotlib render)</figcaption><a href="img/05_scatter_c.png"><img loading="lazy" src="img/05_scatter_c.png" alt="Labelled scatter on a log axis: + gr2mpl (matplotlib render)"></a></figure>
-</div><details><summary>Stata code for the polished versions</summary><pre>twoway (function y = `a&#x27; + `b&#x27;*ln(x), range(350 45000) lcolor(&quot;154 154 154&quot;) lpattern(dash) lwidth(medium)) ///
+</div><details><summary>Stata code for the polished versions</summary><pre>graph set window fontface &quot;Open Sans&quot;   // font used for the images; any installed font works
+sysuse lifeexp, clear
+drop if missing(gnppc, lexp)
+gen lngnp = ln(gnppc)
+quietly regress lexp lngnp
+local a = _b[_cons]
+local b = _b[lngnp]
+twoway (function y = `a&#x27; + `b&#x27;*ln(x), range(350 45000) lcolor(&quot;154 154 154&quot;) lpattern(dash) lwidth(medium)) ///
        (scatter lexp gnppc if region==1, mcolor(&quot;11 93 122%85&quot;) mlcolor(white) mlwidth(vthin) msize(6pt)) ///
        (scatter lexp gnppc if region==2, mcolor(&quot;184 67 15%85&quot;) mlcolor(white) mlwidth(vthin) msize(6pt)) ///
        (scatter lexp gnppc if region==3, mcolor(&quot;224 161 0%85&quot;) mlcolor(white) mlwidth(vthin) msize(6pt)) ///
@@ -140,7 +185,11 @@ gr2mpl, saving(figure.png) replace</pre></details></section>
 <figure><figcaption>Stata default</figcaption><a href="img/06_margins_a.png"><img loading="lazy" src="img/06_margins_a.png" alt="marginsplot: Stata default"></a></figure>
 <figure><figcaption>scheme(pypolish) + gpolish</figcaption><a href="img/06_margins_b.png"><img loading="lazy" src="img/06_margins_b.png" alt="marginsplot: scheme(pypolish) + gpolish"></a></figure>
 <figure><figcaption>+ gr2mpl (matplotlib render)</figcaption><a href="img/06_margins_c.png"><img loading="lazy" src="img/06_margins_c.png" alt="marginsplot: + gr2mpl (matplotlib render)"></a></figure>
-</div><details><summary>Stata code for the polished versions</summary><pre>marginsplot, scheme(pypolish) recast(line) recastci(rarea) ciopts(color(%18) lwidth(none)) legend(off) xsize(7) ysize(4.6) ///
+</div><details><summary>Stata code for the polished versions</summary><pre>graph set window fontface &quot;Open Sans&quot;   // font used for the images; any installed font works
+sysuse nlsw88, clear
+quietly regress wage c.ttl_exp##i.collgrad i.race
+quietly margins collgrad, at(ttl_exp=(0(4)28))
+marginsplot, scheme(pypolish) recast(line) recastci(rarea) ciopts(color(%18) lwidth(none)) legend(off) xsize(7) ysize(4.6) ///
     title(&quot;College graduates start higher and pull away with experience&quot;, size(13.5pt)) ///
     subtitle(&quot;Predicted hourly wage (1988 dollars) by total work experience&quot;, size(10pt)) ///
     note(&quot;Source: NLSW 1988 extract. Linear model with race controls; bands are 95% confidence intervals.&quot;, size(8pt)) ///
@@ -152,7 +201,10 @@ gr2mpl, saving(figure.png) replace</pre></details></section>
 <figure><figcaption>Stata default</figcaption><a href="img/07_highlight_a.png"><img loading="lazy" src="img/07_highlight_a.png" alt="One series highlighted: Stata default"></a></figure>
 <figure><figcaption>scheme(pypolish) + gpolish</figcaption><a href="img/07_highlight_b.png"><img loading="lazy" src="img/07_highlight_b.png" alt="One series highlighted: scheme(pypolish) + gpolish"></a></figure>
 <figure><figcaption>+ gr2mpl (matplotlib render)</figcaption><a href="img/07_highlight_c.png"><img loading="lazy" src="img/07_highlight_c.png" alt="One series highlighted: + gr2mpl (matplotlib render)"></a></figure>
-</div><details><summary>Stata code for the polished versions</summary><pre>local g &quot;205 205 205&quot;
+</div><details><summary>Stata code for the polished versions</summary><pre>graph set window fontface &quot;Open Sans&quot;   // font used for the images; any installed font works
+sysuse uslifeexp, clear
+label var le_bfemale &quot;Black women&quot;
+local g &quot;205 205 205&quot;
 line le_wmale le_wfemale le_bmale le_male le_female le le_bfemale year if year&gt;=1950, scheme(pypolish) legend(off) xsize(7) ysize(4.6) ///
     lcolor(&quot;`g&#x27;&quot; &quot;`g&#x27;&quot; &quot;`g&#x27;&quot; &quot;`g&#x27;&quot; &quot;`g&#x27;&quot; &quot;`g&#x27;&quot; &quot;184 67 15&quot;) lwidth(medium medium medium medium medium medium thick) ///
     title(&quot;Black women gained the most after 1950&quot;, size(13.5pt)) ///
@@ -166,7 +218,11 @@ gr2mpl, saving(figure.png) replace</pre></details></section>
 <figure><figcaption>Stata default</figcaption><a href="img/08_overlays_a.png"><img loading="lazy" src="img/08_overlays_a.png" alt="Finding box, brace and callout: Stata default"></a></figure>
 <figure><figcaption>scheme(pypolish) + gpolish</figcaption><a href="img/08_overlays_b.png"><img loading="lazy" src="img/08_overlays_b.png" alt="Finding box, brace and callout: scheme(pypolish) + gpolish"></a></figure>
 <figure><figcaption>+ gr2mpl (matplotlib render)</figcaption><a href="img/08_overlays_c.png"><img loading="lazy" src="img/08_overlays_c.png" alt="Finding box, brace and callout: + gr2mpl (matplotlib render)"></a></figure>
-</div><details><summary>Stata code for the polished versions</summary><pre>twoway (lfit mpg weight, lcolor(&quot;60 60 60&quot;) lwidth(medium)) ///
+</div><details><summary>Stata code for the polished versions</summary><pre>graph set window fontface &quot;Open Sans&quot;   // font used for the images; any installed font works
+sysuse auto, clear
+quietly regress mpg weight
+local slope = strtrim(&quot;`: display %3.1f -1000*_b[weight]&#x27;&quot;)
+twoway (lfit mpg weight, lcolor(&quot;60 60 60&quot;) lwidth(medium)) ///
        (scatter mpg weight, mcolor(&quot;11 93 122%85&quot;) mlcolor(white) mlwidth(vthin) msize(6pt)) ///
     , scheme(pypolish) legend(off) xsize(7) ysize(4.6) title(&quot;Weight explains most of the difference in mileage&quot;, size(13.5pt)) ///
     subtitle(&quot;Mileage (mpg) and weight (lbs.), 74 cars, 1978&quot;, size(10pt)) note(&quot;Source: Stata auto dataset.&quot;, size(8pt)) ///
@@ -180,7 +236,14 @@ gr2mpl, saving(figure.png) replace</pre></details></section>
 <figure><figcaption>Stata default</figcaption><a href="img/09_cibrace_a.png"><img loading="lazy" src="img/09_cibrace_a.png" alt="Group means with confidence-interval braces: Stata default"></a></figure>
 <figure><figcaption>scheme(pypolish) + gpolish</figcaption><a href="img/09_cibrace_b.png"><img loading="lazy" src="img/09_cibrace_b.png" alt="Group means with confidence-interval braces: scheme(pypolish) + gpolish"></a></figure>
 <figure><figcaption>+ gr2mpl (matplotlib render)</figcaption><a href="img/09_cibrace_c.png"><img loading="lazy" src="img/09_cibrace_c.png" alt="Group means with confidence-interval braces: + gr2mpl (matplotlib render)"></a></figure>
-</div><details><summary>Stata code for the polished versions</summary><pre>local m1 = m[1]
+</div><details><summary>Stata code for the polished versions</summary><pre>graph set window fontface &quot;Open Sans&quot;   // font used for the images; any installed font works
+sysuse nlsw88, clear
+drop if missing(union)
+collapse (mean) m=wage (semean) se=wage (count) n=wage, by(union)
+gen lo = m - invttail(n-1, 0.025)*se
+gen hi = m + invttail(n-1, 0.025)*se
+gen x = union + 1
+local m1 = m[1]
 local m2 = m[2]
 local lo2 = lo[2]
 local hi2 = hi[2]
@@ -199,7 +262,29 @@ gr2mpl, saving(figure.png) replace</pre></details></section>
 <figure><figcaption>Stata default</figcaption><a href="img/10_flow_a.png"><img loading="lazy" src="img/10_flow_a.png" alt="Flow chart of sample restrictions: Stata default"></a></figure>
 <figure><figcaption>scheme(pypolish) + gpolish</figcaption><a href="img/10_flow_b.png"><img loading="lazy" src="img/10_flow_b.png" alt="Flow chart of sample restrictions: scheme(pypolish) + gpolish"></a></figure>
 <figure><figcaption>+ gr2mpl (matplotlib render)</figcaption><a href="img/10_flow_c.png"><img loading="lazy" src="img/10_flow_c.png" alt="Flow chart of sample restrictions: + gr2mpl (matplotlib render)"></a></figure>
-</div><details><summary>Stata code for the polished versions</summary><pre>scatter y x, msymbol(none) scheme(pypolish) xscale(off range(0 100)) yscale(off range(0 100)) ///
+</div><details><summary>Stata code for the polished versions</summary><pre>graph set window fontface &quot;Open Sans&quot;   // font used for the images; any installed font works
+sysuse nlsw88, clear
+local n0 = _N
+quietly count if missing(union)
+local d1 = r(N)
+drop if missing(union)
+local n1 = _N
+quietly count if missing(tenure, hours)
+local d2 = r(N)
+drop if missing(tenure, hours)
+local n2 = _N
+quietly count if hours &lt; 35
+local d3 = r(N)
+drop if hours &lt; 35
+local n3 = _N
+foreach k in n0 n1 n2 n3 d1 d2 d3 {
+    local `k&#x27; = strtrim(string(``k&#x27;&#x27;, &quot;%9.0fc&quot;))
+}
+clear
+set obs 2
+gen x = cond(_n==1, 0, 100)
+gen y = x
+scatter y x, msymbol(none) scheme(pypolish) xscale(off range(0 100)) yscale(off range(0 100)) ///
     xlabel(, nogrid) ylabel(, nogrid) xsize(7) ysize(4.6) plotregion(margin(zero)) ///
     title(&quot;From the full extract to the estimation sample&quot;, size(13.5pt)) ///
     subtitle(&quot;National Longitudinal Survey of Women, 1988 extract&quot;, size(10pt)) note(&quot;Source: NLSW 1988 extract.&quot;, size(8pt))
@@ -224,7 +309,9 @@ gr2mpl, saving(figure.png) replace</pre></details></section>
 <figure><figcaption>Stata default</figcaption><a href="img/11_fitci_a.png"><img loading="lazy" src="img/11_fitci_a.png" alt="Scatter with fit and confidence band: Stata default"></a></figure>
 <figure><figcaption>scheme(pypolish) + gpolish</figcaption><a href="img/11_fitci_b.png"><img loading="lazy" src="img/11_fitci_b.png" alt="Scatter with fit and confidence band: scheme(pypolish) + gpolish"></a></figure>
 <figure><figcaption>+ gr2mpl (matplotlib render)</figcaption><a href="img/11_fitci_c.png"><img loading="lazy" src="img/11_fitci_c.png" alt="Scatter with fit and confidence band: + gr2mpl (matplotlib render)"></a></figure>
-</div><details><summary>Stata code for the polished versions</summary><pre>twoway (lfitci mpg weight, lcolor(&quot;60 60 60&quot;) lwidth(medium) fcolor(&quot;225 225 225&quot;) alcolor(&quot;225 225 225&quot;)) ///
+</div><details><summary>Stata code for the polished versions</summary><pre>graph set window fontface &quot;Open Sans&quot;   // font used for the images; any installed font works
+sysuse auto, clear
+twoway (lfitci mpg weight, lcolor(&quot;60 60 60&quot;) lwidth(medium) fcolor(&quot;225 225 225&quot;) alcolor(&quot;225 225 225&quot;)) ///
        (scatter mpg weight if !foreign, mcolor(&quot;11 93 122%85&quot;) mlcolor(white) mlwidth(vthin) msize(6pt)) ///
        (scatter mpg weight if foreign,  mcolor(&quot;184 67 15%85&quot;) mlcolor(white) mlwidth(vthin) msize(6pt)) ///
     , scheme(pypolish) xsize(7) ysize(4.6) ///
@@ -241,7 +328,9 @@ gr2mpl, saving(figure.png) replace</pre></details></section>
 <figure><figcaption>Stata default</figcaption><a href="img/12_timeseries_a.png"><img loading="lazy" src="img/12_timeseries_a.png" alt="Daily time series: Stata default"></a></figure>
 <figure><figcaption>scheme(pypolish) + gpolish</figcaption><a href="img/12_timeseries_b.png"><img loading="lazy" src="img/12_timeseries_b.png" alt="Daily time series: scheme(pypolish) + gpolish"></a></figure>
 <figure><figcaption>+ gr2mpl (matplotlib render)</figcaption><a href="img/12_timeseries_c.png"><img loading="lazy" src="img/12_timeseries_c.png" alt="Daily time series: + gr2mpl (matplotlib render)"></a></figure>
-</div><details><summary>Stata code for the polished versions</summary><pre>quietly summarize close
+</div><details><summary>Stata code for the polished versions</summary><pre>graph set window fontface &quot;Open Sans&quot;   // font used for the images; any installed font works
+sysuse sp500, clear
+quietly summarize close
 local lo = r(min)
 quietly summarize date if close==`lo&#x27;
 local dlo = r(mean)
@@ -256,7 +345,32 @@ gr2mpl, saving(figure.png) replace</pre></details></section>
 <figure><figcaption>Stata default</figcaption><a href="img/13_coef_a.png"><img loading="lazy" src="img/13_coef_a.png" alt="Coefficient plot: Stata default"></a></figure>
 <figure><figcaption>scheme(pypolish) + gpolish</figcaption><a href="img/13_coef_b.png"><img loading="lazy" src="img/13_coef_b.png" alt="Coefficient plot: scheme(pypolish) + gpolish"></a></figure>
 <figure><figcaption>+ gr2mpl (matplotlib render)</figcaption><a href="img/13_coef_c.png"><img loading="lazy" src="img/13_coef_c.png" alt="Coefficient plot: + gr2mpl (matplotlib render)"></a></figure>
-</div><details><summary>Stata code for the polished versions</summary><pre>twoway (rcap lo hi k, horizontal lcolor(&quot;11 93 122&quot;) lwidth(medthick) msize(zero)) ///
+</div><details><summary>Stata code for the polished versions</summary><pre>graph set window fontface &quot;Open Sans&quot;   // font used for the images; any installed font works
+sysuse nlsw88, clear
+quietly regress wage i.collgrad i.union i.married i.south i.smsa c.tenure
+tempname M
+matrix `M&#x27; = r(table)
+clear
+set obs 6
+gen k = 7 - _n
+gen str30 lab = &quot;&quot;
+gen b = .
+gen lo = .
+gen hi = .
+local names &quot;1.collgrad 1.union 1.married 1.south 1.smsa tenure&quot;
+local labs `&quot;&quot;College graduate&quot; &quot;Union member&quot; &quot;Married&quot; &quot;Lives in the South&quot; &quot;Lives in a metro area&quot; &quot;Job tenure (per year)&quot;&quot;&#x27;
+forvalues i = 1/6 {
+    local nm : word `i&#x27; of `names&#x27;
+    replace b  = `M&#x27;[1, colnumb(`M&#x27;, &quot;`nm&#x27;&quot;)] in `i&#x27;
+    replace lo = `M&#x27;[5, colnumb(`M&#x27;, &quot;`nm&#x27;&quot;)] in `i&#x27;
+    replace hi = `M&#x27;[6, colnumb(`M&#x27;, &quot;`nm&#x27;&quot;)] in `i&#x27;
+    replace lab = `&quot;`: word `i&#x27; of `labs&#x27;&#x27;&quot;&#x27; in `i&#x27;
+}
+local yl
+forvalues i = 1/6 {
+    local yl `yl&#x27; `=k[`i&#x27;]&#x27; `&quot;`=lab[`i&#x27;]&#x27;&quot;&#x27;
+}
+twoway (rcap lo hi k, horizontal lcolor(&quot;11 93 122&quot;) lwidth(medthick) msize(zero)) ///
        (scatter k b, mcolor(&quot;11 93 122&quot;) mlcolor(white) mlwidth(vthin) msize(7pt)) ///
     , scheme(pypolish) legend(off) xsize(7) ysize(4.6) ylabel(`yl&#x27;, labsize(9pt) nogrid) yscale(range(0.5 6.5)) ///
     xline(0, lcolor(&quot;120 120 120&quot;) lwidth(thin)) xlabel(, labsize(9pt) grid glcolor(&quot;228 228 228&quot;) glwidth(thin)) ///
@@ -269,7 +383,9 @@ gr2mpl, saving(figure.png) replace</pre></details></section>
 <figure><figcaption>Stata default</figcaption><a href="img/14_histogram_a.png"><img loading="lazy" src="img/14_histogram_a.png" alt="Histogram: Stata default"></a></figure>
 <figure><figcaption>scheme(pypolish) + gpolish</figcaption><a href="img/14_histogram_b.png"><img loading="lazy" src="img/14_histogram_b.png" alt="Histogram: scheme(pypolish) + gpolish"></a></figure>
 <figure><figcaption>+ gr2mpl (matplotlib render)</figcaption><a href="img/14_histogram_c.png"><img loading="lazy" src="img/14_histogram_c.png" alt="Histogram: + gr2mpl (matplotlib render)"></a></figure>
-</div><details><summary>Stata code for the polished versions</summary><pre>quietly summarize wage, detail
+</div><details><summary>Stata code for the polished versions</summary><pre>graph set window fontface &quot;Open Sans&quot;   // font used for the images; any installed font works
+sysuse nlsw88, clear
+quietly summarize wage, detail
 local med = r(p50)
 histogram wage, scheme(pypolish) width(1) start(0) frequency xsize(7) ysize(4.6) ///
     title(&quot;Most women earned under ten dollars an hour&quot;, size(13.5pt)) ///
@@ -282,7 +398,11 @@ gr2mpl, saving(figure.png) replace</pre></details></section>
 <figure><figcaption>Stata default</figcaption><a href="img/15_hbar_a.png"><img loading="lazy" src="img/15_hbar_a.png" alt="Ranked horizontal bars: Stata default"></a></figure>
 <figure><figcaption>scheme(pypolish) + gpolish</figcaption><a href="img/15_hbar_b.png"><img loading="lazy" src="img/15_hbar_b.png" alt="Ranked horizontal bars: scheme(pypolish) + gpolish"></a></figure>
 <figure><figcaption>+ gr2mpl (matplotlib render)</figcaption><a href="img/15_hbar_c.png"><img loading="lazy" src="img/15_hbar_c.png" alt="Ranked horizontal bars: + gr2mpl (matplotlib render)"></a></figure>
-</div><details><summary>Stata code for the polished versions</summary><pre>graph hbar (mean) wage, over(industry, sort(1) descending label(labsize(9pt))) scheme(pypolish) xsize(7) ysize(4.6) ///
+</div><details><summary>Stata code for the polished versions</summary><pre>graph set window fontface &quot;Open Sans&quot;   // font used for the images; any installed font works
+* graph bar is not a twoway graph: the scheme applies and gpolish bolds the title,
+* but the layout commands (endlabel, callout, ptlabel) are twoway only. gr2mpl redraws it.
+sysuse nlsw88, clear
+graph hbar (mean) wage, over(industry, sort(1) descending label(labsize(9pt))) scheme(pypolish) xsize(7) ysize(4.6) ///
     title(&quot;Mining and utilities pay the most&quot;, size(13.5pt)) subtitle(&quot;Mean hourly wage (1988 dollars) by industry&quot;, size(10pt)) ///
     note(&quot;Source: NLSW 1988 extract.&quot;, size(8pt)) ytitle(&quot;&quot;) ylabel(, labsize(9pt))
 gpolish
@@ -291,7 +411,9 @@ gr2mpl, saving(figure.png) replace</pre></details></section>
 <figure><figcaption>Stata default</figcaption><a href="img/16_box_a.png"><img loading="lazy" src="img/16_box_a.png" alt="Box plot: Stata default"></a></figure>
 <figure><figcaption>scheme(pypolish) + gpolish</figcaption><a href="img/16_box_b.png"><img loading="lazy" src="img/16_box_b.png" alt="Box plot: scheme(pypolish) + gpolish"></a></figure>
 <figure><figcaption>+ gr2mpl (matplotlib render)</figcaption><a href="img/16_box_c.png"><img loading="lazy" src="img/16_box_c.png" alt="Box plot: + gr2mpl (matplotlib render)"></a></figure>
-</div><details><summary>Stata code for the polished versions</summary><pre>graph box wage, over(race, label(labsize(9pt))) scheme(pypolish) xsize(7) ysize(4.6) ///
+</div><details><summary>Stata code for the polished versions</summary><pre>graph set window fontface &quot;Open Sans&quot;   // font used for the images; any installed font works
+sysuse nlsw88, clear
+graph box wage, over(race, label(labsize(9pt))) scheme(pypolish) xsize(7) ysize(4.6) ///
     title(&quot;Wage distributions overlap far more than their means suggest&quot;, size(13.5pt)) ///
     subtitle(&quot;Hourly wage (1988 dollars) by race&quot;, size(10pt)) note(&quot;Source: NLSW 1988 extract.&quot;, size(8pt)) ///
     ytitle(&quot;&quot;) ylabel(, labsize(9pt))
@@ -301,7 +423,11 @@ gr2mpl, saving(figure.png) replace</pre></details></section>
 <figure><figcaption>Stata default</figcaption><a href="img/17_by_a.png"><img loading="lazy" src="img/17_by_a.png" alt="Small multiples with by(): Stata default"></a></figure>
 <figure><figcaption>scheme(pypolish) + gpolish</figcaption><a href="img/17_by_b.png"><img loading="lazy" src="img/17_by_b.png" alt="Small multiples with by(): scheme(pypolish) + gpolish"></a></figure>
 <figure><figcaption>+ gr2mpl (matplotlib render)</figcaption><a href="img/17_by_c.png"><img loading="lazy" src="img/17_by_c.png" alt="Small multiples with by(): + gr2mpl (matplotlib render)"></a></figure>
-</div><details><summary>Stata code for the polished versions</summary><pre>line wage age, scheme(pypolish) lcolor(&quot;11 93 122&quot;) xtitle(&quot;Age&quot;, size(9pt)) ytitle(&quot;&quot;) xlabel(, labsize(9pt)) ylabel(, labsize(9pt)) ///
+</div><details><summary>Stata code for the polished versions</summary><pre>graph set window fontface &quot;Open Sans&quot;   // font used for the images; any installed font works
+sysuse nlsw88, clear
+keep if inlist(industry, 4, 6, 7, 11, 12) &amp; inrange(age, 34, 45)
+collapse (mean) wage, by(age industry)
+line wage age, scheme(pypolish) lcolor(&quot;11 93 122&quot;) xtitle(&quot;Age&quot;, size(9pt)) ytitle(&quot;&quot;) xlabel(, labsize(9pt)) ylabel(, labsize(9pt)) ///
     by(industry, title(&quot;Wages are flat across the late thirties and early forties&quot;, size(13.5pt)) ///
        subtitle(&quot;Mean hourly wage (1988 dollars) by age, five industries&quot;, size(10pt)) ///
        note(&quot;Source: NLSW 1988 extract.&quot;, size(8pt))) xsize(7) ysize(4.6)
@@ -311,7 +437,9 @@ gr2mpl, saving(figure.png) replace</pre></details></section>
 <figure><figcaption>Stata default</figcaption><a href="img/18_combine_a.png"><img loading="lazy" src="img/18_combine_a.png" alt="Combined panels: Stata default"></a></figure>
 <figure><figcaption>scheme(pypolish) + gpolish</figcaption><a href="img/18_combine_b.png"><img loading="lazy" src="img/18_combine_b.png" alt="Combined panels: scheme(pypolish) + gpolish"></a></figure>
 <figure><figcaption>+ gr2mpl (matplotlib render)</figcaption><a href="img/18_combine_c.png"><img loading="lazy" src="img/18_combine_c.png" alt="Combined panels: + gr2mpl (matplotlib render)"></a></figure>
-</div><details><summary>Stata code for the polished versions</summary><pre>local o scheme(pypolish) nodraw
+</div><details><summary>Stata code for the polished versions</summary><pre>graph set window fontface &quot;Open Sans&quot;   // font used for the images; any installed font works
+sysuse auto, clear
+local o scheme(pypolish) nodraw
 scatter mpg weight, `o&#x27; mcolor(&quot;11 93 122%85&quot;) mlcolor(white) mlwidth(vthin) title(&quot;Mileage and weight&quot;, size(10pt)) xtitle(&quot;Weight (lbs.)&quot;) ytitle(&quot;&quot;) name(c1, replace)
 graph bar (mean) mpg, over(rep78) `o&#x27; title(&quot;Mileage by repair record&quot;, size(10pt)) ytitle(&quot;&quot;) name(c2, replace)
 histogram price, `o&#x27; title(&quot;Price&quot;, size(10pt)) xtitle(&quot;&quot;) ytitle(&quot;&quot;) name(c3, replace)
@@ -324,7 +452,9 @@ gr2mpl, saving(figure.png) replace</pre></details></section>
 <figure><figcaption>Stata default</figcaption><a href="img/19_matrix_a.png"><img loading="lazy" src="img/19_matrix_a.png" alt="Scatterplot matrix: Stata default"></a></figure>
 <figure><figcaption>scheme(pypolish) + gpolish</figcaption><a href="img/19_matrix_b.png"><img loading="lazy" src="img/19_matrix_b.png" alt="Scatterplot matrix: scheme(pypolish) + gpolish"></a></figure>
 <figure><figcaption>+ gr2mpl (matplotlib render)</figcaption><a href="img/19_matrix_c.png"><img loading="lazy" src="img/19_matrix_c.png" alt="Scatterplot matrix: + gr2mpl (matplotlib render)"></a></figure>
-</div><details><summary>Stata code for the polished versions</summary><pre>graph matrix price mpg weight length, half scheme(pypolish) xsize(7) ysize(4.6) mcolor(&quot;11 93 122%70&quot;) msize(3.5pt) ///
+</div><details><summary>Stata code for the polished versions</summary><pre>graph set window fontface &quot;Open Sans&quot;   // font used for the images; any installed font works
+sysuse auto, clear
+graph matrix price mpg weight length, half scheme(pypolish) xsize(7) ysize(4.6) mcolor(&quot;11 93 122%70&quot;) msize(3.5pt) ///
     title(&quot;Four measures of a car, two at a time&quot;, size(13.5pt)) subtitle(&quot;Price, mileage, weight and length, 74 cars&quot;, size(10pt)) ///
     note(&quot;Source: Stata auto dataset.&quot;, size(8pt))
 gpolish
@@ -333,7 +463,15 @@ gr2mpl, saving(figure.png) replace</pre></details></section>
 <figure><figcaption>Stata default</figcaption><a href="img/20_dendrogram_a.png"><img loading="lazy" src="img/20_dendrogram_a.png" alt="Cluster dendrogram: Stata default"></a></figure>
 <figure><figcaption>scheme(pypolish) + gpolish</figcaption><a href="img/20_dendrogram_b.png"><img loading="lazy" src="img/20_dendrogram_b.png" alt="Cluster dendrogram: scheme(pypolish) + gpolish"></a></figure>
 <figure><figcaption>+ gr2mpl (matplotlib render)</figcaption><a href="img/20_dendrogram_c.png"><img loading="lazy" src="img/20_dendrogram_c.png" alt="Cluster dendrogram: + gr2mpl (matplotlib render)"></a></figure>
-</div><details><summary>Stata code for the polished versions</summary><pre>cluster dendrogram w, labels(make) horizontal scheme(pypolish) xsize(7) ysize(4.6) lcolor(&quot;11 93 122&quot;) lwidth(medium) ///
+</div><details><summary>Stata code for the polished versions</summary><pre>graph set window fontface &quot;Open Sans&quot;   // font used for the images; any installed font works
+sysuse auto, clear
+keep if foreign
+foreach v of varlist price mpg weight length {
+    quietly summarize `v&#x27;
+    gen z_`v&#x27; = (`v&#x27; - r(mean))/r(sd)
+}
+cluster wardslinkage z_price z_mpg z_weight z_length, name(w)
+cluster dendrogram w, labels(make) horizontal scheme(pypolish) xsize(7) ysize(4.6) lcolor(&quot;11 93 122&quot;) lwidth(medium) ///
     ylabel(, labsize(8pt) nogrid) xlabel(, labsize(9pt) grid glcolor(&quot;228 228 228&quot;) glwidth(thin)) xtitle(&quot;Dissimilarity (Ward&#x27;s linkage)&quot;, size(9pt)) ytitle(&quot;&quot;) ///
     title(&quot;The imported cars fall into three families&quot;, size(13.5pt)) ///
     subtitle(&quot;Hierarchical clustering on price, mileage, weight and length (standardized)&quot;, size(10pt)) ///
@@ -344,7 +482,10 @@ gr2mpl, saving(figure.png) replace</pre></details></section>
 <figure><figcaption>Stata default</figcaption><a href="img/21_statplot_a.png"><img loading="lazy" src="img/21_statplot_a.png" alt="statplot: Stata default"></a></figure>
 <figure><figcaption>scheme(pypolish) + gpolish</figcaption><a href="img/21_statplot_b.png"><img loading="lazy" src="img/21_statplot_b.png" alt="statplot: scheme(pypolish) + gpolish"></a></figure>
 <figure><figcaption>+ gr2mpl (matplotlib render)</figcaption><a href="img/21_statplot_c.png"><img loading="lazy" src="img/21_statplot_c.png" alt="statplot: + gr2mpl (matplotlib render)"></a></figure>
-</div><details><summary>Stata code for the polished versions</summary><pre>statplot wage hours tenure, over(collgrad) scheme(pypolish) xsize(7) ysize(4.6) ///
+</div><details><summary>Stata code for the polished versions</summary><pre>graph set window fontface &quot;Open Sans&quot;   // font used for the images; any installed font works
+* needs the community command statplot (ssc install statplot)
+sysuse nlsw88, clear
+statplot wage hours tenure, over(collgrad) scheme(pypolish) xsize(7) ysize(4.6) ///
     title(&quot;College graduates earn more for similar hours and tenure&quot;, size(13.5pt)) ///
     subtitle(&quot;Means of hourly wage, weekly hours and job tenure (years)&quot;, size(10pt)) note(&quot;Source: NLSW 1988 extract. Drawn with statplot.&quot;, size(8pt)) ytitle(&quot;&quot;)
 gpolish
@@ -353,7 +494,10 @@ gr2mpl, saving(figure.png) replace</pre></details></section>
 <figure><figcaption>Stata default</figcaption><a href="img/22_heatplot_a.png"><img loading="lazy" src="img/22_heatplot_a.png" alt="heatplot: Stata default"></a></figure>
 <figure><figcaption>scheme(pypolish) + gpolish</figcaption><a href="img/22_heatplot_b.png"><img loading="lazy" src="img/22_heatplot_b.png" alt="heatplot: scheme(pypolish) + gpolish"></a></figure>
 <figure><figcaption>+ gr2mpl (matplotlib render)</figcaption><a href="img/22_heatplot_c.png"><img loading="lazy" src="img/22_heatplot_c.png" alt="heatplot: + gr2mpl (matplotlib render)"></a></figure>
-</div><details><summary>Stata code for the polished versions</summary><pre>heatplot wage tenure if wage &lt; 25, scheme(pypolish) xsize(7) ysize(4.6) color(viridis, reverse) levels(8) ///
+</div><details><summary>Stata code for the polished versions</summary><pre>graph set window fontface &quot;Open Sans&quot;   // font used for the images; any installed font works
+* needs the community command heatplot (ssc install heatplot, ssc install palettes and ssc install colrspace)
+sysuse nlsw88, clear
+heatplot wage tenure if wage &lt; 25, scheme(pypolish) xsize(7) ysize(4.6) color(viridis, reverse) levels(8) ///
     legend(position(3) cols(1) rows(8) region(lstyle(none)) size(8pt)) ///
     title(&quot;Most women had short tenure and modest pay&quot;, size(13.5pt)) subtitle(&quot;Share of women by hourly wage and job tenure&quot;, size(10pt)) ///
     note(&quot;Source: NLSW 1988 extract. Drawn with heatplot.&quot;, size(8pt)) xtitle(&quot;Job tenure (years)&quot;, size(9pt)) ytitle(&quot;&quot;) ///

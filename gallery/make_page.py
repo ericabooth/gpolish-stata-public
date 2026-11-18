@@ -1,6 +1,17 @@
 """Build the gallery pages from gallery/gallery.do: gallery/index.html (GitHub Pages)
-and gallery/README.md (rendered on GitHub). Run from the repository root."""
-import re, html
+and gallery/README.md (rendered on GitHub). Run from the repository root:
+
+    python gallery/make_page.py            write both pages
+    python gallery/make_page.py --check    write nothing; exit 1 if either page differs from
+                                           what this script would write
+    python gallery/make_page.py --blocks DIR
+                                           also write each example's code block to DIR/<key>.do,
+                                           for running every block in a fresh Stata session
+
+Each code block runs as it stands: the section's setup lines (sysuse, estimation, label var,
+locals), without the default-look graph drawn before shotA, then the polished code between
+shotA and shotBC, with the shared size macros written out and a gr2mpl line at the end."""
+import html, os, re, sys, textwrap
 INFO = {
  "04_lines": ("Multi-series lines", "Direct end labels with a value column replace the legend. The two notes are placed automatically."),
  "05_scatter": ("Labelled scatter on a log axis", "Point labels pick the least crowded of eight positions and avoid the fit line. Legend text takes the colour of its key."),
@@ -25,17 +36,84 @@ INFO = {
  "03_coefplot": ("coefplot with shaded confidence bands", "Two regressions drawn with the community command coefplot: lines for the estimates and three nested bands for 50, 80 and 95 percent intervals, with direct labels and a finding box added by gpolish."),
  "22_heatplot": ("heatplot", "A two-way density from the community command heatplot, with its colour key."),
 }
-src = open("gallery/gallery.do").read()
-blocks = re.split(r"\n\* -{20,} (\d\d) [^\n]*\n", src)
+GRAPH_CMDS = ("avplot", "twoway", "coefplot", "line", "scatter", "marginsplot", "graph ",
+              "histogram", "cluster dendrogram", "statplot", "heatplot")
+COMMUNITY = {"coefplot": "ssc install coefplot",
+             "statplot": "ssc install statplot",
+             "heatplot": "ssc install heatplot, ssc install palettes and ssc install colrspace"}
+FONT = 'graph set window fontface "Open Sans"   // font used for the images; any installed font works'
+INTRO_MD = ("Each code block runs as it stands in a fresh Stata session, as a do-file "
+            "(paste it into the Do-file Editor: the `///` line breaks and local macros need one). "
+            "A block loads its data, runs any estimation the graph needs, draws the polished graph, "
+            "and saves the matplotlib version as `figure.png`. The examples that use the community "
+            "commands coefplot, statplot and heatplot name the `ssc install` lines they need. "
+            "In batch mode (`stata -b`) the first line, `graph set window fontface`, only prints a note, "
+            "and Stata exports with the font set by `graph set svg fontface` instead.")
+
+
+def statements(lines):
+    """Group physical lines into statements joined by ///."""
+    out, cur = [], []
+    for ln in lines:
+        cur.append(ln)
+        if not ln.rstrip().endswith("///"):
+            out.append(cur)
+            cur = []
+    if cur:
+        out.append(cur)
+    return out
+
+
+def expand(c):
+    """Write out the size macros that gallery.do shares across examples."""
+    c = c.replace("`SZ'", "xsize(7) ysize(4.6)").replace("`TS'", "size(13.5pt)").replace("`SS'", "size(10pt)")
+    return c.replace("`NS'", "size(8pt)").replace("`LS'", "labsize(9pt)")
+
+
+def block(body):
+    """One runnable code block from the body of one gallery.do section."""
+    community = None
+    keep = []
+    for ln in body.split("\n"):
+        s = ln.strip()
+        m = re.match(r"capture which (\w+)", s)
+        if m:
+            community = m.group(1)
+            continue
+        if s in ("if !_rc {", "preserve", "restore"):
+            continue
+        keep.append(ln)
+    # the if !_rc { ... } guard around a community command is not part of the example;
+    # drop its closing brace (the last "}" in column 1 of the section)
+    if community:
+        del keep[max(i for i, ln in enumerate(keep) if ln == "}")]
+    lines = textwrap.dedent("\n".join(keep)).split("\n")
+    ia = next(i for i, ln in enumerate(lines) if ln.startswith("shotA "))
+    ib = next(i for i, ln in enumerate(lines) if ln.startswith("shotBC "))
+    pre = statements(lines[:ia])
+    # drop the default-look graph command(s) directly before shotA
+    while pre and pre[-1][0].lstrip().startswith(GRAPH_CMDS) and "wardslinkage" not in pre[-1][0]:
+        pre.pop()
+    setup = [ln for st in pre for ln in st]
+    head = [FONT]
+    if community:
+        head.append(f"* needs the community command {community} ({COMMUNITY[community]})")
+    if not any(re.match(r"sysuse ", ln) for ln in setup):
+        setup.insert(0, "sysuse nlsw88, clear")  # 16 and 17 reuse the data loaded by 15
+    code = "\n".join(head + setup + lines[ia + 1:ib]).strip("\n")
+    return expand(code) + "\ngr2mpl, saving(figure.png) replace"
+
+
+src = open("gallery/gallery.do", encoding="utf-8").read()
+parts = re.split(r"\n\* -{20,} (\d\d) [^\n]*\n", src)
 code = {}
-for i in range(1, len(blocks), 2):
-    body = blocks[i + 1]
-    m = re.search(r"shotA (\S+)\n(.*?)\n\s*shotBC \S+", body, re.S)
-    if not m: continue
-    import textwrap
-    c = textwrap.dedent(m.group(2)).replace("`SZ'", "xsize(7) ysize(4.6)").replace("`TS'", "size(13.5pt)").replace("`SS'", "size(10pt)")
-    c = c.replace("`NS'", "size(8pt)").replace("`LS'", "labsize(9pt)")
-    code[m.group(1)] = c.strip() + "\ngr2mpl, saving(figure.png) replace"
+for i in range(1, len(parts), 2):
+    body = parts[i + 1].split('\ndi as res "gallery done"')[0]  # the last section runs on to the end of the script
+    m = re.search(r"shotA (\S+)", body)
+    if m:
+        code[m.group(1)] = block(body)
+missing = sorted(set(INFO) ^ set(code))
+assert not missing, f"gallery.do sections and INFO differ: {missing}"
 COLS = [("a", "Stata default"), ("b", "scheme(pypolish) + gpolish"), ("c", "+ gr2mpl (matplotlib render)")]
 # ---- HTML page
 css = """
@@ -61,12 +139,13 @@ h = ['<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="vie
      "<title>gpolish gallery</title><style>" + css + "</style></head><body><main>",
      "<h1>gpolish gallery</h1>",
      '<p class="lead">Twenty-two Stata graphs, each drawn three ways: Stata\'s default look, the same graph with <code>scheme(pypolish)</code> and <code>gpolish</code> (still a Stata graph), and that graph redrawn in matplotlib by <code>gr2mpl</code>.</p>',
-     '<p class="lead"><a href="https://github.com/ericabooth/gpolish-stata-public">Repository and installation</a> · every image on this page is produced by <a href="https://github.com/ericabooth/gpolish-stata-public/blob/main/gallery/gallery.do">gallery/gallery.do</a>.</p><nav>']
+     '<p class="lead"><a href="https://github.com/ericabooth/gpolish-stata-public">Repository and installation</a> · every image on this page is produced by <a href="https://github.com/ericabooth/gpolish-stata-public/blob/main/gallery/gallery.do">gallery/gallery.do</a>.</p>',
+     '<p class="lead">' + re.sub(r"`([^`]+)`", r"<code>\1</code>", html.escape(INTRO_MD)) + "</p><nav>"]
 for k in sorted(code): h.append(f'<a href="#{k}">{html.escape(INFO[k][0])}</a>')
 h.append("</nav>")
 md = ["# gpolish gallery", "",
       "Twenty-two Stata graphs, each drawn three ways: Stata's default look, the same graph with `scheme(pypolish)` and `gpolish` (still a Stata graph), and that graph redrawn in matplotlib by `gr2mpl`.", "",
-      "Every image is produced by [gallery.do](gallery.do). A browsable version is at <https://ericabooth.github.io/gpolish-stata-public/gallery/>.", ""]
+      "Every image is produced by [gallery.do](gallery.do). A browsable version is at <https://ericabooth.github.io/gpolish-stata-public/gallery/>.", "", INTRO_MD, ""]
 for k in sorted(code):
     t, blurb = INFO[k]
     h.append(f'<section id="{k}"><h2>{html.escape(t)}</h2><p>{html.escape(blurb)}</p><div class="row">')
@@ -75,6 +154,21 @@ for k in sorted(code):
     h.append(f"</div><details><summary>Stata code for the polished versions</summary><pre>{html.escape(code[k])}</pre></details></section>")
     md += [f"## {t}", "", blurb, "", f"![{t}](sheets/{k}.png)", "", "<details><summary>Stata code for the polished versions</summary>", "", "```stata", code[k], "```", "", "</details>", ""]
 h.append("<footer>gpolish, gr2mpl and the pypolish scheme are MIT licensed. Data: datasets shipped with Stata.</footer></main></body></html>")
-open("gallery/index.html", "w").write("\n".join(h))
-open("gallery/README.md", "w").write("\n".join(md))
+pages = {"gallery/index.html": "\n".join(h), "gallery/README.md": "\n".join(md)}
+args = sys.argv[1:]
+if args[:1] == ["--check"]:
+    # regression check: the committed pages must be what this script writes
+    stale = [f for f, t in pages.items() if not os.path.exists(f) or open(f, encoding="utf-8").read() != t]
+    for f in stale:
+        print(f, "differs from what make_page.py writes; run python gallery/make_page.py")
+    print(len(code), "examples;", "pages up to date" if not stale else f"{len(stale)} page(s) out of date")
+    sys.exit(1 if stale else 0)
+for f, t in pages.items():
+    with open(f, "w", encoding="utf-8") as fh:
+        fh.write(t)
+if args[:1] == ["--blocks"] and len(args) == 2:
+    os.makedirs(args[1], exist_ok=True)
+    for k, c in code.items():
+        with open(os.path.join(args[1], k + ".do"), "w", encoding="utf-8") as fh:
+            fh.write(c + "\n")
 print(len(code), "examples")

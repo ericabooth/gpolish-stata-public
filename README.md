@@ -11,8 +11,8 @@
 | Piece | What it does | Output |
 |---|---|---|
 | `scheme(pypolish)` | Static defaults: white background, left-aligned titles, light horizontal grid, horizontal axis labels, a restrained palette. | Stata graph |
-| `gpolish` | Reads the drawn graph and adds direct labels, callouts, point labels and brackets, placed by a layout step that avoids markers, lines and other text. | Stata graph |
-| `gr2mpl` | Redraws the graph held in memory with matplotlib, including every `gpolish` edit. Handles `graph bar`, box, dot, `by()` and combined graphs too. | PNG, PDF, SVG or JPG image |
+| `gpolish` | Reads the drawn graph and adds direct labels, callouts, point labels and brackets. A layout step places them clear of markers, lines, bars, shaded areas, range plots, `xline()` and `yline()` reference lines, labels added earlier and the edges of the plot. | Stata graph |
+| `gr2mpl` | Redraws the graph held in memory with matplotlib, including every `gpolish` edit. Handles `graph bar`, box, dot, `graph matrix`, `by()` and combined graphs too. | PNG, PDF, SVG or JPG image |
 
 `gpolish` needs only Stata. `gr2mpl` needs Python with matplotlib and numpy.
 
@@ -49,23 +49,25 @@ graph export life.png, width(2400) replace // still a Stata graph
 gpolish render, saving(life_mpl.png) replace    // optional matplotlib version
 ```
 
+In batch mode (`stata -b`) and console Stata there is no Graph window, so `graph set window fontface` is not available. Stata then exports PNG files with the font set by `graph set svg fontface`, and `gpolish` reads that setting instead; to use Open Sans there, run `graph set svg fontface "Open Sans"`. To name the font yourself, for example for PDF export, set `global GPOLISH_FONT "Open Sans"`, which overrides both settings. Each `graph set` setting is saved between Stata sessions.
+
 | Command | Use |
 |---|---|
 | `gpolish` | Bold title; remove the y-axis line and tick marks. |
-| `gpolish endlabel` | Label each line at its end in the line's colour; `values`, `dots`, `wrap()`, `side(left)`, `color()`. Running it again replaces the earlier labels. |
+| `gpolish endlabel` | Label each line at its end in the line's colour; `values`, `dots`, `wrap()`, `side(left)`, `color()`. Lines on a second y axis are labelled at their own scale. Running it again replaces the earlier labels, also after `graph save` and `graph use`. |
 | `gpolish callout` | A note with a curved arrow. Leave out `at()` and it finds its own place. |
 | `gpolish note` | A shaded box for a finding or call-out, with an optional arrow. |
 | `gpolish brace` | A curly brace with a label: mark a confidence interval, a gap or a range. |
 | `gpolish arrow` | A straight or curved arrow; with `note` it builds simple flow charts. |
 | `gpolish ptlabel` | Label chosen scatter points, each in the least crowded of eight positions; crowded labels move out on a leader line. |
-| `gpolish bracket` | A square bracket between two y values. |
+| `gpolish bracket` | A square bracket between two y values, with an optional label. |
 | `gpolish legend` | Colour legend text to match its keys. |
 | `gpolish clear` | Remove everything the layout commands added, and undo `endlabel`'s margin and legend changes. |
 | `gpolish render` | Hand the finished graph to `gr2mpl`. |
 | `gpolish limits` | List what Stata's renderer cannot draw. |
 | `gpolish geom` | Report the drawn geometry (size, plot box, data-to-device transform) in `r()`, for programmers. |
 
-Positions in `at()`, `to()` and `from()` may be expressions, so a note on a date axis can be written `to(td(21sep2001) 966)`.
+Positions in `at()`, `to()` and `from()`, and bracket's `x()`, `y0()` and `y1()`, may be expressions, so a note on a date axis can be written `to(td(21sep2001) 966)`. An expression may use the results of the previous command, such as `to(1999 r(max))` after `summarize`; `gpolish` leaves `r()` as it found it, except after `gpolish geom` and `gpolish render`. Positions are read on the first x and y axes. On a graph with a second axis, the options `xaxis(#)` and `yaxis(#)` of `callout`, `note`, `arrow`, `brace`, `bracket` and `ptlabel` say which axis a position belongs to.
 
 Because `gpolish` reads the drawn graph and not your command, it also works on graphs made by other commands that produce twoway graphs, such as `marginsplot`.
 
@@ -108,14 +110,15 @@ Stata's graph renderer cannot draw the following. `gpolish` prints a note for te
 - **Text at an angle other than 0, 90 or 270 degrees.** The angle is stored in the graph and applied by `gr2mpl`.
 - **A soft halo behind text.** `halo` draws a white box in Stata, which can cover a nearby marker; `gr2mpl` draws a thin outline instead.
 - **Different colours inside one line of text**, and **filled arrow heads**.
-- **Layout commands on non-twoway graphs.** `endlabel`, `callout`, `note`, `arrow`, `brace`, `bracket`, `ptlabel`, `legend` and `clear` stop with an error on graphs that are not twoway graphs. Plain `gpolish` (or `gpolish style`) still makes the title bold, and `gpolish render` (gr2mpl) can redraw bar, box, dot, `by()` and combined graphs.
+- **Layout commands on non-twoway graphs.** `endlabel`, `callout`, `note`, `arrow`, `brace`, `bracket`, `ptlabel`, `legend` and `clear` stop with an error on graphs that are not twoway graphs. Plain `gpolish` (or `gpolish style`) still makes the title bold, and `gpolish render` (gr2mpl) can redraw bar, box, dot, matrix, `by()` and combined graphs.
 
-`gr2mpl` does not draw contour plots or pie charts, and does not read a second x axis or a third y axis. Skipped layers are named in a note and in `r(unsupported)`.
+`gr2mpl` does not draw contour plots or pie charts. It skips a layer on a second x axis or a third y axis, reference lines and `text()` on those axes, and a `by()` graph inside `graph combine`. Each skipped item is named in a note, and skipped layers are also listed in `r(unsupported)`.
 
-Two further cautions:
+Three further cautions:
 
 - Both commands rely on undocumented parts of Stata's graph objects and on `gr_edit`. A future Stata release could change them. [docs/OBJECT_MODEL.md](docs/OBJECT_MODEL.md) records what is used.
-- Label spacing depends on the font. `gpolish` has width tables for 16 common fonts and falls back to Arial's widths, with a note, for any other.
+- Label spacing depends on the font. `gpolish` has width tables for 16 common fonts and falls back to Arial's widths, with a note, for any other. It reads the font from `graph set window fontface`, or from `graph set svg fontface` in batch mode; `global GPOLISH_FONT` names it directly (see the [quick start](#quick-start)).
+- A graph edited and saved by `gpolish` 0.6.1 or earlier carries no record of its end labels, so running `gpolish endlabel` on it again adds a second set. Run `gpolish clear` first, or redraw the graph.
 
 ## Tests
 
@@ -124,7 +127,7 @@ Run from the repository root.
 | Script | What it checks |
 |---|---|
 | `tests/gpolish_battery.do` | Assertions on counts, positions, repel spacing, colours, log axes, refusals. |
-| `tests/gr2mpl_tests.do` | About 40 graphs across plot families, each exported by Stata and by `gr2mpl`. |
+| `tests/gr2mpl_tests.do` | About 40 graphs across plot families, each exported by Stata and by `gr2mpl`, and regression checks on the record of what `gr2mpl` drew. |
 | `gallery/gallery.do` | The gallery itself. |
 | `tests/reference/` | Two hand-written matplotlib charts used as targets during development. |
 
@@ -142,7 +145,10 @@ Tested on StataNow 19.5 and Stata 16.1 on macOS. Stata 17 and 18 and Windows are
 
 ## How well does the placement work?
 
-The [benchmark](benchmark/) scores `gpolish ptlabel` against Stata's own `mlabel()`, `labrepel`, adjustText (Python) and ggrepel (R) on four real-data scenarios and 60 synthetic ones, with every label measured by the same rule. When a subset of points is labelled, the usual case in a report, `gpolish` places the largest share of labels cleanly of all five methods: 84 to 100 percent. When every point in a crowded scatter is labelled, it leads ggrepel in three of four scenarios and trails it badly in the fourth, and ggrepel usually keeps labels nearer their points. `gpolish`'s placement settings were tuned on separate scenarios from the ones reported.
+<!-- BENCHNUMBERS -->
+The [benchmark](benchmark/) scores `gpolish ptlabel` against Stata's own `mlabel()`, `labrepel`, adjustText (Python) and ggrepel (R) on four real-data scenarios and 60 synthetic ones, with every label measured by the same rule. When a subset of points is labelled, the usual case in a report, `gpolish` places the largest share of labels cleanly of all five methods: 84 to 100 percent. When every point in a crowded scatter is labelled, it leads ggrepel in three of four scenarios and trails it badly in the fourth, and ggrepel usually keeps labels nearer their points.
+
+`gpolish`'s six placement settings were chosen on separate tuning seeds, not on the scenarios reported. The test data still influenced them: the 0.6.0 starting point was set by hand while looking at test seeds 1 to 6 and three of the real-data scenarios, the tuning objective was revised once after viewing test images, and the method itself was developed with this benchmark in view. [benchmark/README.md](benchmark/README.md#tuning) describes the process.
 
 <img width="1000" alt="Benchmark: share of clean labels, share of clean labels near their point, and seconds per graph" src="benchmark/results/benchmark.png" />
 
