@@ -3,12 +3,16 @@
 Boxes are measured in points (y up) with matplotlib's text extent for Open Sans 8.6 pt.
 For Stata methods the label position and alignment come from the exported SVG; for
 adjustText from the figure; for ggrepel from the label centres read back from grid.
-Per label it records: overlap with other labels, with any data marker (6 pt circles),
+Per label it records: overlap with other labels, with any data marker (a box closer than
+MARKER_PT/2 - 0.25 = 2.75 pt to a data point),
 with the fitted line, whether it leaves the plot region, its distance from its own point,
 and whether another point is closer to it than its own point (ambiguous). A label is *clean* when it
 touches no other label, marker or line and stays in the plot; *clean and near* also requires it to be
 within 3 ems of its own point.
+A method whose output is missing (for example labrepel when it is not installed) is left out.
 Writes results/labels.csv and results/graphs.csv.  python score.py [--check scen ...]
+With --check, nothing is written to results/; instead out/check_<scen>.png shows each method's
+rendered image with the measured boxes drawn over it, so the two can be compared.
 """
 import csv
 import html
@@ -22,6 +26,11 @@ STATA = ["default", "gpolish", "labrepel"]
 ALL = STATA + ["adjusttext", "ggrepel"]
 TEXT_RE = re.compile(r'<text x="([-\d.]+)" y="([-\d.]+)" style="[^"]*font-size:([\d.]+)px[^"]*"( text-anchor="(\w+)")?>([^<]*)</text>')
 HA = {None: "left", "start": "left", "middle": "center", "end": "right"}
+# A label touches a marker when its box comes closer than this to a data point: a 6 pt marker's
+# radius less a 0.25 pt tolerance. Stata draws msize(6pt) as a disc of radius 3.24 pt whose outer
+# 0.5 pt is a white outline, so its coloured part ends at about 2.74 pt. marker_sensitivity.py
+# rescores with other values.
+MARKER_HIT = MARKER_PT / 2 - 0.25
 
 
 def read_csv(path):
@@ -74,7 +83,7 @@ def seg_hits_box(p, q, b):
     return True
 
 
-def score_graph(boxes, pts, idx, line, plot, near_em=3.0):
+def score_graph(boxes, pts, idx, line, plot, near_em=3.0, marker_hit=MARKER_HIT):
     rows = []
     names = list(boxes)
     for i, s in enumerate(names):
@@ -88,8 +97,7 @@ def score_graph(boxes, pts, idx, line, plot, near_em=3.0):
                 if a > 0.25:
                     o_area += a
                     o_n += 1
-        r = MARKER_PT / 2
-        on_mark = sum(1 for (px, py) in pts if dist_box(px, py, b) < r - 0.25)
+        on_mark = sum(1 for (px, py) in pts if dist_box(px, py, b) < marker_hit)
         on_line = bool(line) and seg_hits_box(line[0], line[1], (b[0] + 0.5, b[1] + 0.5, b[2] - 0.5, b[3] - 0.5))
         outside = b[0] < plot[0] - 0.5 or b[1] < plot[1] - 0.5 or b[2] > plot[2] + 0.5 or b[3] > plot[3] + 0.5
         ax, ay = pts[idx[s]]
@@ -104,22 +112,26 @@ def score_graph(boxes, pts, idx, line, plot, near_em=3.0):
     return rows
 
 
-def main(check):
+def main(check, marker_hit=MARKER_HIT, write=True):
     os.makedirs("results", exist_ok=True)
-    at = {}
-    for r in read_csv("out/adjusttext/results.csv"):
-        at.setdefault(r["scenario"], {})[r["label"]] = tuple(float(r[k]) for k in ("x0", "y0", "x1", "y1"))
-    gg = {}
-    for r in read_csv("out/ggrepel/results.csv"):
-        gg.setdefault(r["scenario"], []).append(r)
-    times = {}
+    at, gg, times = {}, {}, {}
+    if os.path.exists("out/adjusttext/results.csv"):
+        for r in read_csv("out/adjusttext/results.csv"):
+            at.setdefault(r["scenario"], {})[r["label"]] = tuple(float(r[k]) for k in ("x0", "y0", "x1", "y1"))
+    if os.path.exists("out/ggrepel/results.csv"):
+        for r in read_csv("out/ggrepel/results.csv"):
+            gg.setdefault(r["scenario"], []).append(r)
     import glob
     for f in sorted(glob.glob("out/stata/geometry_*.csv")):
         for r in read_csv(f):
             times[(r["scenario"], r["method"])] = float(r["seconds"])
     for meth, f in (("adjusttext", "out/adjusttext/timing.csv"), ("ggrepel", "out/ggrepel/timing.csv")):
-        for r in read_csv(f):
-            times[(r["scenario"], meth)] = float(r["seconds"])
+        if os.path.exists(f):
+            for r in read_csv(f):
+                times[(r["scenario"], meth)] = float(r["seconds"])
+    missing = [m for m in ALL if not any(k[1] == m for k in times)]
+    if missing and write:
+        print(f"note: no output for {', '.join(missing)}; left out")
     label_rows, graph_rows = [], []
     for m in manifest():
         scen = m["scenario"]
@@ -127,11 +139,15 @@ def main(check):
             continue
         d = data(scen)
         labels = {r["label"] for r in d if r["lab"]}
-        g0 = geometry(scen)
+        # the default method's geometry (the one adjustText and ggrepel were drawn on), or, when
+        # only some Stata methods were run, the first one present
+        g0 = next((geometry(scen, mm) for mm in STATA if (scen, mm) in times), None)
+        if g0 is None:
+            continue
         meas = Measurer(g0["W"], g0["H"])
         per = {}
         for meth in ALL:
-            if meth in STATA and (scen, meth) not in {k for k in times}:
+            if (scen, meth) not in times:
                 continue
             g = geometry(scen, meth) if meth in STATA else g0
             pts = [(g["xA"] + g["xB"] * r["x"], g["yA"] + g["yB"] * r["y"]) for r in d]
@@ -150,7 +166,7 @@ def main(check):
                 for r in gg.get(scen, []):
                     if r["label"] in labels:
                         boxes[r["label"]] = meas.box(r["label"], float(r["cx"]), float(r["cy"]), ha="center", va="center")
-            rows = score_graph(boxes, pts, idx, line, plot)
+            rows = score_graph(boxes, pts, idx, line, plot, marker_hit=marker_hit)
             per[meth] = (boxes, pts, line, plot)
             for r in rows:
                 label_rows.append(dict(scenario=scen, design=m["design"], method=meth, **r))
@@ -171,34 +187,53 @@ def main(check):
         meas.close()
         if check:
             draw_check(scen, per)
-    if not check:
+    if not graph_rows:
+        sys.exit("no graphs to score: run the drawing steps first")
+    if write and not check:
         for name, rows in (("labels", label_rows), ("graphs", graph_rows)):
             with open(f"results/{name}.csv", "w", newline="") as fh:
                 w = csv.DictWriter(fh, fieldnames=list(rows[0]))
                 w.writeheader()
                 w.writerows(rows)
-    print(len(graph_rows), "graphs scored")
+    if write:
+        print(len(graph_rows), "graphs scored")
     return graph_rows
 
 
+def rendered_png(scen, meth):
+    """The image each method drew for this scenario (kept for real-data scenarios and seed 1)."""
+    f = f"out/stata/{scen}__{meth}.png" if meth in STATA else f"out/{meth}/{scen}.png"
+    return f if os.path.exists(f) else None
+
+
 def draw_check(scen, per):
+    """Each method's rendered image, with the measured boxes (red) and data points (blue rings) over it."""
     import matplotlib.pyplot as plt
     from matplotlib.patches import Rectangle
     fig, axes = plt.subplots(2, 3, figsize=(15, 7))
-    for ax, meth in zip(axes.flat, ALL):
+    meths = [m for m in ALL if m in per]
+    for ax, meth in zip(axes.flat, meths):
         boxes, pts, line, plot = per[meth]
+        g = geometry(scen, meth if meth in STATA else "default")
+        png = rendered_png(scen, meth)
+        if png:
+            ax.imshow(plt.imread(png), extent=[0, g["W"], 0, g["H"]], interpolation="antialiased")
         ax.add_patch(Rectangle(plot[:2], plot[2] - plot[0], plot[3] - plot[1], fill=False, ec="0.7"))
-        ax.scatter([p[0] for p in pts], [p[1] for p in pts], s=8, color="tab:blue")
+        ax.scatter([p[0] for p in pts], [p[1] for p in pts], s=10, facecolor="none", edgecolor="tab:blue", lw=0.5)
         if line:
-            ax.plot([line[0][0], line[1][0]], [line[0][1], line[1][1]], color="0.5")
+            ax.plot([line[0][0], line[1][0]], [line[0][1], line[1][1]], color="0.5", lw=0.5)
         for s, b in boxes.items():
             ax.add_patch(Rectangle(b[:2], b[2] - b[0], b[3] - b[1], fill=False, ec="tab:red", lw=0.6))
-            ax.text(b[0], b[1], s, fontsize=5)
-        ax.set_title(meth)
+            if not png:
+                ax.text(b[0], b[1], s, fontsize=5)
+        ax.set_title(meth if png else f"{meth} (no rendered image kept for this scenario)", fontsize=9)
+        ax.set_xlim(0, g["W"])
+        ax.set_ylim(0, g["H"])
         ax.set_aspect("equal")
-    axes.flat[-1].axis("off")
+    for ax in list(axes.flat)[len(meths):]:
+        ax.axis("off")
     fig.tight_layout()
-    fig.savefig(f"out/check_{scen}.png", dpi=110)
+    fig.savefig(f"out/check_{scen}.png", dpi=150)
     plt.close(fig)
 
 

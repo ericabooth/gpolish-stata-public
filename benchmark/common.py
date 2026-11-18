@@ -1,6 +1,7 @@
 """Shared helpers: scenario list, Stata plot geometry, and one text-measuring rule."""
 import csv
 import functools
+import os
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
@@ -11,10 +12,14 @@ MARKER_PT = 6.0          # marker diameter, points
 
 
 def manifest():
+    """Every test scenario, or only those named in the environment variable BENCH_SCENARIOS."""
     rows = []
     for f in ("data/manifest_synthetic.csv", "data/manifest_real.csv"):
         with open(f) as fh:
             rows += list(csv.DictReader(fh))
+    only = os.environ.get("BENCH_SCENARIOS", "").split()
+    if only:
+        rows = [r for r in rows if r["scenario"] in only]
     return rows
 
 
