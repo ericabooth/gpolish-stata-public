@@ -2,8 +2,13 @@
 
 The settings live in one Mata function in src/gpolish.ado, _gpl_placeparms(). For each
 candidate in the grid below this script writes a copy of gpolish.ado with that setting,
-draws every tuning scenario (data/manifest_tuning.csv: synthetic seeds 101-110, never used
+draws every tuning scenario (data/manifest_tuning.csv: synthetic seeds 101 to 110, never used
 for reporting) with tune.do, and scores the labels with the same rule as score.py.
+Font history: results/tuning.csv comes from runs made before gpolish read its text-width table from
+graph set svg fontface. Stata ran in batch mode, where gpolish then fell back to its Helvetica table,
+so the candidates were scored on Open Sans labels that gpolish had sized with Helvetica widths.
+tune.do now sets the svg font to Open Sans and prints the table gpolish uses, so a new run would
+measure with the Open Sans table and give different scores; the settings were not tuned again.
 The chosen setting maximises the mean share of labels that are clean and near: clean, and no more
 than NEAR_EM ems from their own point. A first version of this script optimised the clean share
 alone, which rewarded sending labels far out on long leader lines; the distance cap prevents that.
@@ -78,7 +83,9 @@ def score_dir(tag):
     by = {}
     for g in csv.DictReader(open(f"{d}/geometry_gpolish.csv")):
         scen = g["scenario"]
-        g = {k: (float(v) if k not in ("scenario", "method") else v) for k, v in g.items()}
+        g = {k: (float(v) if k not in ("scenario", "method", "font") else v) for k, v in g.items()}
+        if g["font"] != "open sans":
+            raise SystemExit(f"{d}: gpolish used its {g['font']!r} width table, not Open Sans's")
         rows = data(scen)
         labels = {r["label"] for r in rows if r["lab"]}
         meas = Measurer(g["W"], g["H"])
@@ -101,7 +108,24 @@ def score_dir(tag):
     return {des: tuple(st.mean(x[k] for x in v) for k in range(4)) for des, v in by.items()}
 
 
+def svg_font():
+    """graph set svg fontface, as the Stata in STATA reports it."""
+    os.makedirs("out/tune", exist_ok=True)
+    with open("out/tune/font_q.do", "w") as fh:
+        fh.write('mata: st_rclear()\nquietly graph set svg\ndi "SVGFONT=[`r(fontface)\']"\n')
+    subprocess.run([STATA, "-b", "do", "font_q.do"], cwd="out/tune", stdout=subprocess.DEVNULL,
+                   stderr=subprocess.DEVNULL, check=False)
+    m = re.search(r"^SVGFONT=\[(.*)\]", open("out/tune/font_q.log", errors="replace").read(), re.M)
+    return m.group(1) if m else None
+
+
 def main():
+    # Each tune.do run sets the svg font to Open Sans and sets the old value back when it ends. Copies
+    # running at once would undo each other's setting, so with several workers the font must already
+    # be Open Sans.
+    if WORKERS > 1 and svg_font() != "Open Sans":
+        sys.exit('graph set svg fontface is not Open Sans: run  graph set svg fontface "Open Sans"  in Stata '
+                 "first (and set it back afterwards), or run tune.py with 1 worker")
     cfgs = list(configs())
     # a setting already drawn (its geometry file exists) is not drawn again
     todo = [c for c in cfgs if not os.path.exists(f"out/tune/{c[0]}/geometry_gpolish.csv")]

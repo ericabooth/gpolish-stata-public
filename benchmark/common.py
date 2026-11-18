@@ -1,26 +1,69 @@
-"""Shared helpers: scenario list, Stata plot geometry, and one text-measuring rule."""
+"""Shared helpers: scenario sets, methods, Stata plot geometry, and one text-measuring rule."""
 import csv
 import functools
+import glob
 import os
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 FONT = "Open Sans"
-LABEL_PT = 8.6
-MARKER_PT = 6.0          # marker diameter, points
+LABEL_PT = 8.6           # label font size, points (every set except "fontmark")
+MARKER_PT = 6.0          # marker diameter, points (every set except "fontmark")
+
+# Scenario sets. Each has its own manifest in data/ and its own list of methods.
+#   main      the headline benchmark: 4 real-data scenarios and 3 synthetic designs x 20 test seeds
+#   perm      the 4 real-data scenarios with their rows in 10 random orders (permutation seeds 1 to 10)
+#   scale     synthetic scatterplots with 150 and 300 points, all labelled, 5 seeds each
+#   fontmark  the 60-of-60 synthetic design (seeds 1 to 10) at other font and marker sizes
+SETS = ["main", "perm", "scale", "fontmark"]
+ALL_METHODS = ["default", "labrepel", "gpolish", "gpolish060", "adjusttext", "ggrepel", "ggrepel_inf"]
+SET_METHODS = {
+    "main": ALL_METHODS,
+    "perm": ALL_METHODS,
+    "scale": ["default", "gpolish", "adjusttext", "ggrepel", "ggrepel_inf"],
+    "fontmark": ["default", "gpolish", "adjusttext", "ggrepel", "ggrepel_inf"],
+}
+STATA = ["default", "gpolish", "gpolish060", "labrepel"]
+MANIFEST_FIELDS = ["scenario", "set", "design", "seed", "n", "nlab", "fit", "fa", "fb", "fx0", "fx1",
+                   "label_pt", "marker_pt"]
+
+
+def manifest_files():
+    """The manifest of every scenario set, in a fixed order."""
+    return [("main", "data/manifest_real.csv"), ("main", "data/manifest_synthetic.csv"),
+            ("perm", "data/manifest_perm.csv"), ("scale", "data/manifest_scale.csv"),
+            ("fontmark", "data/manifest_fontmark.csv")]
 
 
 def manifest():
-    """Every test scenario, or only those named in the environment variable BENCH_SCENARIOS."""
+    """Every scenario of the sets named in BENCH_SETS (default: all), or only those named in BENCH_SCENARIOS."""
+    sets = os.environ.get("BENCH_SETS", "").split() or SETS
     rows = []
-    for f in ("data/manifest_synthetic.csv", "data/manifest_real.csv"):
-        with open(f) as fh:
-            rows += list(csv.DictReader(fh))
+    for s, f in manifest_files():
+        if s in sets and os.path.exists(f):
+            with open(f) as fh:
+                rows += list(csv.DictReader(fh))
     only = os.environ.get("BENCH_SCENARIOS", "").split()
     if only:
         rows = [r for r in rows if r["scenario"] in only]
     return rows
+
+
+def set_order(set_name):
+    """Every scenario of a set in manifest order, ignoring BENCH_SCENARIOS (to keep merged files in order)."""
+    out = []
+    for s, f in manifest_files():
+        if s == set_name and os.path.exists(f):
+            with open(f) as fh:
+                out += [r["scenario"] for r in csv.DictReader(fh)]
+    return {scen: i for i, scen in enumerate(out)}
+
+
+def methods_for(set_name):
+    """The methods run on a set, limited by BENCH_METHODS when it is given."""
+    only = os.environ.get("BENCH_METHODS", "").split()
+    return [m for m in SET_METHODS[set_name] if not only or m in only]
 
 
 def data(scen):
@@ -34,33 +77,42 @@ def data(scen):
 
 
 @functools.lru_cache(maxsize=None)
-def geometry_table():
-    import glob
+def method_geometry(method):
+    """Plot geometry of one Stata method's drawings, from out/stata/geometry_<method>_<set>.csv.
+    Only that method's files are read, so another method's run still writing its file does not matter."""
     out = {}
-    for f in sorted(glob.glob("out/stata/geometry_*.csv")):
+    for f in sorted(glob.glob(f"out/stata/geometry_{method}_*.csv")):
         with open(f) as fh:
             for r in csv.DictReader(fh):
-                out[(r["scenario"], r["method"])] = {k: (float(v) if k not in ("scenario", "method") else v)
-                                                     for k, v in r.items()}
+                out[(r["scenario"], r["method"])] = {
+                    k: (v if k in ("scenario", "method", "font") else float(v)) for k, v in r.items()}
+    return out
+
+
+def geometry_table():
+    """Plot geometry of every Stata drawing."""
+    out = {}
+    for m in STATA:
+        out.update(method_geometry(m))
     return out
 
 
 def geometry(scen, method="default"):
-    return geometry_table()[(scen, method)]
+    return method_geometry(method)[(scen, method)]
 
 
 class Measurer:
     """Measures text boxes in points (y up) with matplotlib, the same way for every method."""
 
-    def __init__(self, W, H):
+    def __init__(self, W, H, size=LABEL_PT):
         self.fig = plt.figure(figsize=(W / 72, H / 72), dpi=72)
         self.r = self.fig.canvas.get_renderer()
-        self.t = self.fig.text(0, 0, "", fontsize=LABEL_PT, family=FONT)
-        self.W, self.H = W, H
+        self.t = self.fig.text(0, 0, "", fontsize=size, family=FONT)
+        self.W, self.H, self.size = W, H, size
 
-    def box(self, s, x, y, ha="left", va="baseline", size=LABEL_PT):
+    def box(self, s, x, y, ha="left", va="baseline", size=None):
         self.t.set_text(s)
-        self.t.set_fontsize(size)
+        self.t.set_fontsize(size or self.size)
         self.t.set_ha(ha)
         self.t.set_va(va)
         self.t.set_position((x / self.W, y / self.H))

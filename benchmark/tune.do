@@ -1,6 +1,10 @@
 * Tuning run for gpolish ptlabel: draws every tuning scenario with one candidate setting.
 * Called by tune.py; the folder in TUNE_DIR holds a copy of gpolish.ado with that setting.
 * Uses only data/manifest_tuning.csv (tuning seeds), never the test scenarios.
+* Fonts: as in run_stata.do, the run records graph set svg fontface (and the window fontface when
+* Stata has a graph window), sets it to Open Sans if it is not already, prints the width table gpolish
+* used, and sets the recorded value back at the end. When tune.py runs several copies of this file at
+* once, set the svg fontface to Open Sans beforehand, so that no copy has anything to change.
 version 16
 set more off
 clear all
@@ -13,42 +17,67 @@ if `"`r(fn)'"' != `"`dir'/gpolish.ado"' {
     di as err `"gpolish.ado resolves to `r(fn)', not to the candidate in `dir'"'
     exit 498
 }
-graph set svg fontface "Open Sans"
-graph set window fontface "Open Sans"
-tempname gf
-file open `gf' using "`dir'/geometry_gpolish.csv", write text replace
-file write `gf' "scenario,method,W,H,px0,py0,px1,py1,xA,xB,yA,yB,seconds,rc" _n
-import delimited using "data/manifest_tuning.csv", clear varnames(1) stringcols(1 2)
-local N = _N
-forvalues r = 1/`N' {
-    local scen`r' = scenario[`r']
+global GPOLISH_FONT
+
+capture program drop _tune_run
+program _tune_run
+    args dir
+    tempname gf
+    file open `gf' using "`dir'/geometry_gpolish.csv", write text replace
+    file write `gf' "scenario,method,W,H,px0,py0,px1,py1,xA,xB,yA,yB,seconds,rc,font" _n
+    import delimited using "data/manifest_tuning.csv", clear varnames(1) stringcols(1 2 3)
+    local N = _N
+    forvalues r = 1/`N' {
+        local scen`r' = scenario[`r']
+    }
+    forvalues r = 1/`N' {
+        local scen `scen`r''
+        import delimited using "data/`scen'.csv", clear varnames(1) stringcols(3) encoding("utf-8")
+        twoway (scatter y x, msymbol(O) msize(6pt) mcolor("11 93 122%70") mlcolor(white) mlwidth(vthin)), ///
+            scheme(pypolish) legend(off) xsize(7) ysize(4.6) xtitle("") ytitle("") ///
+            xlabel(, labsize(8pt)) ylabel(, labsize(8pt)) name(g, replace)
+        timer clear 1
+        timer on 1
+        gpolish ptlabel label if lab == 1, x(x) y(y) size(8.6) msize(6) color("0 0 0")
+        timer off 1
+        if `r' == 1 di as res "gpolish width table: $GPL_FONT"
+        quietly timer list 1
+        local secs = r(t1)
+        graph export "`dir'/`scen'__gpolish.svg", replace
+        local W = 7*72
+        local H = 4.6*72
+        local G1x = `.g.gdi_x1'
+        local G1y = `.g.gdi_y1'
+        local pr .g.plotregion1
+        local xA = ``pr'.drawn_xalpha'/`G1x'*`W'
+        local xB = ``pr'.drawn_xbeta'/`G1x'*`W'
+        local yA = ``pr'.drawn_yalpha'/`G1y'*`H'
+        local yB = ``pr'.drawn_ybeta'/`G1y'*`H'
+        local px0 = min(``pr'.gdi_x0', ``pr'.gdi_x1')/`G1x'*`W'
+        local px1 = max(``pr'.gdi_x0', ``pr'.gdi_x1')/`G1x'*`W'
+        local py0 = min(``pr'.gdi_y0', ``pr'.gdi_y1')/`G1y'*`H'
+        local py1 = max(``pr'.gdi_y0', ``pr'.gdi_y1')/`G1y'*`H'
+        file write `gf' "`scen',gpolish,`W',`H',`px0',`py0',`px1',`py1',`xA',`xB',`yA',`yB',`secs',0,$GPL_FONT" _n
+    }
+    file close `gf'
+end
+
+local fontsets svg
+if "`c(mode)'" != "batch" & "`c(console)'" != "console" local fontsets svg window
+foreach s of local fontsets {
+    mata: st_rclear()
+    quietly graph set `s'
+    local old_`s' `"`r(fontface)'"'
+    di as txt `"graph set `s' fontface was [`old_`s'']"'
+    if `"`old_`s''"' == "" di as err "warning: cannot read graph set `s' fontface; it is left unchanged"
+    else if `"`old_`s''"' != "Open Sans" graph set `s' fontface "Open Sans"
 }
-forvalues r = 1/`N' {
-    local scen `scen`r''
-    import delimited using "data/`scen'.csv", clear varnames(1) stringcols(3) encoding("utf-8")
-    twoway (scatter y x, msymbol(O) msize(6pt) mcolor("11 93 122%70") mlcolor(white) mlwidth(vthin)), ///
-        scheme(pypolish) legend(off) xsize(7) ysize(4.6) xtitle("") ytitle("") ///
-        xlabel(, labsize(8pt)) ylabel(, labsize(8pt)) name(g, replace)
-    timer clear 1
-    timer on 1
-    gpolish ptlabel label if lab == 1, x(x) y(y) size(8.6) msize(6) color("0 0 0")
-    timer off 1
-    quietly timer list 1
-    local secs = r(t1)
-    graph export "`dir'/`scen'__gpolish.svg", replace
-    local W = 7*72
-    local H = 4.6*72
-    local G1x = `.g.gdi_x1'
-    local G1y = `.g.gdi_y1'
-    local pr .g.plotregion1
-    local xA = ``pr'.drawn_xalpha'/`G1x'*`W'
-    local xB = ``pr'.drawn_xbeta'/`G1x'*`W'
-    local yA = ``pr'.drawn_yalpha'/`G1y'*`H'
-    local yB = ``pr'.drawn_ybeta'/`G1y'*`H'
-    local px0 = min(``pr'.gdi_x0', ``pr'.gdi_x1')/`G1x'*`W'
-    local px1 = max(``pr'.gdi_x0', ``pr'.gdi_x1')/`G1x'*`W'
-    local py0 = min(``pr'.gdi_y0', ``pr'.gdi_y1')/`G1y'*`H'
-    local py1 = max(``pr'.gdi_y0', ``pr'.gdi_y1')/`G1y'*`H'
-    file write `gf' "`scen',gpolish,`W',`H',`px0',`py0',`px1',`py1',`xA',`xB',`yA',`yB',`secs',0" _n
+capture noisily _tune_run "`dir'"
+local rc = _rc
+foreach s of local fontsets {
+    if `"`old_`s''"' != "" & `"`old_`s''"' != "Open Sans" graph set `s' fontface `"`old_`s''"'
+    mata: st_rclear()
+    quietly graph set `s'
+    di as txt `"graph set `s' fontface is now [`r(fontface)']"'
 }
-file close `gf'
+exit `rc'

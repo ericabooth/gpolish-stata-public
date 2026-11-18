@@ -1,10 +1,10 @@
-"""How much the scores depend on the marker rule.
+"""How much the main-set scores depend on the marker rule.
 
 score.py counts a label as touching a marker when its box comes closer than 2.75 pt to a data
-point (a 6 pt marker's radius less a 0.25 pt tolerance). This script rescores every graph with
-that distance set to 2.75 pt, to 3.0 pt (the radius exactly) and to 3.24 pt (the full radius
-Stata draws for msize(6pt), white outline included), and reports the clean and clean-and-near
-shares of each method at each value.
+point (a 6 pt marker's radius less a 0.25 pt tolerance). This script rescores every main-set graph
+from the archive (results/positions.csv, geometry.csv, points.csv) with that distance set to
+2.75 pt, to 3.0 pt (the radius exactly) and to 3.24 pt (the full radius Stata draws for msize(6pt),
+white outline included), and reports the clean and clean-and-near shares of each method at each value.
 Writes results/marker_sensitivity.md.  Run from the benchmark folder after score.py:
     python marker_sensitivity.py
 """
@@ -17,14 +17,15 @@ THRESHOLDS = [(2.75, "2.75 pt (the rule used)"), (3.0, "3.0 pt (the radius)"),
 
 
 def main():
+    arch = score.load_archive()
     res = {}
     for t, _ in THRESHOLDS:
-        for r in score.main([], marker_hit=t, write=False):
+        for r in score.score_all(*arch, marker_hit=t, sets={"main"})[1]:
             res.setdefault((t, r["design"], r["method"]), []).append(r)
     methods = [m for m in METHODS if any(k[2] == m for k in res)]
     designs = [(d, n) for d, n in DESIGNS if any(k[1] == d for k in res)]
     out = ["# Label-placement benchmark: sensitivity to the marker rule", "",
-           "Each cell gives a method's mean share for the marker distance "
+           "Main set. Each cell gives a method's mean share for the marker distance "
            + ", ".join(lab for _, lab in THRESHOLDS) + ", in that order.", ""]
     for key, title in (("clean_share", "Clean labels (share)"),
                        ("clean_near_share", "Clean labels within 3 ems of their point (share)")):
