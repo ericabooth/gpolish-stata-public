@@ -273,7 +273,7 @@ program _gpl_regget, rclass
     local q 0
     foreach k of local txt {
         local ++q
-        if `k' >= `rec' {
+        if `k' == `rec' | `k' > `nt' {
             local stale 1
             continue, break
         }
@@ -747,10 +747,20 @@ program _gpl_endlabel
         matrix `Y'[`j',3] = `Y'[`j',2]
     }
     local sep = `gap'*`size'/72*`gpi'
-    local ncrowd 0
-    if "`repel'"=="" mata: _gpl_repel("`Y'", `sep', `gy0', `gy1')
-    if `ncrowd' > 0 {
-        di as txt "note: `ncrowd' pair(s) of end labels still overlap; there is not enough height for all of them."
+    local novl 0
+    local nclose 0
+    if "`repel'"=="" mata: _gpl_repel("`Y'", `sep', `gy0', `gy1', `size'/72*`gpi', 1/72*`gpi')
+    * pairs whose text overlaps, and pairs that do not overlap but sit closer than gap() asks
+    local nnear = `nclose' - `novl'
+    if `novl' > 0 {
+        di as txt "note: `novl' pair(s) of end labels overlap; there is not enough height for them."
+        if `nnear' > 0 di as txt "      Another `nnear' pair(s) are closer than gap() asks but do not overlap."
+    }
+    else if `nnear' > 0 {
+        di as txt "note: `nnear' pair(s) of end labels are closer than gap() asks but do not overlap;"
+        di as txt "      there is not enough height for the full gap."
+    }
+    if `nclose' > 0 {
         di as txt "      Label fewer plots (plots()), use a smaller size() or gap(), or a taller graph (ysize())."
     }
     _gpl_count `name' added_markers
@@ -807,8 +817,25 @@ program _gpl_endlabel
         local lens `lens' `=strlen(`"`t'"')'
     }
     local rec `"gpolish-endlabel|`regtxt'|`regmk'|`side'|`m'|`leg'|`inner'|`lens'"'
-    _gpl_addtext, name(`name') x(`xpos') y(`ynew') lines(`"`rec'"') size(1)
-    _gpl_ge `name' .plotregion1.added_text[`r(k)'].draw_view.setstyle, style(no)
+    * an earlier record box (spent by the undo above) is reused, so a graph holds at most one
+    _gpl_count `name' added_text
+    local nt = r(k)
+    local kr 0
+    forvalues k = 1/`nt' {
+        if substr(`"`.`name'.plotregion1.added_text[`k'].text[1]'"', 1, 16)=="gpolish-endlabel" {
+            local kr `k'
+            continue, break
+        }
+    }
+    if `kr' > 0 {
+        _gpl_ge `name' .plotregion1.added_text[`kr'].text = {}
+        _gpl_ge `name' .plotregion1.added_text[`kr'].text.Arrpush `"`rec'"'
+        _gpl_ge `name' .plotregion1.added_text[`kr'].draw_view.setstyle, style(no)
+    }
+    else {
+        _gpl_addtext, name(`name') x(`xpos') y(`ynew') lines(`"`rec'"') size(1)
+        _gpl_ge `name' .plotregion1.added_text[`r(k)'].draw_view.setstyle, style(no)
+    }
 end
 
 * ================================================================ clear
@@ -853,6 +880,52 @@ program _gpl_axpos
     _gpl_axregion `name' "`xax'" "`yax'"
     local reg = r(region)
     if `reg'!=1 c_local _gpl_reg `reg'
+end
+
+* ptlabel: stop before any edit when the y() (or x()) variable is drawn only on another axis than the
+* one its values are read on, which would put every label far from its point
+program _gpl_axcheck
+    args name xvar yvar xax yax
+    if "`xax'"=="" local xax 1
+    if "`yax'"=="" local yax 1
+    local ysc `.`name'.y_scales'
+    local ysc : subinstr local ysc `"""' "", all
+    local xsc `.`name'.x_scales'
+    local xsc : subinstr local xsc `"""' "", all
+    _gpl_plots `name'
+    local n = r(n)
+    local regs `r(regs)'
+    local yon
+    local xon
+    forvalues i = 1/`n' {
+        local j : word `i' of `regs'
+        local pr .`name'.plotregion`j'
+        local yn
+        local xn
+        capture {
+            local yv = ``pr'.plot`i'.yvar'
+            local xv = ``pr'.plot`i'.xvar'
+            local yn ``pr'.plot`i'.serset.sers[`yv'].name'
+            local xn ``pr'.plot`i'.serset.sers[`xv'].name'
+        }
+        local ya : word `i' of `ysc'
+        local xa : word `i' of `xsc'
+        if "`ya'"=="" local ya 1
+        if "`xa'"=="" local xa 1
+        if "`yn'"=="`yvar'" local yon `yon' `ya'
+        if "`xn'"=="`xvar'" local xon `xon' `xa'
+    }
+    local yon : list uniq yon
+    local xon : list uniq xon
+    foreach d in y x {
+        if "``d'on'"=="" continue
+        if `: list `d'ax in `d'on' continue
+        local a : word 1 of ``d'on'
+        local opt = cond("`d'"=="y", "yaxis", "xaxis")
+        di as err "gpolish ptlabel: `d'() variable {bf:``d'var'} is drawn on `d' axis `a', not on `d' axis ``d'ax'."
+        di as err "  Add {bf:`opt'(`a')} so the labels use that axis's scale."
+        exit 198
+    }
 end
 
 program _gpl_segcheck
@@ -1168,6 +1241,7 @@ program _gpl_ptlabel
     * x() and y() are read on the axes named by xaxis() and yaxis(); labels go into plot region 1
     local _gpl_reg
     _gpl_axpos `name' "`xaxis'" "`yaxis'"
+    _gpl_axcheck `name' `x' `y' "`xaxis'" "`yaxis'"
     if "`_gpl_reg'"=="" local _gpl_reg 1
     _gpl_obstacles `name'
     _gpl_geom, name(`name') region(`_gpl_reg')
@@ -1381,45 +1455,78 @@ void _gpl_wrap(string scalar labmac, string scalar nlmac, string scalar wmac, re
 }
 
 // ---------------------------------------------------------------- 1-D repel
-// column 2 = anchors, column 3 = result, column 5 = number of text lines
-void _gpl_repel(string scalar nm, real scalar sep, real scalar lo, real scalar hi)
+// column 2 = anchors, column 3 = result, column 5 = number of text lines.
+// sep = wanted distance between the centres of two one-line labels (gap() times the text size);
+// em = the text size and lg = the gap between the lines of one label, both in device units.
+// Returns in the caller's locals novl (pairs whose text overlaps) and nclose (pairs closer than sep).
+void _gpl_repel(string scalar nm, real scalar sep, real scalar lo, real scalar hi,
+                real scalar em, real scalar lg)
 {
     real matrix Y
     real colvector g
     real colvector o
     real colvector nl
+    real colvector h
     real scalar n
     real scalar k
     real scalar i
     real scalar d
     real scalar moved
+    real scalar need
+    real scalar t
 
     Y = st_matrix(nm)
     n = rows(Y)
     o = order(Y[,2], 1)
     g = Y[o,2]
     nl = Y[o,5]
-    for (k=1; k<=1000; k++) {
-        moved = 0
-        for (i=1; i<n; i++) {
-            d = sep*(nl[i]+nl[i+1])/2 - (g[i+1]-g[i])
-            if (d > 0.000001) {
-                g[i] = g[i] - d/2
-                g[i+1] = g[i+1] + d/2
-                moved = 1
+    if (lo > hi) {
+        t = lo
+        lo = hi
+        hi = t
+    }
+    // the height the labels need: half a label at each edge plus every wanted distance
+    need = sep*(nl[1] + nl[n])/2
+    for (i=1; i<n; i++) need = need + sep*(nl[i]+nl[i+1])/2
+    if (need > hi - lo) {
+        // not enough height: the first and last labels keep their full room at the edges, and
+        // every distance between neighbours shrinks by the same factor, in the order of the line ends
+        t = need - sep*(nl[1] + nl[n])/2
+        if (t > 0) t = max((0, (hi - lo - sep*(nl[1] + nl[n])/2)/t))
+        g[1] = lo + sep*nl[1]/2
+        for (i=2; i<=n; i++) g[i] = g[i-1] + t*sep*(nl[i-1]+nl[i])/2
+    }
+    else {
+        for (k=1; k<=1000; k++) {
+            moved = 0
+            for (i=1; i<n; i++) {
+                d = sep*(nl[i]+nl[i+1])/2 - (g[i+1]-g[i])
+                if (d > 0.000001) {
+                    g[i] = g[i] - d/2
+                    g[i+1] = g[i+1] + d/2
+                    moved = 1
+                }
             }
+            // keep the outer edges of the first and last labels inside the plot height
+            if (g[1] - sep*nl[1]/2 < lo) g[1] = lo + sep*nl[1]/2
+            if (g[n] + sep*nl[n]/2 > hi) g[n] = hi - sep*nl[n]/2
+            if (moved==0) break
         }
-        // keep the outer edges of the first and last labels inside the plot height
-        if (g[1] - sep*nl[1]/2 < lo) g[1] = lo + sep*nl[1]/2
-        if (g[n] + sep*nl[n]/2 > hi) g[n] = hi - sep*nl[n]/2
-        if (moved==0) break
     }
-    // pairs that still overlap when there is not enough height for all labels
+    // The text of a label spans from the cap height of its first line to the descenders of its
+    // last line: about 0.95 of the text size for one line. A pair overlaps only when these spans meet.
+    // Only pairs pushed closer than sep count: a gap() below about 1 asks for touching labels.
+    h = (nl :- 1)*(em + lg) :+ 0.95*em
     k = 0
+    t = 0
     for (i=1; i<n; i++) {
-        if (sep*(nl[i]+nl[i+1])/2 - (g[i+1]-g[i]) > 0.01*sep) k++
+        if (sep*(nl[i]+nl[i+1])/2 - (g[i+1]-g[i]) > 0.01*sep) {
+            t++
+            if ((h[i]+h[i+1])/2 - (g[i+1]-g[i]) > 0.01*em) k++
+        }
     }
-    st_local("ncrowd", strofreal(k))
+    st_local("novl", strofreal(k))
+    st_local("nclose", strofreal(t))
     Y[o,3] = g
     st_matrix(nm, Y)
 }
@@ -1466,33 +1573,70 @@ void _gpl_obs_path(string scalar xv, string scalar yv, real scalar xlog, real sc
     real matrix D
     real colvector gx
     real colvector gy
-    real matrix S
-    real scalar i
-    real scalar len
-    real scalar m
-    real scalar j
-    real scalar u
+    real colvector len
+    real colvector m
+    real matrix R
+    real scalar n
     real scalar h
 
     D = st_data(., (xv, yv))
     D = select(D, rowmissing(D) :== 0)
-    if (rows(D) < 2) return
+    n = rows(D)
+    if (n < 2) return
     gx = xa :+ xb*(xlog ? ln(D[,1]) : D[,1])
     gy = ya :+ yb*(ylog ? ln(D[,2]) : D[,2])
     h = step/2
-    S = J(0, 4, .)
-    for (i=1; i<rows(D); i++) {
-        len = sqrt((gx[i+1]-gx[i])^2 + (gy[i+1]-gy[i])^2)
-        m = max((1, ceil(len/step)))
-        if (m > 400) m = 400
-        for (j=0; j<m; j++) {
-            u = j/m
-            S = S \ (gx[i] + u*(gx[i+1]-gx[i]) - h, gy[i] + u*(gy[i+1]-gy[i]) - h,
-                     gx[i] + u*(gx[i+1]-gx[i]) + h, gy[i] + u*(gy[i+1]-gy[i]) + h)
-        }
-        if (rows(S) > 20000) break
+    // one box, step wide, every step along each segment (at most 400 per segment)
+    len = sqrt((gx[|2 \ n|] - gx[|1 \ n-1|]):^2 + (gy[|2 \ n|] - gy[|1 \ n-1|]):^2)
+    m = rowmin((rowmax((J(n-1, 1, 1), ceil(len/step))), J(n-1, 1, 400)))
+    R = _gpl_pieces((gx, gy), m, 0, 20000)
+    _gpl_obs_add((R[,1] :- h, R[,2] :- h, R[,3] :+ h, R[,4] :+ h))
+}
+// The pieces of a polyline whose n vertices have the values A (one column per coordinate), with m[i]
+// pieces on the interval from vertex i to vertex i+1. ends 0: piece j is the point at u = j/m[i];
+// ends 1: piece j is the span from u = j/m[i] to u = (j+1)/m[i]. Returns one row per piece: the
+// minimum of each column, then the maximum. When there are more than cap pieces, neighbouring pieces
+// are merged in equal groups (the last group may be smaller) and each row covers its whole group, so
+// the rows still cover the whole polyline.
+real matrix _gpl_pieces(real matrix A, real colvector m, real scalar ends, real scalar cap)
+{
+    real colvector cm
+    real matrix R
+    real matrix Q
+    real rowvector a
+    real rowvector b
+    real scalar T
+    real scalar G
+    real scalar K
+    real scalar k
+    real scalar t0
+    real scalar t1
+    real scalar i0
+    real scalar i1
+    real scalar j0
+    real scalar j1
+
+    T = sum(m)
+    G = max((1, ceil(T/cap)))
+    K = ceil(T/G)
+    cm = runningsum(m)
+    R = J(K, 2*cols(A), .)
+    i0 = 1
+    for (k=1; k<=K; k++) {
+        t0 = (k-1)*G + 1
+        t1 = min((k*G, T))
+        while (cm[i0] < t0) i0++
+        i1 = i0
+        while (cm[i1] < t1) i1++
+        j0 = t0 - (cm[i0] - m[i0]) - 1
+        j1 = t1 - (cm[i1] - m[i1]) - 1
+        a = A[i0,] + (j0/m[i0])*(A[i0+1,] - A[i0,])
+        b = A[i1,] + ((j1+ends)/m[i1])*(A[i1+1,] - A[i1,])
+        Q = a \ b
+        if (i1 > i0) Q = Q \ A[|i0+1, 1 \ i1, .|]
+        R[k,] = (colmin(Q), colmax(Q))
     }
-    _gpl_obs_add(S)
+    return(R)
 }
 // bars, shaded bands and range spikes as boxes. pos = position variable, val = value variable,
 // lov = second value variable ("" uses the constant base). horiz: values run along x.
@@ -1516,13 +1660,8 @@ void _gpl_obs_range(string scalar posv, string scalar valv, string scalar lov, r
     real scalar pb
     real scalar va
     real scalar vb
-    real scalar i
-    real scalar j
-    real scalar m
-    real scalar u0
-    real scalar u1
-    real scalar lo
-    real scalar hi
+    real colvector m
+    real scalar n
     real matrix S
 
     if (lov != "") D = st_data(., (posv, valv, lov))
@@ -1553,21 +1692,11 @@ void _gpl_obs_range(string scalar posv, string scalar valv, string scalar lov, r
         p = p[o]
         v1 = v1[o]
         v2 = v2[o]
-        S = J(0, 4, .)
-        for (i=1; i<rows(p); i++) {
-            m = max((1, ceil(abs(p[i+1]-p[i])/step)))
-            if (m > 200) m = 200
-            for (j=0; j<m; j++) {
-                u0 = j/m
-                u1 = (j+1)/m
-                lo = min((v1[i] + u0*(v1[i+1]-v1[i]), v1[i] + u1*(v1[i+1]-v1[i]),
-                          v2[i] + u0*(v2[i+1]-v2[i]), v2[i] + u1*(v2[i+1]-v2[i])))
-                hi = max((v1[i] + u0*(v1[i+1]-v1[i]), v1[i] + u1*(v1[i+1]-v1[i]),
-                          v2[i] + u0*(v2[i+1]-v2[i]), v2[i] + u1*(v2[i+1]-v2[i])))
-                S = S \ (p[i] + u0*(p[i+1]-p[i]), lo, p[i] + u1*(p[i+1]-p[i]), hi)
-            }
-            if (rows(S) > 20000) break
-        }
+        // strips at most step wide between neighbouring positions (at most 200 per interval)
+        n = rows(p)
+        m = rowmin((rowmax((J(n-1, 1, 1), ceil(abs(p[|2 \ n|] - p[|1 \ n-1|])/step))), J(n-1, 1, 200)))
+        S = _gpl_pieces((p, v1, v2), m, 1, 20000)
+        S = (S[,1], rowmin((S[,2], S[,3])), S[,4], rowmax((S[,5], S[,6])))
     }
     else S = (p0, rowmin((v1, v2)), p1, rowmax((v1, v2)))
     S = select(S, rowmissing(S) :== 0)

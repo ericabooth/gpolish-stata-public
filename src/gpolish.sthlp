@@ -110,8 +110,12 @@ the room is made inside the plot region instead, so the labels sit between the a
 Lines on a second y axis are labeled at their own scale.
 {opt wrap(#)} wraps long labels on word boundaries at about # characters, measured by rendered width.
 {opt gap(#)} sets the minimum distance between the centres of neighbouring labels, in multiples of the font size per text line (default 1.3); wrapped labels get proportionally more room.
-Labels are kept within the height of the plot; when they cannot all fit, {cmd:gpolish endlabel} says how many
-still overlap.
+Labels are kept within the height of the plot. When the labels need more height than the plot has, the first
+and last labels keep their room at the edges and every distance between neighbouring labels shrinks by the same
+factor, so the labels fill the plot height evenly in the order of the line ends, and {cmd:gpolish endlabel} gives
+a note. The note counts the pairs whose text overlaps
+(the text of a line is taken to span about 0.95 of the font size) and, separately, the pairs that are closer
+than {opt gap()} asks but do not overlap.
 Labels are bold unless {opt nobold} is given; a label with an unmatched {cmd:{c )-}} is shown as typed, because the
 brace would end the bold markup early.
 Running {cmd:gpolish endlabel} again replaces the earlier labels instead of adding a second set.
@@ -122,6 +126,8 @@ If {opt at()} is omitted, the note is placed automatically near the target, clea
 the markers and lines of scatter, line, connected, rline, function, spike and dropline plots; bars, shaded areas
 and range plots (bar, rbar, area, rarea, rcap, rspike, rcapsym, which include histograms and confidence bands);
 reference lines from {opt xline()} and {opt yline()}; and other added text.
+Lines and shaded areas are covered by small boxes along their whole length. When one plot would need more than
+20,000 boxes, neighbouring boxes are merged in groups of equal size, each merged box covering its whole group.
 {opt from()} moves the tail of the arrow; by default it starts at the edge of the text nearest the target.
 When the target lies inside the text, or {opt from()} equals {opt to()}, no arrow is drawn and {cmd:gpolish} says so.
 {opt segments(#)} must be 1 or more.
@@ -156,7 +162,9 @@ rings around its point, and joined to the point by a thin leader line; it moves 
 than the best spot next to the point. {opt noleader} keeps every
 label next to its point; {opt lcolor()} and {opt lwidth()} style the leader lines.
 {opt x()} and {opt y()} name the plotted variables; for points plotted on a second axis, add {opt yaxis(2)}
-(or {opt xaxis(2)}). Log axes are detected, and points with zero or negative values on a log axis are skipped.
+(or {opt xaxis(2)}). When the {opt y()} variable is drawn on another y axis only (or the {opt x()} variable on
+another x axis only), {cmd:gpolish ptlabel} stops before any edit and names the {opt yaxis()} or {opt xaxis()}
+option to add. Log axes are detected, and points with zero or negative values on a log axis are skipped.
 Placement avoids the same drawn objects as an automatic {cmd:gpolish callout}.
 
 {phang}
@@ -201,7 +209,7 @@ It stops with an error when a layout command is used on a graph that is not a tw
 {p2col:Soft halo behind text}{opt halo} draws a white box, which can cover nearby markers{p_end}
 {p2col:Different colors inside one line of text}not possible; color whole labels{p_end}
 {p2col:Filled arrow heads}arrow heads are open{p_end}
-{p2col:Labels that cannot all fit}{cmd:endlabel}, {cmd:ptlabel} and automatic callouts report how many labels still overlap noticeably{p_end}
+{p2col:Labels that cannot all fit}{cmd:endlabel} reports how many pairs of labels overlap; {cmd:ptlabel} and automatic callouts report how many labels still overlap noticeably{p_end}
 {p2col:{cmd:graph bar}, {cmd:by()} and combined graphs}layout commands are refused with a message; plain {cmd:gpolish} still makes the title bold; {helpb gr2mpl} redraws them{p_end}
 {p2col:{cmd:graph pie}}layout commands are refused; {helpb gr2mpl} does not redraw pie charts either{p_end}
 {p2col:Positions on a second axis}{opt at()}, {opt to()} and {opt from()} use the first axes unless {opt xaxis()} or {opt yaxis()} says otherwise{p_end}
@@ -279,7 +287,10 @@ hidden text box inside the graph. The record belongs to that graph only, and it 
 {cmd:graph save} and {cmd:graph use} a second {cmd:gpolish endlabel} still replaces the first set of labels and
 {cmd:gpolish clear} still restores the margin and the legend. A graph redrawn under the same name starts with no
 record. If a recorded label was changed or removed by other means (for example in the Graph Editor), the record is
-ignored; run {cmd:gpolish clear} and start again.
+ignored; run {cmd:gpolish clear} and start again. A graph holds at most one record box: a second
+{cmd:gpolish endlabel} writes its record into the box of the first. The record box is not drawn, but it is listed
+in the Graph Editor's object browser, and scripts that count {cmd:.plotregion1.added_text} should skip boxes whose
+text starts with {cmd:gpolish-endlabel}.
 
 
 {title:Author}
