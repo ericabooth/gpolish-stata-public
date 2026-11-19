@@ -37,6 +37,9 @@ This release contains gpolish 0.7.0 and gr2mpl 0.6.0. The changes listed under 0
 - `endlabel, values` puts every value in one column, beyond the line end farthest out on the labelled side, so the value of a line that ends early now sits in the column with the others.
 - `ptlabel` accepts numeric label variables: the value label is shown when there is one, otherwise the display format; missing values are not labelled.
 - `gpolish limits` lines up its columns, describes the matplotlib output as PNG, PDF, SVG or JPG, and lists pie charts as handled by neither command.
+- `endlabel`: when a scheme draws an outline around the plot region (for example s1mono) and the labels sit outside the plot region, the labels and the value column now start `xgap()` points beyond the outline instead of beyond the line end, so text no longer sits on the frame. The margin made for the labels grows by the same amount. An outline counts as drawn when its colour differs from the graph background, so an outline turned off with `plotregion(lstyle(none))` still moves the labels out; the help's Limits table says so.
+- `arrow`, `brace` and `bracket`: a zero or negative position on a log axis now stops with r(198) before any edit and names the option, for example "gpolish bracket: y0() must be positive on a log y axis". Before, the command failed with ". is not a number" and left part of the object in the graph.
+- `bracket`: an end outside the plot region now prints the same note as `arrow` and `brace`, with the axis ranges, plus a hint to add `yscale(range(#))` or `xscale(range(#))` to make room, naming the axis the bracket spans first. The bracket is still drawn.
 
 ### gr2mpl 0.6.0
 
@@ -59,6 +62,11 @@ This release contains gpolish 0.7.0 and gr2mpl 0.6.0. The changes listed under 0
 - `twoway bar` and `twoway rbar` bars narrower than about 0.5% of the x range (for example the default `barwidth()` on a weight axis in pounds) are outlined in their own colour, as Stata draws them, so they show as thin bars instead of disappearing behind a white edge. Wider bars keep their white separators. This also restores the rbar layer in `rarea || rbar` graphs.
 - A colour set to `none` is passed to matplotlib as no colour. Before, the spec recorded it as black, so `twoway bar` and `rbar` with `color(none)` or `fcolor(none)` drew black bars; they now draw no fill, as in Stata, with an outline only when the outline colour is visible.
 - `area` and `rarea` with `color(none)` draw their outline in `lcolor()`: an `area` gets its top edge and an `rarea` both edges, and the legend key is an outlined box. Stata also draws an `area`'s base and side edges; gr2mpl draws only the top edge. Before, the `area` outline was drawn in white and the `rarea` had no outline. With `lcolor(none)` too, nothing is drawn.
+- `xlabel(none)` and `ylabel(none)` now draw no major tick labels or gridlines on that axis, in twoway graphs and on the scale axis of `graph bar/hbar/box/dot`. Before, matplotlib's automatic tick labels appeared.
+- `saving(filename, replace)` is accepted, as in graph's own `saving()`; the suboption works like the `replace` option. Any other suboption stops with error 198. Before, gr2mpl wrote a file literally named `filename, replace.png`.
+- `aspectratio()` is followed in a single graph: the plot region gets Stata's height-to-width ratio and is centred. It is not followed in `by()` panels or `graph combine` members.
+- Minor tick labels from `xmlabel()` and `ymlabel()` are drawn as labelled minor ticks at 80% of the major tick-label size, in twoway graphs and on the bar scale axis. Before, they were dropped. Minor ticks without labels (`xmtick()`, `ymtick()`) are still not drawn.
+- The render record (render_info.txt) gains `xminor=`, `yminor=` and `box_aspect=` lines per panel.
 - `scatter` (and other marker plots) with `mcolor(none)` or `mfcolor(none)` and a visible `mlcolor()` draw hollow markers. Before, the spec recorded the marker fill as black, because Stata stores a `none` marker fill as black and only its style name says it is none, so the markers were drawn filled black.
 
 ### Benchmark
@@ -81,6 +89,8 @@ This release contains gpolish 0.7.0 and gr2mpl 0.6.0. The changes listed under 0
 - Gallery: every code block runs as it stands in a fresh Stata session; `gallery/make_page.py` builds the pages, with `--check` and `--blocks` modes, and stops on an unknown argument without writing a file.
 - README and help: `geom` is listed with the commands that stop with r(198) on graphs that are not twoway graphs, and the bracket label is described as fixed and not checked against the data.
 - Help files and docs/OBJECT_MODEL.md updated for each change above.
+- README and `gpolish` help: the quick-start example sets short variable labels for the four `uslifeexp` series ("White women", "White men", "Black women", "Black men"), so it gives the end labels shown in images/before_after.png and no longer prints the end-label width note.
+- README and benchmark/README.md: `gpolish` has the highest clean share with every country labelled "of the five methods at their defaults", and the release 0.6.0 settings also score higher than the tuned ones with 19 of 74 cars labelled (0.89 against 0.84).
 
 ## 0.6.1 (2026-11-17)
 

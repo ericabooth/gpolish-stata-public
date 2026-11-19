@@ -263,6 +263,10 @@ It stops with an error when {cmd:endlabel}, {cmd:callout}, {cmd:note}, {cmd:arro
 {title:Examples}
 
 {phang2}{cmd:. sysuse uslifeexp, clear}{p_end}
+{phang2}{cmd:. label var le_wfemale "White women"}{p_end}
+{phang2}{cmd:. label var le_wmale "White men"}{p_end}
+{phang2}{cmd:. label var le_bfemale "Black women"}{p_end}
+{phang2}{cmd:. label var le_bmale "Black men"}{p_end}
 {phang2}{cmd:. graph set window fontface "Open Sans"}{p_end}
 {phang2}{cmd:. line le_wfemale le_wmale le_bfemale le_bmale year, scheme(pypolish) legend(off) xsize(7.5) ysize(5) title("Life expectancy rose for every group", size(14pt))}{p_end}
 {phang2}{cmd:. gpolish}{p_end}

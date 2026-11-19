@@ -1575,13 +1575,13 @@ program _gpl_bracket
         _gpl_inplot bracket x0 `name' `b0x' `b0y' note
         local o0 `_gpl_out'
         _gpl_inplot bracket x1 `name' `b1x' `b1y' note
-        if `o0' | `_gpl_out' di as txt "      add yscale(range(#)) or xscale(range(#)) to the graph command to make room for the bracket"
+        if `o0' | `_gpl_out' di as txt "      add xscale(range(#)) or yscale(range(#)) to the graph command to make room for the bracket"
     }
     else {
         _gpl_inplot bracket y0 `name' `b0x' `b0y' note
         local o0 `_gpl_out'
         _gpl_inplot bracket y1 `name' `b1x' `b1y' note
-        if `o0' | `_gpl_out' di as txt "      add xscale(range(#)) or yscale(range(#)) to the graph command to make room for the bracket"
+        if `o0' | `_gpl_out' di as txt "      add yscale(range(#)) or xscale(range(#)) to the graph command to make room for the bracket"
     }
     _gpl_geom, name(`name')
     * device units run left to right and bottom to top on screen whatever the axis direction
