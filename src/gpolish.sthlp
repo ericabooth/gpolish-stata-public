@@ -35,8 +35,8 @@
 {p 8 16 2}{cmd:gpolish arrow,} {opt fr:om(x y)} {opt to(x y)}
 [{opt cur:ve(#)} {opt head:size(#)} {opt seg:ments(#)} {opt shr:ink(#)} {opt lc:olor(rgb)} {opt lw:idth(str)} {opt xax:is(#)} {opt yax:is(#)} {opt name(graphname)}]
 
-{p 8 16 2}{cmd:gpolish ptlabel} {it:varname} {ifin}{cmd:,} {opt x(varname)} {opt y(varname)}
-[{opt siz:e(#)} {opt col:or(rgb)} {opt off:set(#)} {opt ms:ize(#)} {opt halo} {opt nolead:er} {opt lc:olor(rgb)} {opt lw:idth(str)} {opt xax:is(#)} {opt yax:is(#)} {opt maxl:abels(#)} {opt undrawn} {opt name(graphname)}]
+{p 8 16 2}{cmd:gpolish ptlabel} {it:varname} {ifin} [{cmd:,} {opt x(varname)} {opt y(varname)}
+{opt siz:e(#)} {opt col:or(rgb)} {opt off:set(#)} {opt ms:ize(#)} {opt halo} {opt nolead:er} {opt lc:olor(rgb)} {opt lw:idth(str)} {opt xax:is(#)} {opt yax:is(#)} {opt maxl:abels(#)} {opt undrawn} {opt name(graphname)}]
 
 {p 8 16 2}{cmd:gpolish bracket} [{it:"label line 1"} ...]{cmd:,} {c -(}{opt x(#)} {opt y0(#)} {opt y1(#)} [{opt left}] | {opt y(#)} {opt x0(#)} {opt x1(#)} [{opt below}]{c )-} [{opt tick(#)} {opt gap(#)} {opt siz:e(#)} {opt col:or(rgb)} {opt lc:olor(rgb)} {opt lw:idth(str)}
 {opt xax:is(#)} {opt yax:is(#)} {opt name(graphname)}]
@@ -191,7 +191,11 @@ so labels keep clear of the markers. {opt offset(#)} is the gap in points betwee
 {cmd:ptlabel} reads the data in memory, so give it the same {it:if} and {it:in} as the graph command. Selected
 observations whose {opt x()} and {opt y()} values match no point that a plot of {opt y()} against {opt x()} draws
 are skipped with a note that gives how many; {opt undrawn} labels them anyway.
-{opt x()} and {opt y()} name the plotted variables. Their values are read on the scales of the plot region
+{opt x()} and {opt y()} name the plotted variables. They may be left out when the graph has exactly one plot
+that draws markers ({cmd:scatter} or {cmd:connected}) from two variables in memory; {cmd:ptlabel} then uses that
+plot's x and y variables. If one of the two options is given, the plot must also draw that variable. With no such
+plot, or with more than one, {cmd:ptlabel} stops with r(198), lists the plots it found, and asks for {opt x()} and
+{opt y()}, because it cannot tell which points to label. Their values are read on the scales of the plot region
 where a plot draws {opt y()} against {opt x()}, so points plotted on a second axis need no option. When no plot
 draws that pair, the first plot region that carries an axis {opt y()} is drawn on and an axis {opt x()} is drawn
 on is used. A variable that no plot draws puts no condition on the region, so when neither is drawn the first

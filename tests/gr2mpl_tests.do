@@ -1293,6 +1293,54 @@ capture gr2mpl, lwscale(0) saving("tests/out/r_scale.png") replace
 ok _rc == 198
 erase "tests/out/r_scale.png"
 
+* -- yaxis(2) fills keep Stata's command order against axis-1 fills: a bar on
+*    axis 2 drawn after an area on axis 1 sits on top of it, and the reverse
+sysuse auto, clear
+twoway area mpg weight in 1/20, sort || bar price weight in 1/20, yaxis(2)
+rchk y2fill_after
+has "panel1.y2_on_top=1"
+twoway bar price weight in 1/20, yaxis(2) || area mpg weight in 1/20, sort
+rchk y2fill_before
+has "panel1.y2_on_top=0"
+twoway (scatter mpg weight) (bar price weight in 1/20, yaxis(2))
+rchk y2fill_only
+has "panel1.y2_on_top=0"
+
+* -- graph dot: legend keys copy the plotted marker (marker(#, ...)), and the
+*    default dot marker is as large as a default twoway marker
+graph dot (mean) mpg trunk, over(foreign) marker(1, msize(huge) mcolor(red))
+rchk dot_keys
+getv panel1.dot_ms
+local lo = real(substr("`r(val)'", 1, strpos("`r(val)'", ",") - 1))
+local hi = real(substr("`r(val)'", strpos("`r(val)'", ",") + 1, .))
+getv panel1.dotkeys
+local k1 = substr("`r(val)'", 1, strpos("`r(val)'", "|") - 1)
+local k2 = substr("`r(val)'", strpos("`r(val)'", "|") + 1, .)
+ok substr("`k1'", 1, 6) == "ff0000"
+ok abs(real(substr("`k1'", 8, .)) - `hi') < 0.02
+ok abs(real(substr("`k2'", 8, .)) - `lo') < 0.02
+graph dot mpg, over(rep78)
+rchk dot_default
+getv panel1.dot_ms
+local dms = real(substr("`r(val)'", 1, strpos("`r(val)'", ",") - 1))
+twoway scatter mpg weight
+rchk dot_twref
+near panel1.marker_ms `dms' 0.02
+
+* -- aspectratio() in a single graph: the axis titles stay beside the centred plot
+twoway scatter mpg weight, aspectratio(1) xsize(3) ysize(5)
+rchk aspect_titles
+getv xtitle_gap
+ok real("`r(val)'") > 0 & real("`r(val)'") < 0.1
+getv ytitle_gap
+ok real("`r(val)'") > 0 & real("`r(val)'") < 0.05
+twoway scatter mpg weight, aspectratio(0.4) title("T") note("n")
+rchk aspect_titles2
+getv xtitle_gap
+ok real("`r(val)'") > 0 & real("`r(val)'") < 0.1
+getv ytitle_gap
+ok real("`r(val)'") > 0 & real("`r(val)'") < 0.05
+
 * -- gr2mpl doctor returns r(mplok) as a number
 gr2mpl doctor
 ok r(mplok) == 1

@@ -6,7 +6,8 @@ abstract: >-
   gpolish edits a Stata twoway graph after it is drawn: it labels lines at
   their ends, places point labels where they fit (with leader lines when a
   point is crowded), adds callouts, notes, arrows, braces and brackets, and
-  tidies the axes, title and legend. The result is still a Stata graph.
+  colours legend labels to match their keys. Run with no subcommand, it makes
+  the title bold and removes the y-axis line and tick marks. The result is still a Stata graph.
   gr2mpl redraws a Stata graph held in memory with matplotlib, including every
   gpolish edit. The repository includes a reproducible label-placement
   benchmark against Stata's mlabel(), labrepel, adjustText and ggrepel.

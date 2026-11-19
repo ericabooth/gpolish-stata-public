@@ -1868,13 +1868,77 @@ program _gpl_legend
     }
 end
 
+* ptlabel: x() and y() left out. They are read from the graph only when exactly one plot draws
+* markers (scatter or connected) from two variables that exist in memory and agree with any x() or
+* y() given. Otherwise ptlabel stops and says what it found, because a guess could put the labels
+* on the wrong points. r(x), r(y)
+program _gpl_ptinfer, rclass
+    args name xg yg
+    _gpl_plots `name'
+    local n = r(n)
+    local regs `r(regs)'
+    local found 0
+    local other
+    forvalues i = 1/`n' {
+        local j : word `i' of `regs'
+        local pr .`name'.plotregion`j'
+        local t ``pr'.plot`i'.type.setting'
+        local yn
+        local xn
+        capture {
+            local yv = ``pr'.plot`i'.yvar'
+            local xv = ``pr'.plot`i'.xvar'
+            local yn ``pr'.plot`i'.serset.sers[`yv'].name'
+            local xn ``pr'.plot`i'.serset.sers[`xv'].name'
+        }
+        if !inlist("`t'", "scatter", "connected") {
+            if "`t'"!="" local other `other' `t'
+            continue
+        }
+        capture confirm numeric variable `yn' `xn', exact
+        if _rc | "`yn'"=="" | "`xn'"=="" {
+            local other `other' `t'(variables not in memory)
+            continue
+        }
+        if ("`xg'"!="" & "`xg'"!="`xn'") | ("`yg'"!="" & "`yg'"!="`yn'") {
+            local other `other' `t'(`yn' `xn')
+            continue
+        }
+        local ++found
+        local plist `plist' `t'(`yn' `xn')
+        local fx `xn'
+        local fy `yn'
+    }
+    if `found'!=1 {
+        di as err "gpolish ptlabel: specify x() and y()."
+        if `found'==0 {
+            di as err "  ptlabel reads them from the graph only when one scatter or connected plot draws two variables in memory;"
+            di as err "  graph {bf:`name'} has none" _c
+            if "`other'"!="" di as err " (plots found: `other')" _c
+            di as err "."
+        }
+        else {
+            di as err "  graph {bf:`name'} has `found' scatter or connected plots that could be labelled: `plist';"
+            di as err "  ptlabel cannot tell which one to label."
+        }
+        exit 198
+    }
+    return local x `fx'
+    return local y `fy'
+end
+
 * ================================================================ ptlabel
 program _gpl_ptlabel
-    syntax varname [if] [in], x(varname numeric) y(varname numeric) [name(string) SIZe(real 8.6) ///
+    syntax varname [if] [in], [x(varname numeric) y(varname numeric) name(string) SIZe(real 8.6) ///
         COLor(string) OFFset(real 3) MSize(real 6) HALO noLEADer LColor(string) LWidth(string) ///
         XAXis(string) YAXis(string) MAXLabels(integer 1000) UNDRAWN]
     _gpl_name `name'
     local name `r(name)'
+    if "`x'"=="" | "`y'"=="" {
+        _gpl_ptinfer `name' "`x'" "`y'"
+        local x `r(x)'
+        local y `r(y)'
+    }
     _gpl_poschk ptlabel size `size'
     _gpl_poschk ptlabel msize `msize' nonneg
     _gpl_poschk ptlabel offset `offset' nonneg

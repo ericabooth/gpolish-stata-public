@@ -508,8 +508,14 @@ class Panel:
             self.ax2.spines["bottom"].set_visible(False)
             # filled layers on the second axis go behind the first axis
             fills = {"bar", "rbar", "area", "rarea", "spike"}
-            on2 = [p for p in s.get("plots", []) if str(p.get("yaxis")) == "2"]
-            behind = bool(on2) and all(p.get("type") in fills for p in on2)
+            plots = s.get("plots", [])
+            on2 = [j for j, p in enumerate(plots) if str(p.get("yaxis")) == "2"]
+            fills1 = [j for j, p in enumerate(plots) if str(p.get("yaxis")) != "2"
+                      and p.get("type") in fills]
+            # Stata draws plots in command order: put axis 2 behind only when its
+            # fills come before every axis-1 fill
+            behind = (bool(on2) and all(plots[j].get("type") in fills for j in on2)
+                      and (not fills1 or max(on2) < min(fills1)))
             if behind:
                 self.ax2.set_zorder(self.ax.get_zorder() - 1)
                 self.ax.patch.set_visible(False)
@@ -1610,8 +1616,10 @@ class Panel:
                     continue
                 c = colour(m.get("color"))
                 sz = num(m.get("size"))
+                if arr == "points":
+                    self._dotms = getattr(self, "_dotms", []) + [self.bar_ms(sz, size, True)]
                 ax.plot([x], [y], ls="None", marker=MARKERS.get(str(m.get("symbol")), "o"),
-                        ms=max(size * 0.6, self.pts(sz) * self.f.msscale * self.gmult) if sz else size,
+                        ms=self.bar_ms(sz, size, arr == "points"),
                         mfc=c if arr == "points" else "white", mec=c if arr == "outsides" else "white",
                         mew=1.0 if arr == "outsides" else 0.6, zorder=3)
         self.bar_seen = seen
@@ -1718,6 +1726,15 @@ class Panel:
         for a in sup:
             a.xyann = (0, off)
 
+    def bar_ms(self, sz, size, dot=False):
+        """Marker diameter for graph dot points and box-plot outside values. Dot
+        markers use Stata's marker scale (as twoway markers do)."""
+        if not sz:
+            return size
+        if dot:
+            return max(2.0, self.pts(sz) * MSTATA * self.f.msscale * self.gmult)
+        return max(size * 0.6, self.pts(sz) * self.f.msscale * self.gmult)
+
     def bar_legend(self):
         leg = self.s.get("legend", {})
         entries = [e for e in leg.get("entries", []) if e[1]]
@@ -1731,8 +1748,20 @@ class Panel:
             if self.f.palette == "house":
                 c = to_rgba(HOUSE[self.bar_seen.get(key, k) % len(HOUSE)])
             if is_marker:
-                handles.append(plt.Line2D([], [], ls="None", marker="o", ms=6, mfc=c,
-                                          mec="white"))
+                # the key copies the plotted marker of series k (marker(#, ...))
+                mc = e[2] if len(e) > 2 else ""
+                mk = " ".join(str(mc).split())
+                if self.f.palette == "house":
+                    c = to_rgba(HOUSE[self.bar_seen.get(mk, k) % len(HOUSE)]) if mk else c
+                elif mc:
+                    c = stata_color(mc, c)
+                sym = MARKERS.get(str(e[3]), "o") if len(e) > 3 else "o"
+                sz = num(e[4]) if len(e) > 4 else None
+                kms = self.bar_ms(sz, 6.0, True)
+                handles.append(plt.Line2D([], [], ls="None", marker=sym, ms=kms, mfc=c,
+                                          mec="white", mew=0.6))
+                self._dotkeys = getattr(self, "_dotkeys", []) + [
+                    "%02x%02x%02x:%.2f" % (*(round(255 * v) for v in c[:3]), kms)]
             else:
                 handles.append(plt.Rectangle((0, 0), 1, 1, facecolor=c, edgecolor="none"))
         texts = [clean_text(e[1]) for e in entries]
@@ -2067,6 +2096,7 @@ class Figure:
         yt_right = (bool(self.ytitle) and not self.multi and p0 is not None
                     and getattr(p0, "yside", "left") == "right")
         self._ytitle_artist = None
+        self._ytitle_any = None
         if title:
             arts.append(fig.text(left, ycur / H, title, fontsize=fs_title, fontweight="bold",
                                  color=INK, ha="left", va="top", linespacing=1.15))
@@ -2079,11 +2109,14 @@ class Figure:
             arts.append(a)
             if right:
                 self._ytitle_artist = a
+            if sub_is_ytitle:
+                self._ytitle_any = a
             ycur -= fs_sub * 1.3 * (subtitle.count("\n") + 1) + 2 * k
         if ytitle:
             a = fig.text(1 - left if yt_right else left, ycur / H, ytitle, fontsize=fs_y,
                          color=MUTED, ha="right" if yt_right else "left", va="top")
             arts.append(a)
+            self._ytitle_any = a
             if yt_right:
                 self._ytitle_artist = a
             ycur -= fs_y * 1.35
@@ -2180,6 +2213,31 @@ class Figure:
             fig.canvas.draw()
             rr = fig.canvas.get_renderer()
             self._ytitle_artist.set_x(max(p.tightbbox(rr).x1 for p in self.panels))
+        self.aspect_titles()
+
+    def aspect_titles(self):
+        """aspectratio() in a single graph shrinks and centres the plot region; the
+        axis titles move with it, as Stata keeps them beside the axes."""
+        asp = num(self.s.get("aspect"), 0.0) or 0.0
+        if asp <= 0 or self.multi or len(self.panels) != 1:
+            return
+        fig, p = self.fig, self.panels[0]
+        fig.canvas.draw()
+        rr = fig.canvas.get_renderer()
+        pos = p.ax.get_position()  # the active (shrunk) box after drawing
+        bb = p.tightbbox(rr)  # figure fraction, tick labels included
+        gap = 6 * self.k / (self.ys * 72.0)
+        xt = self._xtitle_artist
+        if xt is not None:
+            xt.set_x((pos.x0 + pos.x1) / 2)
+            xt.set_va("top")
+            xt.set_y(bb.y0 - gap)
+        yt = self._ytitle_any
+        if yt is not None:
+            # house style: the y title sits above the plot, flush with its tick labels
+            yt.set_va("bottom")
+            yt.set_y(pos.y1 + gap)
+            yt.set_x(bb.x1 if yt is self._ytitle_artist else bb.x0)
 
     def info_lines(self):
         """A plain-text record of what was drawn (render_info.txt in the spec
@@ -2203,6 +2261,18 @@ class Figure:
             out.append(f"title_fs={texts[0].get_fontsize():.2f}")
         for a in texts:
             out.append(f"figtext={a.get_text()}|{a.get_fontsize():.2f}")
+        # where the axis titles sit relative to the first panel's drawn plot box
+        # (figure fraction): x title gap below the box, y title gap above it
+        if self.panels:
+            pos0 = self.panels[0].ax.get_position()
+            xa = getattr(self, "_xtitle_artist", None)
+            if xa is not None:
+                xb = xa.get_window_extent(r).transformed(fig.transFigure.inverted())
+                out.append(f"xtitle_gap={pos0.y0 - xb.y1:.3f}")
+            ya_ = getattr(self, "_ytitle_any", None)
+            if ya_ is not None:
+                yb = ya_.get_window_extent(r).transformed(fig.transFigure.inverted())
+                out.append(f"ytitle_gap={yb.y0 - pos0.y1:.3f}")
         ya = getattr(self, "_ytitle_artist", None)
         if self.ytitle:
             out.append("ytitle_side=" + ("right" if ya is not None else "left"))
@@ -2369,6 +2439,17 @@ class Figure:
                     kind = "h" if abs(s0[0][1] - s0[-1][1]) < 1e-12 else "v"
                     out.append(f"{tag}.segments={kind}{len(c.get_segments())}")
             out.append(f"{tag}.patches={len(ax.patches)}")
+            if p.ax2 is not None:
+                out.append(f"{tag}.y2_on_top={int(p.ax2.get_zorder() > ax.get_zorder())}")
+            mk = [ln for ln in ax.lines if ln.get_marker() not in (None, "None", "", " ")]
+            if mk:
+                out.append(f"{tag}.marker_ms={mk[0].get_markersize():.2f}")
+            dk = getattr(p, "_dotkeys", None)
+            if dk:
+                out.append(f"{tag}.dotkeys=" + "|".join(dk))
+            dm = getattr(p, "_dotms", None)
+            if dm:
+                out.append(f"{tag}.dot_ms={min(dm):.2f},{max(dm):.2f}")
         return out
 
     def missing_glyphs(self):

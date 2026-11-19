@@ -1,5 +1,22 @@
 # Changelog
 
+## Unreleased
+
+### gpolish
+
+- `gpolish ptlabel` works out `x()` and `y()` from the graph when either is left out. A plot qualifies when it draws markers (`scatter` or `connected`), both of its variables are numeric variables in memory, and it draws any `x()` or `y()` that was given. When exactly one plot qualifies, its variables fill in the missing options, so `scatter price mpg` followed by `gpolish ptlabel make if price>12000` now works; before, it stopped with "option x() required". In every other case it stops with r(198), "specify x() and y()", and says why: with more than one qualifying plot it lists them and says it cannot tell which one to label; with none it lists the plots it found.
+
+### gr2mpl
+
+- Fill order with `yaxis(2)`: the second axis is drawn behind axis 1 only when all its plots are fills and they all come before every axis-1 fill. With `area` on axis 1 followed by `bar, yaxis(2)`, the bars now draw over the area, as in Stata. The reverse order still puts the bars behind.
+- `graph dot` markers: each series' marker colour, symbol and size is written into its legend entry, and the legend key copies them.
+
+### Documentation
+
+- README and benchmark/README.md: the search's label box is described as a core 0.4 font sizes tall, padded by 3 points on every side. The padded box is about 9.4 points tall at 8.6-point type, taller than the 8.65-point drawn text; only the core is shorter. The search ranks positions by overlap cost and does not require the padded box to be clear. The explanation that unclean labels touch only in a band the search's box does not cover is removed, since the padded box covers that band.
+- README and benchmark/README.md: the original row order is no longer called one of the 10 row orders. Its clean share with every car labelled (0.59) equals the highest of 10 separate random orders (median 0.54). The 0.7.0 entries below that say "best of 10 row orders" should be read this way.
+- README and CITATION.cff say what plain `gpolish` does (bold title, no y-axis line or tick marks) instead of "tidies the axes".
+
 ## 0.7.0 (2026-11-18)
 
 This release contains gpolish 0.7.0 and gr2mpl 0.6.0. The changes listed under 0.6.1 below were not released under their own tag and are part of this release too.

@@ -1067,9 +1067,14 @@ program _g2m_bar
         local lab `"``g'.legend.plotregion1.label[`k'].text[1]'"'
         local c ``g'.barstyles[`k'].area.shadestyle.color.setting'
         local c : list retokenize c
+        * graph dot: the marker style of series k, for its legend key
+        local mc ``g'.barstyles[`k'].marker.fillcolor.setting'
+        local mc : list retokenize mc
+        local ms ``g'.barstyles[`k'].marker.symbol.setting'
+        local mz ``g'.barstyles[`k'].marker.size.gmval'
         _g2m_esc `"`lab'"'
         if `k' > 1 file write `fh' ", "
-        file write `fh' `"["`c'", "`s(esc)'"]"'
+        file write `fh' `"["`c'", "`s(esc)'", "`mc'", "`ms'", "`mz'"]"'
     }
     file write `fh' "]}," _n
 end

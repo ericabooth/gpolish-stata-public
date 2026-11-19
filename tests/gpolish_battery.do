@@ -1654,6 +1654,45 @@ chk r8_ptlabel_no_note r(n)==0
 * the data in memory are unchanged
 chk r8_ptlabel_data_kept _N==74
 
+* x() and y() left out: read from the one scatter plot
+scatter price mpg, name(r9a, replace)
+gpolish ptlabel make if price>12000
+quietly count if price>12000
+local na = r(N)
+ntext r9a added_text
+chk r9_ptlabel_infer r(k)==`na'
+* same labels as with x() and y() given
+scatter price mpg, name(r9b, replace)
+gpolish ptlabel make if price>12000, x(mpg) y(price)
+chk r9_ptlabel_infer_same `"`.r9a.plotregion1.added_text[1].text[1]'"'==`"`.r9b.plotregion1.added_text[1].text[1]'"'
+* connected plot also qualifies; y() alone is filled in
+sort mpg
+twoway connected price mpg, name(r9c, replace)
+capture noisily gpolish ptlabel make if price>12000, y(price)
+chk r9_ptlabel_infer_connected _rc==0
+* two scatter plots: cannot infer
+twoway scatter price mpg || scatter price weight, name(r9d, replace)
+capture noisily gpolish ptlabel make if price>12000
+chk r9_ptlabel_two_plots _rc==198
+* given y() picks one of the two? both draw price, still two: error
+capture noisily gpolish ptlabel make if price>12000, y(price)
+chk r9_ptlabel_two_plots_y _rc==198
+* x() given narrows two plots to one
+capture noisily gpolish ptlabel make if price>12000, x(weight)
+chk r9_ptlabel_x_narrows _rc==0
+* a line plot draws no markers: cannot infer
+twoway line price mpg, name(r9e, replace)
+capture noisily gpolish ptlabel make if price>12000
+chk r9_ptlabel_line_err _rc==198
+* variables not in memory: cannot infer
+preserve
+gen double zz = price
+scatter zz mpg, name(r9f, replace)
+drop zz
+capture noisily gpolish ptlabel make if price>12000
+chk r9_ptlabel_novar_err _rc==198
+restore
+
 gpolish limits
 
 if `"`_wf0'"'!="" graph set window fontface `"`_wf0'"'
