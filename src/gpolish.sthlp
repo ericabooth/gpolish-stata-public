@@ -118,7 +118,7 @@ farthest out on the labeled side, so a line that ends early still has its value 
 {opt dots} adds a marker at each line end. {opt dotsize(#)} sets its size in points (default 5.5) and implies {opt dots}. {opt color()} sets one text color for all labels instead of each line's color.
 {opt side(left)} labels the left ends of the lines instead of the right; on a reversed axis
 ({cmd:xscale(reverse)}) the labels follow the screen, not the data.
-When {opt side(left)} switches the legend off, {cmd:endlabel} adds a right margin if the last x tick label of axis 1 would otherwise run past the right edge of the graph.
+{cmd:endlabel} adds a right margin if the last x tick label of axis 1 would otherwise run past the right edge of the graph: with {opt side(left)} when the legend is switched off, and with the labels on the right when half of that tick label is wider than the room made for the labels (for example on a clock-time axis with short labels). The right side then keeps the larger of the two.
 Normally the labels go into the graph margin beside the plot. When a y axis is drawn on the labeled side
 (the usual left axis with {opt side(left)}, or an axis moved right with {cmd:yscale(alt)} or {cmd:yaxis(2)}),
 the room is made inside the plot region instead, so the labels sit between the axis and the lines.
@@ -216,8 +216,9 @@ grows quickly with the number of labels (about 40 seconds for 600). {opt maxlabe
 than # points before any edit; the default is 1000.
 Placement avoids the same drawn objects as an automatic {cmd:gpolish callout}.
 The package's benchmark (benchmark/README.md in the source repository) compares {cmd:ptlabel} with {cmd:labrepel},
-adjustText and ggrepel. {cmd:ptlabel} has the highest share of clean labels when a subset of points is labelled
-and on the synthetic test graphs. With every point labelled on crowded real graphs, ggrepel tuned on the same
+adjustText and ggrepel. {cmd:ptlabel} has the highest share of clean labels when a subset of points is labelled.
+On the all-labelled synthetic test graphs it is level with ggrepel tuned on the same tuning graphs
+(0.99 against 0.98 with 30 points) or slightly ahead (0.92 against 0.89 with 60 points). With every point labelled on crowded real graphs, ggrepel tuned on the same
 tuning graphs scores higher: 0.68 against 0.59 with every car in {cmd:auto} labelled and
 0.78 against 0.68 ({cmd:census}) and 0.88 against 0.56 ({cmd:states}) with all 50 states
 labelled. With every country in {cmd:lifeexp} labelled the two are about level (0.76 against 0.75 in the
@@ -290,7 +291,7 @@ It stops with an error when {cmd:endlabel}, {cmd:callout}, {cmd:note}, {cmd:arro
 {p2col:Labels wider than the plot region}{cmd:ptlabel} skips them with a note; an automatically placed callout or note stops with an error; {cmd:gpolish} does not wrap text itself{p_end}
 {p2col:{cmd:ptlabel} and points the graph leaves out}a selected point is matched to the drawn points by its {opt x()} and {opt y()} values; the check is made only when a plot draws the {opt y()} variable against the {opt x()} variable, so a graph of other variables (for example a transformed copy) is not checked; an observation left out of the graph that has the same values as a drawn point is still labeled{p_end}
 {p2col:Zero or negative positions on a log axis}{cmd:arrow}, {cmd:brace} and {cmd:bracket} stop with r(198) before any edit; {cmd:ptlabel} skips such points{p_end}
-{p2col:{cmd:endlabel, side(left)} and the last x tick label}the right margin added after the legend is switched off is sized for the tick labels of x axis 1 drawn horizontally; a second x axis or angled tick labels are not measured, and {cmd:graphregion(margin())} can add room by hand{p_end}
+{p2col:{cmd:endlabel} and the last x tick label}the right margin added for the last x tick label (with {opt side(left)} after the legend is switched off, or beside labels on the right) is sized for the tick labels of x axis 1 drawn horizontally; a second x axis or angled tick labels are not measured, and {cmd:graphregion(margin())} can add room by hand{p_end}
 {p2col:Plot-region outlines}when a scheme such as {cmd:s1mono} outlines the plot region and the end labels sit outside it, {cmd:endlabel} starts them {opt xgap()} points beyond the outline rather than beyond the line end. An outline counts as drawn when its colour differs from the graph background, so an outline turned off with {cmd:plotregion(lstyle(none))} still moves the labels out{p_end}
 {p2col:Positions on a second axis}{opt at()}, {opt to()} and {opt from()} use the first axes unless {opt xaxis()} or {opt yaxis()} says otherwise{p_end}
 {p2col:Graphs edited by {cmd:gpolish} 0.6.1 or earlier}these carry no {cmd:endlabel} record; their end labels are found in the graph's edit log (see {help gpolish##technical:Technical notes}){p_end}

@@ -1442,4 +1442,31 @@ ok _rc != 0
 gr2mpl doctor
 ok r(mplok) == 1
 
+* -- r12: a graph made with nodraw gives the same spec as the displayed graph, and the
+*    graph that was current stays current
+sysuse auto, clear
+foreach c in "scatter mpg weight" "graph bar mpg, over(rep78)" {
+    local o = cond(strpos(`"`c'"', ","), "", ",")
+    `c' `o' name(r12nd, replace) nodraw
+    scatter price mpg, name(r12cur, replace)
+    gr2mpl, name(r12nd) saving("tests/out/r_r12nd_a.png") specdir("tests/spec/r_r12nd_a") keepspec replace
+    quietly graph describe
+    ok "`r(fn)'" == "r12cur"
+    graph display r12nd
+    gr2mpl, name(r12nd) saving("tests/out/r_r12nd_b.png") specdir("tests/spec/r_r12nd_b") keepspec replace
+    local sa = ustrregexra(fileread("tests/spec/r_r12nd_a/spec.json"), "r_r12nd_a", "")
+    local sb = ustrregexra(fileread("tests/spec/r_r12nd_b/spec.json"), "r_r12nd_b", "")
+    ok `"`macval(sa)'"' == `"`macval(sb)'"'
+    * tick and category labels are filled in (empty before the graph is drawn)
+    ok strpos(`"`macval(sa)'"', `""ticks": [["') > 0 | strpos(`"`macval(sa)'"', `""grpaxis": [["') > 0
+}
+
+* -- r12: xaxis(1 2) names the second x axis it does not draw
+twoway scatter mpg weight, xaxis(1 2) yaxis(1 2)
+rchk r12_x12
+ok strpos(`"$R_UNSUP"', "second x axis") > 0
+scatter mpg weight
+rchk r12_x1
+ok strpos(`"$R_UNSUP"', "second x axis") == 0
+
 di as res "$R_N checks passed"

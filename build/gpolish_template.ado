@@ -346,7 +346,7 @@ end
 * an endlabel record, kept in the graph itself as a hidden text box so that it lasts through
 * graph save and graph use and belongs to this graph only. Its text is
 * gpolish-endlabel|<text boxes>|<markers>|<side>|<margin>|<legend>|<where>|<first-line lengths>|<right margin>|<legend margin>
-* (the last field, kept for side(left) only, is the right graph margin that holds the last x tick label)
+* (the ninth field is the right graph margin added to hold the last x tick label of axis 1)
 program _gpl_regget, rclass
     args name
     return local ok 0
@@ -1106,10 +1106,13 @@ program _gpl_endlabel
     * the plot region moved: redraw so the transforms below are current
     gr_draw `name'
     * With the labels on the left and the legend switched off, the plot region can widen to the
-    * right edge of the graph, and the x tick label at that end then runs off the graph. A right
-    * margin is added that holds the overhang of every x tick label of axis 1, with 15% added
-    * to the estimated width (rendered text runs a little wider than the font tables), plus 4 points.
-    if "`side'"=="left" & `leg' {
+    * right edge of the graph, and the x tick label at that end then runs off the graph. With the
+    * labels on the right, the margin made for short labels can be narrower than half of a wide
+    * tick label (a clock-time axis, say). In both cases a right margin is added that holds the
+    * overhang of every x tick label of axis 1, with 15% added to the estimated width (rendered
+    * text runs a little wider than the font tables), plus 4 points. On the right, the room left
+    * is then the larger of the end-label margin and the tick-label overhang.
+    if ("`side'"=="left" & `leg') | "`side'"=="right" {
         _gpl_geom, name(`name')
         local gpi0 = r(gpi)
         local rel0 = r(relperpt)

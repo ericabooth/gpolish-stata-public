@@ -57,6 +57,24 @@ program gr2mpl, rclass
         di as err "graph `name' not found in memory"
         exit 111
     }
+    * a graph made with nodraw has no tick positions or label layout until it is
+    * drawn; draw it with graphics off (no window opens or changes), then make the
+    * graph that was current before current again
+    if inlist(`"``g'.gdi_x1'"', "", ".") {
+        capture quietly graph describe
+        local cur `"`r(fn)'"'
+        local gset `c(graphics)'
+        set graphics off
+        capture quietly graph display `name'
+        local drc = _rc
+        if `"`cur'"' != "" & `"`cur'"' != `"`name'"' capture quietly graph display `cur'
+        set graphics `gset'
+        if `drc' | inlist(`"``g'.gdi_x1'"', "", ".") {
+            di as err "gr2mpl: graph `name' has not been drawn (nodraw); type graph display `name' and try again"
+            exit 198
+        }
+        di as txt "note: graph `name' was made with nodraw; gr2mpl drew it with graphics off to read its axes"
+    }
     _g2m_family `g'
     local fam `s(fam)'
     if !inlist("`fam'", "twoway", "bar", "by", "combine", "matrix") {
@@ -263,6 +281,20 @@ program gr2mpl, rclass
 
     * layers the renderer could not draw
     local unsupported
+    * a second x axis (xaxis(1 2), or a plot on xaxis(2)) is not drawn
+    local x2 0
+    if "`fam'" == "twoway" {
+        if "``g'.xaxis2.draw_view.setting'" == "yes" local x2 1
+    }
+    else if inlist("`fam'", "by", "combine") {
+        forvalues k = 1/`=``g'.graphs.arrnels'' {
+            if "``g'.graphs[`k'].xaxis2.draw_view.setting'" == "yes" local x2 1
+        }
+    }
+    if `x2' {
+        di as txt "note: gr2mpl did not draw the second x axis"
+        local unsupported "second x axis"
+    }
     capture confirm file "`specdir'/skipped.txt"
     if !_rc {
         tempname sk

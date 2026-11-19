@@ -150,12 +150,13 @@ To set the interpreter once, put {cmd:global GR2MPL_PYTHON "/path/to/python"} in
 {p2col:contour, contourline}layer skipped, with a note{p_end}
 {p2col:graph pie}refused{p_end}
 {p2col:a layer on a second x axis or a third y axis}layer skipped, with a note{p_end}
+{p2col:a second x axis, also with no layer on it, xaxis(1 2)}axis not drawn, with a note{p_end}
 {p2col:xline(), yline(), text() on those axes}skipped, with a note{p_end}
 {p2col:nested combine; by() graph inside combine}panel skipped, with a note{p_end}
 {p2line}
 
 {pstd}
-Skipped layers, panels and annotations are named in a note and listed in {cmd:r(unsupported)}.
+Skipped layers, panels, annotations and second x axes are named in a note and listed in {cmd:r(unsupported)}.
 
 
 {marker limits}{...}
@@ -181,6 +182,7 @@ Other differences are limits of the translation:
 {p 8 12 2}o Colours set by options in the graph command are kept: the fill of {cmd:graphregion()}, the fill of {cmd:plotregion()} in a single twoway graph or {cmd:graph bar}, the colour of {cmd:title()} and {cmd:subtitle()}, and in a single twoway graph the colours of {cmd:xtitle()}, {cmd:ytitle()} and of the tick labels set by {cmd:labcolor()} in {cmd:xlabel()} or {cmd:ylabel()}. {cmd:gr2mpl} reads these options from the command Stata stored with the graph, and only at the top level of its options: a {cmd:title()} or {cmd:subtitle()} inside {cmd:legend()} or {cmd:by()} does not set the graph title's colour. A {cmd:title()} written among a plot's own options inside its parentheses, as in {cmd:twoway (scatter y x, title("T", color(red)))}, applies to the whole graph in Stata and is read as the graph's. Colours that come only from the scheme (for example the blue-gray background of {cmd:scheme(economist)} or {cmd:scheme(s2color)}), colours set later in the Graph Editor or by {cmd:gr_edit}, and text colours in {cmd:by()} panels, {cmd:graph combine} members and {cmd:graph bar} axes are replaced by the house style.{p_end}
 {p 8 12 2}o {cmd:aspectratio()} is followed in a single graph, with the plot region centred and the axis titles moved with it. In {cmd:by()} panels and {cmd:graph combine} it is not followed, and each panel fills its cell.{p_end}
 {p 8 12 2}o Minor tick labels from {cmd:xmlabel()} and {cmd:ymlabel()} are drawn at 80% of the major tick-label size; ticks from {cmd:xmtick()} and {cmd:ymtick()} without labels are not drawn.{p_end}
+{p 8 12 2}o A graph made with {cmd:nodraw} holds no tick positions until Stata draws it. {cmd:gr2mpl} then draws it first with graphics off, so no Graph window opens or changes, prints a note, and makes the graph that was current before current again. The output is the same as for the displayed graph. If the graph cannot be drawn, {cmd:gr2mpl} stops with an error that asks for {cmd:graph display}.{p_end}
 {p 8 12 2}o {cmd:xscale(alt)} is not followed: the x axis stays at the bottom. When Stata draws both y axes on one side (as it does with a third y axis), the second is drawn on the other side.{p_end}
 {p 8 12 2}o Text does not land exactly where Stata puts it. Across the 22 graphs in the gallery, half of all text items sit within 10 points (about 3.5 mm) of their position in Stata's own export and 90 percent within 21 points; legend entries move the most, with a median of 26 points. Fewer than 1 item in 10 sits within 5 points. {cmd:gr2mpl} can also thin a long colour-key legend, dropping some of its labels. Compare the two images before using a translated figure in print.{p_end}
 

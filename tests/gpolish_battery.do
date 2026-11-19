@@ -1782,6 +1782,41 @@ chk r11_bracket_zerotick _rc==198
 capture gpolish bracket "pos tick", x(30) y0(5000) y1(10000) tick(8)
 chk r11_bracket_postick _rc==0
 
+* ---- r12: endlabel on the right keeps the last x tick label of a clock-time axis in the graph
+clear
+set obs 24
+gen double tt = tc(01jan2020 00:00:00) + (_n-1)*3600000
+format tt %tc
+gen y1 = sin(_n/3)
+gen y2 = cos(_n/3)
+* a small right graph margin, so the overhang shows under every scheme
+line y1 y2 tt, name(r12a, replace) graphregion(margin(r=1))
+local gm0 `.r12a.style.margin.gright.val'
+gpolish endlabel, name(r12a)
+local rec
+local nt `.r12a.plotregion1.added_text.arrnels'
+forvalues k = 1/`nt' {
+    if substr(`"`.r12a.plotregion1.added_text[`k'].text[1]'"', 1, 17)=="gpolish-endlabel|" local rec `"`.r12a.plotregion1.added_text[`k'].text[1]'"'
+}
+* field 9 of the record holds the right margin added for the tick label
+local rm = ustrregexra(`"`rec'"', "^([^|]*[|]){8}([^|]*).*$", "$2")
+chk r12_tick_rm "`rm'"!="" & real("`rm'")>0
+gpolish clear, name(r12a)
+chk r12_tick_clear abs(`.r12a.style.margin.gright.val' - `gm0') < 1e-6
+* a year axis with long labels needs no extra margin
+sysuse uslifeexp, clear
+label var le_male "Men in the United States"
+label var le_female "Women in the United States"
+line le_male le_female year, name(r12b, replace)
+gpolish endlabel, name(r12b)
+local nt `.r12b.plotregion1.added_text.arrnels'
+local rec
+forvalues k = 1/`nt' {
+    if substr(`"`.r12b.plotregion1.added_text[`k'].text[1]'"', 1, 17)=="gpolish-endlabel|" local rec `"`.r12b.plotregion1.added_text[`k'].text[1]'"'
+}
+local rm = ustrregexra(`"`rec'"', "^([^|]*[|]){8}([^|]*).*$", "$2")
+chk r12_tick_norm "`rm'"==""
+
 gpolish limits
 
 if `"`_wf0'"'!="" graph set window fontface `"`_wf0'"'
