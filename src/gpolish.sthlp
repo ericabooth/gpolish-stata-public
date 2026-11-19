@@ -36,7 +36,7 @@
 [{opt cur:ve(#)} {opt head:size(#)} {opt seg:ments(#)} {opt shr:ink(#)} {opt lc:olor(rgb)} {opt lw:idth(str)} {opt xax:is(#)} {opt yax:is(#)} {opt name(graphname)}]
 
 {p 8 16 2}{cmd:gpolish ptlabel} {it:strvar} {ifin}{cmd:,} {opt x(varname)} {opt y(varname)}
-[{opt siz:e(#)} {opt col:or(rgb)} {opt off:set(#)} {opt ms:ize(#)} {opt halo} {opt nolead:er} {opt lc:olor(rgb)} {opt lw:idth(str)} {opt xax:is(#)} {opt yax:is(#)} {opt name(graphname)}]
+[{opt siz:e(#)} {opt col:or(rgb)} {opt off:set(#)} {opt ms:ize(#)} {opt halo} {opt nolead:er} {opt lc:olor(rgb)} {opt lw:idth(str)} {opt xax:is(#)} {opt yax:is(#)} {opt maxl:abels(#)} {opt name(graphname)}]
 
 {p 8 16 2}{cmd:gpolish bracket} [{it:"label line 1"} ...]{cmd:,} {opt x(#)} {opt y0(#)} {opt y1(#)} [{opt tick(#)} {opt left} {opt gap(#)} {opt siz:e(#)} {opt col:or(rgb)} {opt lc:olor(rgb)} {opt lw:idth(str)}
 {opt xax:is(#)} {opt yax:is(#)} {opt name(graphname)}]
@@ -100,7 +100,9 @@ Labels that would overlap are moved apart, and the margin grows to fit the longe
 The legend is switched off; {opt keeplegend} keeps it.
 By default every line plot is labeled; {opt plots()} names the plots to label by number, and series with no
 nonmissing values are skipped with a note.
-Label text is the variable label; {opt labels()} overrides it, one label per plot in the order of {opt plots()}.
+Label text is the plot's legend text when it differs from the variable label, as it does for a fit line from {cmd:lfit} or a line drawn by {cmd:marginsplot}; otherwise it is the variable label.
+{opt labels()} overrides both, one label per plot in the order of {opt plots()}.
+When two plots would get the same label, {cmd:endlabel} prints a note, keeps the legend and suggests {opt labels()}.
 {opt values} adds the last value in a column, formatted with {opt format()}.
 {opt dots} adds a marker at each line end. {opt color()} sets one text color for all labels instead of each line's color.
 {opt side(left)} labels the left ends of the lines instead of the right; on a reversed axis
@@ -172,6 +174,10 @@ plot region is used. {opt yaxis(#)} and {opt xaxis(#)} limit the choice to the p
 When the {opt y()} variable is drawn only on other y axes than {opt yaxis()} names (or the {opt x()} variable
 only on other x axes than {opt xaxis()} names), or when no plot region carries an axis of each variable,
 {cmd:gpolish ptlabel} stops before any edit and names the option to use. Log axes are detected, and points with zero or negative values on a log axis are skipped.
+Selected points that fall outside the axis range of the plot region are skipped with a note that gives how many.
+{cmd:ptlabel} is meant for tens to a few hundred labels. Above 300 labels it prints a note, because run time
+grows quickly with the number of labels (about 40 seconds for 600). {opt maxlabels(#)} refuses a selection of more
+than # points before any edit; the default is 1000.
 Placement avoids the same drawn objects as an automatic {cmd:gpolish callout}.
 
 {phang}
@@ -189,6 +195,7 @@ line keep every line. If the legend uses {cmd:order()}, give the plot numbers in
 changes of {cmd:gpolish endlabel}, including those made by {cmd:gpolish} 0.6.1 or earlier (see
 {help gpolish##technical:Technical notes}). It keeps the title and axis edits of plain {cmd:gpolish}. It also
 removes anything added by hand in the Graph Editor.
+It reports how many objects it removed; when there is nothing to remove it makes no edit and prints nothing.
 
 {phang}
 {cmd:gpolish render} passes the graph to {helpb gr2mpl}, which redraws it with matplotlib and writes a PNG, PDF,
@@ -220,6 +227,7 @@ It stops with an error when a layout command is used on a graph that is not a tw
 {p2col:Labels that cannot all fit}{cmd:endlabel} reports how many pairs of labels overlap among the pairs it placed closer than {opt gap()} asks; {cmd:ptlabel} and automatic callouts report how many labels still overlap noticeably{p_end}
 {p2col:{cmd:graph bar}, {cmd:by()} and combined graphs}layout commands are refused with a message; plain {cmd:gpolish} still makes the title bold; {helpb gr2mpl} redraws them{p_end}
 {p2col:{cmd:graph pie}}layout commands are refused; {helpb gr2mpl} does not redraw pie charts either{p_end}
+{p2col:{cmd:ptlabel} on many points}run time grows quickly with the number of labels; a note is printed above 300 labels and more than {opt maxlabels()} (default 1000) are refused{p_end}
 {p2col:Positions on a second axis}{opt at()}, {opt to()} and {opt from()} use the first axes unless {opt xaxis()} or {opt yaxis()} says otherwise{p_end}
 {p2col:Graphs edited by {cmd:gpolish} 0.6.1 or earlier}these carry no {cmd:endlabel} record; their end labels are found in the graph's edit log (see {help gpolish##technical:Technical notes}){p_end}
 {p2line}

@@ -1078,6 +1078,80 @@ local hz `.ob2.plotregion1.added_text[1].style.horizontal.setting'
 local x0 = cond("`hz'"=="left", `gx', cond("`hz'"=="right", `gx' - `w', `gx' - `w'/2))
 chk avoid_xline `gl' < `x0' | `gl' > `x0' + `w' 
 
+* ---- 36. endlabel text follows the legend; ptlabel skips points off the plot -------
+* the texts of the added boxes of graph g, joined by |, in the local alltext
+capture program drop _alltext
+program _alltext
+    args g
+    local n `.`g'.plotregion1.added_text.arrnels'
+    if "`n'"=="" local n 0
+    local t
+    forvalues k = 1/`n' {
+        local t `"`t'|`.`g'.plotregion1.added_text[`k'].text[1]'"'
+    }
+    c_local alltext `"`t'|"'
+end
+sysuse auto, clear
+twoway (line price mpg, sort) (lfit price mpg), name(el1, replace)
+gpolish endlabel
+_alltext el1
+local h = strpos(`"`alltext'"', "Fitted values") > 0
+chk lfit_label `h'
+local h = strpos(`"`alltext'"', "Price") > 0
+chk lfit_data `h'
+quietly regress price mpg i.foreign
+quietly margins foreign, at(mpg=(12(4)40))
+marginsplot, name(el2, replace)
+gpolish endlabel
+_alltext el2
+local h = strpos(`"`alltext'"', "Domestic") > 0
+chk mplot_dom `h'
+local h = strpos(`"`alltext'"', "Foreign") > 0
+chk mplot_for `h'
+chk mplot_noleg "`.el2.legend.draw_view.setting'"=="no"
+sysuse uslifeexp, clear
+twoway (line le year if year<1950) (line le year if year>=1950), name(el3, replace)
+gpolish endlabel
+chk dup_keepleg "`.el3.legend.draw_view.setting'"=="yes"
+gpolish endlabel, labels("Before 1950" "From 1950")
+_alltext el3
+local h = strpos(`"`alltext'"', "From 1950") > 0
+chk dup_labels `h'
+chk dup_labels_leg "`.el3.legend.draw_view.setting'"=="no"
+* a second clear prints nothing
+gpolish clear
+tempfile clog
+log using `"`clog'"', text name(_clr) replace
+gpolish clear
+log close _clr
+mata: st_local("cl", strofreal(sum(strpos(cat(st_local("clog")), "removed")) > 0))
+chk clear_silent `cl'==0
+* points selected by ptlabel but outside the axis range are skipped
+sysuse auto, clear
+scatter price mpg if rep78==4, name(pt1, replace)
+quietly count if price>8000 & rep78==4
+local ndrawn = r(N)
+gpolish ptlabel make if price>8000, x(mpg) y(price)
+local nt `.pt1.plotregion1.added_text.arrnels'
+chk off_plot `nt' < 14 & `nt' >= `ndrawn'
+gpolish geom, name(pt1)
+local ok 1
+forvalues k = 1/`nt' {
+    local yy = r(ya) + r(yb)*`.pt1.plotregion1.added_text[`k'].ypos.val'
+    if `yy' > r(gy1) + 0.05*(r(gy1)-r(gy0)) local ok 0
+}
+chk off_plot_inside `ok'
+twoway scatter price mpg if price<5000, name(pt2, replace)
+gpolish ptlabel make if price>14000, x(mpg) y(price)
+chk off_plot_none "`.pt2.plotregion1.added_text.arrnels'"=="" | "`.pt2.plotregion1.added_text.arrnels'"=="0"
+* maxlabels() refuses a selection larger than it
+scatter price mpg, name(pt3, replace)
+capture gpolish ptlabel make, x(mpg) y(price) maxlabels(10)
+chk maxlabels_rc _rc==198
+chk maxlabels_noedit "`.pt3.plotregion1.added_text.arrnels'"=="" | "`.pt3.plotregion1.added_text.arrnels'"=="0"
+capture gpolish ptlabel make, x(mpg) y(price) maxlabels(0)
+chk maxlabels_bad _rc==198
+
 * ---- 35. font detection in batch mode -------------------------------------------------
 if "`c(mode)'"=="batch" {
     sysuse uslifeexp, clear
