@@ -13,37 +13,37 @@ gpolish measured label widths with its width table for: open sans.
 
 | Scenario | Stata mlabel() | labrepel (Stata) | gpolish ptlabel (Stata) | gpolish 0.6.0 settings | adjustText (Python) | ggrepel (R) | ggrepel (informed) |
 |---|---|---|---|---|---|---|---|
-| Life expectancy, 12 of 63 labelled | 0.58 | 0.00 | 1.00 | 0.92 | 0.42 | 0.67 | 0.75 |
-| Auto, 19 of 74 labelled | 0.05 | 0.00 | 0.84 | 0.89 | 0.26 | 0.37 | 0.63 |
-| Life expectancy, all 63 labelled | 0.22 | 0.02 | 0.71 | 0.65 | 0.27 | 0.60 | 0.63 |
-| Auto, all 74 labelled | 0.05 | 0.00 | 0.49 | 0.41 | 0.28 | 0.57 | 0.51 |
-| Synthetic, 30 of 30 labelled | 0.58 ± 0.06 | 0.41 ± 0.06 | 0.99 ± 0.01 | 0.93 ± 0.03 | 0.41 ± 0.03 | 0.95 ± 0.03 | 0.96 ± 0.02 |
-| Synthetic, 20 of 60 labelled | 0.45 ± 0.05 | 0.33 ± 0.05 | 0.96 ± 0.01 | 0.82 ± 0.05 | 0.35 ± 0.05 | 0.68 ± 0.05 | 0.86 ± 0.04 |
-| Synthetic, 60 of 60 labelled | 0.30 ± 0.03 | 0.22 ± 0.03 | 0.91 ± 0.03 | 0.77 ± 0.05 | 0.44 ± 0.02 | 0.86 ± 0.02 | 0.85 ± 0.03 |
+| Life expectancy, 12 of 63 labelled | 0.58 | 0.00 | 1.00 | 0.92 | 0.42 | 0.33 | 0.75 |
+| Auto, 19 of 74 labelled | 0.05 | 0.00 | 0.84 | 0.89 | 0.26 | 0.16 | 0.63 |
+| Life expectancy, all 63 labelled | 0.22 | 0.02 | 0.71 | 0.65 | 0.27 | 0.56 | 0.63 |
+| Auto, all 74 labelled | 0.05 | 0.00 | 0.49 | 0.41 | 0.28 | 0.50 | 0.51 |
+| Synthetic, 30 of 30 labelled | 0.58 ± 0.06 | 0.41 ± 0.06 | 0.99 ± 0.01 | 0.93 ± 0.03 | 0.41 ± 0.03 | 0.56 ± 0.03 | 0.95 ± 0.02 |
+| Synthetic, 20 of 60 labelled | 0.45 ± 0.05 | 0.33 ± 0.05 | 0.96 ± 0.01 | 0.82 ± 0.05 | 0.35 ± 0.05 | 0.38 ± 0.04 | 0.85 ± 0.04 |
+| Synthetic, 60 of 60 labelled | 0.30 ± 0.03 | 0.22 ± 0.03 | 0.91 ± 0.03 | 0.77 ± 0.05 | 0.44 ± 0.02 | 0.57 ± 0.03 | 0.84 ± 0.03 |
 
 ## Clean labels within 3 ems of their point (share)
 
 | Scenario | Stata mlabel() | labrepel (Stata) | gpolish ptlabel (Stata) | gpolish 0.6.0 settings | adjustText (Python) | ggrepel (R) | ggrepel (informed) |
 |---|---|---|---|---|---|---|---|
-| Life expectancy, 12 of 63 labelled | 0.58 | 0.00 | 1.00 | 0.92 | 0.42 | 0.67 | 0.75 |
-| Auto, 19 of 74 labelled | 0.05 | 0.00 | 0.68 | 0.68 | 0.26 | 0.37 | 0.63 |
-| Life expectancy, all 63 labelled | 0.22 | 0.02 | 0.60 | 0.44 | 0.24 | 0.59 | 0.56 |
-| Auto, all 74 labelled | 0.05 | 0.00 | 0.32 | 0.15 | 0.14 | 0.36 | 0.31 |
-| Synthetic, 30 of 30 labelled | 0.58 ± 0.06 | 0.30 ± 0.05 | 0.98 ± 0.01 | 0.92 ± 0.03 | 0.40 ± 0.03 | 0.95 ± 0.03 | 0.96 ± 0.02 |
-| Synthetic, 20 of 60 labelled | 0.45 ± 0.05 | 0.29 ± 0.05 | 0.95 ± 0.02 | 0.80 ± 0.05 | 0.34 ± 0.05 | 0.68 ± 0.05 | 0.86 ± 0.04 |
-| Synthetic, 60 of 60 labelled | 0.30 ± 0.03 | 0.15 ± 0.03 | 0.87 ± 0.04 | 0.70 ± 0.05 | 0.41 ± 0.02 | 0.84 ± 0.03 | 0.82 ± 0.03 |
+| Life expectancy, 12 of 63 labelled | 0.58 | 0.00 | 1.00 | 0.92 | 0.42 | 0.33 | 0.75 |
+| Auto, 19 of 74 labelled | 0.05 | 0.00 | 0.68 | 0.68 | 0.26 | 0.16 | 0.63 |
+| Life expectancy, all 63 labelled | 0.22 | 0.02 | 0.60 | 0.44 | 0.24 | 0.54 | 0.56 |
+| Auto, all 74 labelled | 0.05 | 0.00 | 0.32 | 0.15 | 0.14 | 0.31 | 0.31 |
+| Synthetic, 30 of 30 labelled | 0.58 ± 0.06 | 0.30 ± 0.05 | 0.98 ± 0.01 | 0.92 ± 0.03 | 0.40 ± 0.03 | 0.56 ± 0.03 | 0.95 ± 0.02 |
+| Synthetic, 20 of 60 labelled | 0.45 ± 0.05 | 0.29 ± 0.05 | 0.95 ± 0.02 | 0.80 ± 0.05 | 0.34 ± 0.05 | 0.38 ± 0.04 | 0.85 ± 0.04 |
+| Synthetic, 60 of 60 labelled | 0.30 ± 0.03 | 0.15 ± 0.03 | 0.87 ± 0.04 | 0.70 ± 0.05 | 0.41 ± 0.02 | 0.55 ± 0.03 | 0.82 ± 0.03 |
 
 ## Clean labels, not counting the label's own marker (share)
 
 | Scenario | Stata mlabel() | labrepel (Stata) | gpolish ptlabel (Stata) | gpolish 0.6.0 settings | adjustText (Python) | ggrepel (R) | ggrepel (informed) |
 |---|---|---|---|---|---|---|---|
 | Life expectancy, 12 of 63 labelled | 0.58 | 0.75 | 1.00 | 0.92 | 0.75 | 0.75 | 0.83 |
-| Auto, 19 of 74 labelled | 0.05 | 0.11 | 0.84 | 0.89 | 0.32 | 0.37 | 0.63 |
-| Life expectancy, all 63 labelled | 0.22 | 0.21 | 0.71 | 0.65 | 0.37 | 0.60 | 0.63 |
-| Auto, all 74 labelled | 0.05 | 0.03 | 0.49 | 0.41 | 0.32 | 0.58 | 0.53 |
+| Auto, 19 of 74 labelled | 0.05 | 0.11 | 0.84 | 0.89 | 0.32 | 0.21 | 0.63 |
+| Life expectancy, all 63 labelled | 0.22 | 0.21 | 0.71 | 0.65 | 0.37 | 0.59 | 0.63 |
+| Auto, all 74 labelled | 0.05 | 0.03 | 0.49 | 0.41 | 0.32 | 0.53 | 0.53 |
 | Synthetic, 30 of 30 labelled | 0.58 ± 0.06 | 0.46 ± 0.05 | 0.99 ± 0.01 | 0.93 ± 0.03 | 0.87 ± 0.04 | 0.96 ± 0.02 | 0.96 ± 0.02 |
 | Synthetic, 20 of 60 labelled | 0.45 ± 0.05 | 0.41 ± 0.05 | 0.96 ± 0.01 | 0.82 ± 0.05 | 0.66 ± 0.05 | 0.69 ± 0.04 | 0.88 ± 0.04 |
-| Synthetic, 60 of 60 labelled | 0.30 ± 0.03 | 0.25 ± 0.03 | 0.91 ± 0.03 | 0.77 ± 0.05 | 0.70 ± 0.03 | 0.88 ± 0.03 | 0.85 ± 0.03 |
+| Synthetic, 60 of 60 labelled | 0.30 ± 0.03 | 0.25 ± 0.03 | 0.91 ± 0.03 | 0.77 ± 0.05 | 0.70 ± 0.03 | 0.85 ± 0.02 | 0.85 ± 0.03 |
 
 ## Overlapping label pairs
 
@@ -61,33 +61,33 @@ gpolish measured label widths with its width table for: open sans.
 
 | Scenario | Stata mlabel() | labrepel (Stata) | gpolish ptlabel (Stata) | gpolish 0.6.0 settings | adjustText (Python) | ggrepel (R) | ggrepel (informed) |
 |---|---|---|---|---|---|---|---|
-| Life expectancy, 12 of 63 labelled | 0.17 | 1.00 | 0.00 | 0.08 | 0.58 | 0.25 | 0.17 |
-| Auto, 19 of 74 labelled | 0.68 | 1.00 | 0.16 | 0.11 | 0.74 | 0.58 | 0.11 |
-| Life expectancy, all 63 labelled | 0.54 | 0.92 | 0.21 | 0.17 | 0.48 | 0.22 | 0.13 |
-| Auto, all 74 labelled | 0.64 | 0.99 | 0.31 | 0.30 | 0.41 | 0.24 | 0.18 |
-| Synthetic, 30 of 30 labelled | 0.19 ± 0.04 | 0.26 ± 0.04 | 0.01 ± 0.01 | 0.05 ± 0.02 | 0.58 ± 0.03 | 0.04 ± 0.02 | 0.03 ± 0.02 |
-| Synthetic, 20 of 60 labelled | 0.41 ± 0.05 | 0.51 ± 0.05 | 0.04 ± 0.01 | 0.16 ± 0.05 | 0.65 ± 0.05 | 0.32 ± 0.05 | 0.12 ± 0.04 |
-| Synthetic, 60 of 60 labelled | 0.40 ± 0.03 | 0.44 ± 0.04 | 0.08 ± 0.03 | 0.16 ± 0.03 | 0.52 ± 0.02 | 0.11 ± 0.02 | 0.09 ± 0.02 |
+| Life expectancy, 12 of 63 labelled | 0.17 | 1.00 | 0.00 | 0.08 | 0.58 | 0.58 | 0.17 |
+| Auto, 19 of 74 labelled | 0.68 | 1.00 | 0.16 | 0.11 | 0.74 | 0.84 | 0.11 |
+| Life expectancy, all 63 labelled | 0.54 | 0.92 | 0.21 | 0.17 | 0.48 | 0.35 | 0.13 |
+| Auto, all 74 labelled | 0.64 | 0.99 | 0.31 | 0.30 | 0.41 | 0.35 | 0.16 |
+| Synthetic, 30 of 30 labelled | 0.19 ± 0.04 | 0.26 ± 0.04 | 0.01 ± 0.01 | 0.05 ± 0.02 | 0.58 ± 0.03 | 0.43 ± 0.03 | 0.04 ± 0.02 |
+| Synthetic, 20 of 60 labelled | 0.41 ± 0.05 | 0.51 ± 0.05 | 0.04 ± 0.01 | 0.16 ± 0.05 | 0.65 ± 0.05 | 0.62 ± 0.04 | 0.14 ± 0.04 |
+| Synthetic, 60 of 60 labelled | 0.40 ± 0.03 | 0.44 ± 0.04 | 0.08 ± 0.03 | 0.16 ± 0.03 | 0.52 ± 0.02 | 0.41 ± 0.03 | 0.10 ± 0.02 |
 
 ## Labels touching another point's marker (share)
 
 | Scenario | Stata mlabel() | labrepel (Stata) | gpolish ptlabel (Stata) | gpolish 0.6.0 settings | adjustText (Python) | ggrepel (R) | ggrepel (informed) |
 |---|---|---|---|---|---|---|---|
 | Life expectancy, 12 of 63 labelled | 0.17 | 0.17 | 0.00 | 0.08 | 0.25 | 0.17 | 0.08 |
-| Auto, 19 of 74 labelled | 0.68 | 0.68 | 0.16 | 0.11 | 0.63 | 0.58 | 0.11 |
-| Life expectancy, all 63 labelled | 0.54 | 0.49 | 0.21 | 0.17 | 0.35 | 0.21 | 0.08 |
-| Auto, all 74 labelled | 0.64 | 0.81 | 0.31 | 0.30 | 0.35 | 0.23 | 0.14 |
-| Synthetic, 30 of 30 labelled | 0.19 ± 0.04 | 0.20 ± 0.04 | 0.01 ± 0.01 | 0.05 ± 0.02 | 0.12 ± 0.04 | 0.02 ± 0.01 | 0.02 ± 0.01 |
+| Auto, 19 of 74 labelled | 0.68 | 0.68 | 0.16 | 0.11 | 0.63 | 0.79 | 0.11 |
+| Life expectancy, all 63 labelled | 0.54 | 0.49 | 0.21 | 0.17 | 0.35 | 0.27 | 0.08 |
+| Auto, all 74 labelled | 0.64 | 0.81 | 0.31 | 0.30 | 0.35 | 0.32 | 0.14 |
+| Synthetic, 30 of 30 labelled | 0.19 ± 0.04 | 0.20 ± 0.04 | 0.01 ± 0.01 | 0.05 ± 0.02 | 0.12 ± 0.04 | 0.03 ± 0.02 | 0.03 ± 0.02 |
 | Synthetic, 20 of 60 labelled | 0.41 ± 0.05 | 0.41 ± 0.04 | 0.04 ± 0.01 | 0.16 ± 0.05 | 0.34 ± 0.05 | 0.31 ± 0.04 | 0.10 ± 0.03 |
-| Synthetic, 60 of 60 labelled | 0.40 ± 0.03 | 0.40 ± 0.03 | 0.08 ± 0.03 | 0.16 ± 0.03 | 0.26 ± 0.02 | 0.08 ± 0.02 | 0.07 ± 0.02 |
+| Synthetic, 60 of 60 labelled | 0.40 ± 0.03 | 0.40 ± 0.03 | 0.08 ± 0.03 | 0.16 ± 0.03 | 0.26 ± 0.02 | 0.12 ± 0.02 | 0.07 ± 0.02 |
 
 ## Labels crossing the fit line (share)
 
 | Scenario | Stata mlabel() | labrepel (Stata) | gpolish ptlabel (Stata) | gpolish 0.6.0 settings | adjustText (Python) | ggrepel (R) | ggrepel (informed) |
 |---|---|---|---|---|---|---|---|
 | Life expectancy, 12 of 63 labelled | 0.08 | 0.17 | 0.00 | 0.00 | 0.08 | 0.17 | 0.17 |
-| Auto, 19 of 74 labelled | 0.53 | 0.53 | 0.00 | 0.00 | 0.21 | 0.32 | 0.37 |
-| Life expectancy, all 63 labelled | 0.38 | 0.32 | 0.02 | 0.05 | 0.19 | 0.19 | 0.21 |
+| Auto, 19 of 74 labelled | 0.53 | 0.53 | 0.00 | 0.00 | 0.21 | 0.26 | 0.37 |
+| Life expectancy, all 63 labelled | 0.38 | 0.32 | 0.02 | 0.05 | 0.19 | 0.19 | 0.19 |
 | Auto, all 74 labelled | 0.54 | 0.54 | 0.11 | 0.15 | 0.16 | 0.18 | 0.20 |
 | Synthetic, 30 of 30 labelled | 0.00 ± 0.00 | 0.00 ± 0.00 | 0.00 ± 0.00 | 0.00 ± 0.00 | 0.00 ± 0.00 | 0.00 ± 0.00 | 0.00 ± 0.00 |
 | Synthetic, 20 of 60 labelled | 0.00 ± 0.00 | 0.00 ± 0.00 | 0.00 ± 0.00 | 0.00 ± 0.00 | 0.00 ± 0.00 | 0.00 ± 0.00 | 0.00 ± 0.00 |
@@ -109,25 +109,25 @@ gpolish measured label widths with its width table for: open sans.
 
 | Scenario | Stata mlabel() | labrepel (Stata) | gpolish ptlabel (Stata) | gpolish 0.6.0 settings | adjustText (Python) | ggrepel (R) | ggrepel (informed) |
 |---|---|---|---|---|---|---|---|
-| Life expectancy, 12 of 63 labelled | 0.17 | 0.00 | 0.00 | 0.25 | 0.00 | 0.17 | 0.08 |
-| Auto, 19 of 74 labelled | 0.84 | 0.05 | 0.63 | 0.74 | 0.53 | 0.58 | 0.37 |
-| Life expectancy, all 63 labelled | 0.54 | 0.17 | 0.51 | 0.52 | 0.54 | 0.40 | 0.35 |
-| Auto, all 74 labelled | 0.81 | 0.22 | 0.76 | 0.78 | 0.65 | 0.61 | 0.49 |
-| Synthetic, 30 of 30 labelled | 0.24 ± 0.05 | 0.66 ± 0.04 | 0.10 ± 0.04 | 0.15 ± 0.05 | 0.13 ± 0.04 | 0.03 ± 0.02 | 0.05 ± 0.02 |
-| Synthetic, 20 of 60 labelled | 0.48 ± 0.03 | 0.71 ± 0.04 | 0.28 ± 0.05 | 0.35 ± 0.06 | 0.24 ± 0.03 | 0.28 ± 0.04 | 0.14 ± 0.03 |
-| Synthetic, 60 of 60 labelled | 0.47 ± 0.03 | 0.82 ± 0.02 | 0.29 ± 0.04 | 0.37 ± 0.03 | 0.34 ± 0.03 | 0.20 ± 0.04 | 0.22 ± 0.03 |
+| Life expectancy, 12 of 63 labelled | 0.17 | 0.00 | 0.00 | 0.25 | 0.00 | 0.17 | 0.00 |
+| Auto, 19 of 74 labelled | 0.84 | 0.05 | 0.63 | 0.74 | 0.53 | 0.58 | 0.47 |
+| Life expectancy, all 63 labelled | 0.54 | 0.17 | 0.51 | 0.52 | 0.54 | 0.38 | 0.33 |
+| Auto, all 74 labelled | 0.81 | 0.22 | 0.76 | 0.78 | 0.65 | 0.59 | 0.51 |
+| Synthetic, 30 of 30 labelled | 0.24 ± 0.05 | 0.66 ± 0.04 | 0.10 ± 0.04 | 0.15 ± 0.05 | 0.13 ± 0.04 | 0.03 ± 0.02 | 0.06 ± 0.02 |
+| Synthetic, 20 of 60 labelled | 0.48 ± 0.03 | 0.71 ± 0.04 | 0.28 ± 0.05 | 0.35 ± 0.06 | 0.24 ± 0.03 | 0.29 ± 0.04 | 0.17 ± 0.03 |
+| Synthetic, 60 of 60 labelled | 0.47 ± 0.03 | 0.82 ± 0.02 | 0.29 ± 0.04 | 0.37 ± 0.03 | 0.34 ± 0.03 | 0.21 ± 0.04 | 0.21 ± 0.03 |
 
 ## Distance from own point (em)
 
 | Scenario | Stata mlabel() | labrepel (Stata) | gpolish ptlabel (Stata) | gpolish 0.6.0 settings | adjustText (Python) | ggrepel (R) | ggrepel (informed) |
 |---|---|---|---|---|---|---|---|
-| Life expectancy, 12 of 63 labelled | 0.61 | 0.00 | 0.69 | 0.81 | 0.28 | 0.33 | 0.42 |
-| Auto, 19 of 74 labelled | 0.61 | 0.01 | 1.21 | 2.04 | 1.10 | 0.39 | 0.57 |
+| Life expectancy, 12 of 63 labelled | 0.61 | 0.00 | 0.69 | 0.81 | 0.28 | 0.32 | 0.43 |
+| Auto, 19 of 74 labelled | 0.61 | 0.01 | 1.21 | 2.04 | 1.10 | 0.38 | 0.57 |
 | Life expectancy, all 63 labelled | 0.61 | 0.28 | 1.65 | 2.04 | 1.54 | 0.98 | 1.10 |
-| Auto, all 74 labelled | 0.61 | 0.18 | 2.35 | 3.05 | 2.85 | 2.21 | 2.20 |
-| Synthetic, 30 of 30 labelled | 0.61 ± 0.00 | 2.30 ± 0.13 | 0.72 ± 0.03 | 0.77 ± 0.06 | 0.48 ± 0.07 | 0.39 ± 0.02 | 0.52 ± 0.01 |
-| Synthetic, 20 of 60 labelled | 0.61 ± 0.00 | 1.84 ± 0.14 | 0.78 ± 0.04 | 0.78 ± 0.06 | 0.48 ± 0.06 | 0.37 ± 0.01 | 0.53 ± 0.03 |
-| Synthetic, 60 of 60 labelled | 0.61 ± 0.00 | 2.46 ± 0.10 | 1.00 ± 0.08 | 1.11 ± 0.07 | 0.92 ± 0.09 | 0.62 ± 0.09 | 0.75 ± 0.07 |
+| Auto, all 74 labelled | 0.61 | 0.18 | 2.35 | 3.05 | 2.85 | 2.22 | 2.21 |
+| Synthetic, 30 of 30 labelled | 0.61 ± 0.00 | 2.30 ± 0.13 | 0.72 ± 0.03 | 0.77 ± 0.06 | 0.48 ± 0.07 | 0.39 ± 0.02 | 0.52 ± 0.02 |
+| Synthetic, 20 of 60 labelled | 0.61 ± 0.00 | 1.84 ± 0.14 | 0.78 ± 0.04 | 0.78 ± 0.06 | 0.48 ± 0.06 | 0.37 ± 0.01 | 0.52 ± 0.03 |
+| Synthetic, 60 of 60 labelled | 0.61 ± 0.00 | 2.46 ± 0.10 | 1.00 ± 0.08 | 1.11 ± 0.07 | 0.92 ± 0.09 | 0.62 ± 0.09 | 0.74 ± 0.07 |
 
 ## Seconds per graph
 
@@ -205,7 +205,7 @@ test seeds. A leader is the part of a drawn segment outside the label's own box,
 | Auto, all 74 labelled | 41 of 74 | 34 (0.83) | 10 (0.24) | 2 (0.05) | 35 (0.85) |
 | Synthetic, 30 of 30 labelled | 11 of 600 | 1 (0.09) | 0 (0.00) | 0 (0.00) | 1 (0.09) |
 | Synthetic, 20 of 60 labelled | 1 of 400 | 0 (0.00) | 0 (0.00) | 0 (0.00) | 0 (0.00) |
-| Synthetic, 60 of 60 labelled | 176 of 1200 | 62 (0.35) | 13 (0.07) | 2 (0.01) | 72 (0.41) |
+| Synthetic, 60 of 60 labelled | 176 of 1200 | 60 (0.34) | 13 (0.07) | 2 (0.01) | 71 (0.40) |
 
 ### ggrepel (informed)
 
@@ -213,8 +213,8 @@ test seeds. A leader is the part of a drawn segment outside the label's own box,
 |---|---|---|---|---|---|
 | Life expectancy, 12 of 63 labelled | 0 of 12 | 0 | 0 | 0 | 0 |
 | Auto, 19 of 74 labelled | 2 of 19 | 0 (0.00) | 2 (1.00) | 0 (0.00) | 2 (1.00) |
-| Life expectancy, all 63 labelled | 22 of 63 | 10 (0.45) | 4 (0.18) | 2 (0.09) | 14 (0.64) |
-| Auto, all 74 labelled | 36 of 74 | 30 (0.83) | 6 (0.17) | 2 (0.06) | 30 (0.83) |
+| Life expectancy, all 63 labelled | 22 of 63 | 11 (0.50) | 4 (0.18) | 2 (0.09) | 14 (0.64) |
+| Auto, all 74 labelled | 36 of 74 | 31 (0.86) | 6 (0.17) | 2 (0.06) | 31 (0.86) |
 | Synthetic, 30 of 30 labelled | 11 of 600 | 1 (0.09) | 0 (0.00) | 0 (0.00) | 1 (0.09) |
 | Synthetic, 20 of 60 labelled | 16 of 400 | 4 (0.25) | 2 (0.12) | 0 (0.00) | 5 (0.31) |
 | Synthetic, 60 of 60 labelled | 159 of 1200 | 56 (0.35) | 9 (0.06) | 0 (0.00) | 61 (0.38) |
@@ -226,13 +226,13 @@ Share of labels nearer another point than their own, among labels with a leader 
 
 | Scenario (with / without) | Stata mlabel() | labrepel (Stata) | gpolish ptlabel (Stata) | gpolish 0.6.0 settings | adjustText (Python) | ggrepel (R) | ggrepel (informed) |
 |---|---|---|---|---|---|---|---|
-| Life expectancy, 12 of 63 labelled | n/a / 0.17 | n/a / 0.00 | n/a / 0.00 | 1.00 / 0.18 | 0.00 / 0.00 | n/a / 0.17 | n/a / 0.08 |
-| Auto, 19 of 74 labelled | n/a / 0.84 | 1.00 / 0.00 | 0.71 / 0.58 | 1.00 / 0.62 | 0.91 / 0.00 | 1.00 / 0.56 | 1.00 / 0.29 |
-| Life expectancy, all 63 labelled | n/a / 0.54 | 0.48 / 0.00 | 0.96 / 0.14 | 0.90 / 0.35 | 0.67 / 0.29 | 0.63 / 0.22 | 0.77 / 0.12 |
-| Auto, all 74 labelled | n/a / 0.81 | 0.67 / 0.00 | 0.82 / 0.56 | 0.87 / 0.66 | 0.80 / 0.17 | 0.85 / 0.30 | 0.81 / 0.18 |
-| Synthetic, 30 of 30 labelled | n/a / 0.24 | 0.69 / 0.00 | 0.59 / 0.09 | 0.79 / 0.13 | 0.38 / 0.03 | 0.73 / 0.02 | 0.82 / 0.04 |
-| Synthetic, 20 of 60 labelled | n/a / 0.48 | 0.79 / 0.00 | 0.89 / 0.21 | 1.00 / 0.32 | 0.68 / 0.08 | 0.00 / 0.29 | 0.81 / 0.12 |
-| Synthetic, 60 of 60 labelled | n/a / 0.47 | 0.84 / 0.00 | 0.85 / 0.14 | 0.92 / 0.27 | 0.57 / 0.07 | 0.81 / 0.10 | 0.81 / 0.13 |
+| Life expectancy, 12 of 63 labelled | n/a / 0.17 | n/a / 0.00 | n/a / 0.00 | 1.00 / 0.18 | 0.00 / 0.00 | n/a / 0.17 | n/a / 0.00 |
+| Auto, 19 of 74 labelled | n/a / 0.84 | 1.00 / 0.00 | 0.71 / 0.58 | 1.00 / 0.62 | 0.91 / 0.00 | 1.00 / 0.56 | 1.00 / 0.41 |
+| Life expectancy, all 63 labelled | n/a / 0.54 | 0.48 / 0.00 | 0.96 / 0.14 | 0.90 / 0.35 | 0.67 / 0.29 | 0.63 / 0.19 | 0.77 / 0.10 |
+| Auto, all 74 labelled | n/a / 0.81 | 0.67 / 0.00 | 0.82 / 0.56 | 0.87 / 0.66 | 0.80 / 0.17 | 0.85 / 0.27 | 0.81 / 0.24 |
+| Synthetic, 30 of 30 labelled | n/a / 0.24 | 0.69 / 0.00 | 0.59 / 0.09 | 0.79 / 0.13 | 0.38 / 0.03 | 0.64 / 0.02 | 0.82 / 0.04 |
+| Synthetic, 20 of 60 labelled | n/a / 0.48 | 0.79 / 0.00 | 0.89 / 0.21 | 1.00 / 0.32 | 0.68 / 0.08 | 0.00 / 0.29 | 0.81 / 0.14 |
+| Synthetic, 60 of 60 labelled | n/a / 0.47 | 0.84 / 0.00 | 0.85 / 0.14 | 0.92 / 0.27 | 0.57 / 0.07 | 0.81 / 0.10 | 0.79 / 0.12 |
 
 ## Paired differences on the synthetic designs: gpolish minus each other method
 
@@ -243,25 +243,25 @@ difference with its 95% t interval, then the number of seeds where gpolish is hi
 
 | Design | Stata mlabel() | labrepel (Stata) | gpolish 0.6.0 settings | adjustText (Python) | ggrepel (R) | ggrepel (informed) |
 |---|---|---|---|---|---|---|
-| Synthetic, 30 of 30 labelled | +0.405 (+0.345 to +0.465); 20/0/0 | +0.570 (+0.518 to +0.622); 20/0/0 | +0.055 (+0.034 to +0.076); 17/3/0 | +0.578 (+0.542 to +0.615); 20/0/0 | +0.037 (+0.008 to +0.066); 11/6/3 | +0.030 (+0.007 to +0.053); 11/7/2 |
-| Synthetic, 20 of 60 labelled | +0.510 (+0.458 to +0.562); 20/0/0 | +0.632 (+0.578 to +0.687); 20/0/0 | +0.142 (+0.096 to +0.189); 19/1/0 | +0.612 (+0.567 to +0.658); 20/0/0 | +0.280 (+0.231 to +0.329); 20/0/0 | +0.102 (+0.060 to +0.145); 14/5/1 |
-| Synthetic, 60 of 60 labelled | +0.607 (+0.573 to +0.640); 20/0/0 | +0.689 (+0.650 to +0.728); 20/0/0 | +0.147 (+0.108 to +0.185); 19/0/1 | +0.473 (+0.443 to +0.502); 20/0/0 | +0.053 (+0.030 to +0.075); 18/1/1 | +0.066 (+0.036 to +0.096); 16/1/3 |
+| Synthetic, 30 of 30 labelled | +0.405 (+0.345 to +0.465); 20/0/0 | +0.570 (+0.518 to +0.622); 20/0/0 | +0.055 (+0.034 to +0.076); 17/3/0 | +0.578 (+0.542 to +0.615); 20/0/0 | +0.423 (+0.384 to +0.462); 20/0/0 | +0.037 (+0.014 to +0.059); 13/5/2 |
+| Synthetic, 20 of 60 labelled | +0.510 (+0.458 to +0.562); 20/0/0 | +0.632 (+0.578 to +0.687); 20/0/0 | +0.142 (+0.096 to +0.189); 19/1/0 | +0.612 (+0.567 to +0.658); 20/0/0 | +0.580 (+0.540 to +0.620); 20/0/0 | +0.112 (+0.070 to +0.155); 16/3/1 |
+| Synthetic, 60 of 60 labelled | +0.607 (+0.573 to +0.640); 20/0/0 | +0.689 (+0.650 to +0.728); 20/0/0 | +0.147 (+0.108 to +0.185); 19/0/1 | +0.473 (+0.443 to +0.502); 20/0/0 | +0.342 (+0.300 to +0.383); 20/0/0 | +0.068 (+0.038 to +0.097); 16/2/2 |
 
 ### Clean and near
 
 | Design | Stata mlabel() | labrepel (Stata) | gpolish 0.6.0 settings | adjustText (Python) | ggrepel (R) | ggrepel (informed) |
 |---|---|---|---|---|---|---|
-| Synthetic, 30 of 30 labelled | +0.403 (+0.345 to +0.462); 20/0/0 | +0.682 (+0.633 to +0.730); 20/0/0 | +0.062 (+0.039 to +0.084); 17/3/0 | +0.587 (+0.554 to +0.619); 20/0/0 | +0.037 (+0.008 to +0.065); 12/5/3 | +0.028 (+0.006 to +0.051); 11/7/2 |
-| Synthetic, 20 of 60 labelled | +0.502 (+0.450 to +0.555); 20/0/0 | +0.665 (+0.616 to +0.714); 20/0/0 | +0.152 (+0.105 to +0.200); 19/1/0 | +0.607 (+0.562 to +0.653); 20/0/0 | +0.272 (+0.220 to +0.325); 20/0/0 | +0.095 (+0.053 to +0.137); 14/5/1 |
-| Synthetic, 60 of 60 labelled | +0.567 (+0.527 to +0.606); 20/0/0 | +0.721 (+0.670 to +0.772); 20/0/0 | +0.169 (+0.127 to +0.211); 19/0/1 | +0.463 (+0.427 to +0.498); 20/0/0 | +0.033 (+0.006 to +0.059); 14/1/5 | +0.047 (+0.016 to +0.077); 13/1/6 |
+| Synthetic, 30 of 30 labelled | +0.403 (+0.345 to +0.462); 20/0/0 | +0.682 (+0.633 to +0.730); 20/0/0 | +0.062 (+0.039 to +0.084); 17/3/0 | +0.587 (+0.554 to +0.619); 20/0/0 | +0.423 (+0.384 to +0.463); 20/0/0 | +0.035 (+0.013 to +0.057); 13/5/2 |
+| Synthetic, 20 of 60 labelled | +0.502 (+0.450 to +0.555); 20/0/0 | +0.665 (+0.616 to +0.714); 20/0/0 | +0.152 (+0.105 to +0.200); 19/1/0 | +0.607 (+0.562 to +0.653); 20/0/0 | +0.573 (+0.528 to +0.617); 20/0/0 | +0.105 (+0.063 to +0.147); 16/3/1 |
+| Synthetic, 60 of 60 labelled | +0.567 (+0.527 to +0.606); 20/0/0 | +0.721 (+0.670 to +0.772); 20/0/0 | +0.169 (+0.127 to +0.211); 19/0/1 | +0.463 (+0.427 to +0.498); 20/0/0 | +0.322 (+0.278 to +0.365); 20/0/0 | +0.048 (+0.018 to +0.077); 13/1/6 |
 
 ### Clean except own marker
 
 | Design | Stata mlabel() | labrepel (Stata) | gpolish 0.6.0 settings | adjustText (Python) | ggrepel (R) | ggrepel (informed) |
 |---|---|---|---|---|---|---|
-| Synthetic, 30 of 30 labelled | +0.405 (+0.345 to +0.465); 20/0/0 | +0.528 (+0.479 to +0.577); 20/0/0 | +0.055 (+0.034 to +0.076); 17/3/0 | +0.120 (+0.088 to +0.152); 20/0/0 | +0.022 (-0.003 to +0.046); 8/9/3 | +0.020 (+0.000 to +0.040); 10/7/3 |
-| Synthetic, 20 of 60 labelled | +0.510 (+0.458 to +0.562); 20/0/0 | +0.550 (+0.495 to +0.605); 20/0/0 | +0.142 (+0.096 to +0.189); 19/1/0 | +0.297 (+0.249 to +0.346); 20/0/0 | +0.270 (+0.225 to +0.315); 20/0/0 | +0.082 (+0.042 to +0.123); 13/6/1 |
-| Synthetic, 60 of 60 labelled | +0.607 (+0.573 to +0.640); 20/0/0 | +0.661 (+0.622 to +0.700); 20/0/0 | +0.147 (+0.108 to +0.185); 19/0/1 | +0.209 (+0.187 to +0.231); 20/0/0 | +0.033 (+0.009 to +0.056); 13/3/4 | +0.058 (+0.030 to +0.087); 16/1/3 |
+| Synthetic, 30 of 30 labelled | +0.405 (+0.345 to +0.465); 20/0/0 | +0.528 (+0.479 to +0.577); 20/0/0 | +0.055 (+0.034 to +0.076); 17/3/0 | +0.120 (+0.088 to +0.152); 20/0/0 | +0.030 (+0.006 to +0.054); 10/7/3 | +0.022 (+0.001 to +0.042); 10/7/3 |
+| Synthetic, 20 of 60 labelled | +0.510 (+0.458 to +0.562); 20/0/0 | +0.550 (+0.495 to +0.605); 20/0/0 | +0.142 (+0.096 to +0.189); 19/1/0 | +0.297 (+0.249 to +0.346); 20/0/0 | +0.272 (+0.229 to +0.316); 20/0/0 | +0.080 (+0.043 to +0.117); 15/4/1 |
+| Synthetic, 60 of 60 labelled | +0.607 (+0.573 to +0.640); 20/0/0 | +0.661 (+0.622 to +0.700); 20/0/0 | +0.147 (+0.108 to +0.185); 19/0/1 | +0.209 (+0.187 to +0.231); 20/0/0 | +0.065 (+0.041 to +0.089); 17/0/3 | +0.060 (+0.030 to +0.090); 16/1/3 |
 
 ## Sort-order sensitivity (real data)
 
@@ -273,19 +273,19 @@ the main-set value above.
 
 | Scenario | Stata mlabel() | labrepel (Stata) | gpolish ptlabel (Stata) | gpolish 0.6.0 settings | adjustText (Python) | ggrepel (R) | ggrepel (informed) |
 |---|---|---|---|---|---|---|---|
-| Life expectancy, 12 of 63 labelled | 0.58 (0.58 to 0.58) | 0.00 (0.00 to 0.00) | 1.00 (1.00 to 1.00) | 1.00 (0.92 to 1.00) | 0.42 (0.42 to 0.42) | 0.75 (0.67 to 0.75) | 0.88 (0.75 to 0.92) |
-| Auto, 19 of 74 labelled | 0.05 (0.05 to 0.05) | 0.00 (0.00 to 0.00) | 0.79 (0.74 to 0.89) | 0.84 (0.74 to 0.89) | 0.24 (0.21 to 0.26) | 0.32 (0.32 to 0.37) | 0.74 (0.63 to 0.74) |
-| Life expectancy, all 63 labelled | 0.22 (0.22 to 0.22) | 0.00 (0.00 to 0.03) | 0.79 (0.65 to 0.84) | 0.55 (0.48 to 0.63) | 0.38 (0.33 to 0.43) | 0.58 (0.48 to 0.63) | 0.62 (0.57 to 0.70) |
-| Auto, all 74 labelled | 0.05 (0.05 to 0.05) | 0.00 (0.00 to 0.00) | 0.45 (0.36 to 0.49) | 0.36 (0.31 to 0.46) | 0.34 (0.26 to 0.42) | 0.54 (0.49 to 0.65) | 0.53 (0.46 to 0.58) |
+| Life expectancy, 12 of 63 labelled | 0.58 (0.58 to 0.58) | 0.00 (0.00 to 0.00) | 1.00 (1.00 to 1.00) | 1.00 (0.92 to 1.00) | 0.42 (0.42 to 0.42) | 0.33 (0.25 to 0.42) | 0.88 (0.75 to 0.92) |
+| Auto, 19 of 74 labelled | 0.05 (0.05 to 0.05) | 0.00 (0.00 to 0.00) | 0.79 (0.74 to 0.89) | 0.84 (0.74 to 0.89) | 0.24 (0.21 to 0.26) | 0.16 (0.16 to 0.16) | 0.74 (0.63 to 0.74) |
+| Life expectancy, all 63 labelled | 0.22 (0.22 to 0.22) | 0.00 (0.00 to 0.03) | 0.79 (0.65 to 0.84) | 0.55 (0.48 to 0.63) | 0.38 (0.33 to 0.43) | 0.52 (0.44 to 0.57) | 0.62 (0.57 to 0.70) |
+| Auto, all 74 labelled | 0.05 (0.05 to 0.05) | 0.00 (0.00 to 0.00) | 0.45 (0.36 to 0.49) | 0.36 (0.31 to 0.46) | 0.34 (0.26 to 0.42) | 0.47 (0.42 to 0.58) | 0.53 (0.46 to 0.58) |
 
 ### Clean and near
 
 | Scenario | Stata mlabel() | labrepel (Stata) | gpolish ptlabel (Stata) | gpolish 0.6.0 settings | adjustText (Python) | ggrepel (R) | ggrepel (informed) |
 |---|---|---|---|---|---|---|---|
-| Life expectancy, 12 of 63 labelled | 0.58 (0.58 to 0.58) | 0.00 (0.00 to 0.00) | 1.00 (1.00 to 1.00) | 1.00 (0.92 to 1.00) | 0.42 (0.42 to 0.42) | 0.75 (0.67 to 0.75) | 0.88 (0.75 to 0.92) |
-| Auto, 19 of 74 labelled | 0.05 (0.05 to 0.05) | 0.00 (0.00 to 0.00) | 0.68 (0.58 to 0.74) | 0.68 (0.58 to 0.74) | 0.24 (0.21 to 0.26) | 0.32 (0.32 to 0.37) | 0.74 (0.63 to 0.74) |
-| Life expectancy, all 63 labelled | 0.22 (0.22 to 0.22) | 0.00 (0.00 to 0.03) | 0.66 (0.59 to 0.71) | 0.37 (0.33 to 0.43) | 0.30 (0.25 to 0.33) | 0.54 (0.43 to 0.59) | 0.55 (0.51 to 0.65) |
-| Auto, all 74 labelled | 0.05 (0.05 to 0.05) | 0.00 (0.00 to 0.00) | 0.32 (0.24 to 0.38) | 0.17 (0.14 to 0.22) | 0.18 (0.12 to 0.23) | 0.36 (0.31 to 0.47) | 0.32 (0.24 to 0.41) |
+| Life expectancy, 12 of 63 labelled | 0.58 (0.58 to 0.58) | 0.00 (0.00 to 0.00) | 1.00 (1.00 to 1.00) | 1.00 (0.92 to 1.00) | 0.42 (0.42 to 0.42) | 0.33 (0.25 to 0.42) | 0.88 (0.75 to 0.92) |
+| Auto, 19 of 74 labelled | 0.05 (0.05 to 0.05) | 0.00 (0.00 to 0.00) | 0.68 (0.58 to 0.74) | 0.68 (0.58 to 0.74) | 0.24 (0.21 to 0.26) | 0.16 (0.16 to 0.16) | 0.74 (0.63 to 0.74) |
+| Life expectancy, all 63 labelled | 0.22 (0.22 to 0.22) | 0.00 (0.00 to 0.03) | 0.66 (0.59 to 0.71) | 0.37 (0.33 to 0.43) | 0.30 (0.25 to 0.33) | 0.49 (0.40 to 0.54) | 0.55 (0.51 to 0.65) |
+| Auto, all 74 labelled | 0.05 (0.05 to 0.05) | 0.00 (0.00 to 0.00) | 0.32 (0.24 to 0.38) | 0.17 (0.14 to 0.22) | 0.18 (0.12 to 0.23) | 0.31 (0.24 to 0.36) | 0.32 (0.24 to 0.41) |
 
 ### gpolish against each other method, order by order
 
@@ -295,9 +295,9 @@ on the same order (clean, then clean and near).
 | Scenario | Stata mlabel() | labrepel (Stata) | gpolish 0.6.0 settings | adjustText (Python) | ggrepel (R) | ggrepel (informed) |
 |---|---|---|---|---|---|---|
 | Life expectancy, 12 of 63 labelled | 10/0/0; 10/0/0 | 10/0/0; 10/0/0 | 3/7/0; 3/7/0 | 10/0/0; 10/0/0 | 10/0/0; 10/0/0 | 10/0/0; 10/0/0 |
-| Auto, 19 of 74 labelled | 10/0/0; 10/0/0 | 10/0/0; 10/0/0 | 4/2/4; 6/1/3 | 10/0/0; 10/0/0 | 10/0/0; 10/0/0 | 8/2/0; 3/2/5 |
-| Life expectancy, all 63 labelled | 10/0/0; 10/0/0 | 10/0/0; 10/0/0 | 10/0/0; 10/0/0 | 10/0/0; 10/0/0 | 10/0/0; 9/1/0 | 10/0/0; 10/0/0 |
-| Auto, all 74 labelled | 10/0/0; 10/0/0 | 10/0/0; 10/0/0 | 8/0/2; 10/0/0 | 9/1/0; 10/0/0 | 0/0/10; 2/1/7 | 1/0/9; 6/1/3 |
+| Auto, 19 of 74 labelled | 10/0/0; 10/0/0 | 10/0/0; 10/0/0 | 4/2/4; 6/1/3 | 10/0/0; 10/0/0 | 10/0/0; 10/0/0 | 8/2/0; 3/3/4 |
+| Life expectancy, all 63 labelled | 10/0/0; 10/0/0 | 10/0/0; 10/0/0 | 10/0/0; 10/0/0 | 10/0/0; 10/0/0 | 10/0/0; 10/0/0 | 10/0/0; 10/0/0 |
+| Auto, all 74 labelled | 10/0/0; 10/0/0 | 10/0/0; 10/0/0 | 8/0/2; 10/0/0 | 9/1/0; 10/0/0 | 2/1/7; 5/2/3 | 1/0/9; 5/2/3 |
 
 ## Scaling: 150 and 300 points, all labelled
 
@@ -305,8 +305,8 @@ Mean over 5 seeds, with the range in brackets. Seconds are for the placement ste
 
 | Design, measure | gpolish ptlabel (Stata) | adjustText (Python) | ggrepel (R) | ggrepel (informed) |
 |---|---|---|---|---|
-| 150 points, clean share | 0.33 (0.27 to 0.39) | 0.23 (0.18 to 0.29) | 0.44 (0.39 to 0.55) | 0.40 (0.27 to 0.55) |
-| 150 points, clean and near | 0.24 (0.19 to 0.33) | 0.13 (0.10 to 0.16) | 0.24 (0.18 to 0.29) | 0.24 (0.15 to 0.27) |
+| 150 points, clean share | 0.33 (0.27 to 0.39) | 0.23 (0.18 to 0.29) | 0.43 (0.37 to 0.53) | 0.40 (0.27 to 0.54) |
+| 150 points, clean and near | 0.24 (0.19 to 0.33) | 0.13 (0.10 to 0.16) | 0.23 (0.18 to 0.26) | 0.23 (0.15 to 0.27) |
 | 150 points, seconds | 3.5 (3.2 to 3.8) | 22.3 (19.5 to 25.3) | 2.0 (2.0 to 2.1) | 2.1 (2.0 to 2.1) |
 | 300 points, clean share | 0.09 (0.07 to 0.11) | 0.05 (0.04 to 0.08) | 0.09 (0.08 to 0.11) | 0.13 (0.09 to 0.15) |
 | 300 points, clean and near | 0.05 (0.03 to 0.08) | 0.01 (0.00 to 0.01) | 0.01 (0.00 to 0.02) | 0.03 (0.01 to 0.05) |
@@ -321,21 +321,21 @@ The marker rule and the 3-em distance follow each condition's marker and font si
 
 | Condition | gpolish ptlabel (Stata) | adjustText (Python) | ggrepel (R) | ggrepel (informed) |
 |---|---|---|---|---|
-| 8.6 pt labels, 6 pt markers (main set, seeds 1 to 10) | 0.90 ± 0.05 | 0.43 ± 0.03 | 0.86 ± 0.04 | 0.84 ± 0.05 |
-| 7 pt labels, 6 pt markers | 0.96 ± 0.03 | 0.42 ± 0.04 | 0.93 ± 0.04 | 0.90 ± 0.04 |
-| 11 pt labels, 6 pt markers | 0.74 ± 0.07 | 0.42 ± 0.03 | 0.72 ± 0.06 | 0.75 ± 0.05 |
-| 8.6 pt labels, 4 pt markers | 0.90 ± 0.04 | 0.59 ± 0.04 | 0.88 ± 0.03 | 0.85 ± 0.05 |
-| 8.6 pt labels, 9 pt markers | 0.91 ± 0.05 | 0.28 ± 0.04 | 0.19 ± 0.06 | 0.78 ± 0.06 |
+| 8.6 pt labels, 6 pt markers (main set, seeds 1 to 10) | 0.90 ± 0.05 | 0.43 ± 0.03 | 0.57 ± 0.04 | 0.83 ± 0.05 |
+| 7 pt labels, 6 pt markers | 0.96 ± 0.03 | 0.42 ± 0.04 | 0.92 ± 0.04 | 0.90 ± 0.05 |
+| 11 pt labels, 6 pt markers | 0.74 ± 0.07 | 0.42 ± 0.03 | 0.58 ± 0.05 | 0.70 ± 0.05 |
+| 8.6 pt labels, 4 pt markers | 0.90 ± 0.04 | 0.59 ± 0.04 | 0.87 ± 0.03 | 0.85 ± 0.04 |
+| 8.6 pt labels, 9 pt markers | 0.91 ± 0.05 | 0.28 ± 0.04 | 0.20 ± 0.06 | 0.79 ± 0.06 |
 
 ### Clean and near
 
 | Condition | gpolish ptlabel (Stata) | adjustText (Python) | ggrepel (R) | ggrepel (informed) |
 |---|---|---|---|---|
-| 8.6 pt labels, 6 pt markers (main set, seeds 1 to 10) | 0.86 ± 0.07 | 0.40 ± 0.03 | 0.84 ± 0.05 | 0.82 ± 0.06 |
-| 7 pt labels, 6 pt markers | 0.93 ± 0.04 | 0.40 ± 0.03 | 0.92 ± 0.05 | 0.89 ± 0.05 |
-| 11 pt labels, 6 pt markers | 0.67 ± 0.07 | 0.36 ± 0.03 | 0.69 ± 0.06 | 0.71 ± 0.06 |
-| 8.6 pt labels, 4 pt markers | 0.87 ± 0.05 | 0.56 ± 0.05 | 0.86 ± 0.05 | 0.84 ± 0.05 |
-| 8.6 pt labels, 9 pt markers | 0.85 ± 0.08 | 0.25 ± 0.03 | 0.17 ± 0.05 | 0.77 ± 0.07 |
+| 8.6 pt labels, 6 pt markers (main set, seeds 1 to 10) | 0.86 ± 0.07 | 0.40 ± 0.03 | 0.55 ± 0.04 | 0.81 ± 0.06 |
+| 7 pt labels, 6 pt markers | 0.93 ± 0.04 | 0.40 ± 0.03 | 0.91 ± 0.04 | 0.88 ± 0.05 |
+| 11 pt labels, 6 pt markers | 0.67 ± 0.07 | 0.36 ± 0.03 | 0.55 ± 0.05 | 0.66 ± 0.05 |
+| 8.6 pt labels, 4 pt markers | 0.87 ± 0.05 | 0.56 ± 0.05 | 0.85 ± 0.05 | 0.84 ± 0.05 |
+| 8.6 pt labels, 9 pt markers | 0.85 ± 0.08 | 0.25 ± 0.03 | 0.18 ± 0.05 | 0.77 ± 0.07 |
 
 ## Stopping rules: iterations of adjustText and ggrepel
 

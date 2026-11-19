@@ -16,7 +16,13 @@ left alone. It needs a finished run (data/, out/ and results/ present). It check
      when BENCH_PLUS names a folder holding another gpolish; gpolish060 uses the 0.6.0-settings
      copy and refuses to share a session with gpolish; gpolish uses its Open Sans width table;
      graph set svg fontface is the same after a run as before it, also when the run stops with an
-     error; and labrepel's result for a graph does not depend on which scenarios ran before it.
+     error; and labrepel's result for a graph does not depend on which scenarios ran before it;
+  5. with Rscript present: the box score.py builds for a ggrepel label sits where grid draws the
+     text (grid applies vjust to the string height without descent): a label drawn by grid at
+     vjust 0.5 has its descender ink at the bottom of the box, the baseline run_ggrepel.R writes
+     matches the one score.py computes when that column is missing, and both are 0.6 pt below
+     the baseline of a box centred with matplotlib's va="center".
+Check 5 needs no finished run:  python selftest.py --baseline
 Run from the benchmark folder:  python selftest.py [stata executable]
 """
 import csv
@@ -76,8 +82,62 @@ def stata_log(bench):
     return open(os.path.join(bench, "run_stata.log"), encoding="utf-8", errors="replace").read()
 
 
+GRID_TEXT = r"""
+suppressPackageStartupMessages(library(grid))
+a <- commandArgs(trailingOnly = TRUE); f <- a[1]; lab <- a[2]; cx <- as.numeric(a[3]); cy <- as.numeric(a[4])
+W <- 300; H <- 200
+png(f, width = W / 72, height = H / 72, units = "in", res = 720, bg = "white")
+gp <- gpar(fontsize = 8.6, fontfamily = "Open Sans", col = "black")
+grid.text(lab, x = unit(cx, "bigpts"), y = unit(cy, "bigpts"), hjust = 0.5, vjust = 0.5, gp = gp)
+sh <- convertHeight(grobHeight(textGrob(lab, gp = gp)), "bigpts", valueOnly = TRUE)
+dev.off()
+cat(cy - 0.5 * sh, "\n")
+"""
+
+
+def check_baseline():
+    """Check 5: ggrepel label boxes are registered to the baseline grid draws."""
+    if not shutil.which("Rscript"):
+        print("note: Rscript not found; the ggrepel baseline check is skipped")
+        return
+    import numpy as np
+    from PIL import Image
+    sys.path.insert(0, HERE)
+    from common import Measurer
+    import score
+    W, H, cx, cy = 300.0, 200.0, 150.0, 100.0
+    meas = Measurer(W, H, 8.6)
+    with tempfile.TemporaryDirectory() as root:
+        rf = os.path.join(root, "t.R")
+        open(rf, "w").write(GRID_TEXT)
+        for lab in ("Egypt", "Armenia"):
+            png = os.path.join(root, lab + ".png")
+            r = run(["Rscript", rf, png, lab, str(cx), str(cy)], root)
+            check(r.returncode == 0, f"grid draws {lab}")
+            by_grid = float(r.stdout.split()[-1])
+            b_file = score.ggrepel_box(meas, lab, cx, cy, 0.5, str(by_grid))
+            b_calc = score.ggrepel_box(meas, lab, cx, cy, 0.5, None)
+            check(abs(b_file[1] - b_calc[1]) < 0.01,
+                  f"{lab}: score.py's baseline matches the one grid reports ({b_calc[1]:.3f} vs {b_file[1]:.3f})")
+            old = meas.box(lab, cx, cy, ha="center", va="center")
+            check(abs((old[1] - b_calc[1]) - 0.6) < 0.05, f"{lab}: the box sits 0.6 pt below a va=center box")
+            a = np.asarray(Image.open(png).convert("L"))
+            ys = np.where(a < 128)[0]
+            ink_lo, ink_hi = (a.shape[0] - 1 - ys.max()) / 10, (a.shape[0] - ys.min()) / 10
+            check(b_calc[1] <= ink_lo + 0.15 and ink_hi <= b_calc[3] + 0.15,
+                  f"{lab}: the ink ({ink_lo:.2f} to {ink_hi:.2f}) lies inside the box ({b_calc[1]:.2f} to {b_calc[3]:.2f})")
+            if lab == "Egypt":
+                check(abs(b_calc[1] - ink_lo) < 0.15, "Egypt: the descender ink reaches the bottom of the box")
+    meas.close()
+
+
 def main():
+    if sys.argv[1:2] == ["--baseline"]:
+        check_baseline()
+        print(passed, "checks passed")
+        return
     stata = sys.argv[1] if len(sys.argv) > 1 else None
+    check_baseline()
     for need in ("data/manifest_real.csv", "out/stata/geometry_default_main.csv", "results/positions.csv"):
         if not os.path.exists(os.path.join(HERE, need)):
             sys.exit(f"{need} is missing: run the benchmark first")

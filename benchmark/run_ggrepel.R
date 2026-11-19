@@ -20,8 +20,8 @@
 # m-point marker.
 # ggrepel places labels while drawing, so the label centres and the leader segments are read back
 # from the drawn grid objects.
-# Writes, per scenario set, out/<method>/results_<set>.csv (label centres and leader end points in
-# points, y up) and timing_<set>.csv (seconds to place and draw the plot once, ggrepel's iteration
+# Writes, per scenario set, out/<method>/results_<set>.csv (label centres, text baselines and leader
+# end points in points, y up) and timing_<set>.csv (seconds to place and draw the plot once, ggrepel's iteration
 # count in the drawn run and in the run whose positions were read back, and why the latter stopped).
 # A run limited to some scenarios keeps the rows of the others.
 # Run from the benchmark folder after run_stata.do:  Rscript run_ggrepel.R [scenario ...]
@@ -131,8 +131,12 @@ run_one <- function(i, method) {
       b <- deviceLoc(sg$x1, sg$y1, valueOnly = TRUE)
       lead <- c(a$x, a$y, b$x, b$y) * 72
     }
+    # grid places the text with vjust applied to the string height, which grid takes from the font's
+    # ascent of "M" and which has no descent, so the baseline sits vjust * that height below the
+    # anchor. score.py builds the label box from this baseline, the same rule as for the Stata labels.
+    sh <- convertHeight(grobHeight(textGrob(t$label, gp = t$gp)), "bigpts", valueOnly = TRUE)
     res[[length(res) + 1]] <- data.frame(scenario = scen, label = t$label, cx = loc$x * 72, cy = loc$y * 72,
-      hjust = t$hjust, vjust = t$vjust, lx0 = lead[1], ly0 = lead[2], lx1 = lead[3], ly1 = lead[4])
+      hjust = t$hjust, vjust = t$vjust, by = loc$y * 72 - t$vjust * sh, lx0 = lead[1], ly0 = lead[2], lx1 = lead[3], ly1 = lead[4])
   }
   upViewport(0)
   dev.off()
