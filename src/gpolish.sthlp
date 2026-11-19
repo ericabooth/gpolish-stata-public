@@ -51,7 +51,7 @@
 
 {p 8 16 2}{cmd:gpolish geom} [{cmd:,} {opt name(graphname)}]
 
-{pstd}All sizes are in points and must be positive; a zero or negative {opt size()}, {opt headsize()}, {opt dotsize()} or {cmd:brace} {opt width()}
+{pstd}All sizes are in points and must be positive; a zero or negative {opt size()}, {opt headsize()}, {opt dotsize()}, {cmd:brace} {opt width()} or {cmd:bracket} {opt tick()}
 stops with r(198), as does a negative {opt gap()}, {opt xgap()}, {opt wrap()}, {opt pad()}, {opt offset()}, {opt msize()} or {cmd:arrow} {opt shrink()}.
 Positions are in the units of the graph's axes.
 Each value in {opt at()}, {opt to()}, {opt from()} and the {opt x()}, {opt y0()}, {opt y1()}, {opt y()}, {opt x0()} and {opt x1()} of {cmd:bracket}
@@ -164,6 +164,7 @@ it is, so a box can still be placed by hand in the graph margin.
 A box placed with {opt at()} that runs past an edge of the graph also gets a note, which suggests {opt align()} or a different {opt at()}.
 With the default {opt align(left)} the left edge of the box sits on {opt at()}, with {opt align(right)} its right
 edge does, and with {opt align(center)} the box is centered on {opt at()}, which suits flow charts.
+{opt align()} also takes {cmd:centre} and any shorter start of the three words, such as {cmd:l}, {cmd:r} or {cmd:c}; any other value stops with r(198).
 
 {phang}
 {cmd:gpolish brace} draws a curly brace between two points, with an optional label at its tip.
@@ -217,9 +218,11 @@ Placement avoids the same drawn objects as an automatic {cmd:gpolish callout}.
 The package's benchmark (benchmark/README.md in the source repository) compares {cmd:ptlabel} with {cmd:labrepel},
 adjustText and ggrepel. {cmd:ptlabel} has the highest share of clean labels when a subset of points is labelled
 and on the synthetic test graphs. With every point labelled on crowded real graphs, ggrepel tuned on the same
-tuning graphs scores higher: 0.68 against 0.59 with every car in {cmd:auto} labelled, 0.76 against 0.75 with every
-country in {cmd:lifeexp}, and 0.78 against 0.68 ({cmd:census}) and 0.88 against 0.56 ({cmd:states}) with all 50 states
-labelled. ggrepel's tuning tried 256 settings, against 566 for {cmd:ptlabel}.
+tuning graphs scores higher: 0.68 against 0.59 with every car in {cmd:auto} labelled and
+0.78 against 0.68 ({cmd:census}) and 0.88 against 0.56 ({cmd:states}) with all 50 states
+labelled. With every country in {cmd:lifeexp} labelled the two are about level (0.76 against 0.75 in the
+original row order; medians over 10 row orders 0.74 for ggrepel and 0.79 for {cmd:ptlabel}).
+ggrepel's tuning tried 256 settings, against 566 for {cmd:ptlabel}.
 
 {phang}
 {cmd:gpolish bracket} draws a square bracket from {opt y0()} to {opt y1()} at {opt x()}.

@@ -530,7 +530,10 @@ class Panel:
         self.reflines()
         for t in s.get("textboxes", []):
             ax = self.axis_for(t, "text()")
-            if ax is not None:
+            # Stata does not draw a text() whose anchor lies outside the plot
+            # region; gpolish's own labels (added_text) are placed in the margins
+            # on purpose and are drawn below without this check
+            if ax is not None and self.inside_limits(ax, t.get("x"), t.get("y")):
                 self.draw_text(t, keep_color=False, ax=ax)
         # gpolish adds its objects to Stata's first plot region, which belongs to the
         # second y axis when plot 1 is on yaxis(2)
@@ -545,6 +548,25 @@ class Panel:
             for t in added:
                 self.draw_text(t, keep_color=True, ax=added_ax)
             self.added_shapes(added_ax)
+
+    @staticmethod
+    def inside_limits(ax, x, y):
+        """True when the data point (x, y) lies within the axes limits as drawn
+        (either direction, linear or log), with a small tolerance."""
+        x, y = num(x), num(y)
+        if x is None or y is None:
+            return True
+        for v, lim, scale in ((x, ax.get_xlim(), ax.get_xscale()),
+                              (y, ax.get_ylim(), ax.get_yscale())):
+            lo, hi = min(lim), max(lim)
+            if scale == "log":
+                if v <= 0 or lo <= 0:
+                    return False
+                v, lo, hi = math.log(v), math.log(lo), math.log(hi)
+            tol = 1e-6 * (hi - lo)
+            if v < lo - tol or v > hi + tol:
+                return False
+        return True
 
     def axis_for(self, obj, what):
         """The Axes an object on yaxis(#)/xaxis(#) belongs to, or None (skipped)."""

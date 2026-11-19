@@ -1,40 +1,5 @@
 # Changelog
 
-## Unreleased
-
-### gpolish
-
-- `gpolish ptlabel` works out `x()` and `y()` from the graph when either is left out. A plot qualifies when it draws markers (`scatter` or `connected`), both of its variables are numeric variables in memory, and it draws any `x()` or `y()` that was given. When exactly one plot qualifies, its variables fill in the missing options, so `scatter price mpg` followed by `gpolish ptlabel make if price>12000` now works; before, it stopped with "option x() required". In every other case it stops with r(198), "specify x() and y()", and says why: with more than one qualifying plot it lists them and says it cannot tell which one to label; with none it lists the plots it found.
-
-- `endlabel`: a label pulled back inside the top or bottom edge of the plot now pushes its neighbour away again. Before, a wrapped top label could be drawn on the label below it, with a false "not enough height" note (seen under scheme stcolor, and on any scheme when the line ends started far enough apart).
-- `endlabel`: when the legend is switched off, a plot that gets no end label but has a legend key (for example an `rarea` band) is named in a note that points to `keeplegend`.
-- `brace`: `width()` must be positive; zero or a negative value stops with r(198).
-- `arrow`: `shrink()` must be 0 or more; a negative value stops with r(198). The help now explains `shrink()`.
-- The error for a `to()`, `at()` or `from()` value that cannot be read (such as a date typed as 2020m8) now suggests a date function, such as `tm(2020m8)` or `td(21sep2001)`.
-
-### gr2mpl
-
-- Colours set by options on the graph command are kept: the `graphregion()` fill, the `plotregion()` fill (single twoway graph and `graph bar`), the `title()` and `subtitle()` colours, and in a single twoway graph the `xtitle()`/`ytitle()` colours and the tick-label colours set by `labcolor()`. Colours that come only from the scheme stay in the house style. Only options at the top level of the command count: a `title()` or `subtitle()` inside `legend()`, `by()` or a plot's own options does not set the graph title's colour.
-- The saved image uses the figure's background colour instead of always white, so a `graphregion()` fill reaches the file.
-- `width()` below 0 and `dpi()` of 0 or less stop with r(198) before Python runs; before, `width(-5)` was ignored without a message and `dpi(-10)` ended in a Python traceback. The `width()` error now reads "must be 0 (the default size) or a positive integer".
-- Fill order with `yaxis(2)`: the second axis is drawn behind axis 1 only when all its plots are fills and they all come before every axis-1 fill. With `area` on axis 1 followed by `bar, yaxis(2)`, the bars now draw over the area, as in Stata. The reverse order still puts the bars behind.
-- `graph dot` markers: each series' marker colour, symbol and size is written into its legend entry, and the legend key copies them.
-
-### Benchmark
-
-- New `tune_others.py` tunes informed ggrepel (256 settings in two stages) and adjustText (512 settings) on the same tuning seeds (101 to 110) with `gpolish`'s objective; results in results/tuning_ggrepel.csv, results/tuning_adjusttext.csv and results/tuned_settings.md. ggrepel's planned grid was cut to `box.padding` of 0.25 lines or less, plus a 16-setting second stage, because runs at 0.5 lines or more took 15 to 30 minutes each; three of adjustText's chosen values sit at an edge of its grid, which was not extended.
-- New columns "adjustText, tuned" and "ggrepel (informed), tuned" on the main and perm sets (`extra.py tuned`). Tuned informed ggrepel has the higher clean share with every car labelled (0.68 against 0.59 for `gpolish`) and every country labelled (0.76 against 0.75); `gpolish` leads on the subsets and the synthetic designs.
-- New held-out real-data set (`make_real.do` with `BENCH_EXTRA=1`; sets realhold and rhperm, `extra.py realhold`): `census` (all 50 states and 13 of 50), `hsng` and `states`, each in the original order and 10 row orders, every method including `labrepel` and the tuned columns. Tuned informed ggrepel scores higher than `gpolish` on `census` and `states` with every state labelled (0.78 against 0.68, 0.88 against 0.56); `gpolish` scores higher on `hsng` (0.74 against 0.66) and with 13 states labelled (1.00 against 0.62). `labrepel` scores 0.10 or less on all four. `hsng` and `states` come from `webuse`, so this set needs an internet connection; the plotted points are in results/extra/points_realhold.csv.
-- `run_ggrepel.R` takes `BENCH_GG_PARMS` and `BENCH_OUTDIR` and a `ggrepel_tuned` method; `run_adjusttext.py` takes `BENCH_AT_PARMS`, `BENCH_AT_METHOD` and `BENCH_OUTDIR`; `run_stata.do` draws the tuning set only when `BENCH_SETS` names it. The main archive rescores byte for byte unchanged.
-- New docs/PLACEMENT.md: pseudocode of `ptlabel`'s placement search, checked line by line against build/gpolish_template.ado.
-
-### Documentation
-
-- README, benchmark/README.md and the `ptlabel` help: claims that `gpolish` leads ggrepel are qualified. `gpolish` leads on labelled subsets and synthetic designs; with every point labelled on crowded real graphs, tuned informed ggrepel scores higher (figures above). ggrepel's tuning budget was 256 settings against `gpolish`'s 566. The statement that `gpolish` is above `labrepel` everywhere now covers only the sets where `labrepel` ran (all but the scale and fontmark sets). Statements in the 0.7.0 entries below that `gpolish` leads informed ggrepel compare it with ggrepel at its defaults.
-- README and benchmark/README.md: the search's label box is described as a core 0.4 font sizes tall, padded by 3 points on every side. The padded box is about 9.4 points tall at 8.6-point type, taller than the 8.65-point drawn text; only the core is shorter. The search ranks positions by overlap cost and does not require the padded box to be clear. The explanation that unclean labels touch only in a band the search's box does not cover is removed, since the padded box covers that band.
-- README and benchmark/README.md: the original row order is no longer called one of the 10 row orders. Its clean share with every car labelled (0.59) equals the highest of 10 separate random orders (median 0.54). The 0.7.0 entries below that say "best of 10 row orders" should be read this way.
-- README and CITATION.cff say what plain `gpolish` does (bold title, no y-axis line or tick marks) instead of "tidies the axes".
-
 ## 0.7.0 (2026-11-18)
 
 This release contains gpolish 0.7.0 and gr2mpl 0.6.0. The changes listed under 0.6.1 below were not released under their own tag and are part of this release too.
@@ -92,6 +57,15 @@ This release contains gpolish 0.7.0 and gr2mpl 0.6.0. The changes listed under 0
 - `gpolish legend, plots()` stops with r(198) and "plots(#) is out of range; graph NAME has N plot(s)" when a plot number is larger than the graph's plot count, as `endlabel` does. Before, it did nothing and printed nothing.
 - `gpolish ptlabel` labels only points the graph draws. It reads the (x, y) pairs from the sersets of every plot that draws y() against x() and skips selected observations that match no drawn pair, with the note "k selected point(s) are not drawn in the graph and were not labelled". The new option `undrawn` keeps the earlier behaviour. The data in memory are unchanged. The check runs only when some plot draws the y() variable against the x() variable, and an observation left out of the graph with the same (x, y) as a drawn point is still labelled; both limits are in the help.
 - The help file describes `ptlabel`'s `msize(#)` (drawn marker diameter in points, default 6) and `offset(#)` (gap in points between the marker edge and the label, default 3).
+- `gpolish ptlabel` works out `x()` and `y()` from the graph when either is left out. A plot qualifies when it draws markers (`scatter` or `connected`), both of its variables are numeric variables in memory, and it draws any `x()` or `y()` that was given. When exactly one plot qualifies, its variables fill in the missing options, so `scatter price mpg` followed by `gpolish ptlabel make if price>12000` now works; before, it stopped with "option x() required". In every other case it stops with r(198), "specify x() and y()", and says why: with more than one qualifying plot it lists them and says it cannot tell which one to label; with none it lists the plots it found.
+
+- `endlabel`: a label pulled back inside the top or bottom edge of the plot now pushes its neighbour away again. Before, a wrapped top label could be drawn on the label below it, with a false "not enough height" note (seen under scheme stcolor, and on any scheme when the line ends started far enough apart).
+- `endlabel`: when the legend is switched off, a plot that gets no end label but has a legend key (for example an `rarea` band) is named in a note that points to `keeplegend`.
+- `brace`: `width()` must be positive; zero or a negative value stops with r(198).
+- `arrow`: `shrink()` must be 0 or more; a negative value stops with r(198). The help now explains `shrink()`.
+- `callout` and `note`: `align()` takes `left`, `right` or `center` (also `centre`) and any shorter start of them, such as `r` or `c`. Any other value stops with r(198). Before, `align(r)`, `align(centre)` or `align(junk)` ran without an error and drew the box left-aligned.
+- `bracket`: `tick()` must be positive; zero or a negative value stops with r(198). Before, `tick(-8)` drew the ticks and the label on the same side of the spine. `left` and `below` remain the way to flip the ticks.
+- The error for a `to()`, `at()` or `from()` value that cannot be read (such as a date typed as 2020m8) now suggests a date function, such as `tm(2020m8)` or `td(21sep2001)`.
 
 ### gr2mpl 0.6.0
 
@@ -130,6 +104,13 @@ This release contains gpolish 0.7.0 and gr2mpl 0.6.0. The changes listed under 0
 - The render record (render_info.txt, kept with `keepspec`) gains `panelN.psubtitle`, `panelN.pnote`, `panelN.ylabel` and placement checks.
 
 - `rbar`, `bar` and `rarea` series that end up under about two pixels wide on the axis that carries their x() values are outlined in their own colour, so they draw as at least a hairline. Before, a narrow series on an axis that another series widened (for example `twoway rbar mpg trunk rep78 || scatteri 10 5000`) was covered by white bar edges or drawn with no outline and vanished. This includes `horizontal` bars and `horizontal` rarea bands, which are tested against the y axis.
+- Colours set by options on the graph command are kept: the `graphregion()` fill, the `plotregion()` fill (single twoway graph and `graph bar`), the `title()` and `subtitle()` colours, and in a single twoway graph the `xtitle()`/`ytitle()` colours and the tick-label colours set by `labcolor()`. Colours that come only from the scheme stay in the house style. Only options at the top level of the command count: a `title()` or `subtitle()` inside `legend()` or `by()` does not set the graph title's colour. A `title()` written inside a twoway plot's parentheses applies to the whole graph and is read as the graph's.
+- A `title()` (or other graph-wide option) written among a twoway plot's own options, as in `twoway (scatter y x, title("T", color(red)))`, now keeps its colour. Before, the bare parenthesis that opens the plot was counted as option nesting, and the colour was replaced by the house style.
+- A `text()` whose anchor lies outside the axis range is no longer drawn, as in Stata; this also holds in `graph combine`. Labels that `gpolish` places in the margins (`endlabel` and others) are still drawn.
+- The saved image uses the figure's background colour instead of always white, so a `graphregion()` fill reaches the file.
+- `width()` below 0 and `dpi()` of 0 or less stop with r(198) before Python runs; before, `width(-5)` was ignored without a message and `dpi(-10)` ended in a Python traceback. The `width()` error now reads "must be 0 (the default size) or a positive integer".
+- Fill order with `yaxis(2)`: the second axis is drawn behind axis 1 only when all its plots are fills and they all come before every axis-1 fill. With `area` on axis 1 followed by `bar, yaxis(2)`, the bars now draw over the area, as in Stata. The reverse order still puts the bars behind.
+- `graph dot` markers: each series' marker colour, symbol and size is written into its legend entry, and the legend key copies them.
 
 ### Benchmark
 
@@ -159,6 +140,11 @@ This release contains gpolish 0.7.0 and gr2mpl 0.6.0. The changes listed under 0
 - New `box_sensitivity.py` and results/box_sensitivity.md rescore `gpolish`'s labels in the main and perm sets with its search's core box (text width by 0.4 times the font size) and padded box (plus 3 points per side), beside the scored glyph box. With the core box its clean share is 0.73 with every car labelled, 0.83 with every country and 0.95 for 19 cars; with the padded box 0.32, 0.62 and 0.74 (against 0.59, 0.75 and 0.84 scored). The check was made after the results were seen, approximates the search's box, and changes no setting.
 - benchmark/README.md: the row-order bullet says the real-data cells are one graph each in the original order, that with every car labelled this order gave `gpolish`'s highest clean share of the 10 (0.59; median 0.54), and that `gpolish` was lower than informed ggrepel in 6 of 10 orders. New findings and caveats bullets describe the box mismatch.
 - benchmark/README.md: the own-marker wording matches the code (side candidates at the marker radius plus 3 points, diagonal ones at 0.7 times that), and the tuning result lists per-design shares in the usual order (0.97, 0.95 and 0.88 with 30 of 30, 20 of 60 and 60 of 60).
+- New `tune_others.py` tunes informed ggrepel (256 settings in two stages) and adjustText (512 settings) on the same tuning seeds (101 to 110) with `gpolish`'s objective; results in results/tuning_ggrepel.csv, results/tuning_adjusttext.csv and results/tuned_settings.md. ggrepel's planned grid was cut to `box.padding` of 0.25 lines or less, plus a 16-setting second stage, because runs at 0.5 lines or more took 15 to 30 minutes each; all five of adjustText's chosen values sit at an edge of its grid (four if a tie for first place is counted), and the grid was not extended.
+- New columns "adjustText, tuned" and "ggrepel (informed), tuned" on the main and perm sets (`extra.py tuned`). Tuned informed ggrepel has the higher clean share with every car labelled (0.68 against 0.59 for `gpolish`); with every country labelled the two are about level (0.76 against 0.75 in the original row order, medians over 10 row orders 0.74 and 0.79 for `gpolish`); `gpolish` leads on the subsets and the synthetic designs.
+- New held-out real-data set (`make_real.do` with `BENCH_EXTRA=1`; sets realhold and rhperm, `extra.py realhold`): `census` (all 50 states and 13 of 50), `hsng` and `states`, each in the original order and 10 row orders, every method including `labrepel` and the tuned columns. Tuned informed ggrepel scores higher than `gpolish` on `census` and `states` with every state labelled (0.78 against 0.68, 0.88 against 0.56); `gpolish` scores higher on `hsng` (0.74 against 0.66) and with 13 states labelled (1.00 against 0.62). `labrepel` scores 0.10 or less on all four. `hsng` and `states` come from `webuse`, so this set needs an internet connection; the plotted points are in results/extra/points_realhold.csv.
+- `run_ggrepel.R` takes `BENCH_GG_PARMS` and `BENCH_OUTDIR` and a `ggrepel_tuned` method; `run_adjusttext.py` takes `BENCH_AT_PARMS`, `BENCH_AT_METHOD` and `BENCH_OUTDIR`; `run_stata.do` draws the tuning set only when `BENCH_SETS` names it. The main archive rescores byte for byte unchanged.
+- New docs/PLACEMENT.md: pseudocode of `ptlabel`'s placement search, checked line by line against build/gpolish_template.ado.
 
 ### Documentation
 
@@ -173,6 +159,11 @@ This release contains gpolish 0.7.0 and gr2mpl 0.6.0. The changes listed under 0
 
 - README: the measurement audit is described as covering a sample of about 845 isolated labels across 10 scenarios, not every label box. The benchmark paragraph adds the row-order caveat (the every-car figure is the best of 10 row orders) and the post hoc box-sensitivity check.
 - `gpolish` help: `ptlabel` syntax adds `undrawn`; the endlabel, ptlabel and legend descriptions and the Limits table cover the changes above. `gr2mpl` help: the narrow-series outline sentence covers `horizontal` bars and rarea bands.
+- README, benchmark/README.md and the `ptlabel` help: claims that `gpolish` leads ggrepel are qualified. `gpolish` leads on labelled subsets and synthetic designs; with every point labelled on crowded real graphs, tuned informed ggrepel scores higher (figures above). ggrepel's tuning budget was 256 settings against `gpolish`'s 566. The statement that `gpolish` is above `labrepel` everywhere now covers only the sets where `labrepel` ran (all but the scale and fontmark sets). Statements elsewhere in this entry that `gpolish` leads informed ggrepel compare it with ggrepel at its defaults.
+- README and benchmark/README.md: the search's label box is described as a core 0.4 font sizes tall, padded by 3 points on every side. The padded box is about 9.4 points tall at 8.6-point type, taller than the 8.65-point drawn text; only the core is shorter. The search ranks positions by overlap cost and does not require the padded box to be clear. The explanation that unclean labels touch only in a band the search's box does not cover is removed, since the padded box covers that band.
+- README and benchmark/README.md: the original row order is no longer called one of the 10 row orders. Its clean share with every car labelled (0.59) equals the highest of 10 separate random orders (median 0.54). Statements elsewhere in this entry that say "best of 10 row orders" should be read this way.
+- README and CITATION.cff say what plain `gpolish` does (bold title, no y-axis line or tick marks) instead of "tidies the axes".
+- benchmark/README.md, README and the `ptlabel` help: adjustText's tuned setting has all five values at an edge of its grid (four counting a tie for first place), not three. The ratio of `gpolish`'s clean share to `mlabel()`'s is given for the main set (1.6 to 6.3 times) and the held-out graphs (2.6 to 7.4 times). With every country labelled, tuned informed ggrepel and `gpolish` are described as about level, with the row-order medians (0.74 and 0.79), instead of ggrepel scoring higher.
 
 ## 0.6.1 (2026-11-17)
 

@@ -1481,6 +1481,17 @@ program _gpl_callout
     }
     if "`color'"=="" local color "26 26 26"
     if "`align'"=="" local align left
+    else {
+        * align() takes left, right or center (also centre), or any shorter start of them
+        local al = lower(`"`align'"')
+        if `"`al'"'==substr("left", 1, strlen(`"`al'"')) local align left
+        else if `"`al'"'==substr("right", 1, strlen(`"`al'"')) local align right
+        else if `"`al'"'==substr("center", 1, strlen(`"`al'"')) | `"`al'"'==substr("centre", 1, strlen(`"`al'"')) local align center
+        else {
+            di as err `"gpolish `cmd': align() must be left, right or center, not {bf:`align'}"'
+            exit 198
+        }
+    }
     if "`isnote'"!="" & "`fill'"=="" {
         * a shaded finding box in the scheme's warm accent
         local fill "253 243 220"
@@ -1701,6 +1712,7 @@ program _gpl_bracket
         GAP(real 4) XAXis(string) YAXis(string)]
     _gpl_poschk bracket size `size'
     _gpl_poschk bracket gap `gap' nonneg
+    _gpl_poschk bracket tick `tick'
     local nv = (`"`x'"'!="") + (`"`y0'"'!="") + (`"`y1'"'!="")
     local nh = (`"`y'"'!="") + (`"`x0'"'!="") + (`"`x1'"'!="")
     if !((`nv'==3 & `nh'==0) | (`nv'==0 & `nh'==3)) {

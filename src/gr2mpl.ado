@@ -1310,28 +1310,41 @@ mata:
 /* the bodies of every option in cmd whose name abbreviates full (at least
    minlen letters), joined by spaces; quoted text is skipped when matching
    parentheses and left out of the result, so a title such as
-   "rbar, color(none)" is not read as a color() option. Only options at
-   parenthesis depth 0 count, so a title() or subtitle() nested inside
-   legend(), by() or a plot's own options is not read as the graph's */
+   "rbar, color(none)" is not read as a color() option. Only options outside
+   every other option's parentheses count, so a title() or subtitle() nested
+   inside legend() or by() is not read as the graph's. A '(' counts toward
+   that option depth only when it directly follows an option name (a letter,
+   digit or underscore); the bare parentheses that enclose a twoway plot, as
+   in (scatter y x, title("T", color(red))), do not, because Stata applies
+   graph-wide options written there to the whole graph. A stack records which
+   '(' counted so that the matching ')' undoes only those */
 string scalar _g2m_optbody(string scalar cmd, string scalar full, real scalar minlen)
 {
     real scalar i, j, n, depth, inq, odepth
-    string scalar out, c, w, body
+    string scalar out, c, w, body, stk
 
     out = ""
     n = strlen(cmd)
     inq = 0
     odepth = 0
+    stk = ""
     for (i = 1; i <= n; i++) {
         c = substr(cmd, i, 1)
         if (c == char(34)) inq = !inq
         if (inq) continue
         if (c == "(") {
-            odepth++
+            if (i > 1 & regexm(substr(cmd, i - 1, 1), "[A-Za-z0-9_]")) {
+                odepth++
+                stk = stk + "1"
+            }
+            else stk = stk + "0"
             continue
         }
         if (c == ")") {
-            if (odepth > 0) odepth--
+            if (strlen(stk) > 0) {
+                if (substr(stk, -1, 1) == "1" & odepth > 0) odepth--
+                stk = substr(stk, 1, strlen(stk) - 1)
+            }
             continue
         }
         if (odepth > 0) continue

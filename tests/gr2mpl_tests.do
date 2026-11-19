@@ -837,6 +837,28 @@ has "panel1.ann=second|left|0|y1|in"
 has "panel1.ann=two lines|left|0|y1|in"
 has "panel2.ann=member two|left|0|y1|in"
 graph drop ga gb
+* a text() whose anchor lies outside the axis range is not drawn, as in Stata;
+* a text() inside the range still is
+sysuse auto, clear
+twoway lfitci price mpg || scatteri 10000 30 "pt", text(12000 20 "outside text", color(red)) ///
+    text(8000 20 "inside text") name(ga, replace)
+rchk text_outside
+has "panel1.ann=inside text|left|0|y1|in"
+ok strpos(fileread("$R_DIR/render_info.txt"), "outside text") == 0
+scatter price mpg, name(gb, replace)
+graph combine ga gb, title("combine with a text() off the axes")
+rchk text_outside_combine
+has "panel1.ann=inside text|left|0|y1|in"
+ok strpos(fileread("$R_DIR/render_info.txt"), "outside text") == 0
+graph drop ga gb
+* gpolish margin labels sit outside the data range on purpose and are still drawn
+sysuse uslifeexp, clear
+line le_male le_female year, legend(off) name(ga, replace)
+gpolish endlabel
+rchk text_outside_endlabel
+ok strpos(fileread("$R_DIR/render_info.txt"), "Life expectancy, male") > 0
+graph drop ga
+sysuse uslifeexp, clear
 * a default plot-region margin keeps gr2mpl's padding (no change from earlier renders)
 line le year, title("default margin")
 rchk margin_default
@@ -1369,7 +1391,9 @@ scatter mpg weight, title("plain")
 rchk optcolors_plain
 has "title_color=`tc'"
 * a title() or subtitle() nested inside legend() or by() is not the graph's own
-* (the spec's colour keys stay empty: no option at depth 0 set them)
+* (the spec's colour keys stay empty: no option at depth 0 set them); the bare
+* parentheses around a twoway plot do not count, so a title() among a plot's own
+* options is the graph's, as in Stata (see optcolors_inplot below)
 scatter mpg weight, title("plain") legend(on title("L", color(red)) subtitle("S", color(red)))
 rchk optcolors_legend
 has "title_color=`tc'"
@@ -1377,6 +1401,16 @@ ok strpos(fileread("$R_DIR/spec.json"), `""title_color": "", "subtitle_color": "
 scatter mpg weight, by(foreign, title("B", color(red)) subtitle("S", color(red)))
 rchk optcolors_by
 ok strpos(fileread("$R_DIR/spec.json"), `""title_color": "", "subtitle_color": "","') > 0
+* a title() written inside a plot's parentheses applies to the whole graph
+twoway (scatter mpg weight, title("T", color(red)))
+rchk optcolors_inplot
+has "title_color=#ff0000"
+twoway (scatter mpg weight, legend(on title("L", color(red)))) (lfit mpg weight), title("T")
+rchk optcolors_inplot_legend
+has "title_color=`tc'"
+twoway (scatter mpg weight if (foreign == 1), title("T", color(red))) (lfit mpg weight)
+rchk optcolors_inplot_if
+has "title_color=#ff0000"
 * the same colour given at depth 0 still carries over
 scatter mpg weight, legend(on title("L")) title("T", color(red)) subtitle("S", color(red))
 rchk optcolors_depth0

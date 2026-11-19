@@ -1747,6 +1747,41 @@ chk r10_date_rc _rc==198
 capture gpolish callout "peak", to(tm(2020m8) 60)
 chk r10_date_fn _rc==0
 
+* ---- r11: align() takes only left, right, center (centre) and their abbreviations; bracket tick() > 0
+sysuse auto, clear
+foreach a in right r center centre c left l junk q {
+    scatter price mpg, name(r11a, replace)
+    capture noisily gpolish note "Box", at(25 10000) align(`a')
+    local rc_`a' = _rc
+    if _rc local x_`a' none
+    else local x_`a' `.r11a.plotregion1.added_text[1].style.horizontal.setting'
+}
+chk r11_align_junk `rc_junk'==198
+chk r11_align_q `rc_q'==198
+foreach a in right r center centre c left l {
+    chk r11_align_ok_`a' `rc_`a''==0
+}
+* the text style records the normalised alignment
+foreach a in right r {
+    chk r11_align_h_`a' "`x_`a''"=="right"
+}
+foreach a in center centre c {
+    chk r11_align_h_`a' "`x_`a''"=="center"
+}
+foreach a in left l {
+    chk r11_align_h_`a' "`x_`a''"=="left"
+}
+scatter price mpg, name(r11a, replace)
+capture gpolish callout "Box", at(25 10000) to(30 12000) align(junk)
+chk r11_callout_align _rc==198
+scatter price mpg, name(r11b, replace)
+capture noisily gpolish bracket "neg tick", x(30) y0(5000) y1(10000) tick(-8)
+chk r11_bracket_negtick _rc==198
+capture gpolish bracket "zero tick", x(30) y0(5000) y1(10000) tick(0)
+chk r11_bracket_zerotick _rc==198
+capture gpolish bracket "pos tick", x(30) y0(5000) y1(10000) tick(8)
+chk r11_bracket_postick _rc==0
+
 gpolish limits
 
 if `"`_wf0'"'!="" graph set window fontface `"`_wf0'"'
