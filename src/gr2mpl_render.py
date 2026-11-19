@@ -669,6 +669,7 @@ class Panel:
             else:
                 h = ax.bar(x, y - lo, bottom=lo, width=width, **kw)
             info.update(handle=h, color=afill, bars=True, horizontal=horizontal,
+                        barwidth=width, outlined=afill[3] == 0,
                         base=float(np.nanmin(lo)) if len(lo) else base)
         elif t == "area" and str(p.get("dropbase", "")).strip() == "no":
             # nodropbase areas are closed polygons separated by missing rows
@@ -2391,8 +2392,53 @@ class Figure:
                 if not any(f.get_char_index(ord(c)) for f in fonts)]
         return "".join(miss)
 
+    def outline_narrow(self):
+        """Outline bars and range areas that end up under about two pixels wide
+        on the final axis in their own colour, as Stata draws them, so each still
+        shows as at least a hairline. The test uses the plotted axis range, which
+        other series (or explicit scales) may widen far past the series' own span."""
+        self.fig.canvas.draw()
+        for pnl in getattr(self, "panels", []):
+            for info in pnl.infos:
+                ax = info.get("ax") or pnl.ax
+                if info.get("type") not in ("bar", "rbar", "rarea") or ax is None:
+                    continue
+                horiz = bool(info.get("horizontal"))
+                lo, hi = ax.get_ylim() if horiz else ax.get_xlim()
+                bb = ax.get_window_extent()
+                pix = bb.height if horiz else bb.width
+                rng = abs(hi - lo)
+                if rng <= 0 or pix <= 0:
+                    continue
+                if info["type"] == "rarea":
+                    fx = info["x"][np.isfinite(info["x"])]
+                    if len(fx) == 0:
+                        continue
+                    w = float(fx.max() - fx.min())
+                else:
+                    w = float(info.get("barwidth") or 0)
+                if w * pix / rng >= 2.0:
+                    continue
+                h = info.get("handle")
+                if info["type"] == "rarea":
+                    fc = h.get_facecolor() if hasattr(h, "get_facecolor") else None
+                    if fc is None or len(fc) == 0 or fc[0][3] == 0:
+                        continue
+                    c = tuple(fc[0][:3]) + (1.0,)
+                    h.set_edgecolor(c)
+                    h.set_linewidth(0.6)
+                elif not info.get("outlined"):
+                    for patch in h:
+                        c = tuple(patch.get_facecolor()[:3]) + (1.0,)
+                        patch.set_edgecolor(c)
+                        patch.set_linewidth(0.6)
+
     def save(self):
         out = self.s.get("saving") or "gr2mpl.png"
+        try:
+            self.outline_narrow()
+        except Exception:
+            pass
         self.fig.savefig(out, dpi=self.dpi, facecolor="white")
         try:
             with open(os.path.join(self.dir, "render_info.txt"), "w", encoding="utf-8") as fh:
