@@ -1045,4 +1045,45 @@ ok _rc == 601
 mata: st_local("ex", strofreal(direxists("tests/spec/r_fail")))
 ok "`ex'" == "0"
 
+* -- bars with the default barwidth on a wide continuous axis still draw
+* (each is outlined in its own colour, so a sub-pixel bar shows as a hairline)
+tempname pf
+file open `pf' using "tests/out/barpix.py", write text replace
+file write `pf' "import sys" _n "from matplotlib.image import imread" _n
+file write `pf' "a = imread(sys.argv[1])[..., :3]" _n
+file write `pf' "n = int(((a.max(axis=2) - a.min(axis=2)) > 0.15).sum())" _n
+file write `pf' "open(sys.argv[2], 'w').write(str(n))" _n
+file close `pf'
+capture program drop barpix
+program barpix
+    * barpix tag minimum: the gr2mpl PNG holds at least this many coloured pixels
+    args tag mn
+    shell "$GR2MPL_PYTHON" "tests/out/barpix.py" "tests/out/r_`tag'_mpl.png" "tests/out/barpix.txt"
+    tempname fh
+    file open `fh' using "tests/out/barpix.txt", read text
+    file read `fh' n
+    file close `fh'
+    erase "tests/out/barpix.txt"
+    if real("`n'") < `mn' {
+        di as err "`tag': `n' coloured pixels, expected at least `mn'"
+        exit 9
+    }
+    global R_N = $R_N + 1
+end
+sysuse auto, clear
+gen lo = mpg - 3
+gen hi = mpg + 3
+twoway rbar lo hi weight, title("rbar on a weight axis")
+rchk rbar_wide
+barpix rbar_wide 1500
+twoway bar mpg weight, title("bar on a weight axis")
+rchk bar_wide
+barpix bar_wide 3000
+* the rbar layer is drawn over an rarea: gr2mpl draws the rarea in a gray with no
+* chroma, so the coloured pixels here come from the cranberry bars alone
+twoway (rarea lo hi weight, sort) (rbar lo hi weight, color(cranberry)), title("rarea and rbar")
+rchk rbar_layer
+barpix rbar_layer 1500
+erase "tests/out/barpix.py"
+
 di as res "$R_N checks passed"

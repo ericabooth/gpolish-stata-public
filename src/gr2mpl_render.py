@@ -611,7 +611,13 @@ class Panel:
             width = num(p.get("barsize"), 0.8) or 0.8
             base = num(p.get("base"), 0.0)
             lo = y2 if (t == "rbar" and y2 is not None) else np.full_like(y, base)
-            kw = dict(color=afill, lw=0.6, edgecolor="white", zorder=z)
+            # white separators suit bars that are a few pixels wide; narrow bars
+            # (a default barwidth on a wide continuous axis) are outlined in their
+            # own colour, as Stata does, so they still draw as at least a hairline
+            fx = x[np.isfinite(x)] if len(x) else x
+            span = float(np.nanmax(fx) - np.nanmin(fx)) if len(fx) > 1 else 0.0
+            narrow = span > 0 and width / (span + width) < 0.005
+            kw = dict(color=afill, lw=0.6, edgecolor=afill if narrow else "white", zorder=z)
             if horizontal:
                 h = ax.barh(x, y - lo, left=lo, height=width, **kw)
             else:

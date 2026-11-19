@@ -162,7 +162,7 @@ Skipped layers, panels and annotations are named in a note and listed in {cmd:r(
 Some choices differ from the Stata graph on purpose: the y-axis title moves above the plot (above its
 right end when the y axis of a single graph is on the right; with two y axes each title stays beside its axis), the series
 legend sits above the plot, bars always start at their base, black reference lines become gray, and y-axis tick
-labels are drawn horizontally unless Stata set a diagonal angle.
+labels are drawn horizontally unless Stata set a diagonal angle. Bars wider than about 0.5% of the x range are separated by thin white edges; narrower bars, such as {cmd:twoway bar} or {cmd:rbar} with the default {cmd:barwidth()} on a continuous axis like weight in pounds, are outlined in their own colour, as Stata draws them, so each shows as at least a hairline.
 
 {pstd}
 Other differences are limits of the translation:
