@@ -272,10 +272,11 @@ def main():
     if it_rows:
         out += ["## Stopping rules: iterations of adjustText and ggrepel", "",
                 "adjustText runs at most 100 iterations (iter_lim=100, no time limit) and stops earlier when its labels",
-                "settle. ggrepel stops at 10,000 iterations, when its labels settle, or after 0.5 seconds; a graph that",
-                "stops at the time limit can give a different result on another machine. ggrepel's positions are read",
-                "from a second run of its placement with the same seed (see run_ggrepel.R); the last column counts graphs",
-                "where that run's iteration count differs from the drawn run's. Seconds are as in the tables above.", ""]
+                "settle. ggrepel runs with max.iter = 10000 (its default) and max.time = Inf (its default is 0.5 seconds),",
+                "so it stops at 10,000 iterations or when its labels settle, and no graph depends on the machine's speed.",
+                "ggrepel's positions are read from a second run of its placement with the same seed (see run_ggrepel.R);",
+                "the last column counts graphs where that run's iteration count differs from the drawn run's. Seconds are",
+                "as in the tables above.", ""]
         out += table(["Method", "Set", "Graphs", "Iterations", "Stopped at the iteration limit / settled / time limit",
                       "Seconds", "Read-back run differs"], it_rows)
     open("results/summary.md", "w").write("\n".join(out))

@@ -34,8 +34,10 @@ def main():
         for d, dname in designs:
             cells = []
             for m in methods:
-                vals = [st.mean(r[key] for r in res[(t, d, m)]) if (t, d, m) in res else float("nan")
-                        for t, _ in THRESHOLDS]
+                # graph shares rounded to 4 decimals as in results/graphs.csv, so that the 2.75 pt column
+                # matches results/summary.md exactly
+                vals = [st.mean(float(score.fmt(r[key])) for r in res[(t, d, m)]) if (t, d, m) in res
+                        else float("nan") for t, _ in THRESHOLDS]
                 cells.append(" / ".join(f"{v:.2f}" for v in vals))
             out.append(f"| {dname} | " + " | ".join(cells) + " |")
         out.append("")

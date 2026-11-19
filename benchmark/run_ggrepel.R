@@ -1,23 +1,29 @@
 # Label-placement benchmark, ggrepel side (R, ggplot2).
 # Each scenario is drawn with the plot region and axis scales of the Stata graph
 # (out/stata/geometry_default_<set>.csv). Two versions are run:
-#   ggrepel      geom_text_repel at its defaults, given only the labelled points (max.overlaps = Inf,
-#                so it drops no labels)
+#   ggrepel      geom_text_repel at its defaults, given only the labelled points, except for
+#                max.overlaps = Inf (so it drops no labels) and the time limit (below)
 #   ggrepel_inf  "ggrepel (informed)": the same call, but given every point, with an empty label for
 #                each unlabelled point (so its labels also avoid those points), and point.size set to
 #                the drawn marker size. Nothing else differs.
-# Marker size in ggplot2 units: ggplot2 sizes are millimetres, and a size s is drawn at a font size of
-# s * .pt points, where .pt = 72.27 / 25.4 (ggplot2 counts TeX points, 72.27 to the inch). A marker
-# m big points (1/72 inch, the unit of Stata and matplotlib) across is m * 72.27 / 72 TeX points, so
-# its ggplot2 size is m * 72.27 / 72 / .pt (2.117 for the benchmark's 6 pt markers). The same rule sets
-# the label size and the size of the drawn points, and point.size takes geom_point()'s size units.
-# ggplot2 draws its markers a little under m points across (shape 19 at that font size), but every
-# method is scored against the same m-point marker.
+# Stopping rule: ggrepel stops after max.iter iterations (default 10000), when its labels settle, or
+# after max.time seconds (default 0.5), whichever comes first. A run stopped by the time limit depends
+# on the machine's speed and load, so both calls set max.iter = 10000 (the default, written out) and
+# max.time = Inf: every run then stops at 10,000 iterations or when the labels settle, and two runs give
+# the same positions.
+# Sizes: ggplot2 draws a text or point size s at a grid fontsize of s * .pt, where .pt = 72.27 / 25.4,
+# and grid reads fontsize in big points (1/72 inch, the unit of Stata and matplotlib; at fontsize 72 one
+# line is 72 bigpts). So a label of f points is size f / .pt (3.023 for 8.6 pt), and a marker m points
+# across is given size m / .pt (2.109 for the benchmark's 6 pt markers), for the drawn points and for
+# point.size, which takes geom_point()'s size units. ggplot2 draws its default marker (shape 19) at size
+# 2.109 as a disc about 5.9 points across, a little under m, but every method is scored against the same
+# m-point marker.
 # ggrepel places labels while drawing, so the label centres and the leader segments are read back
 # from the drawn grid objects.
 # Writes, per scenario set, out/<method>/results_<set>.csv (label centres and leader end points in
-# points, y up) and timing_<set>.csv (seconds to place and draw the plot once, and ggrepel's iteration
-# count in the drawn run and in the run whose positions were read back). A run limited to some scenarios keeps the rows of the others.
+# points, y up) and timing_<set>.csv (seconds to place and draw the plot once, ggrepel's iteration
+# count in the drawn run and in the run whose positions were read back, and why the latter stopped).
+# A run limited to some scenarios keeps the rows of the others.
 # Run from the benchmark folder after run_stata.do:  Rscript run_ggrepel.R [scenario ...]
 # With no scenarios named, BENCH_SCENARIOS (if set) names them; BENCH_SETS and BENCH_METHODS limit the
 # sets and the two versions.
@@ -37,8 +43,10 @@ man <- do.call(rbind, lapply(seq_along(files), function(i) {
 }))
 if (length(args)) man <- man[man$scenario %in% args, ]
 geo <- do.call(rbind, lapply(Sys.glob("out/stata/geometry_default_*.csv"), read.csv))
-PT <- 72.27 / 72                      # ggplot sizes are in TeX points; Stata and matplotlib use 1/72 in
-cat("ggrepel", as.character(packageVersion("ggrepel")), "ggplot2", as.character(packageVersion("ggplot2")), "\n")
+MAX_ITER <- 10000                     # ggrepel's default, written out
+MAX_TIME <- Inf                       # no time limit (the default 0.5 s makes results depend on the machine)
+cat("ggrepel", as.character(packageVersion("ggrepel")), "ggplot2", as.character(packageVersion("ggplot2")),
+    "max.iter =", MAX_ITER, "max.time =", MAX_TIME, "\n")
 
 # every scenario of a set in manifest order, whatever scenarios this run was limited to
 set_order <- function(set) unlist(lapply(seq_along(files), function(i)
@@ -60,8 +68,8 @@ run_one <- function(i, method) {
   scen <- man$scenario[i]
   g <- geo[geo$scenario == scen, ]
   d <- read.csv(file.path("data", paste0(scen, ".csv")), colClasses = c(label = "character"), encoding = "UTF-8")
-  labsize <- man$label_pt[i] * PT / .pt
-  ptsize <- man$marker_pt[i] * PT / .pt
+  labsize <- man$label_pt[i] / .pt
+  ptsize <- man$marker_pt[i] / .pt
   W <- g$W; H <- g$H
   xl <- c((g$px0 - g$xA) / g$xB, (g$px1 - g$xA) / g$xB)
   yl <- c((g$py0 - g$yA) / g$yB, (g$py1 - g$yA) / g$yB)
@@ -71,13 +79,14 @@ run_one <- function(i, method) {
   p <- p + geom_point(size = ptsize, colour = "#0B5D7A", alpha = 0.7)
   if (method == "ggrepel") {
     p <- p + geom_text_repel(data = d[d$lab == 1, ], aes(label = label), size = labsize, family = "Open Sans",
-                             seed = 12345, max.overlaps = Inf, segment.colour = "grey60", segment.size = 0.25,
+                             seed = 12345, max.overlaps = Inf, max.iter = MAX_ITER, max.time = MAX_TIME,
+                             segment.colour = "grey60", segment.size = 0.25,
                              verbose = TRUE)
   } else {
     d$lab2 <- ifelse(d$lab == 1, d$label, "")
     p <- p + geom_text_repel(data = d, aes(label = lab2), size = labsize, family = "Open Sans",
-                             point.size = ptsize, seed = 12345, max.overlaps = Inf,
-                             segment.colour = "grey60", segment.size = 0.25, verbose = TRUE)
+                             point.size = ptsize, seed = 12345, max.overlaps = Inf, max.iter = MAX_ITER,
+                             max.time = MAX_TIME, segment.colour = "grey60", segment.size = 0.25, verbose = TRUE)
   }
   p <- p + scale_x_continuous(limits = xl, expand = c(0, 0)) + scale_y_continuous(limits = yl, expand = c(0, 0)) +
     theme_void() + theme(plot.margin = margin(H - g$py1, W - g$px1, g$py0, g$px0, unit = "bigpts"))
@@ -86,8 +95,8 @@ run_one <- function(i, method) {
   png(f, width = W / 72, height = H / 72, units = "in", res = if (keep) 200 else 72)
   # verbose = TRUE only makes ggrepel report its iterations and time as a message; it does not change
   # the placement. print() places and draws the labels (the timed step); grid.force() then runs the same
-  # placement again, with the same seed, so the drawn grid objects can be read. Both runs are recorded:
-  # when neither reaches ggrepel's 0.5 second limit they stop at the same iteration with the same result.
+  # placement again, with the same seed, so the drawn grid objects can be read. Both runs are recorded,
+  # and with no time limit they stop at the same iteration with the same result (checked below).
   msgs <- character(0)
   keepmsg <- function(m) { msgs <<- c(msgs, conditionMessage(m)); invokeRestart("muffleMessage") }
   t0 <- proc.time()[["elapsed"]]
@@ -102,6 +111,7 @@ run_one <- function(i, method) {
   last <- im[length(im)]
   stop_read <- if (grepl("complete", last)) "settled" else if (grepl("max.time", last)) "time limit" else "iteration limit"
   if (length(it) != 2) stop(scen, ": expected two ggrepel iteration reports, got ", length(it))
+  if (it[1] != it[2]) stop(scen, ": the drawn run and the read-back run stopped at different iterations")
   vp <- grep("^panel", grid.ls(viewports = TRUE, grobs = FALSE, print = FALSE)$name, value = TRUE)[1]
   downViewport(vp)
   tr <- grid.get("textrepeltree", grep = TRUE, global = TRUE)

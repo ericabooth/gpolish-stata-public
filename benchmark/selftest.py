@@ -4,8 +4,10 @@ Works on a copy of this folder in a temporary directory, so data/, out/ and resu
 left alone. It needs a finished run (data/, out/ and results/ present). It checks that:
   1. run_adjusttext.py gives identical label positions on two runs, and a run of run_adjusttext.py or
      run_ggrepel.R limited to some scenarios reproduces the full run's rows and keeps the others;
-     run_adjusttext.py runs while another Stata method's geometry file is still being written; and
-     results/geometry.csv records ggrepel's iteration counts and stopping reason;
+     run_adjusttext.py runs while another Stata method's geometry file is still being written;
+     run_ggrepel.R sets max.iter = 10000 and max.time = Inf, two ggrepel runs give identical label
+     positions, and results/geometry.csv records ggrepel's iteration counts and stopping reason, with
+     no graph stopped by a time limit and the drawn and read-back runs at the same iteration;
   2. score.py --rescore, which reads only results/positions.csv, geometry.csv and points.csv,
      gives the same labels.csv and graphs.csv byte for byte as the full scoring run;
   3. score.py, summarize.py, marker_sensitivity.py and score.py --check still work when a
@@ -100,8 +102,15 @@ def main():
             same = all(filecmp.cmp(os.path.join(HERE, f"out/{m}/results_main.csv"),
                                    os.path.join(bench, f"out/{m}/results_main.csv"), shallow=False)
                        for m in ("ggrepel", "ggrepel_inf"))
-            check(rg.returncode == 0 and same,
-                  "a ggrepel run limited to two scenarios gives the same label positions and keeps the other rows")
+            check(rg.returncode == 0 and same and "max.iter = 10000 max.time = Inf" in rg.stdout,
+                  "a ggrepel run (max.iter = 10000, max.time = Inf) limited to two scenarios gives the same label positions and keeps the other rows")
+            for m in ("ggrepel", "ggrepel_inf"):
+                shutil.copy(os.path.join(bench, f"out/{m}/results_main.csv"), os.path.join(root, f"{m}1.csv"))
+            rg2 = run(["Rscript", "run_ggrepel.R"], bench, {"BENCH_SCENARIOS": "autoall"})
+            check(rg2.returncode == 0 and all(filecmp.cmp(os.path.join(root, f"{m}1.csv"),
+                                                          os.path.join(bench, f"out/{m}/results_main.csv"), shallow=False)
+                                              for m in ("ggrepel", "ggrepel_inf")),
+                  "two ggrepel runs give identical label positions")
         else:
             print("note: Rscript not found; the ggrepel check is skipped")
 
@@ -122,6 +131,8 @@ def main():
         check(gg and all(g["iterations"] and g["iterations_drawn"] and
                          g["stop"] in ("iteration limit", "settled", "time limit") for g in gg),
               "results/geometry.csv records ggrepel's iterations and why it stopped for every graph")
+        check(all(g["stop"] != "time limit" and g["iterations"] == g["iterations_drawn"] for g in gg),
+              "no ggrepel graph stopped at a time limit, and every read-back run matches the drawn run")
 
         # the reruns above wrote new timings; the rest of the checks use the full run's output again
         for m in ("adjusttext", "ggrepel", "ggrepel_inf"):
