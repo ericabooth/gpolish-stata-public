@@ -11,7 +11,7 @@
 | Piece | What it does | Output |
 |---|---|---|
 | `scheme(pypolish)` | Static defaults: white background, left-aligned titles, light horizontal grid, horizontal axis labels, a restrained palette. | Stata graph |
-| `gpolish` | Reads the drawn graph and adds direct labels, callouts, point labels and brackets. A layout step places them clear of markers, lines, bars, shaded areas, range plots, `xline()` and `yline()` reference lines, labels added earlier and the edges of the plot. | Stata graph |
+| `gpolish` | Reads the drawn graph and adds direct labels, callouts, point labels and brackets. A layout step places them clear of markers, lines, bars, shaded areas, range plots, `xline()` and `yline()` reference lines, labels added earlier and the edges of the plot. Bracket labels are the exception: `gpolish bracket` sets its label at a fixed position beside the spine and does not check it against the data. | Stata graph |
 | `gr2mpl` | Redraws the graph held in memory with matplotlib, including every `gpolish` edit. Handles `graph bar`, box, dot, `graph matrix`, `by()` and combined graphs too. | PNG, PDF, SVG or JPG image |
 
 `gpolish` needs only Stata. `gr2mpl` needs Python with matplotlib 3.6 or later and numpy.
@@ -112,7 +112,7 @@ Stata's graph renderer cannot draw the following. `gpolish` prints a note for te
 - **Text at an angle other than 0, 90 or 270 degrees.** The angle is stored in the graph and applied by `gr2mpl`.
 - **A soft halo behind text.** `halo` draws a white box in Stata, which can cover a nearby marker; `gr2mpl` draws a thin outline instead.
 - **Different colours inside one line of text**, and **filled arrow heads**.
-- **Layout commands on non-twoway graphs.** `endlabel`, `callout`, `note`, `arrow`, `brace`, `bracket`, `ptlabel`, `legend` and `clear` stop with an error on graphs that are not twoway graphs. Plain `gpolish` (or `gpolish style`) still makes the title bold, and `gpolish render` (gr2mpl) can redraw bar, box, dot, matrix, `by()` and combined graphs.
+- **Layout commands on non-twoway graphs.** `endlabel`, `callout`, `note`, `arrow`, `brace`, `bracket`, `ptlabel`, `legend`, `geom` and `clear` stop with an error on graphs that are not twoway graphs. Plain `gpolish` (or `gpolish style`) still makes the title bold, and `gpolish render` (gr2mpl) can redraw bar, box, dot, matrix, `by()` and combined graphs.
 
 `gr2mpl` does not draw contour plots or pie charts. It skips a layer on a second x axis or a third y axis, reference lines and `text()` on those axes, and a `by()` graph inside `graph combine`. Each skipped item is named in a note, and skipped layers are also listed in `r(unsupported)`. With two y axes, `gr2mpl` draws each axis on the side Stata used, and `yscale(alt)` puts the y axis on the right. It does not follow `xscale(alt)`: the x axis stays at the bottom. When Stata draws both y axes on one side, as it does with a third y axis, `gr2mpl` draws the second on the other side.
 
