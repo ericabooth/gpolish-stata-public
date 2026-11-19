@@ -669,6 +669,28 @@ program _gpl_style
 end
 
 * ================================================================ endlabel
+* the text of the legend key drawn for the plot whose object key is given, lines joined by a
+* space; r(text) is empty when the graph has no legend or no key for that plot
+program _gpl_legtext, rclass
+    args name okey
+    local nk `.`name'.legend.plotregion1.key.arrnels'
+    if "`nk'"=="" | `"`okey'"'=="" exit
+    forvalues k = 1/`nk' {
+        if `"`.`name'.legend.plotregion1.key[`k'].view.objkey'"'==`"`okey'"' {
+            local nl `.`name'.legend.plotregion1.label[`k'].text.arrnels'
+            if "`nl'"=="" local nl 0
+            local t
+            forvalues q = 1/`nl' {
+                local s `"`.`name'.legend.plotregion1.label[`k'].text[`q']'"'
+                if `"`t'"'=="" local t `"`s'"'
+                else if `"`s'"'!="" local t `"`t' `s'"'
+            }
+            return local text `"`t'"'
+            exit
+        }
+    }
+end
+
 program _gpl_endlabel
     syntax [, name(string) SIZe(real 9.5) GAP(real 1.3) VALues FORmat(string) noBOLD ///
               DOTs DOTSize(real 5.5) PLOTs(numlist integer >0) XGap(real 8) LABels(string asis) noREPEL ///
@@ -762,12 +784,32 @@ program _gpl_endlabel
         local plot`j' `i'
         * prefer the variable's own label: it is read raw, while a serset label passes
         * through macro expansion once more (a $ in it would already be lost)
+        * the legend key text of the plot comes first when it says something the variable
+        * label does not: a fit line (lfit, qfit, lowess) or a marginsplot line keeps the
+        * name its legend gave it. Otherwise the raw variable label is used.
+        _gpl_legtext `name' `"``pr'.plot`i'.objkey'"'
+        local ltx `"`r(text)'"'
         local lab`j'
         capture confirm variable `sname', exact
         if !_rc local lab`j' : variable label `sname'
         if `"`lab`j''"'=="" local lab`j' `"`slab'"'
+        * the legend text has passed through global expansion, so it is compared with the label
+        * expanded the same way
+        mata: st_local("lexp", _gpl_gexp(st_local("lab`j'")))
+        if `"`ltx'"'!="" & `"`ltx'"'!=`"`lexp'"' local lab`j' `"`ltx'"'
         if `"`lab`j''"'=="" local lab`j' `sname'
         mata: st_local("lab`j'", _gpl_esc(st_local("lab`j'")))
+        if `"`labels'"'=="" | `"`: word `q' of `labels''"'=="" {
+            * two plots with one label leave the reader unable to tell them apart
+            forvalues jj = 1/`=`j'-1' {
+                if `"`lab`jj''"'==`"`lab`j''"' {
+                    di as txt `"note: gpolish endlabel: plots `plot`jj'' and `i' get the same label "`lab`j''";"'
+                    di as txt "      use labels() to tell them apart; the legend is kept"
+                    local keeplegend keeplegend
+                    continue, break
+                }
+            }
+        }
         if `"`labels'"'!="" {
             * labels() follow the order of plots(), one per plot
             local ll : word `q' of `labels'
@@ -970,6 +1012,8 @@ program _gpl_clear
             _gpl_ge `name' .plotregion1.`a'_rec = 0
         }
     }
+    * a clear with nothing to remove makes no edit and prints nothing
+    if `kadded_text' + `kadded_lines' + `kadded_markers' == 0 exit
     di as txt "gpolish clear: removed `kadded_text' text box(es), `kadded_lines' line segment(s) and `kadded_markers' marker(s)"
     di as txt "  (this includes anything added in the Graph Editor; the title and axis edits of {bf:gpolish} stay)"
 end
@@ -1405,9 +1449,13 @@ end
 program _gpl_ptlabel
     syntax varname(string) [if] [in], x(varname numeric) y(varname numeric) [name(string) SIZe(real 8.6) ///
         COLor(string) OFFset(real 3) MSize(real 6) HALO noLEADer LColor(string) LWidth(string) ///
-        XAXis(string) YAXis(string)]
+        XAXis(string) YAXis(string) MAXLabels(integer 1000)]
     _gpl_name `name'
     local name `r(name)'
+    if `maxlabels' < 1 {
+        di as err "gpolish ptlabel: maxlabels() must be 1 or more"
+        exit 198
+    }
     marksample touse, novarlist strok
     quietly count if `touse' & !missing(`x', `y') & `varlist'!=""
     if r(N)==0 {
@@ -1445,6 +1493,34 @@ program _gpl_ptlabel
     if r(N)==0 {
         di as txt "note: gpolish ptlabel: none of the selected points is drawn (zero or negative values on a log axis); nothing to label"
         exit
+    }
+    * points outside the axis range of the plot region are not drawn, so they are not labelled
+    _gpl_geom, name(`name')
+    local tol = 0.001*max(r(gx1)-r(gx0), r(gy1)-r(gy0))
+    local bx0 = r(gx0) - `tol'
+    local bx1 = r(gx1) + `tol'
+    local by0 = r(gy0) - `tol'
+    local by1 = r(gy1) + `tol'
+    quietly count if `sel'
+    local nin = r(N)
+    quietly replace `sel' = 0 if `sel' & (`gx' < `bx0' | `gx' > `bx1' | `gy' < `by0' | `gy' > `by1')
+    quietly count if `sel'
+    local nsel = r(N)
+    if `nsel' < `nin' {
+        di as txt "note: gpolish ptlabel: `=`nin'-`nsel'' selected point(s) lie outside the plot region and were not labelled"
+    }
+    if `nsel'==0 {
+        di as txt "note: gpolish ptlabel: none of the selected points is drawn inside the plot region; nothing to label"
+        exit
+    }
+    if `nsel' > `maxlabels' {
+        di as err "gpolish ptlabel: `nsel' points are selected, more than maxlabels(`maxlabels');"
+        di as err "         use if/in to label fewer points, or raise maxlabels()"
+        exit 198
+    }
+    if `nsel' > 300 {
+        di as txt "note: gpolish ptlabel: placing `nsel' labels; run time grows quickly with the number of labels"
+        di as txt "      (about 40 seconds for 600 labels); use if/in to label fewer points"
     }
     _gpl_geom, name(`name')
     tempname R
@@ -1522,6 +1598,41 @@ end
 mata:
 // ---------------------------------------------------------------- text escaping
 // $ and a backtick that does not open a compound quote become SMCL character codes
+// s with each $name and ${name} replaced by the global's contents, as macro expansion does
+string scalar _gpl_gexp(string scalar s)
+{
+    real scalar i, j, n
+    string scalar out, ch, nm
+
+    out = ""
+    n = strlen(s)
+    i = 1
+    while (i <= n) {
+        ch = substr(s, i, 1)
+        if (ch == char(36) & i < n) {
+            if (substr(s, i+1, 1) == "{") {
+                j = strpos(substr(s, i+2, .), "}")
+                if (j > 0) {
+                    out = out + st_global(substr(s, i+2, j-1))
+                    i = i + j + 2
+                    continue
+                }
+            }
+            else if (regexm(substr(s, i+1, 1), "[A-Za-z_]")) {
+                j = i + 1
+                while (j <= n & regexm(substr(s, j, 1), "[A-Za-z0-9_]")) j++
+                nm = substr(s, i+1, j-i-1)
+                out = out + st_global(nm)
+                i = j
+                continue
+            }
+        }
+        out = out + ch
+        i++
+    }
+    return(out)
+}
+
 string scalar _gpl_esc(string scalar s)
 {
     real scalar i
