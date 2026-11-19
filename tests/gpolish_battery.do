@@ -920,6 +920,119 @@ _gm_edit .old6.plotregion1.added_text[1].style.editstyle size(9.5pt) linegap(1pt
 gpolish clear
 przx old6
 chk old_userlegend "`.old6.legend.draw_view.setting'"=="no" & abs(r(x1) - `ox1') < 1
+* a second clear on an old graph changes nothing and prints no note
+local nlog `.old6.__LOG.arrnels'
+shownote "0.6.1" gpolish clear
+chk old_clear2_note r(note)==0
+chk old_clear2_noedit `.old6.__LOG.arrnels'==`nlog'
+
+* ---- 33g. one clear undoes every endlabel run; a second clear changes nothing ---------
+* After any sequence of endlabel runs (some of them made stale by a hand edit, some with
+* keeplegend, side(left), values or dots, across graph save and graph use), one gpolish clear
+* leaves the plot region where it was before the first run, the legend as it was, and no added
+* objects. A second clear makes no edit and prints no note.
+capture program drop clrchk
+program clrchk
+    args g tag x0 x1 leg
+    gpolish clear, name(`g')
+    ntext `g' added_text
+    chk `tag'_text r(all)==0
+    ntext `g' added_markers
+    chk `tag'_marks r(all)==0
+    przx `g'
+    chk `tag'_margin abs(r(x0) - `x0') < 1 & abs(r(x1) - `x1') < 1
+    chk `tag'_legend "`.`g'.legend.draw_view.setting'"=="`leg'"
+    local nlog `.`g'.__LOG.arrnels'
+    shownote "note:" gpolish clear, name(`g')
+    chk `tag'_clear2_note r(note)==0
+    chk `tag'_clear2_noedit `.`g'.__LOG.arrnels'==`nlog'
+    przx `g'
+    chk `tag'_clear2_margin abs(r(x0) - `x0') < 1 & abs(r(x1) - `x1') < 1
+end
+capture program drop handedit
+program handedit
+    args g k
+    _gm_edit .`g'.plotregion1.added_text[`k'].text = {}
+    _gm_edit .`g'.plotregion1.added_text[`k'].text.Arrpush "Edited by hand"
+end
+sysuse uslifeexp, clear
+* the stale case: run 1's record goes stale, run 2 still gives back run 1's margin and legend
+line le_wfemale le_wmale le_bfemale year, name(sc1, replace)
+przx sc1
+local bx0 = r(x0)
+local bx1 = r(x1)
+gpolish endlabel
+handedit sc1 1
+shownote "changed or" gpolish endlabel
+chk stale_note r(note)==1
+ntext sc1 added_text
+chk stale_hidden r(k)==4
+chk stale_edit_kept "`.sc1.plotregion1.added_text[1].draw_view.setting'"!="no" & "`.sc1.plotregion1.added_text[2].draw_view.setting'"=="no"
+przx sc1
+chk stale_margin abs(r(x1) - `rx1') < 1 & abs(r(x0) - `rx0') < 1
+chk stale_legend "`.sc1.legend.draw_view.setting'"=="no"
+clrchk sc1 staleclr `bx0' `bx1' yes
+* a single stale run
+line le_wfemale le_wmale le_bfemale year, name(sc2, replace)
+gpolish endlabel, values dots
+handedit sc2 2
+clrchk sc2 stale1 `bx0' `bx1' yes
+* a chain of stale runs with mixed options
+line le_wfemale le_wmale le_bfemale year, name(sc3, replace)
+gpolish endlabel
+handedit sc3 1
+gpolish endlabel, values
+handedit sc3 6
+gpolish endlabel, side(left) dots
+handedit sc3 11
+gpolish endlabel, keeplegend
+gpolish endlabel, values side(left)
+clrchk sc3 chain `bx0' `bx1' yes
+* keeplegend first, then a run that switches the legend off
+line le_wfemale le_wmale le_bfemale year, name(sc4, replace)
+gpolish endlabel, keeplegend
+handedit sc4 1
+gpolish endlabel
+chk keep_then_off "`.sc4.legend.draw_view.setting'"=="no"
+clrchk sc4 keepoff `bx0' `bx1' yes
+* a legend switched off by the user stays off
+line le_wfemale le_wmale le_bfemale year, legend(off) name(sc5, replace)
+przx sc5
+local ux0 = r(x0)
+local ux1 = r(x1)
+gpolish endlabel
+handedit sc5 1
+gpolish endlabel, values
+clrchk sc5 userleg `ux0' `ux1' no
+* across graph save and graph use, with a callout between the runs
+line le_wfemale le_wmale le_bfemale year, name(sc6, replace)
+gpolish endlabel
+handedit sc6 2
+tempfile gsc
+graph save sc6 "`gsc'", replace
+graph drop sc6
+graph use "`gsc'", name(sc7)
+gpolish callout "kept until clear", at(1950 60)
+gpolish endlabel, dots
+tempfile gsc2
+graph save sc7 "`gsc2'", replace
+graph drop sc7
+graph use "`gsc2'", name(sc8)
+clrchk sc8 saved `bx0' `bx1' yes
+* labels made inside the plot regions (a second y axis on the right)
+generate pop = 1000 + 20*(year-1900)
+twoway (line le year) (line pop year, yaxis(2)), name(sc9, replace)
+local pm1 = `.sc9.plotregion1.style.margin.gright.val'
+local pm2 = `.sc9.plotregion2.style.margin.gright.val'
+przx sc9
+local px0 = r(x0)
+local px1 = r(x1)
+gpolish endlabel
+handedit sc9 1
+gpolish endlabel, values
+clrchk sc9 inner `px0' `px1' yes
+chk inner_pm abs(`.sc9.plotregion1.style.margin.gright.val' - `pm1') < 1e-6 & abs(`.sc9.plotregion2.style.margin.gright.val' - `pm2') < 1e-6
+drop pop
 
 * ---- 33e. obstacle boxes cover the whole of a long band and line --------------------
 clear

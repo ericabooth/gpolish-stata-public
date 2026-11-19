@@ -291,34 +291,52 @@ program _gpl_regget, rclass
     mata: _gpl_recparse(st_local("s"))
     _gpl_count `name' added_markers
     local nm = r(k)
-    * the record is stale if a recorded object is gone or no longer holds the same text
+    * The record is stale if a recorded object is gone or no longer holds the same text. The margin
+    * and the legend change do not depend on the objects, so they are returned either way; of the
+    * objects, only those still present and unchanged are returned (r(nchg) counts the others).
     local stale 0
+    local nchg 0
+    local okt
+    local okm
     local q 0
     foreach k of local txt {
         local ++q
         if `k' == `rec' | `k' > `nt' {
             local stale 1
-            continue, break
+            local ++nchg
+            continue
         }
         local L : word `q' of `lens'
         local t `"`.`name'.plotregion1.added_text[`k'].text[1]'"'
-        if `"`L'"'!="`=strlen(`"`t'"')'" local stale 1
+        if `"`L'"'!="`=strlen(`"`t'"')'" {
+            local stale 1
+            local ++nchg
+        }
+        else local okt `okt' `k'
     }
     foreach k of local mk {
         if `k' > `nm' local stale 1
+        else local okm `okm' `k'
     }
+    capture confirm number `m'
+    if _rc local m
     return local rec `rec'
-    if `stale' exit
-    return local ok 1
-    return local txt `txt'
-    return local mk `mk'
+    return local ok = !`stale'
+    return local nchg `nchg'
+    return local txt `okt'
+    return local mk `okm'
     return local side `side'
     return local m `m'
     return local leg `leg'
     return local pm `pm'
 end
 
-* undo a recorded endlabel: hide its objects, give back its margin, restore the legend
+* Undo a recorded endlabel: hide its objects, give back its margin, restore the legend. Every run
+* undoes the run before it, so at most one run is outstanding, and its record is the live one: one
+* gpolish clear returns the graph to its state before the first endlabel run. A record is spent when it
+* is used. A stale record (a label changed or removed by other means) still gives back the margin and
+* the legend; the labels that were changed or removed are left as they are (the caller's local
+* _gpl_nchg counts them).
 program _gpl_regundo
     args name
     _gpl_regget `name'
@@ -331,17 +349,19 @@ program _gpl_regundo
     local side `r(side)'
     local leg `r(leg)'
     local pm `r(pm)'
+    local nchg `r(nchg)'
     c_local _gpl_legn 0
+    c_local _gpl_nchg 0
     if "`rec'"=="" {
-        * no record: end labels added by gpolish 0.6.1 or earlier are found in the edit log
+        * no record box: end labels added by gpolish 0.6.1 or earlier are found in the edit log
         _gpl_legundo `name'
         c_local _gpl_legn `r(n)'
         exit
     }
-    * a record is used once: mark it spent, whether or not it could be applied
+    * a record is used once: mark it spent
     _gpl_ge `name' .plotregion1.added_text[`rec'].text = {}
     _gpl_ge `name' .plotregion1.added_text[`rec'].text.Arrpush "gpolish-endlabel-spent"
-    if "`ok'"!="1" exit
+    if "`nchg'"!="" c_local _gpl_nchg `nchg'
     foreach k of local txt {
         _gpl_ge `name' .plotregion1.added_text[`k'].draw_view.setstyle, style(no)
     }
@@ -367,6 +387,7 @@ end
 * edit, and then its text boxes: each label box is styled with linegap(1pt), and a value box follows
 * its label at the same height. Each run whose margin was not given back later in the log is undone
 * here: its boxes and markers are hidden, its margin is given back and the legend is shown again.
+* A graph whose log shows an endlabel record of this release is not scanned (see _gpl_legscan()).
 * r(n) = runs undone
 program _gpl_legundo, rclass
     args name
@@ -687,6 +708,12 @@ program _gpl_endlabel
         di as txt "note: end labels added to graph {bf:`name'} by gpolish 0.6.1 or earlier were found in its"
         di as txt "      edit log; they are hidden and their margin is given back before the new labels"
         di as txt "      are added."
+    }
+    if `_gpl_nchg' > 0 {
+        di as txt "note: `_gpl_nchg' end label(s) of the earlier run on graph {bf:`name'} were changed or"
+        di as txt "      removed by other means and are left as they are; the other labels of that"
+        di as txt "      run are hidden and its margin is given back. {bf:gpolish clear} removes"
+        di as txt "      every added text box."
     }
     * which end of each line sits on the chosen side of the plot, whatever the axis direction
     local s = cond("`side'"=="right", 1, -1)
@@ -2163,6 +2190,18 @@ void _gpl_legscan(string colvector L)
     prevlab = 0
     expleg = 0
     pend = ""
+    // A graph that has held an endlabel record was handled by this release, whose first endlabel or
+    // clear on the graph already undid any earlier runs: then there is nothing to scan for.
+    for (e=1; e<=rows(L); e++) {
+        if (regexm(L[e], "^\.plotregion1\.added_text\[[0-9]+\]\.text\.Arrpush ") & strpos(L[e], "gpolish-endlabel")) {
+            st_local("n", "0")
+            st_local("txt", "")
+            st_local("mk", "")
+            st_local("marg", "")
+            st_local("leg", "0")
+            return
+        }
+    }
     for (e=1; e<=rows(L); e++) {
         s = L[e]
         if (regexm(s, "^\.style\.editstyle margin\(([rl])([+-])([0-9.eE+-]+)\) editcopy$")) {

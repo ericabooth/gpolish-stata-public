@@ -294,8 +294,12 @@ Text keeps {cmd:$} and backtick characters literally; they are stored as {cmd:{c
 hidden text box inside the graph. The record belongs to that graph only, and it is saved with the graph, so after
 {cmd:graph save} and {cmd:graph use} a second {cmd:gpolish endlabel} still replaces the first set of labels and
 {cmd:gpolish clear} still restores the margin and the legend. A graph redrawn under the same name starts with no
-record. If a recorded label was changed or removed by other means (for example in the Graph Editor), the record is
-ignored; run {cmd:gpolish clear} and start again. A graph holds at most one record box: a second
+record. Each {cmd:endlabel} run undoes the run before it, so after any number of runs one {cmd:gpolish clear}
+returns the graph to its layout before the first run: the plot region where it was, the legend shown or hidden as
+it was, and no added objects. A second {cmd:gpolish clear} changes nothing. If a recorded label was changed or
+removed by other means (for example in the Graph Editor), the next {cmd:endlabel} leaves that label as it is,
+hides the other labels of the earlier run, gives back its margin and restores the legend, and prints a note;
+{cmd:gpolish clear} removes every added text box. A graph holds at most one record box: a second
 {cmd:gpolish endlabel} writes its record into the box of the first. The record box is not drawn, but it is listed
 in the Graph Editor's object browser, and scripts that count {cmd:.plotregion1.added_text} should skip boxes whose
 text starts with {cmd:gpolish-endlabel}.
@@ -307,7 +311,9 @@ Stata keeps in every graph and saves with it. An earlier {cmd:endlabel} run show
 graph, followed by the legend switched off (unless {opt keeplegend} was given) and the label boxes. Each run whose margin was not given back
 later is undone: its labels, values and dots are hidden, its margin is given back, and the legend is shown again
 if that run switched it off. A note says so when this happens. Changes made to those labels in the Graph Editor
-are not followed; if the result looks wrong, redraw the graph.
+are not followed; if the result looks wrong, redraw the graph. Once {cmd:gpolish} 0.7.0 or later has written an
+{cmd:endlabel} record into a graph, the edit log is no longer searched, because that release has already undone
+the earlier runs.
 
 
 {title:Author}
