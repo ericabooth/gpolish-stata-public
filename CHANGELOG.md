@@ -72,6 +72,7 @@ This release contains gpolish 0.7.0 and gr2mpl 0.6.0. The changes listed under 0
 - New metrics: clean except the label's own marker; leader lines drawn and leaders that cross a label, a marker or another leader; ambiguity split by labels with and without a leader; paired seed-level differences with 95 percent intervals. New scenario sets: 10 random row orders of the real-data scenarios, 150 and 300 points, and other label and marker sizes.
 - `score.py` writes every method's measured label boxes, leader lines, geometry and points, and `score.py --rescore` rebuilds the scores from them alone. New `marker_sensitivity.py`, `selftest.py` and `BENCH_SCENARIOS`; `run_stata.do` checks that it runs the package's own `gpolish`.
 - benchmark/README.md was rewritten to report every result, including the scenarios and measures where `gpolish` does worse than ggrepel.
+- The reported seconds for the main and scale sets come from a separate timing run with one process at a time and no other benchmark job running. It gave the same positions as the archived run for every method and graph; only the seconds changed.
 - benchmark/README.md: the 150-point paragraph now matches results/summary.md and graphs.csv for adjustText, and the distance finding says `gpolish` places labels farther from their points than ggrepel in every scenario (it said "usually").
 
 ### Documentation

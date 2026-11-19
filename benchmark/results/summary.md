@@ -133,13 +133,13 @@ gpolish measured label widths with its width table for: open sans.
 
 | Scenario | Stata mlabel() | labrepel (Stata) | gpolish ptlabel (Stata) | gpolish 0.6.0 settings | adjustText (Python) | ggrepel (R) | ggrepel (informed) |
 |---|---|---|---|---|---|---|---|
-| Life expectancy, 12 of 63 labelled | 0.00 | 0.00 | 0.15 | 0.19 | 0.03 | 0.10 | 0.09 |
-| Auto, 19 of 74 labelled | 0.00 | 0.32 | 0.34 | 0.31 | 0.13 | 0.10 | 0.12 |
-| Life expectancy, all 63 labelled | 0.00 | 1.10 | 1.89 | 1.53 | 1.33 | 0.51 | 0.45 |
-| Auto, all 74 labelled | 0.00 | 4.82 | 3.03 | 2.52 | 2.70 | 0.57 | 0.57 |
-| Synthetic, 30 of 30 labelled | 0.00 ± 0.00 | 0.11 ± 0.02 | 0.28 ± 0.02 | 0.29 ± 0.01 | 0.11 ± 0.03 | 0.15 ± 0.00 | 0.16 ± 0.00 |
-| Synthetic, 20 of 60 labelled | 0.00 ± 0.00 | 0.05 ± 0.01 | 0.23 ± 0.01 | 0.20 ± 0.02 | 0.11 ± 0.01 | 0.11 ± 0.01 | 0.12 ± 0.00 |
-| Synthetic, 60 of 60 labelled | 0.00 ± 0.00 | 0.55 ± 0.05 | 0.75 ± 0.07 | 0.66 ± 0.04 | 1.13 ± 0.06 | 0.41 ± 0.00 | 0.42 ± 0.01 |
+| Life expectancy, 12 of 63 labelled | 0.00 | 0.00 | 0.10 | 0.10 | 0.03 | 0.10 | 0.08 |
+| Auto, 19 of 74 labelled | 0.00 | 0.20 | 0.23 | 0.21 | 0.12 | 0.09 | 0.12 |
+| Life expectancy, all 63 labelled | 0.00 | 0.65 | 1.14 | 0.90 | 1.26 | 0.49 | 0.43 |
+| Auto, all 74 labelled | 0.00 | 2.79 | 2.03 | 1.59 | 2.54 | 0.56 | 0.54 |
+| Synthetic, 30 of 30 labelled | 0.00 ± 0.00 | 0.06 ± 0.01 | 0.16 ± 0.01 | 0.16 ± 0.01 | 0.11 ± 0.03 | 0.15 ± 0.00 | 0.15 ± 0.00 |
+| Synthetic, 20 of 60 labelled | 0.00 ± 0.00 | 0.03 ± 0.00 | 0.13 ± 0.00 | 0.12 ± 0.00 | 0.10 ± 0.01 | 0.10 ± 0.01 | 0.12 ± 0.00 |
+| Synthetic, 60 of 60 labelled | 0.00 ± 0.00 | 0.31 ± 0.03 | 0.41 ± 0.04 | 0.37 ± 0.02 | 1.07 ± 0.06 | 0.40 ± 0.00 | 0.41 ± 0.00 |
 
 ## Leader lines
 
@@ -307,10 +307,10 @@ Mean over 5 seeds, with the range in brackets. Seconds are for the placement ste
 |---|---|---|---|---|
 | 150 points, clean share | 0.40 (0.33 to 0.49) | 0.29 (0.25 to 0.35) | 0.46 (0.39 to 0.57) | 0.43 (0.33 to 0.57) |
 | 150 points, clean and near | 0.29 (0.21 to 0.39) | 0.17 (0.13 to 0.21) | 0.25 (0.19 to 0.28) | 0.25 (0.19 to 0.28) |
-| 150 points, seconds | 6.1 (5.6 to 6.6) | 21.3 (18.9 to 24.3) | 2.0 (2.0 to 2.1) | 2.1 (2.0 to 2.1) |
+| 150 points, seconds | 3.3 (3.0 to 3.6) | 20.9 (18.9 to 23.3) | 2.0 (2.0 to 2.0) | 2.0 (2.0 to 2.0) |
 | 300 points, clean share | 0.11 (0.09 to 0.12) | 0.07 (0.05 to 0.10) | 0.13 (0.11 to 0.17) | 0.15 (0.13 to 0.16) |
 | 300 points, clean and near | 0.06 (0.04 to 0.08) | 0.01 (0.00 to 0.02) | 0.03 (0.01 to 0.05) | 0.04 (0.01 to 0.06) |
-| 300 points, seconds | 16.0 (13.8 to 21.0) | 304.2 (265.7 to 371.3) | 7.2 (6.7 to 7.6) | 7.3 (6.8 to 7.8) |
+| 300 points, seconds | 13.2 (12.1 to 13.8) | 304.7 (265.3 to 369.6) | 7.1 (6.6 to 7.5) | 7.2 (6.7 to 7.6) |
 
 ## Font and marker sizes: the 60-of-60 design, seeds 1 to 10
 
@@ -348,15 +348,15 @@ as in the tables above.
 
 | Method | Set | Graphs | Iterations | Stopped at the iteration limit / settled / time limit | Seconds | Read-back run differs |
 |---|---|---|---|---|---|---|
-| adjustText (Python) | main | 64 | 5 to 100 | 51 / 13 / 0 | 0.02 to 2.70 | n/a |
+| adjustText (Python) | main | 64 | 5 to 100 | 51 / 13 / 0 | 0.02 to 2.54 | n/a |
 | adjustText (Python) | perm | 40 | 9 to 100 | 30 / 10 / 0 | 0.02 to 2.77 | n/a |
-| adjustText (Python) | scale | 10 | 100 to 100 | 10 / 0 / 0 | 18.88 to 371.34 | n/a |
+| adjustText (Python) | scale | 10 | 100 to 100 | 10 / 0 / 0 | 18.94 to 369.58 | n/a |
 | adjustText (Python) | fontmark | 40 | 21 to 100 | 39 / 1 / 0 | 0.19 to 1.72 | n/a |
-| ggrepel (R) | main | 64 | 9911 to 10000 | 63 / 1 / 0 | 0.09 to 0.57 | 0 |
+| ggrepel (R) | main | 64 | 9911 to 10000 | 63 / 1 / 0 | 0.09 to 0.56 | 0 |
 | ggrepel (R) | perm | 40 | 3294 to 10000 | 37 / 3 / 0 | 0.07 to 0.60 | 0 |
-| ggrepel (R) | scale | 10 | 10000 to 10000 | 10 / 0 / 0 | 1.99 to 7.63 | 0 |
+| ggrepel (R) | scale | 10 | 10000 to 10000 | 10 / 0 / 0 | 1.96 to 7.53 | 0 |
 | ggrepel (R) | fontmark | 40 | 10000 to 10000 | 40 / 0 / 0 | 0.40 to 0.43 | 0 |
-| ggrepel (informed) | main | 64 | 10000 to 10000 | 64 / 0 / 0 | 0.09 to 0.57 | 0 |
+| ggrepel (informed) | main | 64 | 10000 to 10000 | 64 / 0 / 0 | 0.08 to 0.54 | 0 |
 | ggrepel (informed) | perm | 40 | 10000 to 10000 | 40 / 0 / 0 | 0.09 to 0.60 | 0 |
-| ggrepel (informed) | scale | 10 | 10000 to 10000 | 10 / 0 / 0 | 2.02 to 7.77 | 0 |
+| ggrepel (informed) | scale | 10 | 10000 to 10000 | 10 / 0 / 0 | 1.99 to 7.61 | 0 |
 | ggrepel (informed) | fontmark | 40 | 10000 to 10000 | 40 / 0 / 0 | 0.39 to 0.43 | 0 |
