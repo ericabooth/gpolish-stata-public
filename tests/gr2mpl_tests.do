@@ -1469,4 +1469,28 @@ scatter mpg weight
 rchk r12_x1
 ok strpos(`"$R_UNSUP"', "second x axis") == 0
 
+* -- r13: a graph with no observations keeps Stata's empty axes (no invented ticks)
+sysuse auto, clear
+twoway scatter mpg weight if mpg>100
+rchk r13_empty
+has "panel1.xticks="
+has "panel1.yticks="
+ok strpos(fileread("$R_DIR/notes.txt"), "graph has no data") > 0
+* -- r13: graph hbar and graph dot put the value-axis title under the horizontal axis
+graph hbar (count), over(rep78) missing
+rchk r13_hbar_title
+has "ytitle_side=left", absent
+ok strpos(fileread("$R_DIR/render_info.txt"), "figtext=frequency|") > 0
+getv xtitle_gap
+ok real(`"`r(val)'"') > 0
+graph dot (mean) mpg, over(rep78)
+rchk r13_dot_title
+has "ytitle_side=left", absent
+getv xtitle_gap
+ok real(`"`r(val)'"') > 0
+* graph bar keeps the title above the plot
+graph bar (count), over(rep78)
+rchk r13_vbar_title
+has "ytitle_side=left"
+
 di as res "$R_N checks passed"

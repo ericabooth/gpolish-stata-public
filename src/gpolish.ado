@@ -641,6 +641,26 @@ program _gpl_obstacles
             if `isrange' local y2v = ``pr'.plot`i'.y2var'
         }
         if _rc continue
+        * marker labels drawn by mlabel(): the label variable, the position (one clock position for
+        * the plot, or a variable from mlabvposition()), the text size and the gap
+        local lv
+        local pv
+        capture {
+            local lv = ``pr'.plot`i'.lvar'
+            local pv = ``pr'.plot`i'.pvar'
+        }
+        if "`lv'"=="." local lv
+        if "`pv'"=="." local pv
+        local lpos ``pr'.plot`i'.style.label.position.setting'
+        if "`lpos'"=="" local lpos 3
+        local lsz ``pr'.plot`i'.style.label.textstyle.size.gmval'
+        local lgap ``pr'.plot`i'.style.label.textgap.gmval'
+        local lang ``pr'.plot`i'.style.label.textstyle.angle.val'
+        if "`lsz'"=="" local lsz 0
+        if "`lgap'"=="" local lgap 0
+        if "`lang'"=="" local lang 0
+        if !inlist("`t'","scatter","connected","dot") local lv
+        if _rc continue
         local rad = 0
         if inlist("`t'","scatter","connected","dot") {
             local ms ``pr'.plot`i'.style.marker.size.gmval'
@@ -665,6 +685,25 @@ program _gpl_obstacles
             local y2name
             if "`y2v'"!="" local y2name : word `y2v' of `all'
             if `rad' > 0 mata: _gpl_obs_points("`xname'", "`yname'", `T', `rad')
+            if "`lv'"!="" & `lsz' > 0 {
+                local lname : word `lv' of `all'
+                local pname
+                if "`pv'"!="" local pname : word `pv' of `all'
+                * numeric labels: value label, else display format, as mlabel() shows them
+                capture confirm string variable `lname'
+                if _rc {
+                    tempvar lstr
+                    local vl : value label `lname'
+                    if "`vl'"!="" decode `lname', gen(`lstr')
+                    else {
+                        local lf : format `lname'
+                        gen strL `lstr' = string(`lname', "`lf'") if !missing(`lname')
+                    }
+                    local lname `lstr'
+                }
+                mata: _gpl_obs_mlab("`xname'", "`yname'", "`lname'", "`pname'", `lpos', `T', ///
+                    `rad', `lgap'*`gprel', `lsz'*`gprel', `lang')
+            }
             if inlist("`t'","connected","line","rline","function") ///
                 mata: _gpl_obs_path("`xname'", "`yname'", `T', 4/72*`gpi')
             * kind: 1 bars (width bw in data units), 2 shaded band, 3 thin range spike
@@ -768,6 +807,10 @@ program _gpl_legtext, rclass
             local t
             forvalues q = 1/`nl' {
                 local s `"`.`name'.legend.plotregion1.label[`k'].text[`q']'"'
+                * drop the {bf:...} wrapper that gpolish legend puts on each line, so that
+                * endlabel's wrap() and nobold see the plain text
+                if substr(`"`s'"',1,4)=="{bf:" & substr(`"`s'"',-1,1)=="}" ///
+                    local s = substr(`"`s'"',5,strlen(`"`s'"')-5)
                 if `"`t'"'=="" local t `"`s'"'
                 else if `"`s'"'!="" local t `"`t' `s'"'
             }
@@ -3035,6 +3078,71 @@ void _gpl_legscan(string colvector L)
     st_local("mk", strtrim(om))
     st_local("marg", strtrim(oc))
     st_local("leg", strofreal(lg))
+}
+// boxes for the marker labels drawn by mlabel(): one per observation with a non-empty label. The box
+// is estimated from the text width and size and sits beside the marker at its clock position, the
+// gap (plus the marker radius) away from the marker centre; position 0 centres it on the marker.
+void _gpl_obs_mlab(string scalar xv, string scalar yv, string scalar lv, string scalar pv,
+                   real scalar pos, real scalar xlog, real scalar ylog, real scalar xa, real scalar xb,
+                   real scalar ya, real scalar yb, real scalar rad, real scalar gap, real scalar fs,
+                   real scalar ang)
+{
+    real matrix D
+    string colvector L
+    real colvector P
+    real colvector ok
+    real scalar i
+    real scalar gx
+    real scalar gy
+    real scalar w
+    real scalar h
+    real scalar p
+    real scalar th
+    real scalar d
+    real scalar cx
+    real scalar cy
+    real scalar x0
+    real scalar y0
+    real matrix B
+
+    D = st_data(., (xv, yv))
+    L = st_sdata(., lv)
+    P = (pv == "" ? J(rows(D), 1, pos) : st_data(., pv))
+    ok = (rowmissing(D) :== 0) :& (strtrim(L) :!= "")
+    B = J(0, 4, .)
+    for (i=1; i<=rows(D); i++) {
+        if (!ok[i]) continue
+        gx = xa + xb*(xlog ? ln(D[i,1]) : D[i,1])
+        gy = ya + yb*(ylog ? ln(D[i,2]) : D[i,2])
+        if (missing(gx) | missing(gy)) continue
+        w = _gpl_textw(st_global("GPL_FONT"), strtrim(L[i]), 0)*fs
+        h = fs*1.3
+        // text turned a quarter turn swaps width and height
+        if (mod(abs(ang), 180) == 90) {
+            d = w
+            w = h
+            h = d
+        }
+        p = P[i]
+        if (missing(p)) p = pos
+        p = mod(round(p), 12)
+        if (P[i] == 0 | (pv == "" & pos == 0)) {
+            B = B \ (gx - w/2, gy - h/2, gx + w/2, gy + h/2)
+            continue
+        }
+        th = (90 - 30*p)*pi()/180
+        d = rad + gap
+        cx = gx + d*cos(th)
+        cy = gy + d*sin(th)
+        x0 = cx - w/2
+        y0 = cy - h/2
+        if (cos(th) > 0.1) x0 = cx
+        else if (cos(th) < -0.1) x0 = cx - w
+        if (sin(th) > 0.5) y0 = cy
+        else if (sin(th) < -0.5) y0 = cy - h
+        B = B \ (x0, y0, x0 + w, y0 + h)
+    }
+    if (rows(B)) _gpl_obs_add(B)
 }
 void _gpl_obs_text(real scalar gx, real scalar gy, real scalar w, real scalar h, string scalar ba)
 {

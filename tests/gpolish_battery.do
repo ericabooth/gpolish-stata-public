@@ -1817,6 +1817,99 @@ forvalues k = 1/`nt' {
 local rm = ustrregexra(`"`rec'"', "^([^|]*[|]){8}([^|]*).*$", "$2")
 chk r12_tick_norm "`rm'"==""
 
+* ---- r13: endlabel after gpolish legend uses the plain legend text (no literal {bf: markup)
+sysuse uslifeexp, clear
+twoway line le_male le_female year, name(r13a, replace)
+gpolish legend, name(r13a)
+gpolish endlabel, wrap(15) name(r13a)
+local nt `.r13a.plotregion1.added_text.arrnels'
+local nbad 0
+local nlab 0
+forvalues k = 1/`nt' {
+    local nl `.r13a.plotregion1.added_text[`k'].text.arrnels'
+    forvalues q = 1/`nl' {
+        local s `"`.r13a.plotregion1.added_text[`k'].text[`q']'"'
+        if substr(`"`s'"',1,17)=="gpolish-endlabel|" continue
+        local ++nlab
+        * a line that opens {bf: must close it on the same line
+        if strpos(`"`s'"',"{bf:") & substr(`"`s'"',-1,1)!="}" local ++nbad
+        if strpos(`"`s'"',"{bf:{bf:") local ++nbad
+        if !strpos(`"`s'"',"{bf:") & strpos(`"`s'"',"}") local ++nbad
+    }
+}
+chk r13_legwrap_lines `nlab' >= 4
+chk r13_legwrap_markup `nbad'==0
+twoway line le_male le_female year, name(r13b, replace)
+gpolish legend, name(r13b)
+gpolish endlabel, nobold name(r13b)
+local nt `.r13b.plotregion1.added_text.arrnels'
+local nbf 0
+local nlab 0
+forvalues k = 1/`nt' {
+    local s `"`.r13b.plotregion1.added_text[`k'].text[1]'"'
+    if substr(`"`s'"',1,17)=="gpolish-endlabel|" continue
+    if `"`.r13b.plotregion1.added_text[`k'].draw_view.setting'"'=="no" continue
+    local ++nlab
+    if strpos(`"`s'"',"{bf:") local ++nbf
+}
+chk r13_legnobold_n `nlab'==2
+chk r13_legnobold `nbf'==0
+* ---- r13: automatic callout placement and ptlabel avoid text drawn by mlabel()
+sysuse auto, clear
+gen lab = make + " (a long label)" if price>11000
+scatter price mpg, mlabel(lab) mlabsize(small) name(r13c, replace)
+gpolish callout "Expensive cars" "cluster here", to(14 13000) name(r13c)
+gpolish geom, name(r13c)
+local gpi = r(gpi)
+local gprel = r(gpi)/72/r(relperpt)
+local xa = r(xa)
+local xb = r(xb)
+local ya = r(ya)
+local yb = r(yb)
+* the callout box: anchored at its xpos/ypos, about 0.55 em per character, 2 lines
+local k `.r13c.plotregion1.added_text.arrnels'
+local cx = `xa' + `xb'*`.r13c.plotregion1.added_text[`k'].xpos.val'
+local cy = `ya' + `yb'*`.r13c.plotregion1.added_text[`k'].ypos.val'
+local csz `.r13c.plotregion1.added_text[`k'].style.size.gmval'
+local cw = 14*0.55*`csz'*`gprel'
+local ch = 2*1.3*`csz'*`gprel'
+local cba `.r13c.plotregion1.added_text[`k'].style.box_alignment.setting'
+local cx0 = `cx' - `cw'/2
+if "`cba'"=="east" local cx0 = `cx'
+if "`cba'"=="west" local cx0 = `cx' - `cw'
+local cy0 = `cy' - `ch'/2
+if "`cba'"=="north" local cy0 = `cy'
+if "`cba'"=="south" local cy0 = `cy' - `ch'
+* each marker label: clock 3, starting just right of the marker, 0.55 em per character
+local lsz `.r13c.plotregion1.plot1.style.label.textstyle.size.gmval'
+local hit 0
+forvalues i = 1/`=_N' {
+    if lab[`i']=="" continue
+    local mx = `xa' + `xb'*mpg[`i']
+    local my = `ya' + `yb'*price[`i']
+    local lw = ustrlen(lab[`i'])*0.55*`lsz'*`gprel'
+    local lh = 1.3*`lsz'*`gprel'
+    local ox = min(`cx0'+`cw', `mx'+`lw') - max(`cx0', `mx')
+    local oy = min(`cy0'+`ch', `my'+`lh'/2) - max(`cy0', `my'-`lh'/2)
+    if `ox' > 0 & `oy' > 0 local ++hit
+}
+chk r13_callout_mlabel `hit'==0
+* ptlabel on a point whose mlabel() text is already drawn moves its label off that text
+gen lab2 = "Concord" in 1
+scatter price mpg in 1/20, mlabel(lab2) name(r13d, replace)
+gpolish ptlabel make in 1, name(r13d)
+gpolish geom, name(r13d)
+local k `.r13d.plotregion1.added_text.arrnels'
+local px = r(xa) + r(xb)*mpg[1]
+local py = r(ya) + r(yb)*price[1]
+local tx = r(xa) + r(xb)*`.r13d.plotregion1.added_text[`k'].xpos.val'
+local ty = r(ya) + r(yb)*`.r13d.plotregion1.added_text[`k'].ypos.val'
+local ba `.r13d.plotregion1.added_text[`k'].style.box_alignment.setting'
+* clock 3 puts the mlabel to the right of the point at its height; the gpolish label must not
+* start at that same spot
+local onml = ("`ba'"=="east") & abs(`ty'-`py') < 0.5*1.3*`.r13d.plotregion1.added_text[`k'].style.size.gmval'*r(gpi)/72/r(relperpt) & `tx' > `px'
+chk r13_ptlabel_mlabel `onml'==0
+
 gpolish limits
 
 if `"`_wf0'"'!="" graph set window fontface `"`_wf0'"'

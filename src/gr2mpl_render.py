@@ -967,6 +967,7 @@ class Panel:
             any(i.get("horizontal") for i in infos)
             and not any(i["type"] in LINE_TYPES for i in infos))
         self.horizontal = horizontal_any
+        self.empty_axes = set()
         for which, key, ax in (("x", "xaxis", self.ax), ("y", "yaxis", self.ax),
                                ("y", "y2axis", self.ax2)):
             if ax is None:
@@ -1020,6 +1021,13 @@ class Panel:
             elif a.get("ticks_none"):
                 # xlabel(none) / ylabel(none): no major ticks, labels or gridlines
                 (ax.set_xticks if which == "x" else ax.set_yticks)([])
+            elif lo is None or hi is None or hi <= lo:
+                # no data on this axis (Stata records an empty range and no ticks): draw
+                # the axis without ticks or tick labels, as Stata does, instead of
+                # matplotlib's default scale around zero
+                (ax.set_xlim if which == "x" else ax.set_ylim)(0, 1)
+                (ax.set_xticks if which == "x" else ax.set_yticks)([])
+                self.empty_axes.add(which if key != "y2axis" else "y2")
             self.minor_ticks(ax, which, a.get("ticks_minor"))
             if is_log:
                 ax.tick_params(axis=which, which="minor", length=0, labelbottom=False,
@@ -1062,6 +1070,8 @@ class Panel:
         if (not horizontal_any and not self.f.noticks and "x" not in self.axis_off
                 and "xline" not in self.axis_off and not is_matrix):
             ax.tick_params(axis="x", length=3.5, width=0.9, color=AXIS, direction="out")
+        if {"x", "y"} <= self.empty_axes and not any(n.startswith("graph has no data") for n in self.f.notes):
+            self.f.notes.append("graph has no data; the axes are drawn without ticks, as in Stata")
         ylo, yhi = ax.get_ylim()
         if (min(ylo, yhi) < 0 < max(ylo, yhi) and not horizontal_any
                 and "y" not in self.axis_off and not is_matrix):
@@ -1858,7 +1868,10 @@ class Panel:
     def axis_title(self, which):
         key = {"x": "xaxis", "y": "yaxis", "y2": "y2axis"}[which]
         if self.s.get("family") == "bar":
-            return join_lines(self.s.get("scaletitle")) if which == "y" else ""
+            # the scale title belongs to the value axis: horizontal in graph hbar and
+            # hbox, so Stata puts it under the plot there
+            value = "x" if self.horizontal else "y"
+            return join_lines(self.s.get("scaletitle")) if which == value else ""
         a = self.s.get(key) or {}
         if a.get("draw") == "no" and not self.f.multi:
             return ""

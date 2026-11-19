@@ -142,7 +142,9 @@ Running {cmd:gpolish endlabel} again replaces the earlier labels instead of addi
 If {opt at()} is omitted, the note is placed automatically near the target, clear of what is already drawn:
 the markers and lines of scatter, line, connected, rline, function, spike and dropline plots; bars, shaded areas
 and range plots (bar, rbar, area, rarea, rcap, rspike, rcapsym, which include histograms and confidence bands);
-reference lines from {opt xline()} and {opt yline()}; and other added text.
+reference lines from {opt xline()} and {opt yline()}; marker labels drawn by {opt mlabel()}; and other added text.
+The box of each {opt mlabel()} label is estimated from its text, its size and its clock position, so it can be
+off by a little for unusual fonts, angles or positions given by {opt mlabvposition()}.
 Lines and shaded areas are covered by small boxes along their whole length. When one plot would need more than
 20,000 boxes, neighbouring boxes are merged in groups of equal size, each merged box covering its whole group.
 {opt from()} moves the tail of the arrow; by default it starts at the edge of the text nearest the target.
@@ -219,9 +221,9 @@ The package's benchmark (benchmark/README.md in the source repository) compares 
 adjustText and ggrepel. {cmd:ptlabel} has the highest share of clean labels when a subset of points is labelled.
 On the all-labelled synthetic test graphs it is level with ggrepel tuned on the same tuning graphs
 (0.99 against 0.98 with 30 points) or slightly ahead (0.92 against 0.89 with 60 points). With every point labelled on crowded real graphs, ggrepel tuned on the same
-tuning graphs scores higher: 0.68 against 0.59 with every car in {cmd:auto} labelled and
+tuning graphs scores higher in the original row order: 0.68 against 0.59 with every car in {cmd:auto} labelled and
 0.78 against 0.68 ({cmd:census}) and 0.88 against 0.56 ({cmd:states}) with all 50 states
-labelled. With every country in {cmd:lifeexp} labelled the two are about level (0.76 against 0.75 in the
+labelled. The medians over 10 row orders agree (0.69 against 0.54, 0.74 against 0.68, 0.82 against 0.67). With every country in {cmd:lifeexp} labelled the two are about level (0.76 against 0.75 in the
 original row order; medians over 10 row orders 0.74 for ggrepel and 0.79 for {cmd:ptlabel}).
 ggrepel's tuning tried 256 settings, against 566 for {cmd:ptlabel}.
 
