@@ -178,7 +178,7 @@ Other differences are limits of the translation:
 {p 8 12 2}o {cmd:aspectratio()} is followed in a single graph, with the plot region centred. In {cmd:by()} panels and {cmd:graph combine} it is not followed, and each panel fills its cell.{p_end}
 {p 8 12 2}o Minor tick labels from {cmd:xmlabel()} and {cmd:ymlabel()} are drawn at 80% of the major tick-label size; ticks from {cmd:xmtick()} and {cmd:ymtick()} without labels are not drawn.{p_end}
 {p 8 12 2}o {cmd:xscale(alt)} is not followed: the x axis stays at the bottom. When Stata draws both y axes on one side (as it does with a third y axis), the second is drawn on the other side.{p_end}
-{p 8 12 2}o Text positions in the {cmd:gr2mpl} image were measured against Stata's own export on one graph only, where titles and tick labels sat within about 4 points of Stata's. Other graphs may differ by more; compare the two images before using a translated figure in print.{p_end}
+{p 8 12 2}o Text does not land exactly where Stata puts it. Across the 22 graphs in the gallery, half of all text items sit within 10 points (about 3.5 mm) of their position in Stata's own export and 90 percent within 21 points; legend entries move the most, with a median of 26 points. Fewer than 1 item in 10 sits within 5 points. {cmd:gr2mpl} can also thin a long colour-key legend, dropping some of its labels. Compare the two images before using a translated figure in print.{p_end}
 
 
 {marker examples}{...}

@@ -134,6 +134,7 @@ for i in range(1, len(parts), 2):
         code[m.group(1)] = block(body)
 missing = sorted(set(INFO) ^ set(code))
 assert not missing, f"gallery.do sections and INFO differ: {missing}"
+FID_TXT = "How closely the gr2mpl images place text compared with Stata's own export is measured for all twenty-two graphs in"
 COLS = [("a", "Stata default"), ("b", "scheme(pypolish) + gpolish"), ("c", "+ gr2mpl (matplotlib render)")]
 # ---- HTML page
 css = """
@@ -160,12 +161,14 @@ h = ['<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="vie
      "<h1>gpolish gallery</h1>",
      '<p class="lead">Twenty-two Stata graphs, each drawn three ways: Stata\'s default look, the same graph with <code>scheme(pypolish)</code> and <code>gpolish</code> (still a Stata graph), and that graph redrawn in matplotlib by <code>gr2mpl</code>.</p>',
      '<p class="lead"><a href="https://github.com/ericabooth/gpolish-stata-public">Repository and installation</a> · every image on this page is produced by <a href="https://github.com/ericabooth/gpolish-stata-public/blob/main/gallery/gallery.do">gallery/gallery.do</a>.</p>',
+     '<p class="lead">' + FID_TXT + ' <a href="https://github.com/ericabooth/gpolish-stata-public/blob/main/gallery/fidelity.md">gallery/fidelity.md</a> (per-item data in <a href="https://github.com/ericabooth/gpolish-stata-public/blob/main/gallery/fidelity.csv">fidelity.csv</a>).</p>',
      '<p class="lead">' + re.sub(r"`([^`]+)`", r"<code>\1</code>", html.escape(INTRO_MD)) + "</p><nav>"]
 for k in sorted(code): h.append(f'<a href="#{k}">{html.escape(INFO[k][0])}</a>')
 h.append("</nav>")
 md = ["# gpolish gallery", "",
       "Twenty-two Stata graphs, each drawn three ways: Stata's default look, the same graph with `scheme(pypolish)` and `gpolish` (still a Stata graph), and that graph redrawn in matplotlib by `gr2mpl`.", "",
-      "Every image is produced by [gallery.do](gallery.do). A browsable version is at <https://ericabooth.github.io/gpolish-stata-public/gallery/>.", "", INTRO_MD, ""]
+      "Every image is produced by [gallery.do](gallery.do). A browsable version is at <https://ericabooth.github.io/gpolish-stata-public/gallery/>.", "",
+      FID_TXT + " [fidelity.md](fidelity.md) (per-item data in [fidelity.csv](fidelity.csv)).", "", INTRO_MD, ""]
 for k in sorted(code):
     t, blurb = INFO[k]
     h.append(f'<section id="{k}"><h2>{html.escape(t)}</h2><p>{html.escape(blurb)}</p><div class="row">')
