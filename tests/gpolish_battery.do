@@ -1290,6 +1290,16 @@ chk r4_aspect_left_noedit r(all)==0
 twoway line le year, name(r4d, replace)
 gpolish endlabel, dotsize(8)
 chk r4_dotsize_dots "`.r4d.plotregion1.added_markers.arrnels'"=="1"
+* dotsize() at the default value still turns dots on; no dotsize() leaves them off
+twoway line le year, name(r4f, replace)
+gpolish endlabel, dotsize(5.5)
+chk r4_dotsize_default_dots "`.r4f.plotregion1.added_markers.arrnels'"=="1"
+twoway line le year, name(r4g, replace)
+gpolish endlabel
+chk r4_nodotsize_nodots "0`.r4g.plotregion1.added_markers.arrnels'"=="0" | "0`.r4g.plotregion1.added_markers.arrnels'"=="00"
+twoway line le year, name(r4i, replace)
+capture gpolish endlabel, dotsize(0)
+chk r4_dotsize_zero _rc==198
 twoway line le year, name(r4e, replace)
 capture gpolish endlabel, dots(20)
 chk r4_dots_num _rc==198
