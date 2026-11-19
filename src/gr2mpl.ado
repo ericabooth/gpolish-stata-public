@@ -1101,6 +1101,11 @@ program _g2m_legend
         }
         local lab `"``g'.legend.plotregion1.label[`k'].text[1]'"'
         local lcol ``g'.legend.plotregion1.label[`k'].style.color.setting'
+        if `nk' == 1 & `"`lab'"' == "" {
+            * a one-key legend holds a single label object, not an array
+            local lab `"``g'.legend.plotregion1.label.text[1]'"'
+            local lcol ``g'.legend.plotregion1.label.style.color.setting'
+        }
         local lcol : list retokenize lcol
         _g2m_esc `"`lab'"'
         if `k' > 1 file write `fh' ", "
