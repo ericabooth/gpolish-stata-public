@@ -169,7 +169,9 @@ labels are drawn horizontally unless Stata set a diagonal angle. Bars wider than
 {pstd}
 Other differences are limits of the translation:
 
-{p 8 12 2}o {cmd:{c -(}it:{c )-}} text is drawn upright, and SMCL font changes ({cmd:{c -(}stSerif:{c )-}} and the like) use the main font.{p_end}
+{p 8 12 2}o {cmd:{c -(}it:{c )-}} text is drawn upright, and SMCL font changes ({cmd:{c -(}stSerif:{c )-}} and the like) use the main font. The toggle forms {cmd:{c -(}bf{c )-}}, {cmd:{c -(}it{c )-}}, {cmd:{c -(}sf{c )-}} and {cmd:{c -(}rm{c )-}} work the same way: {cmd:{c -(}bf{c )-}} sets bold until the next {cmd:{c -(}sf{c )-}}, {cmd:{c -(}rm{c )-}} or {cmd:{c -(}it{c )-}}, and the others are dropped.{p_end}
+
+{p 8 12 2}o In {cmd:graph combine}, each member keeps its own title, subtitle, note and caption. {cmd:gr2mpl} draws the subtitle under the member's title and the note and caption left-aligned under the member's x axis. The note and caption are drawn in one size, the note's.{p_end}
 {p 8 12 2}o {cmd:{c -(}sup:{c )-}} and {cmd:{c -(}sub:{c )-}} use Unicode superscript and subscript characters; text that has none (most capital letters in subscripts, punctuation) is drawn on the line.{p_end}
 {p 8 12 2}o Characters that no installed font can draw appear as empty boxes; {cmd:gr2mpl} tries the CJK fonts that come with macOS, Windows and Noto.{p_end}
 {p 8 12 2}o With {cmd:gpolish endlabel, values}, the value column is spaced from the widths matplotlib measures, so it can sit a little further right than in Stata.{p_end}

@@ -189,6 +189,27 @@ def _char(m):
         return m.group(0)
 
 
+_TOGGLES = r"\{(bf|it|sf|rm|stSerif|stSans|stMono|stSymbol)\}"
+
+
+def _bold_toggles(s):
+    """Rewrite SMCL toggle tags as {bf:...} runs: {bf} turns bold on until the next
+    {sf}, {rm} or {it}; the other toggles are dropped (italic is drawn upright)."""
+    if not re.search(_TOGGLES, s):
+        return s
+    out, bold = [], False
+    for k, part in enumerate(re.split(_TOGGLES, s)):
+        if k % 2 == 1:
+            if part == "bf":
+                bold = True
+            elif part in ("sf", "rm", "it"):
+                bold = False
+            continue
+        if part:
+            out.append("{bf:" + part + "}" if bold and "}" not in part else part)
+    return "".join(out)
+
+
 def _strip_tags(s):
     s = re.sub(r"\{c (0[xX][0-9a-fA-F]+|\d+)\}", _char, s)
     s = re.sub(r"\{&([a-zA-Z]+[0-9]*)\}", _entity, s)
@@ -232,13 +253,13 @@ def clean_text(s):
     """Plain text: SMCL tags dropped, dollar signs escaped (not math)."""
     if not s:
         return ""
-    s = re.sub(r"\{bf:([^}]*)\}", r"\1", _strip_tags(s))
+    s = re.sub(r"\{bf:([^}]*)\}", r"\1", _bold_toggles(_strip_tags(s)))
     return s.replace("$", r"\$")
 
 
 def rich_segments(s):
     """One line -> [(text, is_bold), ...] honouring {bf:...}."""
-    parts = re.split(r"\{bf:([^}]*)\}", _strip_tags(s or ""))
+    parts = re.split(r"\{bf:([^}]*)\}", _bold_toggles(_strip_tags(s or "")))
     return [(part.replace("$", r"\$"), k % 2 == 1) for k, part in enumerate(parts) if part]
 
 
@@ -1745,6 +1766,23 @@ class Panel:
             bb = Bbox.from_extents(bb.x0, min(bb.y0, lb.y0), bb.x1, max(bb.y1, lb.y1))
         return bb.transformed(self.f.fig.transFigure.inverted())
 
+    def panel_note(self, text, fs):
+        """A combine member's note() and caption(), left-aligned under its own
+        x axis (tick labels and axis title), as Stata draws them in the cell."""
+        ax, ax2 = self.ax, self.ax2
+
+        def under(r):
+            boxes = [a.get_tightbbox(r, bbox_extra_artists=[]) for a in (ax, ax2)
+                     if a is not None]
+            bb = Bbox.union([b for b in boxes if b is not None])
+            x0 = ax.get_window_extent(r).x0
+            return Bbox.from_extents(x0, bb.y0, x0 + 1, bb.y0 + 1)
+
+        self.note_artist = ax.annotate(text, xy=(0, 0), xycoords=under,
+                                       xytext=(0, -3 * self.f.k), textcoords="offset points",
+                                       ha="left", va="top", fontsize=fs, color=MUTED,
+                                       linespacing=1.3, annotation_clip=False)
+
     def set_position(self, rect):
         self.ax.set_position(rect)
         if self.ax2 is not None:
@@ -1924,12 +1962,24 @@ class Figure:
                     else:
                         p.legend()
                 title = join_lines(p.s.get("ptitle"))
+                sub = join_lines(p.s.get("psubtitle")) if not is_by else ""
+                pad = (24 if p.has_legend else 7) * self.k
+                if sub:
+                    fs_s = self.tsize(p.s.get("psubtitle_size"), self.tickfs0, p.gmult)
+                    p.sub_artist = p.ax.annotate(sub, xy=(0, 1), xycoords="axes fraction",
+                                  xytext=(0, pad), textcoords="offset points",
+                                  ha="left", va="bottom", fontsize=fs_s, color=MUTED,
+                                  linespacing=1.2, annotation_clip=False)
+                    pad += fs_s * 1.3 * (sub.count("\n") + 1) + 2 * self.k
                 if title:
                     p.ax.set_title(title, loc="left",
                                    fontsize=self.tsize(p.s.get("ptitle_size"), self.tickfs0 + 1,
                                                        p.gmult),
-                                   fontweight="bold", color="#374151",
-                                   pad=(24 if p.has_legend else 7) * self.k)
+                                   fontweight="bold", color="#374151", pad=pad)
+                pnote = "\n".join(x for x in [join_lines(p.s.get("pnote")),
+                                              join_lines(p.s.get("pcaption"))] if x)
+                if pnote and not is_by:
+                    p.panel_note(pnote, self.tsize(p.s.get("pnote_size"), 8.0, p.gmult))
             if is_by and not s.get("nolegend") and self.panels:
                 p0 = self.panels[0]
                 handles, texts = p0.legend_items(p0.legend_entries(s.get("legend", {})))
@@ -2170,6 +2220,23 @@ class Figure:
             pt = ax.get_title(loc="left")
             if pt:
                 out.append(f"{tag}.ptitle={pt}")
+            t = getattr(p, "sub_artist", None)
+            if t is not None:
+                out.append(f"{tag}.psubtitle={t.get_text()}")
+                tb = t.get_window_extent(r)
+                if ax.get_title(loc="left"):
+                    lt = ax._left_title.get_window_extent(r)
+                    out.append(f"{tag}.psubtitle_below_title={int(tb.y1 <= lt.y0 + 0.5)}")
+            na = getattr(p, "note_artist", None)
+            if na is not None:
+                out.append(f"{tag}.pnote=" + na.get_text().replace("\n", "/"))
+                nb = na.get_window_extent(r)
+                xl = ax.xaxis.get_tightbbox(r)
+                out.append(f"{tag}.pnote_below_xaxis={int(xl is None or nb.y1 <= xl.y0 + 0.5)}")
+                out.append(f"{tag}.pnote_inside={int(nb.y0 >= -0.5 and nb.x1 <= fig.bbox.width + 0.5)}")
+            yl = ax.get_ylabel()
+            if yl:
+                out.append(f"{tag}.ylabel={yl}")
             for info in p.infos:
                 which = "y2" if (p.ax2 is not None and info["ax"] is p.ax2) else "y1"
                 out.append(f"{tag}.plot{info['p'].get('index')}.axis={which}")
@@ -2202,7 +2269,8 @@ class Figure:
                 if a_ax is None:
                     continue
                 for c in a_ax.texts:
-                    if not c.get_text():
+                    if not c.get_text() or c is getattr(p, "sub_artist", None) \
+                            or c is getattr(p, "note_artist", None):
                         continue
                     bb = c.get_window_extent(r)
                     side = ("right" if bb.x0 >= axbb.x1 - 1 else
