@@ -320,8 +320,9 @@ def fmt(v):
     return f"{v:.4f}" if isinstance(v, float) else v
 
 
-def score_all(geo, pos, pts, marker_hit=None, sets=None):
-    """Scores every graph in the archive. marker_hit overrides the marker distance (points)."""
+def score_all(geo, pos, pts, marker_hit=None, sets=None, near_em=NEAR_EM):
+    """Scores every graph in the archive. marker_hit overrides the marker distance (points); near_em
+    the distance, in ems, within which a clean label counts as near."""
     label_rows, graph_rows = [], []
     for g in geo:
         if sets and g["set"] not in sets:
@@ -343,7 +344,7 @@ def score_all(geo, pos, pts, marker_hit=None, sets=None):
             boxes[r["label"]] = tuple(float(r[k]) for k in ("x0", "y0", "x1", "y1"))
             if r["lx0"] != "":
                 leads[r["label"]] = tuple(float(r[k]) for k in ("lx0", "ly0", "lx1", "ly1"))
-        rows = score_graph(boxes, P, idx, line, plot, marker_hit=mh, label_pt=lpt, leaders=leads)
+        rows = score_graph(boxes, P, idx, line, plot, near_em=near_em, marker_hit=mh, label_pt=lpt, leaders=leads)
         for r in rows:
             label_rows.append(dict(set=g["set"], scenario=scen, design=g["design"], method=meth,
                                    **{k: fmt(v) for k, v in r.items()}))
