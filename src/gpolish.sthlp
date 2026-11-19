@@ -146,9 +146,10 @@ When the target lies inside the text, or {opt from()} equals {opt to()}, no arro
 change the box colors (the default border is used only when {opt fill()} is not given), and {opt pad(#)} sets the
 padding in points. {cmd:gpolish callout} draws the same box when {opt fill()} is given.
 With {opt to()} it draws an arrow from the box; with {opt at()} alone it is a plain box.
-{cmd:callout} and {cmd:note} stop with an error when the text is empty, when {opt to()} or {opt at()} lies outside
+{cmd:callout} and {cmd:note} stop with an error when the text is empty, when {opt to()} lies outside
 the plot region (the message gives the axis ranges), or, with automatic placement, when the text box is wider or
-taller than the plot region. A {opt from()} outside the plot region gets a note.
+taller than the plot region. An {opt at()} or {opt from()} outside the plot region gets a note and is drawn where
+it is, so a box can still be placed by hand in the graph margin.
 With the default {opt align(left)} the left edge of the box sits on {opt at()}, with {opt align(right)} its right
 edge does, and with {opt align(center)} the box is centered on {opt at()}, which suits flow charts.
 
@@ -192,7 +193,9 @@ Placement avoids the same drawn objects as an automatic {cmd:gpolish callout}.
 {cmd:gpolish bracket} draws a square bracket from {opt y0()} to {opt y1()} at {opt x()}.
 Its ticks point right on the screen, whatever the axis direction; {opt left} points them left.
 {opt tick(#)} sets their length in points. An optional label sits beside the middle of the bracket, on the side
-away from the ticks, {opt gap(#)} points from it. {opt y0()} and {opt y1()} must differ. For a labeled span across x, use {cmd:gpolish brace}.
+away from the ticks, {opt gap(#)} points from it. The label's position is fixed: unlike the other layout commands,
+{cmd:bracket} does not check it against markers, lines, bars or earlier labels, and prints no note if they overlap.
+{opt y0()} and {opt y1()} must differ. For a labeled span across x, use {cmd:gpolish brace}.
 
 {phang}
 {cmd:gpolish legend} colors each legend label to match its key and makes it bold. Labels of more than one
@@ -215,6 +218,7 @@ SVG or JPG file. {cmd:gpolish limits} lists what needs it.
 data-to-device transform in {cmd:r(xa)}, {cmd:r(xb)}, {cmd:r(ya)} and {cmd:r(yb)} (device = a + b * data, with the
 natural log of the data on a log axis, flagged in {cmd:r(xlog)} and {cmd:r(ylog)}), device units per inch in
 {cmd:r(gpi)}, relative size units per point in {cmd:r(relperpt)}, and the graph's name in {cmd:r(name)}.
+Like the layout commands, {cmd:geom} works on twoway graphs only and stops with r(198) on other graph families.
 
 
 {marker limits}{...}
@@ -223,7 +227,8 @@ natural log of the data on a log axis, flagged in {cmd:r(xlog)} and {cmd:r(ylog)
 {pstd}Stata's renderer cannot draw the first four items below; the others are limits of {cmd:gpolish} itself.
 {cmd:gpolish} prints a note for text at an unsupported angle, for inline color tags in the graph title, and when
 {cmd:endlabel}, {cmd:ptlabel} or an automatically placed callout or note cannot place every label without overlap.
-It stops with an error when a layout command is used on a graph that is not a twoway graph.
+It stops with an error when {cmd:endlabel}, {cmd:callout}, {cmd:note}, {cmd:arrow}, {cmd:brace}, {cmd:bracket},
+{cmd:ptlabel}, {cmd:legend}, {cmd:geom} or {cmd:clear} is used on a graph that is not a twoway graph.
 
 {p2colset 8 46 48 2}{...}
 {p2col:Limit}What happens{p_end}
@@ -233,10 +238,11 @@ It stops with an error when a layout command is used on a graph that is not a tw
 {p2col:Different colors inside one line of text}not possible; color whole labels{p_end}
 {p2col:Filled arrow heads}arrow heads are open{p_end}
 {p2col:Labels that cannot all fit}{cmd:endlabel} reports how many pairs of labels overlap among the pairs it placed closer than {opt gap()} asks; {cmd:ptlabel} and automatic callouts report how many labels still overlap noticeably{p_end}
-{p2col:{cmd:graph bar}, {cmd:by()} and combined graphs}layout commands are refused with a message; plain {cmd:gpolish} still makes the title bold; {helpb gr2mpl} redraws them{p_end}
+{p2col:{cmd:graph bar}, {cmd:by()} and combined graphs}layout commands and {cmd:geom} are refused with a message; plain {cmd:gpolish} still makes the title bold; {helpb gr2mpl} redraws them{p_end}
 {p2col:{cmd:graph pie}}layout commands are refused; {helpb gr2mpl} does not redraw pie charts either{p_end}
 {p2col:{cmd:ptlabel} on many points}run time grows quickly with the number of labels; a note is printed above 300 labels and more than {opt maxlabels()} (default 1000) are refused{p_end}
-{p2col:Positions outside the plot region}{cmd:callout} and {cmd:note} refuse {opt to()} or {opt at()} outside the axis ranges; {cmd:arrow}, {cmd:brace} and a callout's {opt from()} get a note; ranges are given in the axis's own units, so dates show as numbers{p_end}
+{p2col:{cmd:bracket} labels}placed at a fixed spot beside the spine and not checked against the data or other labels; move the bracket with {opt x()} or {opt left} if its label covers something{p_end}
+{p2col:Positions outside the plot region}{cmd:callout} and {cmd:note} refuse a {opt to()} outside the axis ranges; {opt at()}, {opt from()}, {cmd:arrow} and {cmd:brace} get a note; ranges are given in the axis's own units, so dates show as numbers{p_end}
 {p2col:Labels wider than the plot region}{cmd:ptlabel} skips them with a note; an automatically placed callout or note stops with an error; {cmd:gpolish} does not wrap text itself{p_end}
 {p2col:Positions on a second axis}{opt at()}, {opt to()} and {opt from()} use the first axes unless {opt xaxis()} or {opt yaxis()} says otherwise{p_end}
 {p2col:Graphs edited by {cmd:gpolish} 0.6.1 or earlier}these carry no {cmd:endlabel} record; their end labels are found in the graph's edit log (see {help gpolish##technical:Technical notes}){p_end}

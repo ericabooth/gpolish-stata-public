@@ -1167,8 +1167,18 @@ line le_wmale year, name(r3a, replace)
 capture gpolish callout "Far away", to(2100 100)
 chk r3_callout_off _rc==198
 chk r3_callout_off_noedit "`.r3a.plotregion1.added_text.arrnels'"=="" | "`.r3a.plotregion1.added_text.arrnels'"=="0"
-capture gpolish note "Far", at(1950 1e10)
-chk r3_note_at_off _rc==198
+* round 3b: a box placed by hand with at() off the plot region gets a note and is drawn
+capture noisily gpolish note "Far", at(1950 1e10)
+chk r3_note_at_off _rc==0
+chk r3_note_at_drawn "`.r3a.plotregion1.added_text.arrnels'"=="1"
+* a box in the top margin with an arrow into the plot (worked before 0.7.0)
+line le_wmale year, name(r3m, replace)
+capture noisily gpolish callout "Box in margin", at(1990 90) to(1950 60)
+chk r3_margin_at_ok _rc==0
+chk r3_margin_at_drawn "`.r3m.plotregion1.added_text.arrnels'"=="1"
+* the arrow target is still checked when at() is given
+capture gpolish callout "Box", at(1990 70) to(2100 100)
+chk r3_margin_to_off _rc==198
 capture gpolish note "", at(1950 60)
 chk r3_note_empty _rc==198
 capture gpolish callout " ", to(1950 60)
@@ -1206,6 +1216,21 @@ scatter price mpg, name(r3e, replace)
 gpolish ptlabel rep78 if price>13000 & !missing(rep78), x(mpg) y(price)
 local t `"`.r3e.plotregion1.added_text[1].text[1]'"'
 chk r3_num_fmt inlist(`"`t'"', "1", "2", "3", "4", "5")
+
+* round 3b: geom and clear are refused on graph bar, like the other layout commands
+graph bar (mean) mpg, over(foreign) name(r3g, replace)
+capture gpolish geom, name(r3g)
+chk r3_geom_bar _rc==198
+capture gpolish clear, name(r3g)
+chk r3_clear_bar _rc==198
+* the bracket label sits at a fixed spot: the same with or without data under it
+twoway scatteri 10 10 20 20, name(r3k1, replace) xscale(range(0 30)) yscale(range(0 30))
+gpolish bracket "Span", x(15) y0(5) y1(25)
+local bx1 `.r3k1.plotregion1.added_text[1].xpos.val'
+twoway scatteri 10 10 20 20 15 16 15 17 15 18, name(r3k2, replace) xscale(range(0 30)) yscale(range(0 30))
+gpolish bracket "Span", x(15) y0(5) y1(25)
+local bx2 `.r3k2.plotregion1.added_text[1].xpos.val'
+chk r3_bracket_fixed abs(`bx1'-`bx2') < 1e-6
 
 gpolish limits
 

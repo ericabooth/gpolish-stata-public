@@ -1052,13 +1052,16 @@ file open `pf' using "tests/out/barpix.py", write text replace
 file write `pf' "import sys" _n "from matplotlib.image import imread" _n
 file write `pf' "a = imread(sys.argv[1])[..., :3]" _n
 file write `pf' "n = int(((a.max(axis=2) - a.min(axis=2)) > 0.15).sum())" _n
+* with a third argument, count near-black pixels instead
+file write `pf' "n = int((a.max(axis=2) < 0.2).sum()) if len(sys.argv) > 3 else n" _n
 file write `pf' "open(sys.argv[2], 'w').write(str(n))" _n
 file close `pf'
 capture program drop barpix
 program barpix
-    * barpix tag minimum: the gr2mpl PNG holds at least this many coloured pixels
-    args tag mn
-    shell "$GR2MPL_PYTHON" "tests/out/barpix.py" "tests/out/r_`tag'_mpl.png" "tests/out/barpix.txt"
+    * barpix tag minimum [maximum [dark]]: the gr2mpl PNG holds at least minimum coloured
+    * pixels and, when maximum is given, no more than maximum; dark counts near-black pixels
+    args tag mn mx dark
+    shell "$GR2MPL_PYTHON" "tests/out/barpix.py" "tests/out/r_`tag'_mpl.png" "tests/out/barpix.txt" `dark'
     tempname fh
     file open `fh' using "tests/out/barpix.txt", read text
     file read `fh' n
@@ -1066,6 +1069,10 @@ program barpix
     erase "tests/out/barpix.txt"
     if real("`n'") < `mn' {
         di as err "`tag': `n' coloured pixels, expected at least `mn'"
+        exit 9
+    }
+    if "`mx'" != "" & real("`n'") > 0`mx' {
+        di as err "`tag': `n' coloured pixels, expected at most `mx'"
         exit 9
     }
     global R_N = $R_N + 1
@@ -1079,11 +1086,21 @@ barpix rbar_wide 1500
 twoway bar mpg weight, title("bar on a weight axis")
 rchk bar_wide
 barpix bar_wide 3000
-* the rbar layer is drawn over an rarea: gr2mpl draws the rarea in a gray with no
-* chroma, so the coloured pixels here come from the cranberry bars alone
+* the rbar layer is drawn over an rarea: gr2mpl draws the rarea in a light blue-gray
+* whose channel spread (about 0.09) is under the 0.15 threshold, so the coloured
+* pixels here come from the cranberry bars
 twoway (rarea lo hi weight, sort) (rbar lo hi weight, color(cranberry)), title("rarea and rbar")
 rchk rbar_layer
 barpix rbar_layer 1500
+* color(none) and fcolor(none) draw no fill, as in Stata (not black bars)
+twoway rbar lo hi weight, color(none) barwidth(40) title("rbar, color(none)")
+rchk rbar_none
+barpix rbar_none 0 50
+* tick labels and the title are near-black too; black bars would add tens of thousands
+barpix rbar_none 0 8000 dark
+twoway bar mpg weight, fcolor(none) barwidth(40) title("bar, fcolor(none)")
+rchk bar_fnone
+barpix bar_fnone 1000
 erase "tests/out/barpix.py"
 
 di as res "$R_N checks passed"

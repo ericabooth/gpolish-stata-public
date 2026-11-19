@@ -17,7 +17,7 @@ The figure is also in [results/benchmark.pdf](results/benchmark.pdf). Full table
 - **Leader lines often cross other labels on crowded graphs, for every method that draws them.** With every car labelled, 39 of `gpolish`'s 56 leaders cross another label's box, against 34 of ggrepel's 41 and 42 of adjustText's 56. The clean measure does not count these crossings.
 - **By the ambiguity measure, `gpolish` does worse than ggrepel in five of seven scenarios.** For example, 0.51 of its labels sit nearer another point than their own with every country labelled, against 0.40 for ggrepel. Most of those are labels on leader lines: among `gpolish` labels without a leader the share is 0.14.
 - **Results change with the order of the rows.** Over 10 random row orders, `gpolish`'s clean share ranged from 0.65 to 0.84 with every country labelled and from 0.36 to 0.49 with every car labelled. It was higher than ggrepel's in all 10 orders on the first graph and lower in all 10 on the second.
-- **`gpolish` places labels farther from their points than ggrepel in every scenario.** Its mean distance is 0.7 to 2.4 ems, against 0.3 to 2.2 for ggrepel, and it is farther in all seven scenarios.
+- **`gpolish` places labels farther from their points than ggrepel in every scenario.** Its mean distance is 0.7 to 2.4 ems, against 0.3 to 2.2 for ggrepel.
 - **It takes 0.11 to 2.2 seconds per graph** (means by scenario), against 0.10 to 0.56 for ggrepel and 0.04 to 2.9 for adjustText. With 150 and 300 labelled points it takes about 3.5 and 14 seconds, and on those graphs no method places more than 0.44 of its labels cleanly (mean over 5 seeds).
 
 ## Font history

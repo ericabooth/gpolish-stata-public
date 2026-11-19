@@ -25,6 +25,13 @@ This release contains gpolish 0.7.0 and gr2mpl 0.6.0. The changes listed under 0
 - `gpolish legend` keeps every line of multi-line labels. A label with an unmatched `}` is shown as typed.
 - Clearer errors: `plots()` out of range names the plot count; `arrow` with `from()` equal to `to()`, and `segments()` below 1, stop before any edit; `callout` and `note` draw no arrow, with a note, when the target is inside the text; a mistyped subcommand lists the valid ones (r(199)); `ptlabel` gives a note when none of the selected points is drawn; `render` with no graph gives r(111); the refusal on `graph pie` names it.
 - Fixed: an internal program returned from inside a loop with a bare `exit`, which under `version 16` does not leave the program.
+- `callout` and `note` stop with an error (r(198)) before any edit when `to()`, the point the arrow aims at, lies outside the plot region; the message gives the x and y axis ranges. An `at()` or `from()` outside the plot region gets the same message as a note and is drawn where it was put, so a box placed by hand in the graph margin works as in 0.6.1.
+- `arrow` and `brace` print a note when `from()` or `to()` lies outside the plot region, and still draw.
+- `callout` and `note` stop with "text is empty" when every text line is blank.
+- An automatically placed `callout` or `note` whose text box is wider or taller than the plot region stops with an error instead of drawing off the canvas. `ptlabel` skips labels wider than the plot region and prints a note that gives how many.
+- `bracket` stops with an error when `y0()` equals `y1()`, as `arrow` and `brace` do for equal ends. Its label sits at a fixed position beside the spine and is not checked against the data; the help and README now say so.
+- `endlabel, values` puts every value in one column, beyond the line end farthest out on the labelled side, so the value of a line that ends early now sits in the column with the others.
+- `ptlabel` accepts numeric label variables: the value label is shown when there is one, otherwise the display format; missing values are not labelled.
 - `gpolish limits` lines up its columns, describes the matplotlib output as PNG, PDF, SVG or JPG, and lists pie charts as handled by neither command.
 
 ### gr2mpl 0.6.0
@@ -45,6 +52,8 @@ This release contains gpolish 0.7.0 and gr2mpl 0.6.0. The changes listed under 0
 - gr2mpl needs matplotlib 3.6 or later. The default search (Stata's Python, then `python3`, then `python`) passes over an interpreter whose matplotlib is too old and stops at the first one that is new enough; it stops with error 601 only when none is. The new global `GR2MPL_SEARCH` replaces the search list. Fixed: the search took the last working interpreter instead of the first. `gr2mpl doctor` reports whether matplotlib is new enough and returns `r(mplversion)` and `r(mplok)`.
 - Without `keepspec`, gr2mpl deletes its spec folder (the JSON spec and the CSV copies of the data) when it finishes, also after an error, and `r(specdir)` is returned only with `keepspec`. With `keepspec`, the folder also holds `render_info.txt`, a record of what was drawn.
 - `saving()` naming a folder that ends in a slash writes `<graphname>_mpl.png` there; `palette()` accepts only `house`; matplotlib's font-fallback warnings are no longer printed.
+- `twoway bar` and `twoway rbar` bars narrower than about 0.5% of the x range (for example the default `barwidth()` on a weight axis in pounds) are outlined in their own colour, as Stata draws them, so they show as thin bars instead of disappearing behind a white edge. Wider bars keep their white separators. This also restores the rbar layer in `rarea || rbar` graphs.
+- A colour set to `none` is passed to matplotlib as no colour. Before, the spec recorded it as black, so `twoway bar` and `rbar` with `color(none)` or `fcolor(none)` drew black bars; they now draw no fill, as in Stata, with an outline only when the outline colour is visible.
 
 ### Benchmark
 
@@ -54,11 +63,13 @@ This release contains gpolish 0.7.0 and gr2mpl 0.6.0. The changes listed under 0
 - New metrics: clean except the label's own marker; leader lines drawn and leaders that cross a label, a marker or another leader; ambiguity split by labels with and without a leader; paired seed-level differences with 95 percent intervals. New scenario sets: 10 random row orders of the real-data scenarios, 150 and 300 points, and other label and marker sizes.
 - `score.py` writes every method's measured label boxes, leader lines, geometry and points, and `score.py --rescore` rebuilds the scores from them alone. New `marker_sensitivity.py`, `selftest.py` and `BENCH_SCENARIOS`; `run_stata.do` checks that it runs the package's own `gpolish`.
 - benchmark/README.md was rewritten to report every result, including the scenarios and measures where `gpolish` does worse than ggrepel.
+- benchmark/README.md: the 150-point paragraph now matches results/summary.md and graphs.csv for adjustText, and the distance finding says `gpolish` places labels farther from their points than ggrepel in every scenario (it said "usually").
 
 ### Documentation
 
 - README: describes batch-mode fonts, `GPOLISH_FONT`, the matplotlib 3.6 minimum, second-axis options, the output formats of `gr2mpl`, and the handling of graphs saved by 0.6.1 or earlier; the benchmark paragraph reports the current numbers.
 - Gallery: every code block runs as it stands in a fresh Stata session; `gallery/make_page.py` builds the pages, with `--check` and `--blocks` modes, and stops on an unknown argument without writing a file.
+- README and help: `geom` is listed with the commands that stop with r(198) on graphs that are not twoway graphs, and the bracket label is described as fixed and not checked against the data.
 - Help files and docs/OBJECT_MODEL.md updated for each change above.
 
 ## 0.6.1 (2026-11-17)

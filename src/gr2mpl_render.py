@@ -617,7 +617,12 @@ class Panel:
             fx = x[np.isfinite(x)] if len(x) else x
             span = float(np.nanmax(fx) - np.nanmin(fx)) if len(fx) > 1 else 0.0
             narrow = span > 0 and width / (span + width) < 0.005
-            kw = dict(color=afill, lw=0.6, edgecolor=afill if narrow else "white", zorder=z)
+            edge = afill if narrow else "white"
+            if afill[3] == 0:
+                # fcolor(none): no fill, as Stata draws it; keep only a visible outline
+                aline = self.plot_color(p, "aline", i, lc)
+                edge = aline if aline[3] > 0 else "none"
+            kw = dict(color=afill, lw=0.6, edgecolor=edge, zorder=z)
             if horizontal:
                 h = ax.barh(x, y - lo, left=lo, height=width, **kw)
             else:

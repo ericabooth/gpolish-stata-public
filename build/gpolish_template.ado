@@ -1227,11 +1227,12 @@ program _gpl_callout
     foreach o in at to from {
         if `"``o''"'!="" _gpl_toreg1 `name' "`_gpl_reg'" `o' ``o'x' ``o'y'
     }
-    * a point off the axes is almost always a typo or the wrong axis
-    foreach o in to at {
-        if `"``o''"'!="" _gpl_inplot `cmd' `o' `name' ``o'x' ``o'y' err
+    * an arrow target off the axes is almost always a typo or the wrong axis; a box placed by
+    * hand with at() may sit in the graph margin on purpose, so it gets a note only
+    if `"`to'"'!="" _gpl_inplot `cmd' to `name' `tox' `toy' err
+    foreach o in at from {
+        if `"``o''"'!="" _gpl_inplot `cmd' `o' `name' ``o'x' ``o'y' note
     }
-    if `"`from'"'!="" _gpl_inplot `cmd' from `name' `fromx' `fromy' note
     if "`color'"=="" local color "26 26 26"
     if "`align'"=="" local align left
     if "`isnote'"!="" & "`fill'"=="" {
@@ -1681,8 +1682,6 @@ program _gpl_limits
 end
 
 mata:
-// ---------------------------------------------------------------- text escaping
-// $ and a backtick that does not open a compound quote become SMCL character codes
 // s with each $name and ${name} replaced by the global's contents, as macro expansion does
 string scalar _gpl_gexp(string scalar s)
 {
@@ -1717,7 +1716,8 @@ string scalar _gpl_gexp(string scalar s)
     }
     return(out)
 }
-
+// ---------------------------------------------------------------- text escaping
+// $ and a backtick that does not open a compound quote become SMCL character codes
 string scalar _gpl_esc(string scalar s)
 {
     real scalar i
@@ -2298,12 +2298,6 @@ real scalar _gpl_obscost(real rowvector b, real matrix O)
     return(sum((ox :* oy) :* ((ox :> 0) :& (oy :> 0))))
 }
 
-// ---------------------------------------------------------------- 2-D point labels
-// Each label first tries eight spots next to its point. If the best of them still has an overlap
-// cost above 2% of its box area and leaders are allowed, it also tries spots on rings farther out,
-// joined to the point by a leader line.
-// result rows: obs, anchor x, anchor y, halign (-1 left, 0 centre, 1 right), box alignment
-// (1 E, 2 W, 3 N, 4 S, 5 centre), overlap flag, leader flag, leader x0 y0 x1 y1 (device units)
 // drop labels wider than the plot region from the selection; returns how many were dropped
 real scalar _gpl_skipwide(string scalar labv, string scalar selv, real scalar fs, real scalar pw)
 {
@@ -2324,6 +2318,12 @@ real scalar _gpl_skipwide(string scalar labv, string scalar selv, real scalar fs
     return(n)
 }
 
+// ---------------------------------------------------------------- 2-D point labels
+// Each label first tries eight spots next to its point. If the best of them still has an overlap
+// cost above 2% of its box area and leaders are allowed, it also tries spots on rings farther out,
+// joined to the point by a leader line.
+// result rows: obs, anchor x, anchor y, halign (-1 left, 0 centre, 1 right), box alignment
+// (1 E, 2 W, 3 N, 4 S, 5 centre), overlap flag, leader flag, leader x0 y0 x1 y1 (device units)
 void _gpl_place(string scalar gxv, string scalar gyv, string scalar labv, string scalar selv, string scalar out,
                 real scalar fs, real scalar rad, real scalar off,
                 real scalar x0, real scalar x1, real scalar y0, real scalar y1, real scalar leader)
