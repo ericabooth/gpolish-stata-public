@@ -157,7 +157,8 @@ program _gpl_xy
     forvalues i = 1/2 {
         capture local v`i' = `a`i''
         if _rc | missing(real("`v`i''")) {
-            di as err `"gpolish: `opt'(): cannot read {bf:`a`i''} as a number or expression"'
+            di as err `"gpolish: `opt'(): cannot read {bf:`a`i''} as a number or expression;"'
+            di as err "         on a date axis use a date function, e.g. tm(2020m8) or td(21sep2001)"
             exit 198
         }
     }
@@ -187,7 +188,8 @@ program _gpl_val
     if "$GPL_RHOLD"!="" capture _return restore $GPL_RHOLD, hold
     capture local v = `val'
     if _rc | missing(real("`v'")) {
-        di as err `"gpolish: `opt'(): cannot read {bf:`val'} as a number or expression"'
+        di as err `"gpolish: `opt'(): cannot read {bf:`val'} as a number or expression;"'
+        di as err "         on a date axis use a date function, e.g. tm(2020m8) or td(21sep2001)"
         exit 198
     }
     c_local `opt'v `v'
@@ -1072,6 +1074,32 @@ program _gpl_endlabel
     else _gpl_ge `name' .style.editstyle margin(`mside'+`m') editcopy
     local leg 0
     if "`keeplegend'"=="" & "`.`name'.legend.draw_view.setting'"=="yes" {
+        * a plot that gets no end label but has a legend key loses its only identification
+        * once the legend is switched off; such plots are named in a note
+        local done
+        forvalues jj = 1/`np' {
+            local done `done' `plot`jj''
+        }
+        local lost
+        local nk `.`name'.legend.plotregion1.key.arrnels'
+        if "`nk'"=="" local nk 0
+        forvalues i = 1/`n' {
+            if `: list i in done' continue
+            local rg : word `i' of `regs'
+            local okey `"`.`name'.plotregion`rg'.plot`i'.objkey'"'
+            if `"`okey'"'=="" continue
+            forvalues k = 1/`nk' {
+                if `"`.`name'.legend.plotregion1.key[`k'].view.objkey'"'==`"`okey'"' {
+                    local lost `lost' `i'
+                    continue, break
+                }
+            }
+        }
+        if "`lost'"!="" {
+            local lost : list retokenize lost
+            di as txt "note: gpolish endlabel: plot(s) `lost' get no end label and lose their legend key;"
+            di as txt "      use keeplegend to keep the legend"
+        }
         _gpl_ge `name' .legend.draw_view.setstyle, style(no)
         local leg 1
     }
@@ -1568,6 +1596,7 @@ program _gpl_arrow
         SEGments(integer 24) LColor(string) LWidth(string) SHRink(real 0) XAXis(string) YAXis(string)]
     _gpl_segcheck `segments'
     _gpl_poschk arrow headsize `headsize'
+    _gpl_poschk arrow shrink `shrink' nonneg
     _gpl_xy from `"`from'"'
     _gpl_xy to `"`to'"'
     _gpl_name `name'
@@ -1609,6 +1638,7 @@ program _gpl_brace
         Width(real 7) FLIP SIZe(real 8.8) COLor(string) LColor(string) LWidth(string) GAP(real 4) ///
         XAXis(string) YAXis(string)]
     _gpl_poschk brace size `size'
+    _gpl_poschk brace width `width'
     _gpl_poschk brace gap `gap' nonneg
     _gpl_xy from `"`from'"'
     _gpl_xy to `"`to'"'
@@ -2362,9 +2392,16 @@ void _gpl_repel(string scalar nm, real scalar sep, real scalar lo, real scalar h
                     moved = 1
                 }
             }
-            // keep the outer edges of the first and last labels inside the plot height
-            if (g[1] - sep*nl[1]/2 < lo) g[1] = lo + sep*nl[1]/2
-            if (g[n] + sep*nl[n]/2 > hi) g[n] = hi - sep*nl[n]/2
+            // keep the outer edges of the first and last labels inside the plot height; a label
+            // pulled back from an edge can now sit on its neighbour, so the pass is repeated
+            if (g[1] - sep*nl[1]/2 < lo - 0.000001) {
+                g[1] = lo + sep*nl[1]/2
+                moved = 1
+            }
+            if (g[n] + sep*nl[n]/2 > hi + 0.000001) {
+                g[n] = hi - sep*nl[n]/2
+                moved = 1
+            }
             if (moved==0) break
         }
     }

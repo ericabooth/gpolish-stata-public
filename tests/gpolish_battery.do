@@ -1693,6 +1693,60 @@ capture noisily gpolish ptlabel make if price>12000
 chk r9_ptlabel_novar_err _rc==198
 restore
 
+* ---- r10. round 10 fixes ---------------------------------------------------------
+* a wrapped top label pulled back from the top edge pushes the label below it down
+clear
+set obs 10
+gen t = _n
+gen a = t
+gen b = 0.8*t
+line a b t, scheme(s2color) name(r10a, replace)
+shownote "pair(s)" gpolish endlabel, wrap(5) labels("x y z w v u t s r q p" "Men")
+chk r10_wraptop_nonote r(note)==0
+gpolish geom, name(r10a)
+local dd = (`.r10a.plotregion1.added_text[1].ypos.val' - `.r10a.plotregion1.added_text[3].ypos.val')*r(yb)/(9.5/72*r(gpi))
+chk r10_wraptop_gap abs(`dd' - 2.5*1.3) < 0.01
+if c(stata_version) >= 18 {
+    sysuse uslifeexp, clear
+    line le_male le_female year, scheme(stcolor) name(r10b, replace)
+    shownote "pair(s)" gpolish endlabel, wrap(5) labels("Men" "x y z w v u t s r q p")
+    chk r10_stcolor_nonote r(note)==0
+    gpolish geom, name(r10b)
+    local dd = (`.r10b.plotregion1.added_text[3].ypos.val' - `.r10b.plotregion1.added_text[1].ypos.val')*r(yb)/(9.5/72*r(gpi))
+    chk r10_stcolor_gap `dd' >= 2.5*1.3 - 0.01
+}
+* an unlabelled plot with a legend key is named when the legend is switched off
+sysuse uslifeexp, clear
+twoway rarea le_wmale le_bmale year || line le_female year || lfit le_male year, scheme(s2color) name(r10c, replace)
+shownote "plot(s) 1 get no end label and lose their legend key" gpolish endlabel
+chk r10_lostkey_note r(note)==1
+twoway rarea le_wmale le_bmale year || line le_female year, name(r10d, replace)
+shownote "lose their legend key" gpolish endlabel, keeplegend
+chk r10_lostkey_keep r(note)==0
+line le_male le_female year, name(r10e, replace)
+shownote "lose their legend key" gpolish endlabel
+chk r10_lostkey_none r(note)==0
+* brace width() and arrow shrink() are checked like the other sizes
+line le_male le_female year, name(r10f, replace)
+capture gpolish brace "x", from(1950 60) to(1970 60) width(-20)
+chk r10_brace_negwidth _rc==198
+capture gpolish brace "x", from(1950 60) to(1970 60) width(0)
+chk r10_brace_zerowidth _rc==198
+capture gpolish arrow, from(1950 60) to(1970 60) shrink(-2)
+chk r10_arrow_negshrink _rc==198
+capture gpolish arrow, from(1950 60) to(1970 60) shrink(0)
+chk r10_arrow_zeroshrink _rc==0
+* a date typed as the axis shows it gets a hint toward the date functions
+gen tm = tm(2015m1) + _n
+format tm %tm
+line le_male tm, name(r10g, replace)
+shownote "use a date function, e.g. tm(2020m8)" capture noisily gpolish callout "peak", to(2020m8 1)
+chk r10_date_hint r(note)==1
+capture gpolish callout "peak", to(2020m8 1)
+chk r10_date_rc _rc==198
+capture gpolish callout "peak", to(tm(2020m8) 60)
+chk r10_date_fn _rc==0
+
 gpolish limits
 
 if `"`_wf0'"'!="" graph set window fontface `"`_wf0'"'

@@ -51,12 +51,13 @@
 
 {p 8 16 2}{cmd:gpolish geom} [{cmd:,} {opt name(graphname)}]
 
-{pstd}All sizes are in points and must be positive; a zero or negative {opt size()}, {opt headsize()} or {opt dotsize()}
-stops with r(198), as does a negative {opt gap()}, {opt xgap()}, {opt wrap()}, {opt pad()}, {opt offset()} or {opt msize()}.
+{pstd}All sizes are in points and must be positive; a zero or negative {opt size()}, {opt headsize()}, {opt dotsize()} or {cmd:brace} {opt width()}
+stops with r(198), as does a negative {opt gap()}, {opt xgap()}, {opt wrap()}, {opt pad()}, {opt offset()}, {opt msize()} or {cmd:arrow} {opt shrink()}.
 Positions are in the units of the graph's axes.
 Each value in {opt at()}, {opt to()}, {opt from()} and the {opt x()}, {opt y0()}, {opt y1()}, {opt y()}, {opt x0()} and {opt x1()} of {cmd:bracket}
 may be a number or an expression, such as {cmd:to(td(21sep2001) 966)} on a date axis or
-{cmd:to(tc(02jan2020 05:00:00) 0)} on a clock-time axis. In {opt at()}, {opt to()} and {opt from()}, spaces are allowed only inside parentheses.
+{cmd:to(tc(02jan2020 05:00:00) 0)} on a clock-time axis. A date typed as the axis shows it, such as {cmd:2020m8}, is not a number;
+write it with its date function, {cmd:tm(2020m8)}, and the error message says so. In {opt at()}, {opt to()} and {opt from()}, spaces are allowed only inside parentheses.
 An expression may use the results of the previous command, such as {cmd:to(1999 r(max))} after {cmd:summarize}.
 Positions are read on the first x and y axes; on a graph with a second axis, {opt xaxis(#)} and {opt yaxis(#)}
 say which axis the positions belong to. {cmd:ptlabel} finds the axes of its {opt x()} and {opt y()} variables
@@ -101,7 +102,9 @@ and {cmd:gpolish render} redraws the finished graph with matplotlib (see {helpb 
 {cmd:gpolish endlabel} replaces the legend with a label at the end of each line, in the line's color.
 Labels that would overlap are moved apart, and the margin grows to fit the longest label.
 The legend is switched off; {opt keeplegend} keeps it. {cmd:endlabel} also keeps it, with a note, when two labeled plots
-get the same label. A kept legend that sits beside the plot region on the label side is moved out past the labels,
+get the same label. When the legend is switched off and a plot that gets no end label (an area, a band or a
+bar, for example) has a legend key, {cmd:endlabel} names that plot in a note, since it then has no key or label; {opt keeplegend} keeps its key.
+A kept legend that sits beside the plot region on the label side is moved out past the labels,
 and {cmd:gpolish clear} or a rerun moves it back.
 By default every line plot is labeled; {opt plots()} names the plots to label by number, and series with no
 nonmissing values are skipped with a note.
@@ -166,12 +169,14 @@ edge does, and with {opt align(center)} the box is centered on {opt at()}, which
 {cmd:gpolish brace} draws a curly brace between two points, with an optional label at its tip.
 Use it to mark a confidence interval, a gap between two values, or a range on an axis.
 The tip points to the left of the direction from {opt from()} to {opt to()}; {opt flip} turns it to the other side.
-{opt width(#)} is the depth of the brace in points.
+{opt width(#)} is the depth of the brace in points and must be positive; use {opt flip} to draw the brace on the other side.
 The label's position is fixed beyond the tip: unlike the other layout commands, {cmd:brace} does not check it
 against markers, lines, bars or earlier labels, and prints no note if they overlap.
 
 {phang}
 {cmd:gpolish arrow} draws an arrow between two points, straight by default; {opt curve(#)} bends it.
+{opt shrink(#)} stops the arrowhead # points short of {opt to()} (default 0), for example so it does not cover a marker;
+a negative value stops with r(198).
 {opt from()} and {opt to()} must be different points. When either lies outside the plot region,
 {cmd:arrow} (and {cmd:brace}) prints a note and still draws. On a log axis, {cmd:arrow}, {cmd:brace} and {cmd:bracket}
 stop with r(198) before any edit when a position is zero or negative, and name the option.
