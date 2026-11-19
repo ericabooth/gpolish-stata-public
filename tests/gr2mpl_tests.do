@@ -558,6 +558,31 @@ has "figtext=μ mpg|`: di %4.2f `.Graph.yaxis1.title.style.size.gmval' * min(`.G
 has "figtext=Weight ≤ 5000, Δ|`: di %4.2f `.Graph.xaxis1.title.style.size.gmval' * min(`.Graph.style.declared_xsize.val', `.Graph.style.declared_ysize.val') * 0.72'"
 has "panel1.xticks=Line A/Line B|four"
 
+* -- SMCL toggle tags {bf} {it} {sf} {rm} are applied or dropped, never printed
+sysuse auto, clear
+twoway scatter mpg weight, title("A {bf}bold{sf} and {it}italic{sf} word; {it:colon} form") ///
+    note("{it}note{rm} text") text(30 3000 "{bf}hi{sf}")
+rchk smcl_toggle
+has "title=A bold and italic word; colon form"
+has "panel1.ann=hi|left|0|y1|in"
+
+* -- graph combine keeps each member's subtitle(), note() and caption()
+sysuse auto, clear
+twoway (scatter mpg weight) (lfitci mpg weight), name(cm_a, replace) title("TTT") ///
+    subtitle("SUBXYZ") note("NOTEXYZ") caption("CAPXYZ")
+kdensity mpg, name(cm_b, replace)
+graph combine cm_a cm_b, name(cm_c, replace)
+rchk combine_notes
+has "panel1.ptitle=TTT"
+has "panel1.psubtitle=SUBXYZ"
+has "panel1.psubtitle_below_title=1"
+has "panel1.pnote=NOTEXYZ/CAPXYZ"
+has "panel1.pnote_below_xaxis=1"
+has "panel1.pnote_inside=1"
+has "panel2.pnote=kernel = epanechnikov, bandwidth = 1.9746"
+has "panel1.ann=SUBXYZ|left|0|y1|in", absent
+graph drop cm_a cm_b cm_c
+
 * -- marker labels: mlabformat(), mlabvposition(), pc-plot labels, mlabangle()
 sysuse uslifeexp, clear
 twoway connected le year if mod(year, 10) == 0, msymbol(none) mlabel(le) mlabformat(%4.1f) title("mlabformat")

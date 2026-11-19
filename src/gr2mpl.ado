@@ -566,8 +566,11 @@ program _g2m_panel
     else if "`role'" == "combine" {
         _g2m_textarr `fh' "ptitle" "`g'.title" 6
         _g2m_textarr `fh' "psubtitle" "`g'.subtitle" 6
+        _g2m_textarr `fh' "pnote" "`g'.note" 6
+        _g2m_textarr `fh' "pcaption" "`g'.caption" 6
         file write `fh' "      "
-        _g2m_pairs `fh' "`g'" "ptitle_size title.style.size.gmval"
+        _g2m_pairs `fh' "`g'" "ptitle_size title.style.size.gmval" ///
+            "psubtitle_size subtitle.style.size.gmval" "pnote_size note.style.size.gmval"
         file write `fh' _n
     }
     if "`fam'" == "twoway" {
