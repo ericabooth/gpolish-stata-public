@@ -16,8 +16,14 @@ MARKER_PT = 6.0          # marker diameter, points (every set except "fontmark")
 #   perm      the 4 real-data scenarios with their rows in 10 random orders (permutation seeds 1 to 10)
 #   scale     synthetic scatterplots with 150 and 300 points, all labelled, 5 seeds each
 #   fontmark  the 60-of-60 synthetic design (seeds 1 to 10) at other font and marker sizes
-SETS = ["main", "perm", "scale", "fontmark", "holdout", "rule"]
+#   tuning    synthetic tuning seeds 101 to 110 (tune.py, tune_others.py); run only when BENCH_SETS names it
+#   realhold  held-out real-data scenarios (census, hsng, states), and rhperm their 10 row orders; written
+#             only for extra.py (BENCH_EXTRA=1)
+SETS = ["main", "perm", "scale", "fontmark", "holdout", "rule", "realhold", "rhperm"]
 ALL_METHODS = ["default", "labrepel", "gpolish", "gpolish060", "adjusttext", "ggrepel", "ggrepel_inf"]
+# adjustText and informed ggrepel at the settings tune_others.py chose on the tuning seeds; their
+# outputs exist only in extra.py's "tuned" and "realhold" working copies
+TUNED = ["adjusttext_tuned", "ggrepel_tuned"]
 SET_METHODS = {
     "main": ALL_METHODS,
     "perm": ALL_METHODS,
@@ -25,7 +31,12 @@ SET_METHODS = {
     "fontmark": ["default", "gpolish", "adjusttext", "ggrepel", "ggrepel_inf"],
     "holdout": ALL_METHODS,
     "rule": ALL_METHODS,
+    "realhold": ALL_METHODS + TUNED,
+    "rhperm": ALL_METHODS + TUNED,
+    "tuning": ["default", "adjusttext", "ggrepel", "ggrepel_inf"] + TUNED,
 }
+SET_METHODS["main"] = ALL_METHODS + TUNED
+SET_METHODS["perm"] = ALL_METHODS + TUNED
 STATA = ["default", "gpolish", "gpolish060", "labrepel"]
 MANIFEST_FIELDS = ["scenario", "set", "design", "seed", "n", "nlab", "fit", "fa", "fb", "fx0", "fx1",
                    "label_pt", "marker_pt"]
@@ -36,7 +47,9 @@ def manifest_files():
     return [("main", "data/manifest_real.csv"), ("main", "data/manifest_synthetic.csv"),
             ("perm", "data/manifest_perm.csv"), ("scale", "data/manifest_scale.csv"),
             ("fontmark", "data/manifest_fontmark.csv"),
-            ("holdout", "data/manifest_holdout.csv"), ("rule", "data/manifest_rule.csv")]
+            ("holdout", "data/manifest_holdout.csv"), ("rule", "data/manifest_rule.csv"),
+            ("realhold", "data/manifest_realhold.csv"), ("rhperm", "data/manifest_rhperm.csv"),
+            ("tuning", "data/manifest_tuning.csv")]
 
 
 def manifest():

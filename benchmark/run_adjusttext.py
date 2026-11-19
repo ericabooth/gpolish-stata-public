@@ -14,6 +14,11 @@ box adjustText worked with comes from this 72 dpi figure, whose text extents are
 pixels. A run limited by BENCH_SCENARIOS keeps the rows of the set's other scenarios.
 BENCH_LINEPTS=1 also gives adjust_text() the fitted line as extra points every 4 points along it, so its
 labels also avoid the line (a further run, see extra.py).
+Tuned settings (see tune_others.py): BENCH_AT_PARMS gives adjust_text() settings as
+"expand=1.05,1.2;force_text=0.1,0.2;force_static=0.1,0.2;force_pull=0.01,0.01;iter_lim=100" (any subset;
+a setting not named stays at its default, and iter_lim replaces the iteration limit). BENCH_AT_METHOD names
+the method the run is for (default adjusttext; adjusttext_tuned for the tuned column), which also names the
+output folder out/<method>/; BENCH_OUTDIR replaces that folder (used by tune_others.py).
 Run from the benchmark folder after run_stata.do:  python run_adjusttext.py [iterations]
 """
 import csv
@@ -28,6 +33,23 @@ from adjustText import adjust_text
 from common import manifest, data, geometry, methods_for, set_order, FONT
 
 ITER_LIM = 100
+METHOD = os.environ.get("BENCH_AT_METHOD", "adjusttext")
+OUT = os.environ.get("BENCH_OUTDIR", f"out/{METHOD}")
+
+
+def parms():
+    """adjust_text() settings from BENCH_AT_PARMS: name=value or name=x,y, separated by semicolons."""
+    out = {}
+    for part in os.environ.get("BENCH_AT_PARMS", "").split(";"):
+        if not part.strip():
+            continue
+        k, v = part.split("=")
+        vals = [float(x) for x in v.split(",")]
+        if k.strip() == "iter_lim":
+            out["iter_lim"] = int(vals[0])
+        else:
+            out[k.strip()] = tuple(vals) if len(vals) > 1 else vals[0]
+    return out
 
 
 class StepCount(logging.Handler):
@@ -69,16 +91,18 @@ def merge_write(path, header, rows, scens, order):
 
 
 def main(iter_lim):
-    print(f"adjustText {adjustText.__version__}: iter_lim={iter_lim}, time_lim=None")
+    extra = parms()
+    iter_lim = extra.pop("iter_lim", iter_lim)
+    print(f"adjustText {adjustText.__version__}: iter_lim={iter_lim}, time_lim=None, {extra}, method {METHOD} -> {OUT}")
     counter = StepCount()
     lg = logging.getLogger("adjustText")
     lg.setLevel(logging.DEBUG)
     lg.addHandler(counter)
     lg.propagate = False
-    os.makedirs("out/adjusttext", exist_ok=True)
+    os.makedirs(OUT, exist_ok=True)
     by_set = {}
     for m in manifest():
-        if "adjusttext" in methods_for(m["set"]):
+        if METHOD in methods_for(m["set"]):
             by_set.setdefault(m["set"], []).append(m)
     for set_name, mans in by_set.items():
         lab_rows, time_rows = [], []
@@ -112,7 +136,7 @@ def main(iter_lim):
             texts = [ax.text(r["x"], r["y"], r["label"], fontsize=lpt, family=FONT) for r in lab]
             counter.steps = None
             t0 = time.perf_counter()
-            _, patches = adjust_text(texts, x=ox, y=oy, ax=ax, iter_lim=iter_lim, time_lim=None,
+            _, patches = adjust_text(texts, x=ox, y=oy, ax=ax, iter_lim=iter_lim, time_lim=None, **extra,
                                      arrowprops=dict(arrowstyle="-", color="0.6", lw=0.5))
             secs = time.perf_counter() - t0
             fig.canvas.draw()
@@ -131,15 +155,15 @@ def main(iter_lim):
             # every scenario run at BENCH_PNG_DPI when it is set (for audit_ink.py)
             png_dpi = os.environ.get("BENCH_PNG_DPI", "")
             if png_dpi or (set_name == "main" and m["seed"] in ("0", "1")):
-                fig.savefig(f"out/adjusttext/{scen}.png", dpi=float(png_dpi or 200), facecolor="white")
+                fig.savefig(f"{OUT}/{scen}.png", dpi=float(png_dpi or 200), facecolor="white")
             plt.close(fig)
         scens = {m["scenario"] for m in mans}
-        merge_write(f"out/adjusttext/results_{set_name}.csv",
+        merge_write(f"{OUT}/results_{set_name}.csv",
                     ["scenario", "label", "x0", "y0", "x1", "y1", "tx", "ty", "ha", "va", "lx0", "ly0", "lx1", "ly1"], lab_rows, scens,
                     set_order(set_name))
         if os.environ.get("BENCH_PNG_DPI", ""):
             continue      # its seconds include saving larger images, so they are not kept
-        merge_write(f"out/adjusttext/timing_{set_name}.csv", ["scenario", "seconds", "iterations"], time_rows, scens,
+        merge_write(f"{OUT}/timing_{set_name}.csv", ["scenario", "seconds", "iterations"], time_rows, scens,
                     set_order(set_name))
         print(set_name, len(time_rows), "scenarios")
 
