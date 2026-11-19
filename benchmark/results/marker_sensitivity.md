@@ -26,3 +26,17 @@ Main set. Each cell gives a method's mean share for the marker distance 2.75 pt 
 | Synthetic, 20 of 60 labelled | 0.47 / 0.47 / 0.46 | 0.29 / 0.29 / 0.28 | 0.95 / 0.93 / 0.92 | 0.84 / 0.83 / 0.81 | 0.49 / 0.45 / 0.38 | 0.40 / 0.39 / 0.38 | 0.86 / 0.85 / 0.84 |
 | Synthetic, 60 of 60 labelled | 0.33 / 0.33 / 0.32 | 0.16 / 0.16 / 0.15 | 0.88 / 0.87 / 0.86 | 0.76 / 0.74 / 0.73 | 0.53 / 0.50 / 0.45 | 0.58 / 0.56 / 0.55 | 0.84 / 0.83 / 0.82 |
 
+## Largest fall in the clean share from the 2.75 pt rule
+
+Computed from unrounded per-scenario means, over the scenarios of the main set.
+
+| Method | 3.0 pt (the radius) | 3.24 pt (Stata's drawn radius) |
+|---|---|---|
+| Stata mlabel() | 0.0075 (smallest 0.0000) | 0.0175 (smallest 0.0000) |
+| labrepel (Stata) | 0.0075 (smallest 0.0000) | 0.0150 (smallest 0.0000) |
+| gpolish ptlabel (Stata) | 0.0270 (smallest 0.0000) | 0.0400 (smallest 0.0000) |
+| gpolish 0.6.0 settings | 0.0175 (smallest 0.0000) | 0.0350 (smallest 0.0000) |
+| adjustText (Python) | 0.0526 (smallest 0.0000) | 0.2500 (smallest 0.0270) |
+| ggrepel (R) | 0.0142 (smallest 0.0000) | 0.0308 (smallest 0.0000) |
+| ggrepel (informed) | 0.0067 (smallest 0.0000) | 0.0175 (smallest 0.0000) |
+

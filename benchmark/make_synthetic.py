@@ -103,6 +103,17 @@ def main():
             write_data(scen, *draw(60, 60, seed))     # the same points and names as syn60all_s<seed>
             rows.append(row(scen, "fontmark", f"syn60all_{tag}", seed, 60, 60, lpt, mpt))
     write_manifest("data/manifest_fontmark.csv", rows)
+    if not os.environ.get("BENCH_EXTRA"):
+        return
+    # holdout set, written only for extra.py (BENCH_EXTRA=1), so the main run never draws it:
+    # seeds 201 to 220 of each design, drawn after the main results were fixed
+    rows = []
+    for design, n, nlab in DESIGNS:
+        for seed in range(201, 221):
+            scen = f"{design}_h{seed:03d}"
+            write_data(scen, *draw(n, nlab, seed))
+            rows.append(row(scen, "holdout", design, seed, n, nlab))
+    write_manifest("data/manifest_holdout.csv", rows)
 
 
 if __name__ == "__main__":

@@ -1,0 +1,3064 @@
+set,scenario,i,x,y,lab,label
+holdout,syn30all_h201,0,0.732647,0.528986,1,Gorvelisnel
+holdout,syn30all_h201,1,0.444713,0.418987,1,Chogorbri
+holdout,syn30all_h201,2,0.600988,0.577087,1,Kirquilolum Is
+holdout,syn30all_h201,3,0.683132,0.730853,1,Junvel
+holdout,syn30all_h201,4,0.829745,0.256651,1,Dunsa
+holdout,syn30all_h201,5,0.769688,0.755366,1,Lumhal Ka
+holdout,syn30all_h201,6,0.906321,0.436831,1,Quimor Lum
+holdout,syn30all_h201,7,0.762257,0.718222,1,Junrenmi
+holdout,syn30all_h201,8,0.81454,0.551693,1,Nelveljun
+holdout,syn30all_h201,9,0.54454,0.620399,1,Junka
+holdout,syn30all_h201,10,0.471553,0.325448,1,Sachofa
+holdout,syn30all_h201,11,0.575702,0.875608,1,Pramorhalgor
+holdout,syn30all_h201,12,0.609528,0.511556,1,Toris
+holdout,syn30all_h201,13,0.749959,0.774845,1,Sachojunkir Mi
+holdout,syn30all_h201,14,0.659428,0.751538,1,Elgor
+holdout,syn30all_h201,15,0.647639,0.456176,1,Nelkajunis
+holdout,syn30all_h201,16,0.714455,0.638418,1,Halvelprakir
+holdout,syn30all_h201,17,0.672258,0.510956,1,Veljun Dunvel
+holdout,syn30all_h201,18,0.544408,0.480201,1,Dunsahal
+holdout,syn30all_h201,19,0.790796,0.644404,1,Praelgorjun
+holdout,syn30all_h201,20,0.512075,0.370311,1,Ostfa Toran
+holdout,syn30all_h201,21,0.862566,0.580164,1,Tordunren
+holdout,syn30all_h201,22,0.598581,0.243485,1,Veltorjun Kalo
+holdout,syn30all_h201,23,0.871278,0.52504,1,Mormitor
+holdout,syn30all_h201,24,0.824547,0.508026,1,Elsaostka Gor
+holdout,syn30all_h201,25,0.615189,0.632713,1,Milumjunlum
+holdout,syn30all_h201,26,0.631828,0.89264,1,Kaqui
+holdout,syn30all_h201,27,0.578896,0.283255,1,Dunlum
+holdout,syn30all_h201,28,0.689902,0.567311,1,Brikir Isnel
+holdout,syn30all_h201,29,0.582795,0.857127,1,Tornelfapra
+holdout,syn30all_h202,0,0.19947,0.503624,1,Dunren Sator
+holdout,syn30all_h202,1,0.363586,0.729926,1,Sapraqui
+holdout,syn30all_h202,2,0.651968,0.675766,1,Junmimi
+holdout,syn30all_h202,3,0.441792,0.492963,1,Dunren
+holdout,syn30all_h202,4,0.426377,0.145362,1,Quiquikir
+holdout,syn30all_h202,5,0.299269,0.368004,1,Fael
+holdout,syn30all_h202,6,0.328776,0.65707,1,Fafabri Minel
+holdout,syn30all_h202,7,0.33659,0.558048,1,Velhal Cho
+holdout,syn30all_h202,8,0.525668,0.613202,1,Lokirmor
+holdout,syn30all_h202,9,0.147619,0.569953,1,Elfagorfa
+holdout,syn30all_h202,10,0.526718,0.700845,1,Brichodunan
+holdout,syn30all_h202,11,0.212038,0.625528,1,Isan
+holdout,syn30all_h202,12,0.255256,0.564834,1,Lumdun
+holdout,syn30all_h202,13,0.335731,0.736845,1,Rendunlum Ren
+holdout,syn30all_h202,14,0.5041,0.639277,1,Sakir
+holdout,syn30all_h202,15,0.307724,0.282904,1,Hallogor
+holdout,syn30all_h202,16,0.346963,0.612743,1,Ostfakajun
+holdout,syn30all_h202,17,0.601541,0.242829,1,Velgorlopra
+holdout,syn30all_h202,18,0.443876,0.304556,1,Saquianel Gor
+holdout,syn30all_h202,19,0.510217,0.60215,1,Mimor Quiis
+holdout,syn30all_h202,20,0.205514,0.297063,1,Choost
+holdout,syn30all_h202,21,0.252211,0.727002,1,Choqui
+holdout,syn30all_h202,22,0.164801,0.25229,1,Renchoisdun
+holdout,syn30all_h202,23,0.213373,0.298011,1,Kirost
+holdout,syn30all_h202,24,0.328158,0.141035,1,Dunmitor Kiran
+holdout,syn30all_h202,25,0.150677,0.347913,1,Elost Lum
+holdout,syn30all_h202,26,0.662625,0.546748,1,Halis
+holdout,syn30all_h202,27,0.536081,0.203277,1,Halpra
+holdout,syn30all_h202,28,0.398732,0.55302,1,Loismorhal
+holdout,syn30all_h202,29,0.25353,0.50182,1,Dunlumqui
+holdout,syn30all_h203,0,0.583047,0.69924,1,Gorlo
+holdout,syn30all_h203,1,0.876695,0.823803,1,Dungor Lumost
+holdout,syn30all_h203,2,0.392141,0.448879,1,Haldunlumfa
+holdout,syn30all_h203,3,0.366868,0.185545,1,Gorlum
+holdout,syn30all_h203,4,0.596613,0.444627,1,Lumfa
+holdout,syn30all_h203,5,0.435143,0.743089,1,Halpra
+holdout,syn30all_h203,6,0.327742,0.322592,1,Eljunhal Qui
+holdout,syn30all_h203,7,0.718948,0.710507,1,Gorsajunjun
+holdout,syn30all_h203,8,0.564116,0.288513,1,Mordunsa
+holdout,syn30all_h203,9,0.532802,0.215344,1,Torel
+holdout,syn30all_h203,10,0.565322,0.826849,1,Kirfanel Chomi
+holdout,syn30all_h203,11,0.45242,0.684422,1,Mikamor
+holdout,syn30all_h203,12,0.518474,0.733074,1,Kahal
+holdout,syn30all_h203,13,0.703842,0.545233,1,Dunostsaan Tor
+holdout,syn30all_h203,14,0.528246,0.520665,1,Ostjun
+holdout,syn30all_h203,15,0.382253,0.482244,1,Anjunkanel
+holdout,syn30all_h203,16,0.660113,0.427965,1,Velelbrifa
+holdout,syn30all_h203,17,0.43701,0.464133,1,Halmihalsa
+holdout,syn30all_h203,18,0.6102,0.542726,1,Morlo
+holdout,syn30all_h203,19,0.50611,0.331343,1,Saislumel
+holdout,syn30all_h203,20,0.65358,0.748599,1,Faquigor
+holdout,syn30all_h203,21,0.686878,0.703124,1,Junlumbri Elsa
+holdout,syn30all_h203,22,0.561399,0.349708,1,Ostquikir
+holdout,syn30all_h203,23,0.698735,0.879574,1,Anfakir Ost
+holdout,syn30all_h203,24,0.589236,0.390107,1,Morsa
+holdout,syn30all_h203,25,0.607121,0.576618,1,Ello Falo
+holdout,syn30all_h203,26,0.553089,0.525778,1,Gorel Is
+holdout,syn30all_h203,27,0.530812,0.496886,1,Renjunvelfa
+holdout,syn30all_h203,28,0.648503,0.455039,1,Quiisvellum
+holdout,syn30all_h203,29,0.634683,0.290796,1,Fakaan
+holdout,syn30all_h204,0,0.483922,0.329526,1,Lumgortor
+holdout,syn30all_h204,1,0.434619,0.465506,1,Lumfamor
+holdout,syn30all_h204,2,0.672619,0.546749,1,Morcho Tor
+holdout,syn30all_h204,3,0.394389,0.443144,1,Neltor
+holdout,syn30all_h204,4,0.517641,0.372152,1,Isvelfa
+holdout,syn30all_h204,5,0.450397,0.269723,1,Quiel
+holdout,syn30all_h204,6,0.545299,0.362342,1,Nelel Junka
+holdout,syn30all_h204,7,0.724743,0.13575,1,Lomijun Dunmor
+holdout,syn30all_h204,8,0.258365,0.549381,1,Dunislosa
+holdout,syn30all_h204,9,0.342012,0.590447,1,Torgor Kir
+holdout,syn30all_h204,10,0.380934,0.321134,1,Nelvelbri Ka
+holdout,syn30all_h204,11,0.091056,0.242798,1,Torpraisren
+holdout,syn30all_h204,12,0.360641,0.604287,1,Kamorostsa
+holdout,syn30all_h204,13,0.412815,0.472948,1,Quiischo
+holdout,syn30all_h204,14,0.520305,0.404367,1,Quirenbri Cho
+holdout,syn30all_h204,15,0.249766,0.494547,1,Praloqui
+holdout,syn30all_h204,16,0.490209,0.403411,1,Kirelrenpra Fa
+holdout,syn30all_h204,17,0.416709,0.399424,1,Ostjun Mormi
+holdout,syn30all_h204,18,0.664708,0.070843,1,Halduncho
+holdout,syn30all_h204,19,0.792777,0.355423,1,Quivelanel
+holdout,syn30all_h204,20,0.825013,0.417355,1,Praka
+holdout,syn30all_h204,21,0.517833,0.307646,1,Kasa
+holdout,syn30all_h204,22,0.214882,0.583859,1,Torislum
+holdout,syn30all_h204,23,0.664618,0.445464,1,Quipra Praan
+holdout,syn30all_h204,24,0.725659,0.367221,1,Mivel Is
+holdout,syn30all_h204,25,0.561365,0.331836,1,Lummorquicho
+holdout,syn30all_h204,26,0.469426,0.357997,1,Kalum
+holdout,syn30all_h204,27,0.537882,0.516656,1,Fami
+holdout,syn30all_h204,28,0.655181,0.296979,1,Kavel Iska
+holdout,syn30all_h204,29,0.702863,0.232754,1,Famikagor
+holdout,syn30all_h205,0,0.530019,0.72042,1,Kaan
+holdout,syn30all_h205,1,0.682863,0.932311,1,Kirfamigor
+holdout,syn30all_h205,2,0.643953,0.556526,1,Praislum
+holdout,syn30all_h205,3,0.707775,0.571689,1,Junmor Cho
+holdout,syn30all_h205,4,0.612926,0.953899,1,Halnelbri
+holdout,syn30all_h205,5,0.663509,0.648925,1,Velcho
+holdout,syn30all_h205,6,0.682102,0.618412,1,Halhal
+holdout,syn30all_h205,7,0.689479,0.737022,1,Lumost An
+holdout,syn30all_h205,8,0.549774,0.786451,1,Velelka Pra
+holdout,syn30all_h205,9,0.50634,0.558327,1,Lumhal
+holdout,syn30all_h205,10,0.261215,0.777108,1,Renlumhal
+holdout,syn30all_h205,11,0.513213,0.733269,1,Isis
+holdout,syn30all_h205,12,0.786362,0.76288,1,Junkael
+holdout,syn30all_h205,13,0.428195,0.850149,1,Bridun
+holdout,syn30all_h205,14,0.607429,0.847308,1,Gorsa
+holdout,syn30all_h205,15,0.702489,0.869071,1,Ostlumjun Pra
+holdout,syn30all_h205,16,0.780739,0.799888,1,Ostqui
+holdout,syn30all_h205,17,0.813949,0.839189,1,Fanelsa Quihal
+holdout,syn30all_h205,18,0.624803,0.867433,1,Morello
+holdout,syn30all_h205,19,0.714172,0.832235,1,Tornel
+holdout,syn30all_h205,20,0.609433,0.522956,1,Gorhalhal
+holdout,syn30all_h205,21,0.313133,0.736285,1,Velquihal
+holdout,syn30all_h205,22,0.543681,0.909849,1,Morsa Mimor
+holdout,syn30all_h205,23,0.718807,0.722505,1,Anlumisis
+holdout,syn30all_h205,24,0.592953,0.829053,1,Chodunren
+holdout,syn30all_h205,25,0.336153,0.601161,1,Elgorqui
+holdout,syn30all_h205,26,0.745315,0.855285,1,Mijun
+holdout,syn30all_h205,27,0.723746,0.732698,1,Anvelcho
+holdout,syn30all_h205,28,0.693212,0.632659,1,Mifalo
+holdout,syn30all_h205,29,0.484433,0.880675,1,Kirostis
+holdout,syn30all_h206,0,0.586459,0.706757,1,Bridunjunqui
+holdout,syn30all_h206,1,0.448286,0.291064,1,Morgorbri
+holdout,syn30all_h206,2,0.455683,0.407217,1,Angorkirmi
+holdout,syn30all_h206,3,0.472252,0.312281,1,Kirlumanmor
+holdout,syn30all_h206,4,0.767808,0.523223,1,Nelkanelcho
+holdout,syn30all_h206,5,0.159823,0.302964,1,Junkir
+holdout,syn30all_h206,6,0.447228,0.406542,1,Brilum
+holdout,syn30all_h206,7,0.342915,0.869599,1,Saka
+holdout,syn30all_h206,8,0.72335,0.616941,1,Brimor
+holdout,syn30all_h206,9,0.332865,0.436342,1,Anmi
+holdout,syn30all_h206,10,0.279713,0.330212,1,Nelelgor
+holdout,syn30all_h206,11,0.530834,0.569557,1,Kaanfa
+holdout,syn30all_h206,12,0.648174,0.614753,1,Isost
+holdout,syn30all_h206,13,0.25996,0.392421,1,Miishal
+holdout,syn30all_h206,14,0.45753,0.455806,1,Issajunren
+holdout,syn30all_h206,15,0.062731,0.346355,1,Morgor
+holdout,syn30all_h206,16,0.529251,0.432045,1,Brivelfa
+holdout,syn30all_h206,17,0.344014,0.359369,1,Quimilo Kirost
+holdout,syn30all_h206,18,0.3566,0.116606,1,Sacho
+holdout,syn30all_h206,19,0.119402,0.362092,1,Nellofadun
+holdout,syn30all_h206,20,0.729422,0.828884,1,Chosami
+holdout,syn30all_h206,21,0.425937,0.524378,1,Iseljunlum
+holdout,syn30all_h206,22,0.381154,0.629013,1,Junelprapra
+holdout,syn30all_h206,23,0.606747,0.572588,1,Milumren
+holdout,syn30all_h206,24,0.509468,0.293786,1,Ostdun
+holdout,syn30all_h206,25,0.464488,0.241129,1,Halsaanan
+holdout,syn30all_h206,26,0.266731,0.534227,1,Kirlo
+holdout,syn30all_h206,27,0.211882,0.369292,1,Mormi
+holdout,syn30all_h206,28,0.205637,0.338147,1,Nelostkir
+holdout,syn30all_h206,29,0.420393,0.54487,1,Nelanfa
+holdout,syn30all_h207,0,0.3767,0.277802,1,Isisnel
+holdout,syn30all_h207,1,0.401951,0.314848,1,Anjunmorost El
+holdout,syn30all_h207,2,0.371767,0.852737,1,Kirvelis
+holdout,syn30all_h207,3,0.519113,0.647879,1,Loquikir
+holdout,syn30all_h207,4,0.16212,0.491342,1,Dunpraan Elbri
+holdout,syn30all_h207,5,0.391074,0.251603,1,Morjun
+holdout,syn30all_h207,6,0.490744,0.730086,1,Nelisbri
+holdout,syn30all_h207,7,0.317586,0.453618,1,Nelfaquika
+holdout,syn30all_h207,8,0.452732,0.836958,1,Nelchomor
+holdout,syn30all_h207,9,0.455814,0.250146,1,Nellum Velsa
+holdout,syn30all_h207,10,0.525448,0.709823,1,Brian Vel
+holdout,syn30all_h207,11,0.353061,0.490166,1,Dunhal
+holdout,syn30all_h207,12,0.343958,0.291551,1,Kasa
+holdout,syn30all_h207,13,0.34604,0.242409,1,Nelprafa
+holdout,syn30all_h207,14,0.2141,0.331848,1,Lumostmor
+holdout,syn30all_h207,15,0.262339,0.39244,1,Hallum
+holdout,syn30all_h207,16,0.499917,0.787124,1,Osttorishal
+holdout,syn30all_h207,17,0.408861,0.23275,1,Nelkirmipra
+holdout,syn30all_h207,18,0.407117,0.29715,1,Renpra
+holdout,syn30all_h207,19,0.23667,0.631799,1,Kaprator
+holdout,syn30all_h207,20,0.596949,0.539612,1,Saostan Renel
+holdout,syn30all_h207,21,0.436696,0.152963,1,Brimorlumren
+holdout,syn30all_h207,22,0.113807,0.34098,1,Dunpra Tor
+holdout,syn30all_h207,23,0.10532,0.435855,1,Velpra
+holdout,syn30all_h207,24,0.448871,0.157088,1,Mihal
+holdout,syn30all_h207,25,0.21842,0.079214,1,Torismor
+holdout,syn30all_h207,26,0.39723,0.628113,1,Brika
+holdout,syn30all_h207,27,0.309662,0.46521,1,Ellomor
+holdout,syn30all_h207,28,0.294935,0.5148,1,Sakiris Hal
+holdout,syn30all_h207,29,0.472166,0.674555,1,Brivelqui
+holdout,syn30all_h208,0,0.844117,0.541352,1,Renkakaan Jun
+holdout,syn30all_h208,1,0.749764,0.264511,1,Chomorfaost
+holdout,syn30all_h208,2,0.562876,0.328061,1,Pragorqui
+holdout,syn30all_h208,3,0.692413,0.603595,1,Ostmi
+holdout,syn30all_h208,4,0.587409,0.07122,1,Saneltor
+holdout,syn30all_h208,5,0.875274,0.662663,1,Ankirmor
+holdout,syn30all_h208,6,0.600258,0.424936,1,Chomorvelvel
+holdout,syn30all_h208,7,0.66367,0.324383,1,Loel
+holdout,syn30all_h208,8,0.667079,0.506901,1,Junischogor
+holdout,syn30all_h208,9,0.626717,0.209627,1,Morelvelqui
+holdout,syn30all_h208,10,0.924488,0.627414,1,Safa Qui
+holdout,syn30all_h208,11,0.49102,0.498626,1,Chochogor
+holdout,syn30all_h208,12,0.98,0.769376,1,Pradunmor
+holdout,syn30all_h208,13,0.632995,0.185266,1,Brirencho
+holdout,syn30all_h208,14,0.516069,0.456186,1,Velsa Quigor
+holdout,syn30all_h208,15,0.393037,0.58304,1,Kirpra
+holdout,syn30all_h208,16,0.741487,0.080236,1,Quitorelqui
+holdout,syn30all_h208,17,0.470525,0.401648,1,Junfagor
+holdout,syn30all_h208,18,0.748775,0.452252,1,Bribri
+holdout,syn30all_h208,19,0.567158,0.325895,1,Ostrentor
+holdout,syn30all_h208,20,0.466991,0.678174,1,Ismiquitor
+holdout,syn30all_h208,21,0.533806,0.343135,1,Kirel
+holdout,syn30all_h208,22,0.98,0.321022,1,Famifa
+holdout,syn30all_h208,23,0.582669,0.784047,1,Eltor
+holdout,syn30all_h208,24,0.693765,0.373042,1,Junkasaqui Dun
+holdout,syn30all_h208,25,0.232268,0.292492,1,Anmoris
+holdout,syn30all_h208,26,0.742221,0.05048,1,Halkirdunhal
+holdout,syn30all_h208,27,0.8764,0.758824,1,Duncho Gor
+holdout,syn30all_h208,28,0.509177,0.648053,1,Lofaanis
+holdout,syn30all_h208,29,0.664473,0.723274,1,Iskirka
+holdout,syn30all_h209,0,0.661223,0.317835,1,Torfa
+holdout,syn30all_h209,1,0.32703,0.631332,1,Kamorjun
+holdout,syn30all_h209,2,0.177067,0.423678,1,Renprarenost
+holdout,syn30all_h209,3,0.375777,0.440263,1,Lofa
+holdout,syn30all_h209,4,0.54831,0.371049,1,Velneltor Bri
+holdout,syn30all_h209,5,0.428982,0.312397,1,Ostkir Lummor
+holdout,syn30all_h209,6,0.70906,0.33776,1,Nelbrilo
+holdout,syn30all_h209,7,0.410737,0.453473,1,Isanjun
+holdout,syn30all_h209,8,0.592725,0.44817,1,Faisfa
+holdout,syn30all_h209,9,0.320864,0.48345,1,Prasajun
+holdout,syn30all_h209,10,0.352212,0.417422,1,Lumbri Antor
+holdout,syn30all_h209,11,0.477611,0.07275,1,Junanbriost
+holdout,syn30all_h209,12,0.368695,0.628758,1,Pramorquikir
+holdout,syn30all_h209,13,0.658109,0.383615,1,Anfa Kator
+holdout,syn30all_h209,14,0.98,0.486686,1,Quidun
+holdout,syn30all_h209,15,0.645064,0.594442,1,Rendunprabri
+holdout,syn30all_h209,16,0.416383,0.432577,1,Bripraqui
+holdout,syn30all_h209,17,0.536273,0.282614,1,Junpra Moran
+holdout,syn30all_h209,18,0.5508,0.342879,1,Lolumnelqui
+holdout,syn30all_h209,19,0.373558,0.303802,1,Torsakir
+holdout,syn30all_h209,20,0.754424,0.5098,1,Elka Chogor
+holdout,syn30all_h209,21,0.41181,0.333288,1,Milum
+holdout,syn30all_h209,22,0.799998,0.503068,1,Anostisbri
+holdout,syn30all_h209,23,0.519584,0.463307,1,Ostbrikir
+holdout,syn30all_h209,24,0.676271,0.725229,1,Junkir
+holdout,syn30all_h209,25,0.396153,0.337463,1,Loel Miost
+holdout,syn30all_h209,26,0.5266,0.540239,1,Quimilum
+holdout,syn30all_h209,27,0.624638,0.28034,1,Junprasa Kabri
+holdout,syn30all_h209,28,0.443842,0.2141,1,Gorost Mi
+holdout,syn30all_h209,29,0.720942,0.089121,1,Junmipra Gor
+holdout,syn30all_h210,0,0.581528,0.354479,1,Ostrenisqui
+holdout,syn30all_h210,1,0.358593,0.285929,1,Brichohal
+holdout,syn30all_h210,2,0.464919,0.157812,1,Lumquitor Kir
+holdout,syn30all_h210,3,0.548622,0.121851,1,Renbriprami
+holdout,syn30all_h210,4,0.53165,0.61373,1,Lovel
+holdout,syn30all_h210,5,0.538171,0.442778,1,Pramorhaljun
+holdout,syn30all_h210,6,0.809165,0.592539,1,Pralumrentor
+holdout,syn30all_h210,7,0.276085,0.285977,1,Isostis
+holdout,syn30all_h210,8,0.123722,0.550039,1,Fajun
+holdout,syn30all_h210,9,0.556532,0.126644,1,Torhalel
+holdout,syn30all_h210,10,0.675498,0.294722,1,Junanqui Is
+holdout,syn30all_h210,11,0.456577,0.02,1,Istor
+holdout,syn30all_h210,12,0.709646,0.575273,1,Sanelcho
+holdout,syn30all_h210,13,0.722796,0.450484,1,Sanelsafa Mi
+holdout,syn30all_h210,14,0.323179,0.301003,1,Kagor
+holdout,syn30all_h210,15,0.43667,0.182741,1,Anmorlopra
+holdout,syn30all_h210,16,0.482708,0.362217,1,Renanchoel
+holdout,syn30all_h210,17,0.595449,0.298582,1,Faostis Misa
+holdout,syn30all_h210,18,0.173168,0.451276,1,Chohalfaren
+holdout,syn30all_h210,19,0.62257,0.542518,1,Fasa
+holdout,syn30all_h210,20,0.463269,0.02,1,Savel
+holdout,syn30all_h210,21,0.259961,0.087634,1,Juncho
+holdout,syn30all_h210,22,0.210083,0.322684,1,Kirmi
+holdout,syn30all_h210,23,0.397219,0.462968,1,Pravelgorjun
+holdout,syn30all_h210,24,0.624184,0.811744,1,Torlo Loan
+holdout,syn30all_h210,25,0.518134,0.148143,1,Choqui
+holdout,syn30all_h210,26,0.518204,0.261899,1,Renlovel
+holdout,syn30all_h210,27,0.561065,0.047512,1,Elis Tor
+holdout,syn30all_h210,28,0.267275,0.200643,1,Ellumbriost
+holdout,syn30all_h210,29,0.683013,0.528844,1,Fadundunan
+holdout,syn30all_h211,0,0.460389,0.550774,1,Ansafakir
+holdout,syn30all_h211,1,0.540717,0.802518,1,Ostkir
+holdout,syn30all_h211,2,0.829364,0.411196,1,Fachoeldun
+holdout,syn30all_h211,3,0.729576,0.208072,1,Elbrivel
+holdout,syn30all_h211,4,0.295909,0.394591,1,Quika
+holdout,syn30all_h211,5,0.341272,0.366225,1,Mitornelan An
+holdout,syn30all_h211,6,0.229913,0.445492,1,Briquitorlo An
+holdout,syn30all_h211,7,0.909566,0.555405,1,Torbrijunost
+holdout,syn30all_h211,8,0.670853,0.494735,1,Toris
+holdout,syn30all_h211,9,0.666742,0.32161,1,Halchovel Cho
+holdout,syn30all_h211,10,0.445403,0.639912,1,Kirjunmi
+holdout,syn30all_h211,11,0.65907,0.447213,1,Bripraren
+holdout,syn30all_h211,12,0.665643,0.659638,1,Faelmigor An
+holdout,syn30all_h211,13,0.45683,0.258548,1,Mikarenren
+holdout,syn30all_h211,14,0.98,0.406289,1,Mihal
+holdout,syn30all_h211,15,0.679033,0.41084,1,Quiquinel
+holdout,syn30all_h211,16,0.339243,0.198731,1,Lumjuntortor
+holdout,syn30all_h211,17,0.724876,0.29082,1,Lojunhalgor
+holdout,syn30all_h211,18,0.504684,0.391153,1,Torbriost
+holdout,syn30all_h211,19,0.620746,0.344443,1,Satorbri
+holdout,syn30all_h211,20,0.781954,0.626564,1,Choelka
+holdout,syn30all_h211,21,0.539135,0.654848,1,Praanneltor
+holdout,syn30all_h211,22,0.638912,0.559089,1,Anchodun
+holdout,syn30all_h211,23,0.623495,0.811002,1,Cholo Cho
+holdout,syn30all_h211,24,0.621534,0.644073,1,Mikirsadun
+holdout,syn30all_h211,25,0.485481,0.200541,1,Mielispra Fami
+holdout,syn30all_h211,26,0.485504,0.436482,1,Moran
+holdout,syn30all_h211,27,0.599871,0.599846,1,Saisvel Bri
+holdout,syn30all_h211,28,0.636419,0.322588,1,Quicho
+holdout,syn30all_h211,29,0.653585,0.371536,1,Lumgornelgor
+holdout,syn30all_h212,0,0.444852,0.614103,1,Mitor Nel
+holdout,syn30all_h212,1,0.29464,0.339357,1,Michoveltor
+holdout,syn30all_h212,2,0.372372,0.377567,1,Fagor Jun
+holdout,syn30all_h212,3,0.629211,0.423318,1,Anmi
+holdout,syn30all_h212,4,0.80981,0.676327,1,Elfasa Saren
+holdout,syn30all_h212,5,0.561689,0.871868,1,Halkirkir
+holdout,syn30all_h212,6,0.69711,0.334063,1,Lumdunlo
+holdout,syn30all_h212,7,0.558706,0.432507,1,Kamirencho
+holdout,syn30all_h212,8,0.362924,0.504456,1,Minel
+holdout,syn30all_h212,9,0.190954,0.628776,1,Torisel
+holdout,syn30all_h212,10,0.850572,0.40608,1,Gorelcho
+holdout,syn30all_h212,11,0.704641,0.98,1,Fabrianren
+holdout,syn30all_h212,12,0.226011,0.141218,1,Ostcho Nel
+holdout,syn30all_h212,13,0.62867,0.902536,1,Nelmormi
+holdout,syn30all_h212,14,0.708368,0.822155,1,Nelostquitor
+holdout,syn30all_h212,15,0.849756,0.878399,1,Kirkirsabri
+holdout,syn30all_h212,16,0.644278,0.18885,1,Mitorfa Gor
+holdout,syn30all_h212,17,0.853426,0.760039,1,Velhal Dun
+holdout,syn30all_h212,18,0.348413,0.395944,1,Lobri
+holdout,syn30all_h212,19,0.532973,0.661848,1,Morkavelren
+holdout,syn30all_h212,20,0.185249,0.566581,1,Anvel
+holdout,syn30all_h212,21,0.722403,0.804517,1,Elmor Fakir
+holdout,syn30all_h212,22,0.3798,0.384732,1,Farenpralum
+holdout,syn30all_h212,23,0.537128,0.666606,1,Nelanmi
+holdout,syn30all_h212,24,0.670441,0.180095,1,Kafa
+holdout,syn30all_h212,25,0.492201,0.440695,1,Gorrenan
+holdout,syn30all_h212,26,0.708725,0.692564,1,Velka Nel
+holdout,syn30all_h212,27,0.399516,0.50135,1,Anan
+holdout,syn30all_h212,28,0.609652,0.355989,1,Quiellum Nel
+holdout,syn30all_h212,29,0.309201,0.473219,1,Lumvelan
+holdout,syn30all_h213,0,0.02,0.803544,1,Eljunjunis
+holdout,syn30all_h213,1,0.347194,0.60888,1,Brika Renlo
+holdout,syn30all_h213,2,0.116961,0.927688,1,Cholo
+holdout,syn30all_h213,3,0.857459,0.358409,1,Praost
+holdout,syn30all_h213,4,0.194633,0.693223,1,Torvelbrilum
+holdout,syn30all_h213,5,0.176074,0.488485,1,Chohal
+holdout,syn30all_h213,6,0.163728,0.471839,1,Renkachogor
+holdout,syn30all_h213,7,0.108227,0.9625,1,Lumostjunren
+holdout,syn30all_h213,8,0.748532,0.368191,1,Renchoislum
+holdout,syn30all_h213,9,0.437662,0.396093,1,Kafafa Junan
+holdout,syn30all_h213,10,0.274663,0.734155,1,Lomi
+holdout,syn30all_h213,11,0.140515,0.531272,1,Nelquirenqui
+holdout,syn30all_h213,12,0.277149,0.582664,1,Isis
+holdout,syn30all_h213,13,0.095093,0.979692,1,Lotor
+holdout,syn30all_h213,14,0.293538,0.70401,1,Chofakirpra
+holdout,syn30all_h213,15,0.039726,0.702991,1,Famorpralum
+holdout,syn30all_h213,16,0.844792,0.199624,1,Mihal Renqui
+holdout,syn30all_h213,17,0.88297,0.309006,1,Gorgor
+holdout,syn30all_h213,18,0.904298,0.140758,1,Quidunfamor
+holdout,syn30all_h213,19,0.079829,0.659589,1,Velmor Is
+holdout,syn30all_h213,20,0.021284,0.965268,1,Dunlumcho Ost
+holdout,syn30all_h213,21,0.31458,0.785302,1,Toris
+holdout,syn30all_h213,22,0.180169,0.556037,1,Kacholo Dunkir
+holdout,syn30all_h213,23,0.317061,0.774125,1,Isqui
+holdout,syn30all_h213,24,0.162562,0.843502,1,Kavelfacho
+holdout,syn30all_h213,25,0.332642,0.576936,1,Quidunjunfa
+holdout,syn30all_h213,26,0.517414,0.403108,1,Anquikirlum
+holdout,syn30all_h213,27,0.682241,0.177543,1,Quiren
+holdout,syn30all_h213,28,0.198376,0.717389,1,Osthalan
+holdout,syn30all_h213,29,0.574764,0.249549,1,Quidunmi
+holdout,syn30all_h214,0,0.548023,0.188146,1,Torlofa
+holdout,syn30all_h214,1,0.457227,0.517343,1,Kiranvel
+holdout,syn30all_h214,2,0.437089,0.315816,1,Halisgor
+holdout,syn30all_h214,3,0.512638,0.495493,1,Halmi
+holdout,syn30all_h214,4,0.848696,0.101053,1,Isren
+holdout,syn30all_h214,5,0.36988,0.666812,1,Dunisjundun
+holdout,syn30all_h214,6,0.275889,0.817986,1,Isloquilo
+holdout,syn30all_h214,7,0.433092,0.505676,1,Ismi Brijun
+holdout,syn30all_h214,8,0.388081,0.701355,1,Kireltor
+holdout,syn30all_h214,9,0.02,0.773409,1,Eltorkir Vel
+holdout,syn30all_h214,10,0.365704,0.785262,1,Choelnelvel
+holdout,syn30all_h214,11,0.418106,0.159318,1,Kaneltor Mor
+holdout,syn30all_h214,12,0.335605,0.236747,1,Mifa Sa
+holdout,syn30all_h214,13,0.413833,0.02,1,Nelhalisvel
+holdout,syn30all_h214,14,0.346464,0.877538,1,Kirlum
+holdout,syn30all_h214,15,0.451113,0.810344,1,Mimorlocho
+holdout,syn30all_h214,16,0.332243,0.759757,1,Junbri
+holdout,syn30all_h214,17,0.388938,0.626517,1,Ostsa
+holdout,syn30all_h214,18,0.582025,0.124568,1,Anlo
+holdout,syn30all_h214,19,0.624405,0.138251,1,Gorjunhalan
+holdout,syn30all_h214,20,0.339593,0.679197,1,Dunprami
+holdout,syn30all_h214,21,0.375235,0.5644,1,Halmornelmi
+holdout,syn30all_h214,22,0.562085,0.278075,1,Renkirelan
+holdout,syn30all_h214,23,0.336613,0.860284,1,Brigorvel
+holdout,syn30all_h214,24,0.255502,0.700778,1,Isgordunqui
+holdout,syn30all_h214,25,0.415924,0.599333,1,Torchoan
+holdout,syn30all_h214,26,0.497604,0.82479,1,Prahal
+holdout,syn30all_h214,27,0.445124,0.250035,1,Junlum
+holdout,syn30all_h214,28,0.026105,0.777485,1,Anvel
+holdout,syn30all_h214,29,0.247067,0.714841,1,Renkir
+holdout,syn30all_h215,0,0.163102,0.204645,1,Lumbriren
+holdout,syn30all_h215,1,0.284494,0.402622,1,Dunlum
+holdout,syn30all_h215,2,0.05593,0.415444,1,Torvelhal
+holdout,syn30all_h215,3,0.429151,0.496191,1,Elelhalmor
+holdout,syn30all_h215,4,0.260056,0.571166,1,Halpranelel
+holdout,syn30all_h215,5,0.609055,0.807958,1,Velfa Jun
+holdout,syn30all_h215,6,0.548914,0.704152,1,Ostbrisa
+holdout,syn30all_h215,7,0.330917,0.451835,1,Torpra
+holdout,syn30all_h215,8,0.067757,0.278201,1,Miostfapra Ost
+holdout,syn30all_h215,9,0.723131,0.530284,1,Choisquihal
+holdout,syn30all_h215,10,0.395849,0.52722,1,Kirostfa
+holdout,syn30all_h215,11,0.658411,0.614691,1,Kamorkalo
+holdout,syn30all_h215,12,0.454439,0.250405,1,Torsagorlo
+holdout,syn30all_h215,13,0.386479,0.214589,1,Kirbripra
+holdout,syn30all_h215,14,0.062978,0.565976,1,Ostneljun Kir
+holdout,syn30all_h215,15,0.348562,0.385523,1,Nelan Lolum
+holdout,syn30all_h215,16,0.318388,0.186301,1,Brisa
+holdout,syn30all_h215,17,0.493678,0.636769,1,Kabri
+holdout,syn30all_h215,18,0.406611,0.294615,1,Dunkanelgor
+holdout,syn30all_h215,19,0.077306,0.191757,1,Tormigor
+holdout,syn30all_h215,20,0.603866,0.75416,1,Kirgormiel
+holdout,syn30all_h215,21,0.213626,0.419229,1,Nelbrimiqui
+holdout,syn30all_h215,22,0.373223,0.512076,1,Dunrendun Jun
+holdout,syn30all_h215,23,0.308796,0.428043,1,Halnel
+holdout,syn30all_h215,24,0.045257,0.382167,1,Mielka Isnel
+holdout,syn30all_h215,25,0.317576,0.241369,1,Dunhal
+holdout,syn30all_h215,26,0.607938,0.772501,1,Britor Tor
+holdout,syn30all_h215,27,0.438156,0.451161,1,Morpra
+holdout,syn30all_h215,28,0.543193,0.568183,1,Issa
+holdout,syn30all_h215,29,0.430038,0.226997,1,Sapraren Velan
+holdout,syn30all_h216,0,0.398701,0.563447,1,Neljunmi
+holdout,syn30all_h216,1,0.23855,0.498412,1,Kasaren
+holdout,syn30all_h216,2,0.135371,0.515865,1,Lumjunren
+holdout,syn30all_h216,3,0.343541,0.386165,1,Brihal
+holdout,syn30all_h216,4,0.307734,0.52713,1,Dunkaostren
+holdout,syn30all_h216,5,0.52748,0.420638,1,Elmihal
+holdout,syn30all_h216,6,0.247581,0.617404,1,Jungor
+holdout,syn30all_h216,7,0.194771,0.498117,1,Nelpra
+holdout,syn30all_h216,8,0.043732,0.370531,1,Prakir
+holdout,syn30all_h216,9,0.313565,0.572105,1,Lojunanmor An
+holdout,syn30all_h216,10,0.238104,0.236545,1,Brilumost
+holdout,syn30all_h216,11,0.239926,0.545395,1,Ismorlo
+holdout,syn30all_h216,12,0.322407,0.592473,1,Kirsabri
+holdout,syn30all_h216,13,0.281624,0.376669,1,Gorsami
+holdout,syn30all_h216,14,0.385629,0.681384,1,Veldunfa
+holdout,syn30all_h216,15,0.023277,0.341947,1,Elkaquijun
+holdout,syn30all_h216,16,0.729455,0.6195,1,Pramorfafa
+holdout,syn30all_h216,17,0.370225,0.45798,1,Anmi
+holdout,syn30all_h216,18,0.189233,0.660286,1,Faelost Lum
+holdout,syn30all_h216,19,0.820635,0.975719,1,Renvel
+holdout,syn30all_h216,20,0.560075,0.620554,1,Pramiel
+holdout,syn30all_h216,21,0.180663,0.44148,1,Tornel Kirnel
+holdout,syn30all_h216,22,0.779392,0.770836,1,Halmi
+holdout,syn30all_h216,23,0.511136,0.50498,1,Halsa
+holdout,syn30all_h216,24,0.275113,0.587305,1,Gorsa Nelel
+holdout,syn30all_h216,25,0.771084,0.630152,1,Quivelqui Mi
+holdout,syn30all_h216,26,0.298447,0.404866,1,Kalomor
+holdout,syn30all_h216,27,0.02,0.665939,1,Renmiren
+holdout,syn30all_h216,28,0.202764,0.5601,1,Nelkir Micho
+holdout,syn30all_h216,29,0.205061,0.426392,1,Gorlum Jun
+holdout,syn30all_h217,0,0.223884,0.231757,1,Ananvello
+holdout,syn30all_h217,1,0.374901,0.349213,1,Mornelost
+holdout,syn30all_h217,2,0.315821,0.136607,1,Gorchohalan
+holdout,syn30all_h217,3,0.457886,0.269948,1,Praquivel
+holdout,syn30all_h217,4,0.580323,0.651703,1,Fapra
+holdout,syn30all_h217,5,0.54366,0.066338,1,Sachofafa
+holdout,syn30all_h217,6,0.210421,0.202652,1,Chosalo
+holdout,syn30all_h217,7,0.98,0.53714,1,Fagormor Sa
+holdout,syn30all_h217,8,0.703056,0.530865,1,Halka
+holdout,syn30all_h217,9,0.370803,0.29822,1,Quielpraqui
+holdout,syn30all_h217,10,0.740648,0.514794,1,Miqui
+holdout,syn30all_h217,11,0.288698,0.164777,1,Junchonelpra
+holdout,syn30all_h217,12,0.394231,0.253804,1,Brichoka
+holdout,syn30all_h217,13,0.059033,0.319296,1,Juntordunost
+holdout,syn30all_h217,14,0.788673,0.557512,1,Ostqui
+holdout,syn30all_h217,15,0.231074,0.200448,1,Halhalfa Fanel
+holdout,syn30all_h217,16,0.380886,0.359755,1,Kahal Tor
+holdout,syn30all_h217,17,0.056929,0.267683,1,Quigorvelpra
+holdout,syn30all_h217,18,0.659248,0.536245,1,Salumvel
+holdout,syn30all_h217,19,0.126224,0.371554,1,Mifadun
+holdout,syn30all_h217,20,0.258595,0.160979,1,Ostvel
+holdout,syn30all_h217,21,0.182863,0.283354,1,Lumkaren
+holdout,syn30all_h217,22,0.202841,0.459637,1,Renrenvelfa
+holdout,syn30all_h217,23,0.059154,0.228819,1,Ostgor
+holdout,syn30all_h217,24,0.678759,0.475359,1,Chonel
+holdout,syn30all_h217,25,0.352475,0.091825,1,Ostansator Tor
+holdout,syn30all_h217,26,0.71181,0.447324,1,Morkir
+holdout,syn30all_h217,27,0.445718,0.27739,1,Rensajunjun
+holdout,syn30all_h217,28,0.410168,0.383738,1,Velkirka
+holdout,syn30all_h217,29,0.823953,0.513831,1,Torlo
+holdout,syn30all_h218,0,0.125339,0.427547,1,Osthalsator
+holdout,syn30all_h218,1,0.387412,0.306081,1,Renlumnelka
+holdout,syn30all_h218,2,0.544272,0.775617,1,Mibri
+holdout,syn30all_h218,3,0.070075,0.658657,1,Velgorsator
+holdout,syn30all_h218,4,0.710311,0.822719,1,Morrenjun
+holdout,syn30all_h218,5,0.646091,0.887961,1,Kirmoranost
+holdout,syn30all_h218,6,0.566605,0.915756,1,Choqui
+holdout,syn30all_h218,7,0.02,0.651606,1,Islumcho
+holdout,syn30all_h218,8,0.205968,0.751116,1,Renisrencho
+holdout,syn30all_h218,9,0.164432,0.022369,1,Mivelost Cho
+holdout,syn30all_h218,10,0.163147,0.691948,1,Elquibrilum
+holdout,syn30all_h218,11,0.452488,0.650136,1,Morlo
+holdout,syn30all_h218,12,0.157336,0.354879,1,Fapra Gorqui
+holdout,syn30all_h218,13,0.516634,0.482774,1,Quiisost
+holdout,syn30all_h218,14,0.055809,0.29826,1,Haltor
+holdout,syn30all_h218,15,0.299034,0.172765,1,Juntorbri
+holdout,syn30all_h218,16,0.201886,0.609102,1,Kabri
+holdout,syn30all_h218,17,0.628986,0.843876,1,Kirfa Dun
+holdout,syn30all_h218,18,0.317792,0.773689,1,Lummigorfa
+holdout,syn30all_h218,19,0.141074,0.839599,1,Fagorlumdun
+holdout,syn30all_h218,20,0.253577,0.80995,1,Dunmorpra
+holdout,syn30all_h218,21,0.02,0.815571,1,Lumlumfa
+holdout,syn30all_h218,22,0.241943,0.230081,1,Morprabri
+holdout,syn30all_h218,23,0.086448,0.248973,1,Kakirsaost
+holdout,syn30all_h218,24,0.681566,0.708182,1,Fajun
+holdout,syn30all_h218,25,0.449425,0.601252,1,Quikirka
+holdout,syn30all_h218,26,0.329619,0.830719,1,Velrengor
+holdout,syn30all_h218,27,0.691987,0.663453,1,Faqui
+holdout,syn30all_h218,28,0.271311,0.372826,1,Morlum
+holdout,syn30all_h218,29,0.18017,0.612863,1,Velbriren Ren
+holdout,syn30all_h219,0,0.590492,0.71857,1,Kabri Gor
+holdout,syn30all_h219,1,0.61854,0.784004,1,Halpra
+holdout,syn30all_h219,2,0.31725,0.285189,1,Halelvelel Fa
+holdout,syn30all_h219,3,0.554743,0.457055,1,Iskirkirpra Sa
+holdout,syn30all_h219,4,0.566744,0.499227,1,Sanel
+holdout,syn30all_h219,5,0.365299,0.735904,1,Lumlofaqui
+holdout,syn30all_h219,6,0.745547,0.431156,1,Osttorfapra
+holdout,syn30all_h219,7,0.537231,0.530406,1,Renquikir Ost
+holdout,syn30all_h219,8,0.494895,0.497426,1,Lojunmor
+holdout,syn30all_h219,9,0.255636,0.272757,1,Kirhal
+holdout,syn30all_h219,10,0.537832,0.508247,1,Junis
+holdout,syn30all_h219,11,0.222467,0.840037,1,Haldun
+holdout,syn30all_h219,12,0.371303,0.408751,1,Kirfaostel
+holdout,syn30all_h219,13,0.47227,0.337522,1,Lopracho
+holdout,syn30all_h219,14,0.403845,0.83624,1,Kami
+holdout,syn30all_h219,15,0.391927,0.242632,1,Quipramorbri
+holdout,syn30all_h219,16,0.499348,0.711892,1,Dunnellum
+holdout,syn30all_h219,17,0.356188,0.645084,1,Renkadun
+holdout,syn30all_h219,18,0.719086,0.254395,1,Nelkiranlo
+holdout,syn30all_h219,19,0.422121,0.558524,1,Velostan
+holdout,syn30all_h219,20,0.205184,0.427929,1,Lolum Fa
+holdout,syn30all_h219,21,0.572453,0.73364,1,Junmi Sadun
+holdout,syn30all_h219,22,0.205906,0.100589,1,Sahal
+holdout,syn30all_h219,23,0.5457,0.422304,1,Quigoran Mi
+holdout,syn30all_h219,24,0.304735,0.267716,1,Isis
+holdout,syn30all_h219,25,0.449329,0.632901,1,Kiristorhal
+holdout,syn30all_h219,26,0.477881,0.559371,1,Dunostdun
+holdout,syn30all_h219,27,0.618632,0.577882,1,Kirmor
+holdout,syn30all_h219,28,0.336415,0.389743,1,Praveltorpra
+holdout,syn30all_h219,29,0.382838,0.417629,1,Dunrenveldun
+holdout,syn30all_h220,0,0.196191,0.28318,1,Junlodun
+holdout,syn30all_h220,1,0.45906,0.392321,1,Morhal
+holdout,syn30all_h220,2,0.508135,0.469172,1,Chodunjunan
+holdout,syn30all_h220,3,0.457074,0.312975,1,Duntor
+holdout,syn30all_h220,4,0.261206,0.467363,1,Sabrikahal
+holdout,syn30all_h220,5,0.225835,0.239501,1,Morvelvelgor
+holdout,syn30all_h220,6,0.071659,0.040724,1,Sahalmidun
+holdout,syn30all_h220,7,0.407491,0.384371,1,Faiskafa An
+holdout,syn30all_h220,8,0.546901,0.552251,1,Fahaldunmor
+holdout,syn30all_h220,9,0.439616,0.243971,1,Brigor
+holdout,syn30all_h220,10,0.220201,0.49531,1,Mihal
+holdout,syn30all_h220,11,0.430829,0.430904,1,Gormilum
+holdout,syn30all_h220,12,0.363916,0.296038,1,Quimorpra
+holdout,syn30all_h220,13,0.346741,0.434362,1,Hallo
+holdout,syn30all_h220,14,0.273077,0.621853,1,Renan
+holdout,syn30all_h220,15,0.426983,0.315493,1,Angordun
+holdout,syn30all_h220,16,0.383621,0.524987,1,Gorvel
+holdout,syn30all_h220,17,0.208994,0.522375,1,Halqui
+holdout,syn30all_h220,18,0.199355,0.137482,1,Lummorel An
+holdout,syn30all_h220,19,0.40601,0.518719,1,Kator
+holdout,syn30all_h220,20,0.520209,0.446927,1,Faiskanel
+holdout,syn30all_h220,21,0.381232,0.386562,1,Anhallum
+holdout,syn30all_h220,22,0.397137,0.396084,1,Ankir
+holdout,syn30all_h220,23,0.095689,0.528606,1,Briostkaqui
+holdout,syn30all_h220,24,0.267405,0.44915,1,Jundunelhal
+holdout,syn30all_h220,25,0.131599,0.482208,1,Lumgorkirtor
+holdout,syn30all_h220,26,0.508477,0.628751,1,Tordunvellum
+holdout,syn30all_h220,27,0.241168,0.412156,1,Velmorhal
+holdout,syn30all_h220,28,0.537372,0.295265,1,Kachoqui Lo
+holdout,syn30all_h220,29,0.508424,0.420411,1,Anlumnelren
+holdout,syn60all_h201,0,0.297645,0.579729,1,Anelfaren
+holdout,syn60all_h201,1,0.331764,0.709975,1,Lumchoelpra
+holdout,syn60all_h201,2,0.623544,0.359145,1,Ostjunfa
+holdout,syn60all_h201,3,0.677111,0.641809,1,Renvel Sa
+holdout,syn60all_h201,4,0.333482,0.746771,1,Gorpra Torkir
+holdout,syn60all_h201,5,0.492648,0.27616,1,Kanelkir
+holdout,syn60all_h201,6,0.33832,0.441624,1,Velkir Nel
+holdout,syn60all_h201,7,0.567095,0.363338,1,Kirlumfafa Mi
+holdout,syn60all_h201,8,0.561545,0.389258,1,Torel
+holdout,syn60all_h201,9,0.582692,0.775194,1,Chosael Nelan
+holdout,syn60all_h201,10,0.471455,0.41985,1,Falum
+holdout,syn60all_h201,11,0.749061,0.735924,1,Kasaissa Kir
+holdout,syn60all_h201,12,0.383796,0.288509,1,Midunanhal
+holdout,syn60all_h201,13,0.355888,0.245892,1,Dunanlofa Tor
+holdout,syn60all_h201,14,0.28224,0.311589,1,Dundunlo
+holdout,syn60all_h201,15,0.494234,0.193396,1,Velnelfa
+holdout,syn60all_h201,16,0.377324,0.537403,1,Renvel
+holdout,syn60all_h201,17,0.489398,0.452242,1,Velmorlumnel
+holdout,syn60all_h201,18,0.569938,0.50116,1,Kapravellum
+holdout,syn60all_h201,19,0.451736,0.02,1,Junbribri An
+holdout,syn60all_h201,20,0.378728,0.725915,1,Fapravel
+holdout,syn60all_h201,21,0.314586,0.407801,1,Velfa Dunbri
+holdout,syn60all_h201,22,0.268887,0.437238,1,Rengorelis Bri
+holdout,syn60all_h201,23,0.435247,0.742088,1,Osthaltorfa
+holdout,syn60all_h201,24,0.427455,0.445197,1,Brigorhal
+holdout,syn60all_h201,25,0.358212,0.432874,1,Brilumpraqui
+holdout,syn60all_h201,26,0.630487,0.340434,1,Miqui Chosa
+holdout,syn60all_h201,27,0.39737,0.631627,1,Ostkirveldun
+holdout,syn60all_h201,28,0.354865,0.292703,1,Dundunost
+holdout,syn60all_h201,29,0.211099,0.489183,1,Pravelvel
+holdout,syn60all_h201,30,0.52167,0.202196,1,Nelnelhal
+holdout,syn60all_h201,31,0.490481,0.855905,1,Gordundunlo
+holdout,syn60all_h201,32,0.249427,0.527575,1,Elloost Pra
+holdout,syn60all_h201,33,0.414219,0.077875,1,Pralumel Ren
+holdout,syn60all_h201,34,0.53401,0.302231,1,Briis
+holdout,syn60all_h201,35,0.365799,0.61882,1,Morren Jun
+holdout,syn60all_h201,36,0.564594,0.226855,1,Mimi Bri
+holdout,syn60all_h201,37,0.262379,0.718,1,Eldun Gor
+holdout,syn60all_h201,38,0.342354,0.330516,1,Anansa Sa
+holdout,syn60all_h201,39,0.439715,0.508675,1,Junkir
+holdout,syn60all_h201,40,0.559791,0.737562,1,Elveltorhal
+holdout,syn60all_h201,41,0.468781,0.705796,1,Junbri
+holdout,syn60all_h201,42,0.44898,0.579248,1,Ismicho
+holdout,syn60all_h201,43,0.647799,0.374827,1,Elchoqui
+holdout,syn60all_h201,44,0.434981,0.16933,1,Gorhalpravel
+holdout,syn60all_h201,45,0.542565,0.47799,1,Ansa Ka
+holdout,syn60all_h201,46,0.295426,0.268121,1,Kirkirbri
+holdout,syn60all_h201,47,0.441034,0.326411,1,Falum Gor
+holdout,syn60all_h201,48,0.455131,0.531043,1,Farenbri
+holdout,syn60all_h201,49,0.46049,0.47239,1,Morlum Sajun
+holdout,syn60all_h201,50,0.461401,0.939302,1,Hallo
+holdout,syn60all_h201,51,0.320254,0.355599,1,Kanelmi Mi
+holdout,syn60all_h201,52,0.273686,0.328872,1,Halren
+holdout,syn60all_h201,53,0.370882,0.370684,1,Cholumhal Pra
+holdout,syn60all_h201,54,0.466818,0.497438,1,Renvelbri
+holdout,syn60all_h201,55,0.358193,0.245839,1,Kirhal Fa
+holdout,syn60all_h201,56,0.315064,0.616491,1,Tormorkir
+holdout,syn60all_h201,57,0.391396,0.38377,1,Gormorelvel
+holdout,syn60all_h201,58,0.43999,0.245253,1,Cholum
+holdout,syn60all_h201,59,0.685359,0.398291,1,Torsadunsa
+holdout,syn60all_h202,0,0.575724,0.300285,1,Gormi
+holdout,syn60all_h202,1,0.668474,0.446484,1,Vellumvelcho
+holdout,syn60all_h202,2,0.349202,0.216778,1,Morhal Dundun
+holdout,syn60all_h202,3,0.245357,0.387772,1,Chorenbri
+holdout,syn60all_h202,4,0.826544,0.414854,1,Renquichoel
+holdout,syn60all_h202,5,0.668298,0.383174,1,Velostel Lummi
+holdout,syn60all_h202,6,0.479524,0.462045,1,Isdungormor
+holdout,syn60all_h202,7,0.022333,0.289444,1,Isdun Hal
+holdout,syn60all_h202,8,0.238494,0.473017,1,Renjunrenan
+holdout,syn60all_h202,9,0.366973,0.348909,1,Kirsaqui
+holdout,syn60all_h202,10,0.476847,0.553453,1,Anelan
+holdout,syn60all_h202,11,0.176731,0.349658,1,Elprahalvel
+holdout,syn60all_h202,12,0.57458,0.587198,1,Duntorsa
+holdout,syn60all_h202,13,0.513014,0.653542,1,Gorchoquicho
+holdout,syn60all_h202,14,0.758004,0.2553,1,Chomor
+holdout,syn60all_h202,15,0.180111,0.482226,1,Duntorbri
+holdout,syn60all_h202,16,0.170654,0.477831,1,Renlum Bri
+holdout,syn60all_h202,17,0.661431,0.312224,1,Haltor Toris
+holdout,syn60all_h202,18,0.755512,0.200855,1,Anminel
+holdout,syn60all_h202,19,0.05871,0.387783,1,Junkajun
+holdout,syn60all_h202,20,0.657654,0.596522,1,Sahalvelgor Is
+holdout,syn60all_h202,21,0.905501,0.458714,1,Rentor
+holdout,syn60all_h202,22,0.564081,0.774613,1,Lumgor
+holdout,syn60all_h202,23,0.074225,0.432633,1,Neldunis
+holdout,syn60all_h202,24,0.58478,0.578684,1,Isostnel
+holdout,syn60all_h202,25,0.635018,0.623628,1,Faostren
+holdout,syn60all_h202,26,0.389844,0.399558,1,Velrentornel
+holdout,syn60all_h202,27,0.598605,0.392463,1,Gorgorquidun
+holdout,syn60all_h202,28,0.556515,0.699474,1,Lumostkir Mor
+holdout,syn60all_h202,29,0.265197,0.385616,1,Kaostmi
+holdout,syn60all_h202,30,0.856573,0.341484,1,Anmilum Jun
+holdout,syn60all_h202,31,0.924848,0.270453,1,Gorpra Gorsa
+holdout,syn60all_h202,32,0.391208,0.727636,1,Brigor
+holdout,syn60all_h202,33,0.502388,0.802595,1,Junfa Mian
+holdout,syn60all_h202,34,0.752012,0.53279,1,Quimormilum
+holdout,syn60all_h202,35,0.629115,0.503664,1,Junneldunren
+holdout,syn60all_h202,36,0.662181,0.172772,1,Kirkirdun
+holdout,syn60all_h202,37,0.376771,0.704032,1,Elislo Jun
+holdout,syn60all_h202,38,0.873183,0.460255,1,Velan
+holdout,syn60all_h202,39,0.700964,0.308288,1,Junveltoran
+holdout,syn60all_h202,40,0.603089,0.616538,1,Velhaltor
+holdout,syn60all_h202,41,0.673279,0.560026,1,Chorenostka
+holdout,syn60all_h202,42,0.331584,0.526641,1,Elhal
+holdout,syn60all_h202,43,0.899783,0.475128,1,Kaost
+holdout,syn60all_h202,44,0.821243,0.424402,1,Sapra Pra
+holdout,syn60all_h202,45,0.534357,0.679015,1,Loanjun Jun
+holdout,syn60all_h202,46,0.698341,0.242993,1,Halgorvelhal
+holdout,syn60all_h202,47,0.938424,0.488858,1,Hallo
+holdout,syn60all_h202,48,0.283797,0.229765,1,Rensatorkir
+holdout,syn60all_h202,49,0.403305,0.781368,1,Torbri
+holdout,syn60all_h202,50,0.1658,0.224953,1,Hallo Cho
+holdout,syn60all_h202,51,0.564099,0.61701,1,Renkirdun
+holdout,syn60all_h202,52,0.723362,0.526816,1,Velost
+holdout,syn60all_h202,53,0.16076,0.121717,1,Quiis An
+holdout,syn60all_h202,54,0.398798,0.576192,1,Ostcho
+holdout,syn60all_h202,55,0.653823,0.604388,1,Chotorlum
+holdout,syn60all_h202,56,0.710478,0.397509,1,Chonelmikir
+holdout,syn60all_h202,57,0.604387,0.361927,1,Velnel
+holdout,syn60all_h202,58,0.597997,0.514539,1,Faost
+holdout,syn60all_h202,59,0.537447,0.189709,1,Halhalost
+holdout,syn60all_h203,0,0.313445,0.07579,1,Mianpra Lokir
+holdout,syn60all_h203,1,0.363876,0.361273,1,Halfaantor
+holdout,syn60all_h203,2,0.446614,0.02,1,Elnelan
+holdout,syn60all_h203,3,0.528873,0.272943,1,Halbri Juncho
+holdout,syn60all_h203,4,0.319078,0.31753,1,Nelischo Iskir
+holdout,syn60all_h203,5,0.486762,0.304673,1,Gorgor
+holdout,syn60all_h203,6,0.56404,0.046101,1,Kirdunlum
+holdout,syn60all_h203,7,0.28481,0.159277,1,Praostquisa
+holdout,syn60all_h203,8,0.554419,0.19768,1,Tordunnel
+holdout,syn60all_h203,9,0.281186,0.250169,1,Mipra
+holdout,syn60all_h203,10,0.238646,0.378564,1,Torchohalis
+holdout,syn60all_h203,11,0.169618,0.057975,1,Mortor
+holdout,syn60all_h203,12,0.323482,0.2291,1,Faelelka
+holdout,syn60all_h203,13,0.424491,0.325887,1,Gorvel
+holdout,syn60all_h203,14,0.31187,0.279574,1,Annelhal
+holdout,syn60all_h203,15,0.582444,0.048646,1,Duntorhal
+holdout,syn60all_h203,16,0.254769,0.425808,1,Toris
+holdout,syn60all_h203,17,0.308063,0.292867,1,Faqui
+holdout,syn60all_h203,18,0.308679,0.246904,1,Faneltor
+holdout,syn60all_h203,19,0.278906,0.271753,1,Famorlumel Dun
+holdout,syn60all_h203,20,0.140183,0.062476,1,Chojungorka
+holdout,syn60all_h203,21,0.42923,0.306136,1,Torlum Renost
+holdout,syn60all_h203,22,0.175995,0.339582,1,Kirquiiskir
+holdout,syn60all_h203,23,0.29099,0.377274,1,Fami
+holdout,syn60all_h203,24,0.344733,0.169615,1,Quitorbri Kir
+holdout,syn60all_h203,25,0.445849,0.111616,1,Neldun Jun
+holdout,syn60all_h203,26,0.393073,0.195787,1,Renlumfaan
+holdout,syn60all_h203,27,0.226661,0.292787,1,Loanka
+holdout,syn60all_h203,28,0.054566,0.199806,1,Junpranel
+holdout,syn60all_h203,29,0.204662,0.23709,1,Gorpra Mor
+holdout,syn60all_h203,30,0.181291,0.207249,1,Torjunankir
+holdout,syn60all_h203,31,0.23161,0.473704,1,Dunlovel
+holdout,syn60all_h203,32,0.504418,0.059779,1,Gorlumkirkir
+holdout,syn60all_h203,33,0.597098,0.079505,1,Chocholumdun
+holdout,syn60all_h203,34,0.372345,0.254174,1,Chofaqui
+holdout,syn60all_h203,35,0.236341,0.068951,1,Bribrigor Lum
+holdout,syn60all_h203,36,0.489915,0.081292,1,Mormi
+holdout,syn60all_h203,37,0.15106,0.478907,1,Mipraost
+holdout,syn60all_h203,38,0.490585,0.229066,1,Prabrikir
+holdout,syn60all_h203,39,0.273125,0.442037,1,Veldunkir El
+holdout,syn60all_h203,40,0.435391,0.170583,1,Faanka
+holdout,syn60all_h203,41,0.137853,0.293222,1,Chokachosa
+holdout,syn60all_h203,42,0.576193,0.106089,1,Elkajun
+holdout,syn60all_h203,43,0.346969,0.267088,1,Eldunprajun
+holdout,syn60all_h203,44,0.264845,0.251618,1,Faostostmi
+holdout,syn60all_h203,45,0.265839,0.410665,1,Dunmor Cho
+holdout,syn60all_h203,46,0.254705,0.382123,1,Losaostpra Lo
+holdout,syn60all_h203,47,0.14601,0.387224,1,Fasa
+holdout,syn60all_h203,48,0.192848,0.271053,1,Nelisan
+holdout,syn60all_h203,49,0.622358,0.198291,1,Velsa Jun
+holdout,syn60all_h203,50,0.596275,0.278821,1,Brifaveldun
+holdout,syn60all_h203,51,0.100906,0.326704,1,Ostnelrenhal
+holdout,syn60all_h203,52,0.076312,0.161678,1,Velgorquiqui
+holdout,syn60all_h203,53,0.495522,0.057703,1,Lohal Lum
+holdout,syn60all_h203,54,0.493445,0.275292,1,Elquifa
+holdout,syn60all_h203,55,0.02,0.262941,1,Karenmor
+holdout,syn60all_h203,56,0.316659,0.319257,1,Dungoranfa
+holdout,syn60all_h203,57,0.202432,0.380878,1,Gorpra
+holdout,syn60all_h203,58,0.271406,0.181149,1,Midun Eltor
+holdout,syn60all_h203,59,0.343193,0.138204,1,Dunost
+holdout,syn60all_h204,0,0.745899,0.38915,1,Junquiqui Hal
+holdout,syn60all_h204,1,0.542513,0.631863,1,Velmi Hal
+holdout,syn60all_h204,2,0.510206,0.714176,1,Pracholumdun
+holdout,syn60all_h204,3,0.781249,0.279603,1,Kirischoan
+holdout,syn60all_h204,4,0.691112,0.206473,1,Ostquilum
+holdout,syn60all_h204,5,0.586785,0.518537,1,Junan Dunlo
+holdout,syn60all_h204,6,0.554736,0.433583,1,Elan
+holdout,syn60all_h204,7,0.678951,0.115409,1,Chomiqui
+holdout,syn60all_h204,8,0.644191,0.475841,1,Morlojunka
+holdout,syn60all_h204,9,0.172061,0.688557,1,Junlum
+holdout,syn60all_h204,10,0.77696,0.351074,1,Mitoris
+holdout,syn60all_h204,11,0.466219,0.61648,1,Saan
+holdout,syn60all_h204,12,0.786647,0.313656,1,Lomiost Dun
+holdout,syn60all_h204,13,0.663634,0.635523,1,Dunquimika
+holdout,syn60all_h204,14,0.465022,0.742198,1,Haljunbribri
+holdout,syn60all_h204,15,0.354136,0.794388,1,Anlojun
+holdout,syn60all_h204,16,0.309744,0.538381,1,Rengor An
+holdout,syn60all_h204,17,0.371834,0.962729,1,Rengorquicho
+holdout,syn60all_h204,18,0.632333,0.740769,1,Mordunjunmor
+holdout,syn60all_h204,19,0.431493,0.828584,1,Fakavel
+holdout,syn60all_h204,20,0.744908,0.45815,1,Junfa
+holdout,syn60all_h204,21,0.44436,0.539492,1,Choel
+holdout,syn60all_h204,22,0.792091,0.176534,1,Nelfaostcho
+holdout,syn60all_h204,23,0.560059,0.387239,1,Pradunlumel
+holdout,syn60all_h204,24,0.737372,0.605398,1,Lorenkavel
+holdout,syn60all_h204,25,0.837606,0.2173,1,Ostloren Pra
+holdout,syn60all_h204,26,0.47934,0.156235,1,Kirel
+holdout,syn60all_h204,27,0.519201,0.645101,1,Lummipra
+holdout,syn60all_h204,28,0.526763,0.283065,1,Velkirdunvel
+holdout,syn60all_h204,29,0.466638,0.673021,1,Halren Fa
+holdout,syn60all_h204,30,0.809063,0.523604,1,Angorost Lois
+holdout,syn60all_h204,31,0.448608,0.79067,1,Midunvel
+holdout,syn60all_h204,32,0.343306,0.737122,1,Ostanel
+holdout,syn60all_h204,33,0.634089,0.447866,1,Dunost
+holdout,syn60all_h204,34,0.226842,0.736441,1,Nelsaka
+holdout,syn60all_h204,35,0.311141,0.866716,1,Briel Hal
+holdout,syn60all_h204,36,0.448577,0.813026,1,Choanlum
+holdout,syn60all_h204,37,0.893446,0.314599,1,Velqui
+holdout,syn60all_h204,38,0.338978,0.913902,1,Chonel
+holdout,syn60all_h204,39,0.442101,0.695935,1,Kajun
+holdout,syn60all_h204,40,0.851308,0.633375,1,Ostlumjunka
+holdout,syn60all_h204,41,0.30015,0.931547,1,Prafa
+holdout,syn60all_h204,42,0.664291,0.208609,1,Ostgormorgor
+holdout,syn60all_h204,43,0.98,0.322131,1,Brilokahal
+holdout,syn60all_h204,44,0.383516,0.540331,1,Sahal Nelmi
+holdout,syn60all_h204,45,0.458757,0.326434,1,Saanpra
+holdout,syn60all_h204,46,0.88248,0.055086,1,Vellofasa
+holdout,syn60all_h204,47,0.544791,0.542618,1,Prasa Lumlo
+holdout,syn60all_h204,48,0.601524,0.897323,1,Loelbri
+holdout,syn60all_h204,49,0.672832,0.438106,1,Faismorhal
+holdout,syn60all_h204,50,0.795908,0.462842,1,Kacho
+holdout,syn60all_h204,51,0.337485,0.684378,1,Elvelelmi
+holdout,syn60all_h204,52,0.512105,0.500003,1,Kirlocho Bri
+holdout,syn60all_h204,53,0.651476,0.680718,1,Neltorel
+holdout,syn60all_h204,54,0.401486,0.792626,1,Gorgorqui
+holdout,syn60all_h204,55,0.81045,0.249426,1,Hallumchovel
+holdout,syn60all_h204,56,0.830193,0.257826,1,Saelqui Fahal
+holdout,syn60all_h204,57,0.327462,0.603266,1,Kaka Jun
+holdout,syn60all_h204,58,0.312795,0.98,1,Bripralum
+holdout,syn60all_h204,59,0.283618,0.98,1,Miel
+holdout,syn60all_h205,0,0.616284,0.356871,1,Kakalo
+holdout,syn60all_h205,1,0.531975,0.235775,1,Lokasaqui
+holdout,syn60all_h205,2,0.267426,0.881321,1,Quilo
+holdout,syn60all_h205,3,0.168243,0.931951,1,Choren
+holdout,syn60all_h205,4,0.315193,0.162351,1,Kirelkir Kasa
+holdout,syn60all_h205,5,0.383291,0.766304,1,Goranost Bri
+holdout,syn60all_h205,6,0.530566,0.304886,1,Anvelhal Pra
+holdout,syn60all_h205,7,0.177701,0.400668,1,Junvelisnel
+holdout,syn60all_h205,8,0.451022,0.612529,1,Lojunlosa Vel
+holdout,syn60all_h205,9,0.932304,0.483841,1,Halbrimorqui
+holdout,syn60all_h205,10,0.729612,0.19341,1,Lofa Tor
+holdout,syn60all_h205,11,0.692146,0.377811,1,Isprafavel Jun
+holdout,syn60all_h205,12,0.642032,0.12859,1,Junpra
+holdout,syn60all_h205,13,0.02,0.160432,1,Quichomorpra
+holdout,syn60all_h205,14,0.499645,0.391192,1,Lumbriren
+holdout,syn60all_h205,15,0.548807,0.154015,1,Kirtordun
+holdout,syn60all_h205,16,0.196001,0.030105,1,Halan
+holdout,syn60all_h205,17,0.356771,0.824033,1,Milo Cho
+holdout,syn60all_h205,18,0.366087,0.649323,1,Isbrichojun
+holdout,syn60all_h205,19,0.334116,0.760703,1,Brihal
+holdout,syn60all_h205,20,0.302491,0.693134,1,Ostmivelel
+holdout,syn60all_h205,21,0.568135,0.238806,1,Elsakaka Sa
+holdout,syn60all_h205,22,0.185691,0.189603,1,Kirquikir
+holdout,syn60all_h205,23,0.109605,0.249734,1,Dunkir
+holdout,syn60all_h205,24,0.144013,0.671647,1,Kamicho
+holdout,syn60all_h205,25,0.254042,0.171472,1,Morfafa
+holdout,syn60all_h205,26,0.30828,0.860253,1,Issadun
+holdout,syn60all_h205,27,0.37646,0.154367,1,Moris
+holdout,syn60all_h205,28,0.286448,0.727261,1,Anjun
+holdout,syn60all_h205,29,0.622878,0.14673,1,Praostbriren
+holdout,syn60all_h205,30,0.156613,0.21981,1,Ostpra El
+holdout,syn60all_h205,31,0.374974,0.233978,1,Milumtor
+holdout,syn60all_h205,32,0.649614,0.287888,1,Kasanel
+holdout,syn60all_h205,33,0.664372,0.148599,1,Prasabrijun
+holdout,syn60all_h205,34,0.488145,0.42992,1,Lumfa
+holdout,syn60all_h205,35,0.246904,0.02,1,Praka
+holdout,syn60all_h205,36,0.181762,0.280174,1,Ishalbri
+holdout,syn60all_h205,37,0.61338,0.320417,1,Anquiren
+holdout,syn60all_h205,38,0.457337,0.176781,1,Chonel
+holdout,syn60all_h205,39,0.488468,0.822851,1,Prakabrika
+holdout,syn60all_h205,40,0.416171,0.727526,1,Lochotordun Mi
+holdout,syn60all_h205,41,0.409265,0.220401,1,Halmi
+holdout,syn60all_h205,42,0.220308,0.81048,1,Fadunlo
+holdout,syn60all_h205,43,0.340033,0.856007,1,Lumgor Morqui
+holdout,syn60all_h205,44,0.545287,0.342064,1,Elnelostbri
+holdout,syn60all_h205,45,0.189471,0.326106,1,Haldunis
+holdout,syn60all_h205,46,0.546298,0.348658,1,Dunis
+holdout,syn60all_h205,47,0.376075,0.240405,1,Chomi
+holdout,syn60all_h205,48,0.364628,0.696508,1,Sabri
+holdout,syn60all_h205,49,0.616153,0.522802,1,Tormiquijun
+holdout,syn60all_h205,50,0.561534,0.597739,1,Dundun
+holdout,syn60all_h205,51,0.473652,0.702476,1,Quigor
+holdout,syn60all_h205,52,0.142506,0.240655,1,Neltordun
+holdout,syn60all_h205,53,0.275624,0.750875,1,Mian
+holdout,syn60all_h205,54,0.025113,0.281624,1,Fagorgor
+holdout,syn60all_h205,55,0.619685,0.522804,1,Fabrirenmi
+holdout,syn60all_h205,56,0.453203,0.337809,1,Nelvel Quiren
+holdout,syn60all_h205,57,0.232528,0.753039,1,Kirmihal
+holdout,syn60all_h205,58,0.382005,0.235526,1,Dunsanel Gorel
+holdout,syn60all_h205,59,0.605426,0.718212,1,Brigor
+holdout,syn60all_h206,0,0.433392,0.836207,1,Torost
+holdout,syn60all_h206,1,0.396863,0.59081,1,Sabrilum
+holdout,syn60all_h206,2,0.680814,0.869117,1,Gorloel
+holdout,syn60all_h206,3,0.698303,0.627251,1,Loquikir
+holdout,syn60all_h206,4,0.226095,0.728771,1,Lokalumbri
+holdout,syn60all_h206,5,0.85406,0.70022,1,Elvelcho
+holdout,syn60all_h206,6,0.429069,0.644002,1,Halchonel
+holdout,syn60all_h206,7,0.574818,0.628286,1,Islum Sacho
+holdout,syn60all_h206,8,0.784836,0.560361,1,Sael
+holdout,syn60all_h206,9,0.14319,0.546317,1,Ostmi
+holdout,syn60all_h206,10,0.693733,0.59072,1,Saanlum
+holdout,syn60all_h206,11,0.316047,0.648595,1,Lumkalojun
+holdout,syn60all_h206,12,0.496783,0.56476,1,Ostkir Bricho
+holdout,syn60all_h206,13,0.288461,0.482801,1,Kamortorlum
+holdout,syn60all_h206,14,0.268657,0.611848,1,Quidun Ren
+holdout,syn60all_h206,15,0.391548,0.57725,1,Micho
+holdout,syn60all_h206,16,0.480149,0.735398,1,Isbrilumren
+holdout,syn60all_h206,17,0.730305,0.617973,1,Quiqui Ren
+holdout,syn60all_h206,18,0.428419,0.471912,1,Kael Gor
+holdout,syn60all_h206,19,0.597024,0.629744,1,Lomor Isnel
+holdout,syn60all_h206,20,0.273157,0.682482,1,Quidunren Bri
+holdout,syn60all_h206,21,0.616174,0.807989,1,Kirpravel
+holdout,syn60all_h206,22,0.648284,0.61174,1,Gorka Hal
+holdout,syn60all_h206,23,0.671146,0.832741,1,Elrenannel
+holdout,syn60all_h206,24,0.293448,0.656038,1,Osttorquigor
+holdout,syn60all_h206,25,0.253235,0.585781,1,Praren
+holdout,syn60all_h206,26,0.524257,0.79012,1,Kirostvellum
+holdout,syn60all_h206,27,0.430177,0.88568,1,Kirnelren
+holdout,syn60all_h206,28,0.305717,0.805896,1,Choloan
+holdout,syn60all_h206,29,0.144013,0.698331,1,Salummika
+holdout,syn60all_h206,30,0.02,0.657412,1,Iskirlum
+holdout,syn60all_h206,31,0.321281,0.511081,1,Kachoancho
+holdout,syn60all_h206,32,0.343511,0.7923,1,Choan Dun
+holdout,syn60all_h206,33,0.804198,0.677708,1,Junqui Mormi
+holdout,syn60all_h206,34,0.526741,0.743461,1,Anbrian Kirren
+holdout,syn60all_h206,35,0.436694,0.643232,1,Gorfachoel
+holdout,syn60all_h206,36,0.485565,0.695386,1,Torsanello
+holdout,syn60all_h206,37,0.750204,0.81725,1,Briost
+holdout,syn60all_h206,38,0.14908,0.777157,1,Milo Losa
+holdout,syn60all_h206,39,0.417305,0.696138,1,Sagorfa Cholo
+holdout,syn60all_h206,40,0.734848,0.731668,1,Anostprabri
+holdout,syn60all_h206,41,0.423513,0.446312,1,Brian Vel
+holdout,syn60all_h206,42,0.582754,0.504343,1,Briisfanel An
+holdout,syn60all_h206,43,0.338638,0.770988,1,Torpraquian
+holdout,syn60all_h206,44,0.414064,0.494414,1,Lumrenkir
+holdout,syn60all_h206,45,0.349891,0.732393,1,Ostbridunkir
+holdout,syn60all_h206,46,0.77391,0.638942,1,Jundunlomi Ost
+holdout,syn60all_h206,47,0.149053,0.4934,1,Lumsalo Mivel
+holdout,syn60all_h206,48,0.723764,0.680256,1,Elmiqui Cho
+holdout,syn60all_h206,49,0.701638,0.770851,1,Torelpra
+holdout,syn60all_h206,50,0.651411,0.566196,1,Gorhal
+holdout,syn60all_h206,51,0.596395,0.818307,1,Rennelquisa
+holdout,syn60all_h206,52,0.719535,0.703922,1,Sadun
+holdout,syn60all_h206,53,0.076491,0.399171,1,Elhalost
+holdout,syn60all_h206,54,0.594974,0.741264,1,Mimorsabri
+holdout,syn60all_h206,55,0.400683,0.621821,1,Ischo
+holdout,syn60all_h206,56,0.352184,0.699646,1,Losa
+holdout,syn60all_h206,57,0.36778,0.621353,1,Ispralois Ost
+holdout,syn60all_h206,58,0.449328,0.689213,1,Istor Vel
+holdout,syn60all_h206,59,0.232681,0.634489,1,Lumchonelkir
+holdout,syn60all_h207,0,0.262908,0.663133,1,Elkirqui
+holdout,syn60all_h207,1,0.492947,0.726957,1,Junbriren
+holdout,syn60all_h207,2,0.700625,0.306869,1,Safaostgor
+holdout,syn60all_h207,3,0.564765,0.836776,1,Famiqui
+holdout,syn60all_h207,4,0.589134,0.02,1,Gorquicho Fa
+holdout,syn60all_h207,5,0.287349,0.8853,1,Elnelka Sa
+holdout,syn60all_h207,6,0.504644,0.14857,1,Fahal
+holdout,syn60all_h207,7,0.462742,0.394155,1,Salumis
+holdout,syn60all_h207,8,0.636591,0.439799,1,Gorka
+holdout,syn60all_h207,9,0.570846,0.31665,1,Elsa
+holdout,syn60all_h207,10,0.436074,0.277168,1,Mianchois Ost
+holdout,syn60all_h207,11,0.657263,0.070527,1,Kasalo
+holdout,syn60all_h207,12,0.705555,0.414438,1,Anmiisren
+holdout,syn60all_h207,13,0.594914,0.141066,1,Pranelchomor
+holdout,syn60all_h207,14,0.36836,0.142665,1,Elgorgor
+holdout,syn60all_h207,15,0.419044,0.363556,1,Praelfalum Mi
+holdout,syn60all_h207,16,0.598706,0.204547,1,Nelelsa Gor
+holdout,syn60all_h207,17,0.51638,0.858916,1,Annel
+holdout,syn60all_h207,18,0.732509,0.358676,1,Quika
+holdout,syn60all_h207,19,0.503743,0.204576,1,Mordunpralum
+holdout,syn60all_h207,20,0.208813,0.680233,1,Kirloquiis
+holdout,syn60all_h207,21,0.487912,0.355331,1,Praeljun
+holdout,syn60all_h207,22,0.369241,0.307857,1,Mian
+holdout,syn60all_h207,23,0.389832,0.232839,1,Dunkir Hal
+holdout,syn60all_h207,24,0.313579,0.869964,1,Mipraisost
+holdout,syn60all_h207,25,0.185284,0.976433,1,Morelpra Qui
+holdout,syn60all_h207,26,0.503026,0.186723,1,Lotorgorpra
+holdout,syn60all_h207,27,0.504076,0.266318,1,Anjun
+holdout,syn60all_h207,28,0.572435,0.193321,1,Dunisnel
+holdout,syn60all_h207,29,0.403882,0.655974,1,Sagordunpra
+holdout,syn60all_h207,30,0.350181,0.747764,1,Hallumfalum
+holdout,syn60all_h207,31,0.486622,0.176004,1,Kasaka
+holdout,syn60all_h207,32,0.526834,0.246008,1,Dunren
+holdout,syn60all_h207,33,0.423138,0.185143,1,Lofafa Lum
+holdout,syn60all_h207,34,0.408418,0.22631,1,Elrenan Halcho
+holdout,syn60all_h207,35,0.324884,0.307344,1,Isdunostlo
+holdout,syn60all_h207,36,0.479712,0.257982,1,Migor
+holdout,syn60all_h207,37,0.569191,0.527401,1,Anbrihalka
+holdout,syn60all_h207,38,0.357201,0.67858,1,Chokirdun
+holdout,syn60all_h207,39,0.185402,0.178727,1,Vellumel
+holdout,syn60all_h207,40,0.689552,0.316408,1,Kakirsa Qui
+holdout,syn60all_h207,41,0.491524,0.945163,1,Junel
+holdout,syn60all_h207,42,0.592744,0.315351,1,Anqui
+holdout,syn60all_h207,43,0.462066,0.308793,1,Renkanel Sa
+holdout,syn60all_h207,44,0.254681,0.943964,1,Lojun
+holdout,syn60all_h207,45,0.543764,0.057518,1,Cholum
+holdout,syn60all_h207,46,0.407384,0.850009,1,Lummi Gor
+holdout,syn60all_h207,47,0.658279,0.610628,1,Loostquijun
+holdout,syn60all_h207,48,0.295777,0.818502,1,Lumbriquilo
+holdout,syn60all_h207,49,0.596504,0.113229,1,Neleljun
+holdout,syn60all_h207,50,0.226864,0.586946,1,Junmi
+holdout,syn60all_h207,51,0.830681,0.257567,1,Kaanpradun
+holdout,syn60all_h207,52,0.428794,0.271224,1,Goran Isel
+holdout,syn60all_h207,53,0.233529,0.625498,1,Mikirdun
+holdout,syn60all_h207,54,0.224517,0.724474,1,Anmifa
+holdout,syn60all_h207,55,0.707746,0.261353,1,Torquilois
+holdout,syn60all_h207,56,0.444625,0.128058,1,Kirlum
+holdout,syn60all_h207,57,0.068967,0.847039,1,Briis Fabri
+holdout,syn60all_h207,58,0.411876,0.157854,1,Halost
+holdout,syn60all_h207,59,0.599611,0.300387,1,Iskanelmi
+holdout,syn60all_h208,0,0.53799,0.510541,1,Chonel Saka
+holdout,syn60all_h208,1,0.261829,0.349633,1,Nelbri Halhal
+holdout,syn60all_h208,2,0.666514,0.627114,1,Fafa
+holdout,syn60all_h208,3,0.691946,0.74165,1,Losapra Mi
+holdout,syn60all_h208,4,0.685618,0.67339,1,Fajun
+holdout,syn60all_h208,5,0.22196,0.344322,1,Torjunnel
+holdout,syn60all_h208,6,0.275979,0.270857,1,Junisdun
+holdout,syn60all_h208,7,0.402965,0.420273,1,Halquiqui
+holdout,syn60all_h208,8,0.40287,0.248208,1,Morvel
+holdout,syn60all_h208,9,0.478894,0.538879,1,Kavel
+holdout,syn60all_h208,10,0.5504,0.604813,1,Loren Is
+holdout,syn60all_h208,11,0.495157,0.631017,1,Katormi
+holdout,syn60all_h208,12,0.574353,0.607361,1,Kaan
+holdout,syn60all_h208,13,0.44791,0.54507,1,Lumcho
+holdout,syn60all_h208,14,0.715755,0.919212,1,Ankaostel
+holdout,syn60all_h208,15,0.310818,0.729522,1,Lumpranelren
+holdout,syn60all_h208,16,0.674479,0.668456,1,Lumvelelel
+holdout,syn60all_h208,17,0.654915,0.348698,1,Andunlo
+holdout,syn60all_h208,18,0.545064,0.363716,1,Lumquineljun
+holdout,syn60all_h208,19,0.389793,0.714704,1,Halgorpra
+holdout,syn60all_h208,20,0.471049,0.331415,1,Nelkir
+holdout,syn60all_h208,21,0.460159,0.387196,1,Mimimor
+holdout,syn60all_h208,22,0.486874,0.659154,1,Kircho
+holdout,syn60all_h208,23,0.492184,0.468861,1,Quijun
+holdout,syn60all_h208,24,0.332554,0.579234,1,Chosa An
+holdout,syn60all_h208,25,0.18567,0.528965,1,Jundun
+holdout,syn60all_h208,26,0.600871,0.592635,1,Sabriislo
+holdout,syn60all_h208,27,0.262931,0.462623,1,Dunka Isfa
+holdout,syn60all_h208,28,0.494655,0.544955,1,Halhallo
+holdout,syn60all_h208,29,0.341927,0.213972,1,Rentor
+holdout,syn60all_h208,30,0.264915,0.393088,1,Pramorka Eljun
+holdout,syn60all_h208,31,0.530616,0.777805,1,Velhal Gor
+holdout,syn60all_h208,32,0.447662,0.837741,1,Ostkirdunnel
+holdout,syn60all_h208,33,0.510871,0.569793,1,Torfasa
+holdout,syn60all_h208,34,0.318074,0.486416,1,Nellumel
+holdout,syn60all_h208,35,0.451115,0.491407,1,Torka
+holdout,syn60all_h208,36,0.430914,0.665542,1,Iskaquigor
+holdout,syn60all_h208,37,0.549376,0.424928,1,Gorvelis
+holdout,syn60all_h208,38,0.274794,0.399905,1,Kiran
+holdout,syn60all_h208,39,0.425523,0.492124,1,Elelrenan Anmi
+holdout,syn60all_h208,40,0.6386,0.516862,1,Dunmorfaost
+holdout,syn60all_h208,41,0.589669,0.829208,1,Quichoqui Fa
+holdout,syn60all_h208,42,0.528989,0.403939,1,Isdunnel Lo
+holdout,syn60all_h208,43,0.507625,0.33367,1,Chochonel
+holdout,syn60all_h208,44,0.652035,0.529031,1,Chorenjunpra
+holdout,syn60all_h208,45,0.581473,0.677716,1,Kirgorka
+holdout,syn60all_h208,46,0.546009,0.506544,1,Milo
+holdout,syn60all_h208,47,0.693025,0.426771,1,Torjunrenbri
+holdout,syn60all_h208,48,0.280772,0.377694,1,Lochokajun
+holdout,syn60all_h208,49,0.709438,0.479296,1,Savelel
+holdout,syn60all_h208,50,0.379836,0.372759,1,Gorvel Locho
+holdout,syn60all_h208,51,0.655696,0.401774,1,Gorhalsa
+holdout,syn60all_h208,52,0.39978,0.349238,1,Gorjun
+holdout,syn60all_h208,53,0.411433,0.457319,1,Saelmivel
+holdout,syn60all_h208,54,0.408483,0.32115,1,Kirsalum
+holdout,syn60all_h208,55,0.569899,0.855583,1,Praqui Torbri
+holdout,syn60all_h208,56,0.660573,0.587694,1,Halgortor
+holdout,syn60all_h208,57,0.373787,0.063161,1,Prahallodun
+holdout,syn60all_h208,58,0.468667,0.547468,1,Tormormorost
+holdout,syn60all_h208,59,0.369054,0.250174,1,Kami
+holdout,syn60all_h209,0,0.195901,0.683506,1,Farenduncho
+holdout,syn60all_h209,1,0.780033,0.70437,1,Lonel
+holdout,syn60all_h209,2,0.447977,0.89405,1,Eljunlodun Bri
+holdout,syn60all_h209,3,0.695527,0.61203,1,Neltordun
+holdout,syn60all_h209,4,0.229634,0.684243,1,Isosthalmi
+holdout,syn60all_h209,5,0.83266,0.215489,1,Dunbripranel
+holdout,syn60all_h209,6,0.576707,0.729057,1,Renlumpra
+holdout,syn60all_h209,7,0.522563,0.752246,1,Saostmor
+holdout,syn60all_h209,8,0.263459,0.862075,1,Elelfadun
+holdout,syn60all_h209,9,0.612924,0.284538,1,Nelka
+holdout,syn60all_h209,10,0.591472,0.343979,1,Nelhalost Is
+holdout,syn60all_h209,11,0.433702,0.864662,1,Lumkirlo Gor
+holdout,syn60all_h209,12,0.090302,0.4821,1,Ankirpra
+holdout,syn60all_h209,13,0.844251,0.219955,1,Dunrenmi
+holdout,syn60all_h209,14,0.464794,0.662582,1,Junbritorpra
+holdout,syn60all_h209,15,0.307336,0.835709,1,Chochotor An
+holdout,syn60all_h209,16,0.332687,0.65907,1,Velgor
+holdout,syn60all_h209,17,0.420293,0.517671,1,Kamibricho
+holdout,syn60all_h209,18,0.807349,0.297883,1,Quicho
+holdout,syn60all_h209,19,0.07472,0.63295,1,Fapra Velvel
+holdout,syn60all_h209,20,0.98,0.026912,1,Brifa
+holdout,syn60all_h209,21,0.74511,0.361018,1,Eldun Kajun
+holdout,syn60all_h209,22,0.465662,0.724925,1,Ostgor
+holdout,syn60all_h209,23,0.129189,0.785336,1,Gorost Is
+holdout,syn60all_h209,24,0.721288,0.841536,1,Morqui
+holdout,syn60all_h209,25,0.706972,0.758711,1,Dunostsa
+holdout,syn60all_h209,26,0.090089,0.553839,1,Mikasadun
+holdout,syn60all_h209,27,0.725493,0.709671,1,Lumchosael
+holdout,syn60all_h209,28,0.369296,0.633041,1,Lummi
+holdout,syn60all_h209,29,0.56808,0.5373,1,Gorbridun Dun
+holdout,syn60all_h209,30,0.685773,0.732301,1,Pralummortor
+holdout,syn60all_h209,31,0.856255,0.548141,1,Brikirsakir
+holdout,syn60all_h209,32,0.3919,0.947433,1,Morsahalsa
+holdout,syn60all_h209,33,0.739762,0.659756,1,Gorsagornel
+holdout,syn60all_h209,34,0.559682,0.49928,1,Ishal Nel
+holdout,syn60all_h209,35,0.459627,0.633955,1,Gorelhal Lo
+holdout,syn60all_h209,36,0.688251,0.791524,1,Saostkalum
+holdout,syn60all_h209,37,0.731745,0.701546,1,Lumlonelgor
+holdout,syn60all_h209,38,0.713494,0.669819,1,Quisaka
+holdout,syn60all_h209,39,0.710053,0.546032,1,Dunhalis
+holdout,syn60all_h209,40,0.487337,0.078632,1,Elelisqui
+holdout,syn60all_h209,41,0.457412,0.661218,1,Tornel
+holdout,syn60all_h209,42,0.413678,0.677715,1,Istornel Nel
+holdout,syn60all_h209,43,0.69993,0.648821,1,Kaisvelmor
+holdout,syn60all_h209,44,0.87762,0.711185,1,Ostfa
+holdout,syn60all_h209,45,0.749901,0.143219,1,Junpra
+holdout,syn60all_h209,46,0.734354,0.349373,1,Moran
+holdout,syn60all_h209,47,0.729868,0.714101,1,Choisdun Mi
+holdout,syn60all_h209,48,0.643297,0.620967,1,Lumisqui Kir
+holdout,syn60all_h209,49,0.671998,0.354107,1,Dunvel Is
+holdout,syn60all_h209,50,0.520313,0.539823,1,Lumdunfa
+holdout,syn60all_h209,51,0.275362,0.711274,1,Renquirenren
+holdout,syn60all_h209,52,0.77399,0.216852,1,Chokirost
+holdout,syn60all_h209,53,0.760821,0.327966,1,Dunancho
+holdout,syn60all_h209,54,0.496118,0.846207,1,Ostfa Mi
+holdout,syn60all_h209,55,0.324686,0.943481,1,Velren
+holdout,syn60all_h209,56,0.67678,0.585215,1,Renpra
+holdout,syn60all_h209,57,0.98,0.674627,1,Fakirosttor
+holdout,syn60all_h209,58,0.334976,0.660303,1,Renmordunvel
+holdout,syn60all_h209,59,0.69712,0.451315,1,Quikafa
+holdout,syn60all_h210,0,0.452485,0.481506,1,Dunkaanpra
+holdout,syn60all_h210,1,0.432375,0.576011,1,Brirenkapra
+holdout,syn60all_h210,2,0.578149,0.317528,1,Junnelren Kir
+holdout,syn60all_h210,3,0.475988,0.391261,1,Isgorgor Bri
+holdout,syn60all_h210,4,0.833038,0.437544,1,Morsa Lum
+holdout,syn60all_h210,5,0.391796,0.36954,1,Tornel
+holdout,syn60all_h210,6,0.830187,0.438414,1,Pracho
+holdout,syn60all_h210,7,0.267989,0.367895,1,Ismorkir
+holdout,syn60all_h210,8,0.662609,0.715077,1,Nelnel
+holdout,syn60all_h210,9,0.439178,0.756235,1,Junfa
+holdout,syn60all_h210,10,0.827458,0.509078,1,Praost Mi
+holdout,syn60all_h210,11,0.567891,0.258281,1,Renmivelel
+holdout,syn60all_h210,12,0.652402,0.420226,1,Faanfa Neljun
+holdout,syn60all_h210,13,0.63777,0.359681,1,Anmimorjun Pra
+holdout,syn60all_h210,14,0.463621,0.346669,1,Quiqui
+holdout,syn60all_h210,15,0.187469,0.275427,1,Renandun
+holdout,syn60all_h210,16,0.695694,0.26237,1,Fahallo Chojun
+holdout,syn60all_h210,17,0.688996,0.239506,1,Bripraquiost
+holdout,syn60all_h210,18,0.471156,0.521561,1,Mormiren
+holdout,syn60all_h210,19,0.665614,0.592921,1,Torsa
+holdout,syn60all_h210,20,0.41366,0.54168,1,Jungor
+holdout,syn60all_h210,21,0.411429,0.298456,1,Mifa
+holdout,syn60all_h210,22,0.402911,0.457588,1,Velpravel
+holdout,syn60all_h210,23,0.679944,0.412278,1,Anka
+holdout,syn60all_h210,24,0.529677,0.392369,1,Velgor
+holdout,syn60all_h210,25,0.512428,0.554558,1,Dunqui Mi
+holdout,syn60all_h210,26,0.98,0.723635,1,Morjunsajun
+holdout,syn60all_h210,27,0.914918,0.51599,1,Kirhalka Ren
+holdout,syn60all_h210,28,0.638788,0.282413,1,Elkator
+holdout,syn60all_h210,29,0.361391,0.297232,1,Kais
+holdout,syn60all_h210,30,0.582142,0.50707,1,Chois Kir
+holdout,syn60all_h210,31,0.412625,0.672712,1,Quilofabri
+holdout,syn60all_h210,32,0.783711,0.382161,1,Velhalquijun
+holdout,syn60all_h210,33,0.74809,0.51251,1,Ostgorquidun
+holdout,syn60all_h210,34,0.837379,0.709859,1,Junka
+holdout,syn60all_h210,35,0.354038,0.413616,1,Elpra Jun
+holdout,syn60all_h210,36,0.696585,0.508289,1,Kachomorka
+holdout,syn60all_h210,37,0.796048,0.541169,1,Anhalfa
+holdout,syn60all_h210,38,0.532947,0.602217,1,Brikir
+holdout,syn60all_h210,39,0.394498,0.560914,1,Ostostnelel
+holdout,syn60all_h210,40,0.847832,0.519927,1,Nelelel
+holdout,syn60all_h210,41,0.704174,0.456755,1,Quisa Lum
+holdout,syn60all_h210,42,0.407766,0.275571,1,Brilo Dun
+holdout,syn60all_h210,43,0.50982,0.443446,1,Mordun
+holdout,syn60all_h210,44,0.392174,0.549011,1,Anlocho
+holdout,syn60all_h210,45,0.258867,0.541163,1,Sapraminel Ost
+holdout,syn60all_h210,46,0.701034,0.507179,1,Micho
+holdout,syn60all_h210,47,0.900721,0.412461,1,Junvelhal
+holdout,syn60all_h210,48,0.492548,0.67978,1,Lumlumgor Lum
+holdout,syn60all_h210,49,0.450082,0.492834,1,Mian Ka
+holdout,syn60all_h210,50,0.427523,0.579149,1,Prator
+holdout,syn60all_h210,51,0.419254,0.310606,1,Isgor
+holdout,syn60all_h210,52,0.383883,0.384543,1,Kaelhal Bri
+holdout,syn60all_h210,53,0.570466,0.463828,1,Junanlomi El
+holdout,syn60all_h210,54,0.613651,0.400601,1,Saqui
+holdout,syn60all_h210,55,0.360798,0.481449,1,Choostkir
+holdout,syn60all_h210,56,0.514574,0.513507,1,Ananan
+holdout,syn60all_h210,57,0.569314,0.207114,1,Halqui
+holdout,syn60all_h210,58,0.12889,0.397823,1,Loelkir Anmi
+holdout,syn60all_h210,59,0.803763,0.563924,1,Choquiqui
+holdout,syn60all_h211,0,0.544387,0.442967,1,Briost Sa
+holdout,syn60all_h211,1,0.317109,0.276037,1,Quibrikapra
+holdout,syn60all_h211,2,0.497044,0.148664,1,Eljunanlo
+holdout,syn60all_h211,3,0.412696,0.415078,1,Morbri Tordun
+holdout,syn60all_h211,4,0.148024,0.438844,1,Ankachoren
+holdout,syn60all_h211,5,0.538313,0.388606,1,Velanelan
+holdout,syn60all_h211,6,0.430558,0.268473,1,Britor Neltor
+holdout,syn60all_h211,7,0.187223,0.369772,1,Kirgor
+holdout,syn60all_h211,8,0.19403,0.379073,1,Goran Mi
+holdout,syn60all_h211,9,0.209405,0.150862,1,Isishal Dunlo
+holdout,syn60all_h211,10,0.361467,0.288293,1,Falosa
+holdout,syn60all_h211,11,0.469561,0.234187,1,Lumtor
+holdout,syn60all_h211,12,0.24168,0.34361,1,Annel Gor
+holdout,syn60all_h211,13,0.110443,0.354925,1,Kirfa
+holdout,syn60all_h211,14,0.632068,0.221542,1,Samor
+holdout,syn60all_h211,15,0.670958,0.37015,1,Anmieljun
+holdout,syn60all_h211,16,0.287347,0.517212,1,Kakirlo
+holdout,syn60all_h211,17,0.610162,0.13644,1,Quinelelost
+holdout,syn60all_h211,18,0.412856,0.268802,1,Briis
+holdout,syn60all_h211,19,0.233988,0.469428,1,Praren Kir
+holdout,syn60all_h211,20,0.384862,0.20624,1,Sakaisfa
+holdout,syn60all_h211,21,0.378405,0.483893,1,Lojun
+holdout,syn60all_h211,22,0.04141,0.242529,1,Junel
+holdout,syn60all_h211,23,0.321245,0.261046,1,Ankirren Facho
+holdout,syn60all_h211,24,0.294853,0.297055,1,Kirmorka
+holdout,syn60all_h211,25,0.230736,0.349458,1,Ishalren Renel
+holdout,syn60all_h211,26,0.297907,0.228788,1,Sami
+holdout,syn60all_h211,27,0.452197,0.103483,1,Halanrenost
+holdout,syn60all_h211,28,0.242536,0.434136,1,Velmor
+holdout,syn60all_h211,29,0.460402,0.389702,1,Brika Fator
+holdout,syn60all_h211,30,0.524471,0.541207,1,Fahal
+holdout,syn60all_h211,31,0.450445,0.354457,1,Junqui
+holdout,syn60all_h211,32,0.348622,0.373487,1,Kahalhal
+holdout,syn60all_h211,33,0.38356,0.360073,1,Nelanlo Junel
+holdout,syn60all_h211,34,0.455128,0.376256,1,Quilummoran
+holdout,syn60all_h211,35,0.509252,0.306801,1,Logor
+holdout,syn60all_h211,36,0.294516,0.301953,1,Anmorelvel
+holdout,syn60all_h211,37,0.594424,0.562969,1,Losa
+holdout,syn60all_h211,38,0.381239,0.183256,1,Lumvel
+holdout,syn60all_h211,39,0.271569,0.075953,1,Ostsahal Morlo
+holdout,syn60all_h211,40,0.496546,0.328954,1,Anel Lo
+holdout,syn60all_h211,41,0.615351,0.544825,1,Micho Fafa
+holdout,syn60all_h211,42,0.268955,0.454274,1,Chomormicho
+holdout,syn60all_h211,43,0.312016,0.46189,1,Anhalmijun
+holdout,syn60all_h211,44,0.519842,0.184818,1,Nelostbrifa
+holdout,syn60all_h211,45,0.420158,0.456858,1,Isprajun
+holdout,syn60all_h211,46,0.258696,0.214579,1,Renmor
+holdout,syn60all_h211,47,0.558992,0.409308,1,Elel
+holdout,syn60all_h211,48,0.34752,0.504118,1,Jundun
+holdout,syn60all_h211,49,0.603167,0.422643,1,Faelmor
+holdout,syn60all_h211,50,0.4933,0.260475,1,Torjungor
+holdout,syn60all_h211,51,0.123201,0.598591,1,Kirmi
+holdout,syn60all_h211,52,0.246267,0.273257,1,Dunchosami
+holdout,syn60all_h211,53,0.373507,0.291296,1,Lohal
+holdout,syn60all_h211,54,0.811765,0.373024,1,Kafaquilum
+holdout,syn60all_h211,55,0.369031,0.114396,1,Lopraquilum
+holdout,syn60all_h211,56,0.239105,0.623539,1,Mimorka
+holdout,syn60all_h211,57,0.534692,0.300782,1,Quilumkir
+holdout,syn60all_h211,58,0.316091,0.468935,1,Ostfa
+holdout,syn60all_h211,59,0.569439,0.413394,1,Anquisa Gorren
+holdout,syn60all_h212,0,0.656598,0.333185,1,Karenka
+holdout,syn60all_h212,1,0.54077,0.4809,1,Gordun Miren
+holdout,syn60all_h212,2,0.684355,0.403357,1,Facho
+holdout,syn60all_h212,3,0.285112,0.98,1,Velankael
+holdout,syn60all_h212,4,0.433916,0.413457,1,Kabrivel
+holdout,syn60all_h212,5,0.64949,0.72009,1,Lumvel
+holdout,syn60all_h212,6,0.692863,0.78384,1,Ostostangor
+holdout,syn60all_h212,7,0.429744,0.643472,1,Kafakirvel
+holdout,syn60all_h212,8,0.521286,0.409121,1,Quigorvel
+holdout,syn60all_h212,9,0.728085,0.810955,1,Antorkirjun
+holdout,syn60all_h212,10,0.817966,0.609936,1,Junlumpramor
+holdout,syn60all_h212,11,0.449995,0.582515,1,Junjunsabri
+holdout,syn60all_h212,12,0.634307,0.612555,1,Lumost An
+holdout,syn60all_h212,13,0.930657,0.763507,1,Brigorvel
+holdout,syn60all_h212,14,0.547209,0.886892,1,Torelneltor
+holdout,syn60all_h212,15,0.452633,0.788228,1,Lummi
+holdout,syn60all_h212,16,0.734302,0.11782,1,Quirenostsa
+holdout,syn60all_h212,17,0.786597,0.958394,1,Prafa
+holdout,syn60all_h212,18,0.587433,0.574557,1,Prabripra
+holdout,syn60all_h212,19,0.427606,0.376729,1,Ankakirnel
+holdout,syn60all_h212,20,0.659899,0.299879,1,Praloquiren Ka
+holdout,syn60all_h212,21,0.675742,0.809315,1,Nelpradunvel
+holdout,syn60all_h212,22,0.531926,0.554173,1,Rensa
+holdout,syn60all_h212,23,0.382728,0.591888,1,Haleldun
+holdout,syn60all_h212,24,0.498587,0.647889,1,Toran Is
+holdout,syn60all_h212,25,0.546459,0.823382,1,Torkalum
+holdout,syn60all_h212,26,0.403159,0.49888,1,Kachoqui Tor
+holdout,syn60all_h212,27,0.426477,0.35332,1,Dunhalrenan
+holdout,syn60all_h212,28,0.657395,0.527203,1,Ostsaan Mor
+holdout,syn60all_h212,29,0.600133,0.463446,1,Choqui
+holdout,syn60all_h212,30,0.503748,0.41066,1,Bridunfael
+holdout,syn60all_h212,31,0.692903,0.580578,1,Ostanmor
+holdout,syn60all_h212,32,0.821879,0.835093,1,Elpraren
+holdout,syn60all_h212,33,0.928866,0.644175,1,Veldunan
+holdout,syn60all_h212,34,0.764233,0.827524,1,Gorquitorkir
+holdout,syn60all_h212,35,0.938443,0.648814,1,Rencho
+holdout,syn60all_h212,36,0.780688,0.079715,1,Lumpra
+holdout,syn60all_h212,37,0.776419,0.843851,1,Loquitor Qui
+holdout,syn60all_h212,38,0.803047,0.826533,1,Anmorost
+holdout,syn60all_h212,39,0.509821,0.775907,1,Loeldun
+holdout,syn60all_h212,40,0.844454,0.403909,1,Dunostostcho
+holdout,syn60all_h212,41,0.407738,0.600387,1,Brimor
+holdout,syn60all_h212,42,0.967784,0.736721,1,Halsa
+holdout,syn60all_h212,43,0.745579,0.802921,1,Torgordungor
+holdout,syn60all_h212,44,0.859949,0.774573,1,Rennel
+holdout,syn60all_h212,45,0.707499,0.739231,1,Juncholo
+holdout,syn60all_h212,46,0.279421,0.683427,1,Savel Lumfa
+holdout,syn60all_h212,47,0.726384,0.796349,1,Anqui Prami
+holdout,syn60all_h212,48,0.541294,0.795826,1,Brihalchokir
+holdout,syn60all_h212,49,0.476808,0.503685,1,Chobrifa
+holdout,syn60all_h212,50,0.700561,0.741689,1,Nelren Loren
+holdout,syn60all_h212,51,0.749856,0.977303,1,Mornelnelgor
+holdout,syn60all_h212,52,0.737785,0.736303,1,Gorlumpra
+holdout,syn60all_h212,53,0.486459,0.96485,1,Quihallumjun
+holdout,syn60all_h212,54,0.98,0.839754,1,Halneltorgor
+holdout,syn60all_h212,55,0.752831,0.834804,1,Hallo Quifa
+holdout,syn60all_h212,56,0.683632,0.741575,1,Quielsa
+holdout,syn60all_h212,57,0.709,0.670065,1,Morhalnelvel
+holdout,syn60all_h212,58,0.449883,0.125485,1,Fator Dunlo
+holdout,syn60all_h212,59,0.202693,0.586957,1,Brianan Nelvel
+holdout,syn60all_h213,0,0.66832,0.945004,1,Junhalanost
+holdout,syn60all_h213,1,0.587885,0.31975,1,Rensanel
+holdout,syn60all_h213,2,0.48719,0.168241,1,Sasa
+holdout,syn60all_h213,3,0.622609,0.424986,1,Lumkirlo
+holdout,syn60all_h213,4,0.28316,0.623531,1,Torjunkiris
+holdout,syn60all_h213,5,0.635664,0.403695,1,Velgorlo
+holdout,syn60all_h213,6,0.478011,0.748325,1,Andunan Quilum
+holdout,syn60all_h213,7,0.765967,0.660586,1,Haljun
+holdout,syn60all_h213,8,0.600861,0.746658,1,Renrendun
+holdout,syn60all_h213,9,0.50349,0.39596,1,Neldun
+holdout,syn60all_h213,10,0.583039,0.917833,1,Kirisfa
+holdout,syn60all_h213,11,0.622727,0.372629,1,Kirqui
+holdout,syn60all_h213,12,0.656023,0.354468,1,Morvel Vel
+holdout,syn60all_h213,13,0.434358,0.73363,1,Fakirtorbri
+holdout,syn60all_h213,14,0.646307,0.866701,1,Ostnel
+holdout,syn60all_h213,15,0.552438,0.578426,1,Quiellolum
+holdout,syn60all_h213,16,0.469019,0.648284,1,Elprakir Lo
+holdout,syn60all_h213,17,0.492722,0.703774,1,Anan Loqui
+holdout,syn60all_h213,18,0.571998,0.6421,1,Quipra
+holdout,syn60all_h213,19,0.547656,0.663337,1,Mihalsa
+holdout,syn60all_h213,20,0.563119,0.258461,1,Choprakamor
+holdout,syn60all_h213,21,0.639172,0.364259,1,Isnel Rentor
+holdout,syn60all_h213,22,0.612626,0.716391,1,Kapraqui
+holdout,syn60all_h213,23,0.594852,0.049533,1,Elis Ka
+holdout,syn60all_h213,24,0.704529,0.190727,1,Kirdunnellum
+holdout,syn60all_h213,25,0.420555,0.643258,1,Quilobri
+holdout,syn60all_h213,26,0.759193,0.123914,1,Sajunlomor
+holdout,syn60all_h213,27,0.77766,0.325915,1,Ankirbri
+holdout,syn60all_h213,28,0.75323,0.50517,1,Dunmorchotor
+holdout,syn60all_h213,29,0.825223,0.539275,1,Quichoren
+holdout,syn60all_h213,30,0.819373,0.386988,1,Fafa
+holdout,syn60all_h213,31,0.600878,0.315089,1,Brinelmor
+holdout,syn60all_h213,32,0.681207,0.422951,1,Sakir
+holdout,syn60all_h213,33,0.60529,0.282141,1,Lojun Praqui
+holdout,syn60all_h213,34,0.896952,0.464904,1,Torostquilum
+holdout,syn60all_h213,35,0.459131,0.675937,1,Mitorlum
+holdout,syn60all_h213,36,0.646483,0.258608,1,Lolum Nel
+holdout,syn60all_h213,37,0.555487,0.330468,1,Nelhaldun
+holdout,syn60all_h213,38,0.760872,0.340775,1,Lumnelka
+holdout,syn60all_h213,39,0.585496,0.342186,1,Gorsa Vel
+holdout,syn60all_h213,40,0.431917,0.694185,1,Facho
+holdout,syn60all_h213,41,0.506437,0.300692,1,Morlum
+holdout,syn60all_h213,42,0.536568,0.628657,1,Praislolo
+holdout,syn60all_h213,43,0.451806,0.254095,1,Velkir Bri
+holdout,syn60all_h213,44,0.347991,0.608495,1,Torostkircho
+holdout,syn60all_h213,45,0.494421,0.660533,1,Gorgoranbri
+holdout,syn60all_h213,46,0.605589,0.707303,1,Quimormi
+holdout,syn60all_h213,47,0.690886,0.346061,1,Andunostqui
+holdout,syn60all_h213,48,0.584182,0.74531,1,Salumkir
+holdout,syn60all_h213,49,0.758048,0.431733,1,Juncho
+holdout,syn60all_h213,50,0.98,0.49714,1,Velkamisa Gor
+holdout,syn60all_h213,51,0.518858,0.590111,1,Velsa Bricho
+holdout,syn60all_h213,52,0.804847,0.437191,1,Mibri Torost
+holdout,syn60all_h213,53,0.567289,0.220053,1,Velan
+holdout,syn60all_h213,54,0.514702,0.478046,1,Junkaost
+holdout,syn60all_h213,55,0.633593,0.560743,1,Prasa
+holdout,syn60all_h213,56,0.433633,0.692718,1,Gorren
+holdout,syn60all_h213,57,0.734263,0.317748,1,Quibri
+holdout,syn60all_h213,58,0.761717,0.436826,1,Kakirmorvel
+holdout,syn60all_h213,59,0.347843,0.219842,1,Anost Qui
+holdout,syn60all_h214,0,0.32239,0.667331,1,Bribrivel
+holdout,syn60all_h214,1,0.497094,0.692404,1,Ostfasa
+holdout,syn60all_h214,2,0.824821,0.655484,1,Facho Ka
+holdout,syn60all_h214,3,0.432033,0.29313,1,Velrenquilo
+holdout,syn60all_h214,4,0.498675,0.284354,1,Prarenpra
+holdout,syn60all_h214,5,0.303224,0.390297,1,Osttormor
+holdout,syn60all_h214,6,0.526041,0.02,1,Junren
+holdout,syn60all_h214,7,0.542423,0.67649,1,Morsaren
+holdout,syn60all_h214,8,0.231833,0.435948,1,Gorpra
+holdout,syn60all_h214,9,0.187112,0.559507,1,Loquiis
+holdout,syn60all_h214,10,0.470141,0.138972,1,Veljun
+holdout,syn60all_h214,11,0.752642,0.623176,1,Quivelcho
+holdout,syn60all_h214,12,0.187814,0.54694,1,Renelostbri
+holdout,syn60all_h214,13,0.449605,0.277746,1,Falumdun
+holdout,syn60all_h214,14,0.187885,0.262133,1,Lumkaiska
+holdout,syn60all_h214,15,0.416918,0.291331,1,Lumchobri Lum
+holdout,syn60all_h214,16,0.377334,0.640695,1,Kafaren
+holdout,syn60all_h214,17,0.396249,0.378502,1,Veltor
+holdout,syn60all_h214,18,0.42675,0.554691,1,Elqui
+holdout,syn60all_h214,19,0.30647,0.314723,1,Brihalsa Hal
+holdout,syn60all_h214,20,0.581379,0.150398,1,Rentor
+holdout,syn60all_h214,21,0.195318,0.756915,1,Nelgoran
+holdout,syn60all_h214,22,0.261579,0.488569,1,Minelmormor
+holdout,syn60all_h214,23,0.531702,0.732431,1,Halquigor
+holdout,syn60all_h214,24,0.122353,0.475042,1,Gorostjunlo
+holdout,syn60all_h214,25,0.519456,0.15577,1,Kirmor Kaqui
+holdout,syn60all_h214,26,0.5206,0.617548,1,Dunsa
+holdout,syn60all_h214,27,0.352321,0.7894,1,Elrensami
+holdout,syn60all_h214,28,0.309812,0.257143,1,Praelis Lumdun
+holdout,syn60all_h214,29,0.079947,0.300916,1,Halmitor Lo
+holdout,syn60all_h214,30,0.180159,0.527348,1,Ostan Ka
+holdout,syn60all_h214,31,0.569669,0.052248,1,Renis
+holdout,syn60all_h214,32,0.416699,0.378948,1,Prafatorvel
+holdout,syn60all_h214,33,0.057947,0.659695,1,Morjunqui
+holdout,syn60all_h214,34,0.64344,0.075763,1,Cholo
+holdout,syn60all_h214,35,0.37769,0.332096,1,Elmor
+holdout,syn60all_h214,36,0.300889,0.73305,1,Sakirsaan
+holdout,syn60all_h214,37,0.632065,0.21169,1,Elquiel
+holdout,syn60all_h214,38,0.453324,0.740616,1,Dunhaltorjun
+holdout,syn60all_h214,39,0.02,0.692597,1,Morchosacho
+holdout,syn60all_h214,40,0.381455,0.55495,1,Mirenisbri
+holdout,syn60all_h214,41,0.354777,0.253278,1,Issa
+holdout,syn60all_h214,42,0.298883,0.384719,1,Dunren
+holdout,syn60all_h214,43,0.278135,0.146685,1,Kakirgorvel
+holdout,syn60all_h214,44,0.46703,0.568777,1,Osttorosttor
+holdout,syn60all_h214,45,0.136775,0.746397,1,Haldunnel
+holdout,syn60all_h214,46,0.443938,0.706196,1,Dunpraka
+holdout,syn60all_h214,47,0.262424,0.256943,1,Nellogorfa
+holdout,syn60all_h214,48,0.238065,0.777052,1,Antorsa
+holdout,syn60all_h214,49,0.462366,0.616761,1,Pracholum
+holdout,syn60all_h214,50,0.32211,0.326586,1,Miislo
+holdout,syn60all_h214,51,0.304515,0.530535,1,Quielpra
+holdout,syn60all_h214,52,0.338546,0.279632,1,Lumka Toran
+holdout,syn60all_h214,53,0.152115,0.657259,1,Brilumhalmor
+holdout,syn60all_h214,54,0.182725,0.758435,1,Tortor
+holdout,syn60all_h214,55,0.526371,0.480266,1,Dunhal
+holdout,syn60all_h214,56,0.041783,0.830492,1,Lumel
+holdout,syn60all_h214,57,0.415257,0.581036,1,Quipra Tor
+holdout,syn60all_h214,58,0.312935,0.610626,1,Tornellum
+holdout,syn60all_h214,59,0.734285,0.590009,1,Chokaren
+holdout,syn60all_h215,0,0.296199,0.44519,1,Renkirismi
+holdout,syn60all_h215,1,0.248376,0.633103,1,Kirfachoka
+holdout,syn60all_h215,2,0.782498,0.550118,1,Quimi
+holdout,syn60all_h215,3,0.738302,0.820935,1,Ishalvelfa
+holdout,syn60all_h215,4,0.626939,0.769804,1,Ostquihalhal
+holdout,syn60all_h215,5,0.946169,0.682484,1,Brinel Cholum
+holdout,syn60all_h215,6,0.382456,0.561439,1,Toran Lo
+holdout,syn60all_h215,7,0.766863,0.535909,1,Brigorkirnel
+holdout,syn60all_h215,8,0.785197,0.500164,1,Anvelmivel Is
+holdout,syn60all_h215,9,0.791368,0.37838,1,Nelmi Morpra
+holdout,syn60all_h215,10,0.36959,0.485027,1,Renquiost
+holdout,syn60all_h215,11,0.686469,0.624514,1,Faanistor
+holdout,syn60all_h215,12,0.381578,0.431219,1,Quiost
+holdout,syn60all_h215,13,0.822784,0.579541,1,Nelrengorfa
+holdout,syn60all_h215,14,0.661604,0.51367,1,Eltoran Toran
+holdout,syn60all_h215,15,0.615461,0.474112,1,Halgor Ren
+holdout,syn60all_h215,16,0.579407,0.594038,1,Ostostkacho
+holdout,syn60all_h215,17,0.831363,0.374413,1,Pracho
+holdout,syn60all_h215,18,0.746465,0.340249,1,Velmipraost
+holdout,syn60all_h215,19,0.98,0.494438,1,Osttor
+holdout,syn60all_h215,20,0.295331,0.662334,1,Lolumdun
+holdout,syn60all_h215,21,0.868848,0.5123,1,Quigor
+holdout,syn60all_h215,22,0.686499,0.718759,1,Lumhalpra
+holdout,syn60all_h215,23,0.278667,0.556959,1,Loquilumfa
+holdout,syn60all_h215,24,0.339874,0.426365,1,Quinel
+holdout,syn60all_h215,25,0.633452,0.362693,1,Mipra
+holdout,syn60all_h215,26,0.840801,0.374181,1,Morqui
+holdout,syn60all_h215,27,0.711462,0.358367,1,Elfasacho Nel
+holdout,syn60all_h215,28,0.792425,0.781186,1,Ansaka Dun
+holdout,syn60all_h215,29,0.745845,0.742246,1,Sakir
+holdout,syn60all_h215,30,0.731607,0.558168,1,Junkirsaka Sa
+holdout,syn60all_h215,31,0.917025,0.657158,1,Halvel
+holdout,syn60all_h215,32,0.330901,0.305271,1,Toris Is
+holdout,syn60all_h215,33,0.288694,0.652883,1,Elbrichoqui
+holdout,syn60all_h215,34,0.462899,0.449352,1,Lotor
+holdout,syn60all_h215,35,0.646018,0.365565,1,Kakacho
+holdout,syn60all_h215,36,0.562141,0.500238,1,Lumpra
+holdout,syn60all_h215,37,0.96188,0.425145,1,Lumvel
+holdout,syn60all_h215,38,0.449638,0.298628,1,Quiduntor
+holdout,syn60all_h215,39,0.257044,0.337114,1,Lomilo
+holdout,syn60all_h215,40,0.239479,0.322214,1,Kavelpra
+holdout,syn60all_h215,41,0.52096,0.560382,1,Gorlumlolum
+holdout,syn60all_h215,42,0.221924,0.302208,1,Cholo
+holdout,syn60all_h215,43,0.723645,0.584253,1,Anrenis Saren
+holdout,syn60all_h215,44,0.6044,0.465264,1,Kajunis
+holdout,syn60all_h215,45,0.571874,0.395012,1,Saquimi
+holdout,syn60all_h215,46,0.559834,0.544274,1,Elkircho Mi
+holdout,syn60all_h215,47,0.788638,0.507162,1,Juntorkir
+holdout,syn60all_h215,48,0.704658,0.660969,1,Junka
+holdout,syn60all_h215,49,0.740823,0.775001,1,Ostmiost
+holdout,syn60all_h215,50,0.623483,0.684661,1,Elpraancho Vel
+holdout,syn60all_h215,51,0.341998,0.45976,1,Sagorka
+holdout,syn60all_h215,52,0.327874,0.248048,1,Lumismilo
+holdout,syn60all_h215,53,0.818933,0.577017,1,Sakirchoqui
+holdout,syn60all_h215,54,0.339667,0.421638,1,Ostcho Isel
+holdout,syn60all_h215,55,0.703021,0.665059,1,Dunhalrenlo
+holdout,syn60all_h215,56,0.829501,0.618094,1,Lomiisdun
+holdout,syn60all_h215,57,0.653399,0.846045,1,Lumanveltor
+holdout,syn60all_h215,58,0.631783,0.601545,1,Pramor Gorpra
+holdout,syn60all_h215,59,0.746404,0.659379,1,Savel
+holdout,syn60all_h216,0,0.399125,0.245479,1,Fanelqui
+holdout,syn60all_h216,1,0.524475,0.513449,1,Isquichosa
+holdout,syn60all_h216,2,0.176049,0.653191,1,Renelost Saqui
+holdout,syn60all_h216,3,0.299151,0.378256,1,Eltornelkir
+holdout,syn60all_h216,4,0.105289,0.721034,1,Morgoris
+holdout,syn60all_h216,5,0.55431,0.746561,1,Milobri
+holdout,syn60all_h216,6,0.350973,0.634476,1,Kircho
+holdout,syn60all_h216,7,0.39962,0.551092,1,Dunsajun
+holdout,syn60all_h216,8,0.296294,0.670478,1,Istor Gormi
+holdout,syn60all_h216,9,0.106902,0.587945,1,Quielqui
+holdout,syn60all_h216,10,0.25377,0.748221,1,Lonelvel
+holdout,syn60all_h216,11,0.253449,0.623617,1,Loquiis
+holdout,syn60all_h216,12,0.292795,0.386885,1,Cholorenjun
+holdout,syn60all_h216,13,0.316065,0.788669,1,Ostan
+holdout,syn60all_h216,14,0.546092,0.493366,1,Velpra
+holdout,syn60all_h216,15,0.26592,0.622421,1,Isosthal
+holdout,syn60all_h216,16,0.359458,0.550305,1,Fasarenpra
+holdout,syn60all_h216,17,0.485788,0.426869,1,Velvellumgor
+holdout,syn60all_h216,18,0.366627,0.703842,1,Haljunis
+holdout,syn60all_h216,19,0.233804,0.566135,1,Bripra
+holdout,syn60all_h216,20,0.656156,0.833116,1,Quiellumtor
+holdout,syn60all_h216,21,0.61598,0.592661,1,Cholokirsa
+holdout,syn60all_h216,22,0.50912,0.631521,1,Loquitor
+holdout,syn60all_h216,23,0.466721,0.702628,1,Quimi
+holdout,syn60all_h216,24,0.339459,0.836708,1,Torka Ka
+holdout,syn60all_h216,25,0.569342,0.437026,1,Tormorelren
+holdout,syn60all_h216,26,0.506154,0.692564,1,Sanelsa
+holdout,syn60all_h216,27,0.547192,0.726804,1,Brisanel
+holdout,syn60all_h216,28,0.403977,0.384237,1,Chohal
+holdout,syn60all_h216,29,0.502873,0.623972,1,Chojunmor
+holdout,syn60all_h216,30,0.464372,0.698524,1,Sadunan
+holdout,syn60all_h216,31,0.417166,0.829325,1,Gormipra Ka
+holdout,syn60all_h216,32,0.162717,0.681432,1,Dunmi
+holdout,syn60all_h216,33,0.25135,0.787756,1,Quidunostfa
+holdout,syn60all_h216,34,0.345637,0.68747,1,Dunisbri
+holdout,syn60all_h216,35,0.22667,0.73858,1,Halmorhal
+holdout,syn60all_h216,36,0.447529,0.825106,1,Anostpradun
+holdout,syn60all_h216,37,0.187692,0.760878,1,Fahalel Ostkir
+holdout,syn60all_h216,38,0.412093,0.634764,1,Loren
+holdout,syn60all_h216,39,0.273302,0.479895,1,Brisa
+holdout,syn60all_h216,40,0.458315,0.378041,1,Morren Chobri
+holdout,syn60all_h216,41,0.464852,0.547035,1,Halkir
+holdout,syn60all_h216,42,0.395709,0.582911,1,Halmor
+holdout,syn60all_h216,43,0.634436,0.623595,1,Osthal
+holdout,syn60all_h216,44,0.453935,0.511554,1,Isbriost
+holdout,syn60all_h216,45,0.383855,0.730226,1,Praelcho
+holdout,syn60all_h216,46,0.434786,0.613795,1,Velkirmi
+holdout,syn60all_h216,47,0.374394,0.511915,1,Lumsa
+holdout,syn60all_h216,48,0.122065,0.341853,1,Kalo
+holdout,syn60all_h216,49,0.493058,0.439269,1,Kafachoqui
+holdout,syn60all_h216,50,0.682614,0.752003,1,Morren Pra
+holdout,syn60all_h216,51,0.30713,0.475209,1,Nelquinelel
+holdout,syn60all_h216,52,0.294004,0.621984,1,Logorchodun
+holdout,syn60all_h216,53,0.285817,0.34777,1,Saloostmor
+holdout,syn60all_h216,54,0.257299,0.792774,1,Gorlumquika
+holdout,syn60all_h216,55,0.593431,0.77357,1,Dunostsa
+holdout,syn60all_h216,56,0.415194,0.533795,1,Goran Tor
+holdout,syn60all_h216,57,0.308856,0.611786,1,Gorelquilo
+holdout,syn60all_h216,58,0.706608,0.456562,1,Jundunost
+holdout,syn60all_h216,59,0.355763,0.38632,1,Morhal Dunlo
+holdout,syn60all_h217,0,0.452474,0.558018,1,Ostmilo
+holdout,syn60all_h217,1,0.719721,0.488124,1,Briisdun
+holdout,syn60all_h217,2,0.501602,0.411406,1,Gorhalmitor
+holdout,syn60all_h217,3,0.598294,0.582994,1,Renlumloost
+holdout,syn60all_h217,4,0.318293,0.493693,1,Torkirdun
+holdout,syn60all_h217,5,0.965886,0.553448,1,Kiran
+holdout,syn60all_h217,6,0.742656,0.72051,1,Junost
+holdout,syn60all_h217,7,0.68061,0.436423,1,Isvelmipra
+holdout,syn60all_h217,8,0.656244,0.376948,1,Ostlosa
+holdout,syn60all_h217,9,0.627192,0.461312,1,Faostismor Qui
+holdout,syn60all_h217,10,0.482014,0.46093,1,Briminelmor
+holdout,syn60all_h217,11,0.708132,0.517811,1,Dunnel
+holdout,syn60all_h217,12,0.475324,0.694382,1,Anhalfa
+holdout,syn60all_h217,13,0.659175,0.600465,1,Chokircho
+holdout,syn60all_h217,14,0.6521,0.604518,1,Velgorjunkir
+holdout,syn60all_h217,15,0.761909,0.188506,1,Losa
+holdout,syn60all_h217,16,0.330412,0.406361,1,Quilumjunkir
+holdout,syn60all_h217,17,0.254779,0.498472,1,Mikirquivel
+holdout,syn60all_h217,18,0.633218,0.705607,1,Choqui Nel
+holdout,syn60all_h217,19,0.215359,0.643316,1,Mitorqui Pra
+holdout,syn60all_h217,20,0.415037,0.534009,1,Iskaanhal Fa
+holdout,syn60all_h217,21,0.825327,0.370398,1,Kael
+holdout,syn60all_h217,22,0.62379,0.617934,1,Nelis
+holdout,syn60all_h217,23,0.372492,0.504487,1,Sajun
+holdout,syn60all_h217,24,0.7929,0.553635,1,Mordunpravel
+holdout,syn60all_h217,25,0.545775,0.684016,1,Ostmorren
+holdout,syn60all_h217,26,0.555243,0.542467,1,Velfalumhal
+holdout,syn60all_h217,27,0.560805,0.629703,1,Sajun Renan
+holdout,syn60all_h217,28,0.60347,0.412868,1,Velprahal
+holdout,syn60all_h217,29,0.819839,0.450159,1,Kirquika
+holdout,syn60all_h217,30,0.524814,0.544614,1,Sais Tor
+holdout,syn60all_h217,31,0.49297,0.707685,1,Rencho
+holdout,syn60all_h217,32,0.76784,0.402765,1,Issabrihal
+holdout,syn60all_h217,33,0.375412,0.53435,1,Junfamiqui
+holdout,syn60all_h217,34,0.768999,0.314901,1,Dunmi
+holdout,syn60all_h217,35,0.637011,0.684305,1,Anmor Gor
+holdout,syn60all_h217,36,0.710666,0.595938,1,Prarenmor
+holdout,syn60all_h217,37,0.376015,0.524995,1,Sais
+holdout,syn60all_h217,38,0.73384,0.341002,1,Quigormibri
+holdout,syn60all_h217,39,0.821602,0.463384,1,Isjunlumlo
+holdout,syn60all_h217,40,0.440191,0.687436,1,Lodunsadun
+holdout,syn60all_h217,41,0.854965,0.76386,1,Samorkafa
+holdout,syn60all_h217,42,0.556843,0.662324,1,Anchoannel Sa
+holdout,syn60all_h217,43,0.795386,0.286256,1,Dunsa
+holdout,syn60all_h217,44,0.531532,0.32101,1,Lumhal
+holdout,syn60all_h217,45,0.368809,0.592413,1,Cholo
+holdout,syn60all_h217,46,0.806884,0.43849,1,Lumvel
+holdout,syn60all_h217,47,0.697644,0.086049,1,Ostchoanmi
+holdout,syn60all_h217,48,0.71201,0.392955,1,Nelhal
+holdout,syn60all_h217,49,0.645234,0.56262,1,Gormi Bri
+holdout,syn60all_h217,50,0.650913,0.430644,1,Angorjun
+holdout,syn60all_h217,51,0.582729,0.538053,1,Gorlum
+holdout,syn60all_h217,52,0.660459,0.371612,1,Gorlo Gor
+holdout,syn60all_h217,53,0.671872,0.602908,1,Sapra
+holdout,syn60all_h217,54,0.58836,0.551037,1,Sacho An
+holdout,syn60all_h217,55,0.663724,0.5534,1,Brigorsa
+holdout,syn60all_h217,56,0.244513,0.651588,1,Torlum
+holdout,syn60all_h217,57,0.548132,0.584129,1,Toris
+holdout,syn60all_h217,58,0.428728,0.577301,1,Rennelkir
+holdout,syn60all_h217,59,0.523482,0.463831,1,Gorkiranvel
+holdout,syn60all_h218,0,0.85694,0.370979,1,Ostjun
+holdout,syn60all_h218,1,0.356539,0.782324,1,Chohalel
+holdout,syn60all_h218,2,0.26978,0.394253,1,Renello
+holdout,syn60all_h218,3,0.580931,0.571761,1,Velnel
+holdout,syn60all_h218,4,0.688049,0.462189,1,Islojunmi Hal
+holdout,syn60all_h218,5,0.5612,0.55178,1,Lofaren
+holdout,syn60all_h218,6,0.279514,0.482541,1,Elnel
+holdout,syn60all_h218,7,0.428269,0.527904,1,Sagorvelnel
+holdout,syn60all_h218,8,0.268821,0.785487,1,Halren
+holdout,syn60all_h218,9,0.344202,0.651673,1,Velrenisnel
+holdout,syn60all_h218,10,0.270696,0.801957,1,Torvel
+holdout,syn60all_h218,11,0.366426,0.477062,1,Kasatorel Sa
+holdout,syn60all_h218,12,0.703113,0.612493,1,Quilogor
+holdout,syn60all_h218,13,0.425934,0.549155,1,Ostmor
+holdout,syn60all_h218,14,0.213016,0.451063,1,Renmibrilo
+holdout,syn60all_h218,15,0.44887,0.686583,1,Isrensa
+holdout,syn60all_h218,16,0.155544,0.700267,1,Gorka Sami
+holdout,syn60all_h218,17,0.537442,0.524421,1,Chobriost
+holdout,syn60all_h218,18,0.54074,0.374585,1,Chofa Goris
+holdout,syn60all_h218,19,0.072306,0.737064,1,Quijun
+holdout,syn60all_h218,20,0.263275,0.402501,1,Gorlojun
+holdout,syn60all_h218,21,0.109057,0.492724,1,Gorlumsa
+holdout,syn60all_h218,22,0.646877,0.289651,1,Velvelostjun
+holdout,syn60all_h218,23,0.375818,0.514364,1,Ostvel
+holdout,syn60all_h218,24,0.400197,0.699859,1,Renrensa
+holdout,syn60all_h218,25,0.353621,0.435019,1,Rentorsa Sahal
+holdout,syn60all_h218,26,0.191688,0.351753,1,Kavelvelis
+holdout,syn60all_h218,27,0.290727,0.396995,1,Rendunan
+holdout,syn60all_h218,28,0.607715,0.461533,1,Torka
+holdout,syn60all_h218,29,0.261504,0.354314,1,Iska
+holdout,syn60all_h218,30,0.385714,0.69377,1,Loan Vel
+holdout,syn60all_h218,31,0.14791,0.736824,1,Torhalmi
+holdout,syn60all_h218,32,0.483993,0.409138,1,Velelan
+holdout,syn60all_h218,33,0.340396,0.46635,1,Milum
+holdout,syn60all_h218,34,0.62295,0.316863,1,Anpracho Velan
+holdout,syn60all_h218,35,0.820751,0.467606,1,Mipralo
+holdout,syn60all_h218,36,0.499164,0.31965,1,Halvelmibri
+holdout,syn60all_h218,37,0.731952,0.418303,1,Faisduntor
+holdout,syn60all_h218,38,0.35123,0.931813,1,Nelbri
+holdout,syn60all_h218,39,0.361912,0.397648,1,Quiost
+holdout,syn60all_h218,40,0.345784,0.53917,1,Neltorel Kabri
+holdout,syn60all_h218,41,0.314497,0.532316,1,Kirdun
+holdout,syn60all_h218,42,0.424085,0.207924,1,Renelhal
+holdout,syn60all_h218,43,0.46738,0.554596,1,Kasaprasa
+holdout,syn60all_h218,44,0.597186,0.466731,1,Anfasakir
+holdout,syn60all_h218,45,0.189221,0.546451,1,Prahalan
+holdout,syn60all_h218,46,0.463683,0.612605,1,Nellum Mivel
+holdout,syn60all_h218,47,0.081519,0.654735,1,Saveldun
+holdout,syn60all_h218,48,0.234072,0.298638,1,Gorkiranvel
+holdout,syn60all_h218,49,0.258336,0.551115,1,Praquikasa Pra
+holdout,syn60all_h218,50,0.523205,0.523094,1,Chomifa
+holdout,syn60all_h218,51,0.02,0.74432,1,Tormorjun
+holdout,syn60all_h218,52,0.164485,0.487732,1,Lodunlum Hal
+holdout,syn60all_h218,53,0.437583,0.379767,1,Issaisgor
+holdout,syn60all_h218,54,0.642242,0.242331,1,Velcho
+holdout,syn60all_h218,55,0.248423,0.476872,1,Mornel
+holdout,syn60all_h218,56,0.769889,0.608741,1,Ishal Tor
+holdout,syn60all_h218,57,0.936857,0.498121,1,Istorlum
+holdout,syn60all_h218,58,0.368982,0.55392,1,Favelisbri
+holdout,syn60all_h218,59,0.685615,0.444585,1,Loka
+holdout,syn60all_h219,0,0.320715,0.555852,1,Halelka
+holdout,syn60all_h219,1,0.103718,0.438319,1,Chohal
+holdout,syn60all_h219,2,0.534651,0.382786,1,Elquicholo
+holdout,syn60all_h219,3,0.18436,0.494424,1,Quijun
+holdout,syn60all_h219,4,0.02,0.593789,1,Fami
+holdout,syn60all_h219,5,0.125598,0.600414,1,Elquichoka
+holdout,syn60all_h219,6,0.299334,0.558242,1,Nelfakir
+holdout,syn60all_h219,7,0.209278,0.447668,1,Halfapra
+holdout,syn60all_h219,8,0.68384,0.404919,1,Gorost Kir
+holdout,syn60all_h219,9,0.743431,0.590097,1,Torlumkajun
+holdout,syn60all_h219,10,0.250623,0.294021,1,Isostlum
+holdout,syn60all_h219,11,0.582154,0.403852,1,Mianbri
+holdout,syn60all_h219,12,0.650758,0.792268,1,Ostan
+holdout,syn60all_h219,13,0.751576,0.56275,1,Gorhal
+holdout,syn60all_h219,14,0.101432,0.415991,1,Dunel Cho
+holdout,syn60all_h219,15,0.346506,0.819904,1,Morpramor
+holdout,syn60all_h219,16,0.588884,0.367983,1,Famortor
+holdout,syn60all_h219,17,0.622448,0.447994,1,Pramiost
+holdout,syn60all_h219,18,0.696626,0.471225,1,Mibriloel
+holdout,syn60all_h219,19,0.034162,0.547444,1,Anostan Lo
+holdout,syn60all_h219,20,0.110799,0.783542,1,Angor
+holdout,syn60all_h219,21,0.206266,0.49155,1,Halsabri Pra
+holdout,syn60all_h219,22,0.411499,0.744275,1,Sakirost Fael
+holdout,syn60all_h219,23,0.110543,0.206152,1,Milumbriel
+holdout,syn60all_h219,24,0.416596,0.221124,1,Morprabri
+holdout,syn60all_h219,25,0.766404,0.315878,1,Mortornelbri
+holdout,syn60all_h219,26,0.138854,0.152596,1,Lodunel
+holdout,syn60all_h219,27,0.484064,0.451856,1,Morka
+holdout,syn60all_h219,28,0.426372,0.27885,1,Lumpraost
+holdout,syn60all_h219,29,0.208815,0.505202,1,Bribriqui Dun
+holdout,syn60all_h219,30,0.083092,0.692949,1,Loel
+holdout,syn60all_h219,31,0.47381,0.596818,1,Gorostelost
+holdout,syn60all_h219,32,0.052156,0.573739,1,Prabrijunka
+holdout,syn60all_h219,33,0.453513,0.322543,1,Migorhal
+holdout,syn60all_h219,34,0.558695,0.544287,1,Brijunanqui
+holdout,syn60all_h219,35,0.288017,0.424783,1,Sacho
+holdout,syn60all_h219,36,0.171678,0.492213,1,Iska
+holdout,syn60all_h219,37,0.103557,0.367933,1,Quiprasa
+holdout,syn60all_h219,38,0.210136,0.567442,1,Lumjunjun
+holdout,syn60all_h219,39,0.300027,0.435881,1,Fagorlum
+holdout,syn60all_h219,40,0.691693,0.615771,1,Dunel
+holdout,syn60all_h219,41,0.635392,0.4862,1,Junelsator Ren
+holdout,syn60all_h219,42,0.111041,0.706571,1,Antoran
+holdout,syn60all_h219,43,0.1486,0.241674,1,Brimormi
+holdout,syn60all_h219,44,0.477524,0.284136,1,Kasa
+holdout,syn60all_h219,45,0.478482,0.518675,1,Chofaost
+holdout,syn60all_h219,46,0.540262,0.332615,1,Anmor
+holdout,syn60all_h219,47,0.205582,0.616648,1,Ostfalum Renka
+holdout,syn60all_h219,48,0.286416,0.361843,1,Isfagor
+holdout,syn60all_h219,49,0.320234,0.435757,1,Fafa Jun
+holdout,syn60all_h219,50,0.174237,0.372203,1,Fabridun Ansa
+holdout,syn60all_h219,51,0.700363,0.371392,1,Anbri
+holdout,syn60all_h219,52,0.378249,0.389945,1,Lumkachosa
+holdout,syn60all_h219,53,0.822896,0.388481,1,Mortormornel
+holdout,syn60all_h219,54,0.233811,0.44643,1,Quidunpra
+holdout,syn60all_h219,55,0.245105,0.605961,1,Neltorren Ka
+holdout,syn60all_h219,56,0.320104,0.16821,1,Kalumdunka
+holdout,syn60all_h219,57,0.269081,0.506023,1,Andunduncho
+holdout,syn60all_h219,58,0.079435,0.695367,1,Kirbriis
+holdout,syn60all_h219,59,0.538803,0.443721,1,Lumelsa
+holdout,syn60all_h220,0,0.423751,0.543943,1,Gorsagor Pra
+holdout,syn60all_h220,1,0.544536,0.476179,1,Goris Ren
+holdout,syn60all_h220,2,0.394631,0.443976,1,Elfa
+holdout,syn60all_h220,3,0.440012,0.126132,1,Choan Lum
+holdout,syn60all_h220,4,0.52973,0.612173,1,Mibri
+holdout,syn60all_h220,5,0.420528,0.457388,1,Quilum
+holdout,syn60all_h220,6,0.588343,0.656802,1,Neljun Gor
+holdout,syn60all_h220,7,0.472944,0.476404,1,Misa
+holdout,syn60all_h220,8,0.438924,0.398289,1,Brirenlum
+holdout,syn60all_h220,9,0.595945,0.635505,1,Kirsabritor
+holdout,syn60all_h220,10,0.417304,0.754381,1,Dunka
+holdout,syn60all_h220,11,0.398664,0.500855,1,Hallum
+holdout,syn60all_h220,12,0.291971,0.713847,1,Kiris
+holdout,syn60all_h220,13,0.378372,0.414897,1,Brihal
+holdout,syn60all_h220,14,0.509303,0.698303,1,Morhalsa
+holdout,syn60all_h220,15,0.544266,0.98,1,Brirenren
+holdout,syn60all_h220,16,0.578056,0.696245,1,Anismorhal
+holdout,syn60all_h220,17,0.513515,0.545366,1,Anren Quigor
+holdout,syn60all_h220,18,0.480467,0.482609,1,Dunbripraka
+holdout,syn60all_h220,19,0.344645,0.344872,1,Quifa
+holdout,syn60all_h220,20,0.540695,0.422368,1,Elkirgordun
+holdout,syn60all_h220,21,0.683408,0.081328,1,Kirquiqui
+holdout,syn60all_h220,22,0.193783,0.595134,1,Junmor
+holdout,syn60all_h220,23,0.514086,0.259085,1,Lumlo Mi
+holdout,syn60all_h220,24,0.528536,0.752911,1,Kirnelcho
+holdout,syn60all_h220,25,0.418972,0.426397,1,Prakir
+holdout,syn60all_h220,26,0.469172,0.853536,1,Lochois Kagor
+holdout,syn60all_h220,27,0.642997,0.70908,1,Torgorveltor
+holdout,syn60all_h220,28,0.699432,0.476129,1,Renhalka
+holdout,syn60all_h220,29,0.493897,0.261019,1,Chois Jun
+holdout,syn60all_h220,30,0.491633,0.68013,1,Moranlokir
+holdout,syn60all_h220,31,0.483133,0.303054,1,Mitorostis
+holdout,syn60all_h220,32,0.670045,0.285036,1,Torsael
+holdout,syn60all_h220,33,0.626083,0.063459,1,Isgor
+holdout,syn60all_h220,34,0.717731,0.640625,1,Kachoren
+holdout,syn60all_h220,35,0.566674,0.468897,1,Miostmorkir
+holdout,syn60all_h220,36,0.423808,0.516398,1,Tornel
+holdout,syn60all_h220,37,0.694558,0.702512,1,Praello
+holdout,syn60all_h220,38,0.612264,0.711274,1,Lomor
+holdout,syn60all_h220,39,0.567395,0.663858,1,Quian Ost
+holdout,syn60all_h220,40,0.552982,0.578132,1,Annelkir
+holdout,syn60all_h220,41,0.495078,0.809029,1,Elrenan El
+holdout,syn60all_h220,42,0.512948,0.393965,1,Gorsais
+holdout,syn60all_h220,43,0.629004,0.307393,1,Elren Is
+holdout,syn60all_h220,44,0.91154,0.74842,1,Rengor
+holdout,syn60all_h220,45,0.381255,0.458018,1,Savel Lumqui
+holdout,syn60all_h220,46,0.389131,0.542274,1,Nelcho
+holdout,syn60all_h220,47,0.51306,0.656377,1,Loneldun Pra
+holdout,syn60all_h220,48,0.447655,0.602815,1,Fakiranmi
+holdout,syn60all_h220,49,0.476875,0.430983,1,Fakachovel
+holdout,syn60all_h220,50,0.694296,0.389631,1,Torkirelsa Is
+holdout,syn60all_h220,51,0.568869,0.677878,1,Junkir
+holdout,syn60all_h220,52,0.44825,0.806986,1,Ostdunel
+holdout,syn60all_h220,53,0.484582,0.245742,1,Brimor Dunis
+holdout,syn60all_h220,54,0.523621,0.83893,1,Moran
+holdout,syn60all_h220,55,0.779716,0.762824,1,Sabrilo Tor
+holdout,syn60all_h220,56,0.539016,0.775108,1,Juntormi
+holdout,syn60all_h220,57,0.306851,0.02,1,Kirtor
+holdout,syn60all_h220,58,0.637167,0.727054,1,Ostrengorcho
+holdout,syn60all_h220,59,0.615572,0.552077,1,Loost
+holdout,syn60sub_h201,0,0.98,0.373663,0,Choren
+holdout,syn60sub_h201,1,0.525774,0.651794,0,Halkir
+holdout,syn60sub_h201,2,0.681835,0.375536,1,Sator Ka
+holdout,syn60sub_h201,3,0.680538,0.349142,0,Sator
+holdout,syn60sub_h201,4,0.888451,0.618325,1,Bricho
+holdout,syn60sub_h201,5,0.531701,0.531111,0,Mordunrenren
+holdout,syn60sub_h201,6,0.620861,0.856247,0,Junlo
+holdout,syn60sub_h201,7,0.699976,0.314723,0,Chobrifa Bri
+holdout,syn60sub_h201,8,0.40594,0.162509,0,Halbrihal
+holdout,syn60sub_h201,9,0.810396,0.590496,0,Torbribrijun
+holdout,syn60sub_h201,10,0.674777,0.296566,0,Miquicho
+holdout,syn60sub_h201,11,0.724369,0.657139,0,Vellum
+holdout,syn60sub_h201,12,0.591343,0.60791,0,Torka Eljun
+holdout,syn60sub_h201,13,0.84631,0.253456,0,Lumanis
+holdout,syn60sub_h201,14,0.743776,0.562866,0,Junlummi
+holdout,syn60sub_h201,15,0.719111,0.601988,0,Lumgorost
+holdout,syn60sub_h201,16,0.716606,0.662481,0,Halnel
+holdout,syn60sub_h201,17,0.502537,0.743048,1,Sanelkalum
+holdout,syn60sub_h201,18,0.719293,0.803092,1,Gornel
+holdout,syn60sub_h201,19,0.531987,0.153524,1,Lumnelis Bri
+holdout,syn60sub_h201,20,0.468969,0.257981,0,Halanlohal
+holdout,syn60sub_h201,21,0.831945,0.527247,0,Dunnelbri
+holdout,syn60sub_h201,22,0.637689,0.441744,0,Praelmorren
+holdout,syn60sub_h201,23,0.318876,0.917812,0,Ansatorkir
+holdout,syn60sub_h201,24,0.376844,0.74894,0,Milumtor
+holdout,syn60sub_h201,25,0.496874,0.612464,0,Lumka
+holdout,syn60sub_h201,26,0.753617,0.489764,0,Dunanbri
+holdout,syn60sub_h201,27,0.685956,0.660207,1,Faquimigor
+holdout,syn60sub_h201,28,0.771632,0.510237,0,Kirtor
+holdout,syn60sub_h201,29,0.751699,0.522377,0,Lumqui
+holdout,syn60sub_h201,30,0.78736,0.273534,0,Morminelka
+holdout,syn60sub_h201,31,0.410747,0.630926,0,Halgorbridun
+holdout,syn60sub_h201,32,0.633255,0.695244,0,Briankir
+holdout,syn60sub_h201,33,0.452396,0.335977,1,Sakagor
+holdout,syn60sub_h201,34,0.754127,0.647131,0,Lofa
+holdout,syn60sub_h201,35,0.657018,0.223535,1,Choelcho
+holdout,syn60sub_h201,36,0.527722,0.672905,0,Tormi
+holdout,syn60sub_h201,37,0.470841,0.121935,0,Chorenlum
+holdout,syn60sub_h201,38,0.689557,0.530818,0,Pranel
+holdout,syn60sub_h201,39,0.731665,0.750902,1,Dunprator
+holdout,syn60sub_h201,40,0.688897,0.868331,1,Anbri Fa
+holdout,syn60sub_h201,41,0.524588,0.211502,0,Ismimorpra
+holdout,syn60sub_h201,42,0.693639,0.74391,0,Samihal
+holdout,syn60sub_h201,43,0.54041,0.708656,1,Quidunnel
+holdout,syn60sub_h201,44,0.81361,0.806872,0,Fahalisan Ren
+holdout,syn60sub_h201,45,0.81172,0.360563,1,Brimorfagor
+holdout,syn60sub_h201,46,0.620056,0.593205,1,Ostis
+holdout,syn60sub_h201,47,0.540003,0.73968,0,Farenbri
+holdout,syn60sub_h201,48,0.689365,0.646958,0,Morchoost
+holdout,syn60sub_h201,49,0.636656,0.717192,1,Velchoquimor
+holdout,syn60sub_h201,50,0.928098,0.642175,1,Junvelel
+holdout,syn60sub_h201,51,0.621326,0.268881,0,Nelrenost An
+holdout,syn60sub_h201,52,0.719259,0.729079,1,Elkir
+holdout,syn60sub_h201,53,0.716978,0.50238,0,Lummichosa
+holdout,syn60sub_h201,54,0.738603,0.726984,0,Misarenbri Kir
+holdout,syn60sub_h201,55,0.586155,0.46456,0,Rendunis
+holdout,syn60sub_h201,56,0.408315,0.584398,1,Ischohal
+holdout,syn60sub_h201,57,0.520395,0.740562,1,Dunmorfa
+holdout,syn60sub_h201,58,0.800537,0.510309,1,Neleltorhal
+holdout,syn60sub_h201,59,0.666568,0.116504,1,Miren
+holdout,syn60sub_h202,0,0.528493,0.365805,1,Jungor
+holdout,syn60sub_h202,1,0.484233,0.068315,1,Nelmorkirjun
+holdout,syn60sub_h202,2,0.299763,0.278339,0,Velvel
+holdout,syn60sub_h202,3,0.557975,0.221736,0,Juntorka Fa
+holdout,syn60sub_h202,4,0.613612,0.280716,0,Lumjunis
+holdout,syn60sub_h202,5,0.027975,0.608767,0,Veldun
+holdout,syn60sub_h202,6,0.4328,0.722568,0,Kadunmihal
+holdout,syn60sub_h202,7,0.438266,0.413349,1,Dunfaquian
+holdout,syn60sub_h202,8,0.784667,0.283965,1,Lotor
+holdout,syn60sub_h202,9,0.598394,0.236942,1,Halis Lum
+holdout,syn60sub_h202,10,0.398995,0.817878,0,Nelka
+holdout,syn60sub_h202,11,0.548504,0.121539,0,Prahalel Tor
+holdout,syn60sub_h202,12,0.411507,0.169482,1,Kafamor
+holdout,syn60sub_h202,13,0.208693,0.680729,1,Velcho
+holdout,syn60sub_h202,14,0.373573,0.404641,1,Savel Kagor
+holdout,syn60sub_h202,15,0.096255,0.688811,0,Savelnel Quimi
+holdout,syn60sub_h202,16,0.164125,0.696784,0,Quikirbri
+holdout,syn60sub_h202,17,0.535698,0.292099,0,Veltor
+holdout,syn60sub_h202,18,0.488726,0.698631,1,Nelsamibri
+holdout,syn60sub_h202,19,0.206389,0.241212,0,Tormor
+holdout,syn60sub_h202,20,0.279055,0.569909,0,Neltor
+holdout,syn60sub_h202,21,0.376731,0.725222,0,Dunfator Is
+holdout,syn60sub_h202,22,0.442588,0.722398,0,Gormorka
+holdout,syn60sub_h202,23,0.340313,0.701549,0,Torpra
+holdout,syn60sub_h202,24,0.43458,0.346567,1,Ostfasa Nelmi
+holdout,syn60sub_h202,25,0.453099,0.658598,0,Famian
+holdout,syn60sub_h202,26,0.387247,0.729066,0,Brikir Quikir
+holdout,syn60sub_h202,27,0.263955,0.635966,0,Ismornel
+holdout,syn60sub_h202,28,0.454331,0.761238,0,Kalo
+holdout,syn60sub_h202,29,0.414882,0.592089,0,Junvel Nelcho
+holdout,syn60sub_h202,30,0.211524,0.315291,0,Brilogorsa
+holdout,syn60sub_h202,31,0.258286,0.732871,1,Kirtordun
+holdout,syn60sub_h202,32,0.460782,0.139412,0,Chopra
+holdout,syn60sub_h202,33,0.444698,0.676338,0,Gorbri
+holdout,syn60sub_h202,34,0.521801,0.452566,0,Nelbri
+holdout,syn60sub_h202,35,0.235174,0.735685,1,Mortor Lum
+holdout,syn60sub_h202,36,0.327432,0.302821,0,Satoris Ka
+holdout,syn60sub_h202,37,0.406042,0.816156,0,Dunquika Junlo
+holdout,syn60sub_h202,38,0.32241,0.645942,0,Lumelvelka
+holdout,syn60sub_h202,39,0.441497,0.378371,1,Junren Brilum
+holdout,syn60sub_h202,40,0.308375,0.625041,1,Mortornel
+holdout,syn60sub_h202,41,0.140026,0.726562,0,Ananost Junjun
+holdout,syn60sub_h202,42,0.681359,0.98,0,Lojunhal
+holdout,syn60sub_h202,43,0.281142,0.771114,0,Lumnel
+holdout,syn60sub_h202,44,0.440191,0.261485,1,Lumostsami
+holdout,syn60sub_h202,45,0.453895,0.772813,0,Dunostlo Nelka
+holdout,syn60sub_h202,46,0.242517,0.788782,1,Tordunlojun
+holdout,syn60sub_h202,47,0.44429,0.779131,1,Pralomor
+holdout,syn60sub_h202,48,0.111072,0.561921,1,Lolokirmor
+holdout,syn60sub_h202,49,0.390808,0.510801,0,Velpragor Kir
+holdout,syn60sub_h202,50,0.223793,0.589671,1,Kirtorsa
+holdout,syn60sub_h202,51,0.334128,0.375058,0,Luman
+holdout,syn60sub_h202,52,0.365378,0.49878,0,Mormor
+holdout,syn60sub_h202,53,0.187164,0.835993,1,Fanelvel
+holdout,syn60sub_h202,54,0.205759,0.884396,0,Katorel
+holdout,syn60sub_h202,55,0.453437,0.256595,0,Morkir Fa
+holdout,syn60sub_h202,56,0.454503,0.296225,0,Loveljunbri
+holdout,syn60sub_h202,57,0.257358,0.716426,0,Dunanjun Sacho
+holdout,syn60sub_h202,58,0.304613,0.608291,0,Mivel
+holdout,syn60sub_h202,59,0.13172,0.69898,0,Junbri
+holdout,syn60sub_h203,0,0.630042,0.466122,0,Gorvel
+holdout,syn60sub_h203,1,0.751939,0.259476,1,Prachojun Cho
+holdout,syn60sub_h203,2,0.87502,0.418101,1,Brijun
+holdout,syn60sub_h203,3,0.462095,0.310338,1,Torjundunbri
+holdout,syn60sub_h203,4,0.271561,0.557229,0,Renanost
+holdout,syn60sub_h203,5,0.729833,0.141525,0,Nelpra
+holdout,syn60sub_h203,6,0.276504,0.755761,0,Anmor
+holdout,syn60sub_h203,7,0.170176,0.588641,0,Nelchofa
+holdout,syn60sub_h203,8,0.65673,0.267087,0,Lumbricho
+holdout,syn60sub_h203,9,0.253491,0.545325,0,Halan
+holdout,syn60sub_h203,10,0.512418,0.253595,0,Gortorka
+holdout,syn60sub_h203,11,0.566907,0.319879,0,Velgor Velis
+holdout,syn60sub_h203,12,0.41406,0.296932,0,Isan
+holdout,syn60sub_h203,13,0.248966,0.280043,1,Ananquifa
+holdout,syn60sub_h203,14,0.634595,0.405203,0,Dunchofa
+holdout,syn60sub_h203,15,0.922856,0.359246,1,Kirkirlolo
+holdout,syn60sub_h203,16,0.493166,0.659308,0,Fami
+holdout,syn60sub_h203,17,0.656414,0.220302,0,Lumduncho
+holdout,syn60sub_h203,18,0.416559,0.410301,0,Kaanjun Qui
+holdout,syn60sub_h203,19,0.636289,0.068899,1,Morchonel
+holdout,syn60sub_h203,20,0.073366,0.731593,0,Saelnelqui An
+holdout,syn60sub_h203,21,0.419182,0.587238,1,Istorren
+holdout,syn60sub_h203,22,0.7876,0.317084,0,Elfamor Fa
+holdout,syn60sub_h203,23,0.371488,0.584125,1,Pramihal Qui
+holdout,syn60sub_h203,24,0.458312,0.534374,1,Dunsabriqui
+holdout,syn60sub_h203,25,0.550157,0.225836,0,Lobriost
+holdout,syn60sub_h203,26,0.610334,0.345046,0,Isis
+holdout,syn60sub_h203,27,0.436989,0.279132,0,Brihal
+holdout,syn60sub_h203,28,0.613325,0.314587,1,Mifadunmi
+holdout,syn60sub_h203,29,0.227794,0.144634,0,Junostnelren
+holdout,syn60sub_h203,30,0.581975,0.13863,1,Kaost
+holdout,syn60sub_h203,31,0.90503,0.328494,0,Renquigoran
+holdout,syn60sub_h203,32,0.359549,0.256094,0,Isdunjun
+holdout,syn60sub_h203,33,0.236482,0.668677,0,Morhalmiqui
+holdout,syn60sub_h203,34,0.230961,0.606703,1,Prapracho
+holdout,syn60sub_h203,35,0.607406,0.267792,0,Nelhal
+holdout,syn60sub_h203,36,0.638038,0.373192,0,Iselquika Kir
+holdout,syn60sub_h203,37,0.051436,0.502711,0,Moranlum
+holdout,syn60sub_h203,38,0.305599,0.238989,0,Chocho
+holdout,syn60sub_h203,39,0.355307,0.515493,1,Morkagorost
+holdout,syn60sub_h203,40,0.270357,0.688963,0,Ismorren
+holdout,syn60sub_h203,41,0.817535,0.23333,0,Torfa Mi
+holdout,syn60sub_h203,42,0.532343,0.125108,1,Lohal
+holdout,syn60sub_h203,43,0.577543,0.401018,0,Pradun
+holdout,syn60sub_h203,44,0.84914,0.35606,0,Morjunqui
+holdout,syn60sub_h203,45,0.520567,0.374097,0,Fajunfael
+holdout,syn60sub_h203,46,0.428686,0.472182,0,Lumkirjunis
+holdout,syn60sub_h203,47,0.164629,0.272991,1,Morgor Ka
+holdout,syn60sub_h203,48,0.23285,0.650701,0,Quigor
+holdout,syn60sub_h203,49,0.316533,0.360122,0,Lumhalkakir
+holdout,syn60sub_h203,50,0.421274,0.590284,0,Iselka
+holdout,syn60sub_h203,51,0.178115,0.551351,1,Velanchohal
+holdout,syn60sub_h203,52,0.752496,0.353441,1,Savelkirost
+holdout,syn60sub_h203,53,0.720666,0.319542,1,Neltorostqui
+holdout,syn60sub_h203,54,0.192276,0.486758,0,Elgor Kir
+holdout,syn60sub_h203,55,0.448187,0.34463,1,Nelvel
+holdout,syn60sub_h203,56,0.563805,0.207032,0,Junpra
+holdout,syn60sub_h203,57,0.237162,0.197327,0,Gorostgor
+holdout,syn60sub_h203,58,0.616579,0.338718,1,Fadunnelvel
+holdout,syn60sub_h203,59,0.399949,0.29675,0,Ostnelanel Mor
+holdout,syn60sub_h204,0,0.740321,0.363441,0,Anisgordun Qui
+holdout,syn60sub_h204,1,0.340699,0.79006,1,Isvel
+holdout,syn60sub_h204,2,0.628436,0.826761,0,Anpra
+holdout,syn60sub_h204,3,0.508997,0.432292,1,Brikaanren
+holdout,syn60sub_h204,4,0.077053,0.713959,0,Quilo
+holdout,syn60sub_h204,5,0.435849,0.478441,1,Nellumqui
+holdout,syn60sub_h204,6,0.433749,0.350947,1,Morjunsa Kir
+holdout,syn60sub_h204,7,0.365589,0.940941,0,Gorelfa
+holdout,syn60sub_h204,8,0.62046,0.362713,0,Morjunhalvel
+holdout,syn60sub_h204,9,0.209624,0.612976,0,Prarenis
+holdout,syn60sub_h204,10,0.625027,0.595954,0,Ansalomi
+holdout,syn60sub_h204,11,0.553975,0.340724,0,Elpra
+holdout,syn60sub_h204,12,0.155651,0.789717,0,Veljun Gor
+holdout,syn60sub_h204,13,0.490706,0.490741,0,Renpra
+holdout,syn60sub_h204,14,0.197691,0.693459,1,Lohalost
+holdout,syn60sub_h204,15,0.632667,0.483516,1,Prarenmorbri
+holdout,syn60sub_h204,16,0.530921,0.447635,0,Gorpraquimor
+holdout,syn60sub_h204,17,0.56738,0.40981,1,Torisgorsa
+holdout,syn60sub_h204,18,0.521343,0.251321,1,Hallummi
+holdout,syn60sub_h204,19,0.539284,0.495048,1,Prajun Ka
+holdout,syn60sub_h204,20,0.522369,0.450421,0,Halsatormi
+holdout,syn60sub_h204,21,0.521406,0.613674,0,Isdunsa Quinel
+holdout,syn60sub_h204,22,0.141886,0.844301,1,Juntorprami
+holdout,syn60sub_h204,23,0.471594,0.98,0,Halkirbriqui
+holdout,syn60sub_h204,24,0.557794,0.634984,0,Lotoran
+holdout,syn60sub_h204,25,0.587493,0.366171,0,Kasais
+holdout,syn60sub_h204,26,0.223564,0.725552,0,Quivelanost
+holdout,syn60sub_h204,27,0.533688,0.61842,1,Junan
+holdout,syn60sub_h204,28,0.460623,0.282434,1,Tormorlum
+holdout,syn60sub_h204,29,0.487637,0.562071,0,Velsacho
+holdout,syn60sub_h204,30,0.233552,0.743719,1,Torvel
+holdout,syn60sub_h204,31,0.358893,0.171994,0,Lotor Lo
+holdout,syn60sub_h204,32,0.386348,0.750736,0,Loren
+holdout,syn60sub_h204,33,0.468035,0.297516,0,Chodunsa
+holdout,syn60sub_h204,34,0.354291,0.649265,0,Morgorsa
+holdout,syn60sub_h204,35,0.523871,0.877127,1,Elanren
+holdout,syn60sub_h204,36,0.555716,0.362863,0,Quinelmorel
+holdout,syn60sub_h204,37,0.228508,0.776449,0,Gorbri
+holdout,syn60sub_h204,38,0.561541,0.312015,0,Mortor Nel
+holdout,syn60sub_h204,39,0.429127,0.792465,0,Ostbri
+holdout,syn60sub_h204,40,0.641925,0.320916,1,Gordun Elfa
+holdout,syn60sub_h204,41,0.199275,0.821347,0,Anbri
+holdout,syn60sub_h204,42,0.338749,0.21057,1,Velpra
+holdout,syn60sub_h204,43,0.152661,0.906886,1,Juntor
+holdout,syn60sub_h204,44,0.460557,0.530816,0,Renkarenlum
+holdout,syn60sub_h204,45,0.364522,0.432602,0,Britorgor
+holdout,syn60sub_h204,46,0.56523,0.249276,0,Torelfa Lumhal
+holdout,syn60sub_h204,47,0.413308,0.516963,0,Brisaren
+holdout,syn60sub_h204,48,0.021637,0.870323,0,Torisnelqui
+holdout,syn60sub_h204,49,0.512944,0.714326,0,Nelfakir
+holdout,syn60sub_h204,50,0.285491,0.879823,1,Junloquibri
+holdout,syn60sub_h204,51,0.050507,0.643924,0,Fator Kir
+holdout,syn60sub_h204,52,0.390478,0.447358,0,Morosthallum
+holdout,syn60sub_h204,53,0.41479,0.450612,0,Ostmor Isnel
+holdout,syn60sub_h204,54,0.372452,0.152005,0,Angordun
+holdout,syn60sub_h204,55,0.230088,0.936071,1,Junbri
+holdout,syn60sub_h204,56,0.379394,0.621166,0,Ostmiveltor
+holdout,syn60sub_h204,57,0.444795,0.6134,1,Halren
+holdout,syn60sub_h204,58,0.601292,0.484058,0,Gorissa Kirsa
+holdout,syn60sub_h204,59,0.372479,0.733832,0,Quiel
+holdout,syn60sub_h205,0,0.27103,0.395175,0,Lohal Kir
+holdout,syn60sub_h205,1,0.433652,0.37204,1,Dunosttordun
+holdout,syn60sub_h205,2,0.438771,0.498742,1,Quielfajun
+holdout,syn60sub_h205,3,0.415705,0.665875,1,Loelkirmor
+holdout,syn60sub_h205,4,0.512078,0.575089,0,Rendunvelel
+holdout,syn60sub_h205,5,0.373016,0.490804,1,Mian
+holdout,syn60sub_h205,6,0.473884,0.436419,0,Migorchois
+holdout,syn60sub_h205,7,0.37071,0.481537,0,Torkirka
+holdout,syn60sub_h205,8,0.593654,0.912848,0,Mimor
+holdout,syn60sub_h205,9,0.519035,0.385402,1,Junlumost
+holdout,syn60sub_h205,10,0.239289,0.685002,0,Faquianvel
+holdout,syn60sub_h205,11,0.450777,0.899864,1,Anvellum
+holdout,syn60sub_h205,12,0.079275,0.3458,0,Islumhaltor
+holdout,syn60sub_h205,13,0.476762,0.889256,0,Halfa
+holdout,syn60sub_h205,14,0.331971,0.349419,0,Nelsagoran
+holdout,syn60sub_h205,15,0.61691,0.555412,1,Morbriprabri
+holdout,syn60sub_h205,16,0.43675,0.324117,1,Lumdunhalfa
+holdout,syn60sub_h205,17,0.473057,0.75351,0,Halsaeldun
+holdout,syn60sub_h205,18,0.311029,0.257104,1,Chovelisvel
+holdout,syn60sub_h205,19,0.516739,0.798426,0,Dunisel
+holdout,syn60sub_h205,20,0.3985,0.824261,0,Loisbri Antor
+holdout,syn60sub_h205,21,0.270986,0.729488,1,Velnello
+holdout,syn60sub_h205,22,0.15231,0.790353,0,Torlorenpra
+holdout,syn60sub_h205,23,0.514858,0.572864,0,Anostismor
+holdout,syn60sub_h205,24,0.248545,0.338111,0,Veltor
+holdout,syn60sub_h205,25,0.429306,0.849383,0,Faka
+holdout,syn60sub_h205,26,0.196281,0.701215,1,Quiprarenan
+holdout,syn60sub_h205,27,0.483088,0.69926,0,Halkir
+holdout,syn60sub_h205,28,0.379501,0.792634,0,Gorveljun Jun
+holdout,syn60sub_h205,29,0.504444,0.733046,0,Quijunel Sakir
+holdout,syn60sub_h205,30,0.405823,0.55305,0,Kahalren
+holdout,syn60sub_h205,31,0.436655,0.881217,1,Ostlumissa
+holdout,syn60sub_h205,32,0.453608,0.525984,1,Kirishalpra
+holdout,syn60sub_h205,33,0.476931,0.706594,0,Mivel
+holdout,syn60sub_h205,34,0.431819,0.580454,0,Mordunfa
+holdout,syn60sub_h205,35,0.180381,0.486336,0,Torlumcho
+holdout,syn60sub_h205,36,0.562796,0.692252,1,Lumostnelan
+holdout,syn60sub_h205,37,0.513485,0.768381,1,Lumtormi
+holdout,syn60sub_h205,38,0.383791,0.456236,0,Loostquisa
+holdout,syn60sub_h205,39,0.447476,0.583008,0,Tornel Cho
+holdout,syn60sub_h205,40,0.3635,0.516855,0,Junrenvel
+holdout,syn60sub_h205,41,0.516153,0.777836,0,Junjun Elnel
+holdout,syn60sub_h205,42,0.496102,0.511254,1,Quiren
+holdout,syn60sub_h205,43,0.314597,0.799596,0,Morel Andun
+holdout,syn60sub_h205,44,0.528165,0.435935,1,Cholumrenmor
+holdout,syn60sub_h205,45,0.543644,0.406369,0,Quielpralo
+holdout,syn60sub_h205,46,0.460825,0.585184,0,Dunkir
+holdout,syn60sub_h205,47,0.438333,0.486507,0,Renan
+holdout,syn60sub_h205,48,0.35624,0.550569,0,Elloosttor
+holdout,syn60sub_h205,49,0.358475,0.855114,0,Ananhal
+holdout,syn60sub_h205,50,0.408211,0.418833,0,Fasa
+holdout,syn60sub_h205,51,0.505938,0.354944,0,Iselkir Veldun
+holdout,syn60sub_h205,52,0.299666,0.517289,0,Kirgor Pra
+holdout,syn60sub_h205,53,0.445515,0.818298,0,Praelbri
+holdout,syn60sub_h205,54,0.144168,0.543926,1,Torsamor
+holdout,syn60sub_h205,55,0.629692,0.289863,0,Ishalkir
+holdout,syn60sub_h205,56,0.4769,0.604267,1,Dunhalbri
+holdout,syn60sub_h205,57,0.255544,0.251129,1,Morannelan
+holdout,syn60sub_h205,58,0.45472,0.373679,0,Kavellummi Bri
+holdout,syn60sub_h205,59,0.516886,0.630299,0,Renqui
+holdout,syn60sub_h206,0,0.733237,0.574134,1,Anostostlum
+holdout,syn60sub_h206,1,0.814268,0.067105,0,Lumkirmimi Fa
+holdout,syn60sub_h206,2,0.238464,0.733185,0,Mieljunvel
+holdout,syn60sub_h206,3,0.532479,0.517059,0,Dunquigor Ost
+holdout,syn60sub_h206,4,0.265101,0.843851,0,Torgor Loost
+holdout,syn60sub_h206,5,0.687174,0.132253,0,Dunrensalum
+holdout,syn60sub_h206,6,0.446759,0.928387,0,Praren
+holdout,syn60sub_h206,7,0.617609,0.322084,0,Saelrenan
+holdout,syn60sub_h206,8,0.160158,0.87213,0,Kirjun
+holdout,syn60sub_h206,9,0.84819,0.42451,0,Dunsaprakir
+holdout,syn60sub_h206,10,0.865619,0.322689,1,Nelisren
+holdout,syn60sub_h206,11,0.738639,0.128352,1,Nelelgortor
+holdout,syn60sub_h206,12,0.368389,0.617984,0,Velchoelmi
+holdout,syn60sub_h206,13,0.355997,0.689156,0,Sanel El
+holdout,syn60sub_h206,14,0.838157,0.845421,1,Lummormor Lo
+holdout,syn60sub_h206,15,0.64627,0.611036,1,Brilotorpra
+holdout,syn60sub_h206,16,0.388391,0.784572,0,Nello
+holdout,syn60sub_h206,17,0.776156,0.241761,1,Velmi Hal
+holdout,syn60sub_h206,18,0.622178,0.498352,0,Loelgordun
+holdout,syn60sub_h206,19,0.686141,0.633615,0,Mordunisvel
+holdout,syn60sub_h206,20,0.671654,0.700226,1,Sakirostfa
+holdout,syn60sub_h206,21,0.62924,0.927479,0,Miloloren
+holdout,syn60sub_h206,22,0.535125,0.945856,0,Gorelkir Ostsa
+holdout,syn60sub_h206,23,0.664535,0.557639,0,Halka
+holdout,syn60sub_h206,24,0.521689,0.065123,1,Halkirrenren
+holdout,syn60sub_h206,25,0.909691,0.477835,1,Lumgorhalren
+holdout,syn60sub_h206,26,0.839193,0.81582,0,Loisgor Velcho
+holdout,syn60sub_h206,27,0.641996,0.270087,1,Nelmiqui Lo
+holdout,syn60sub_h206,28,0.282049,0.515757,1,Velfa
+holdout,syn60sub_h206,29,0.724287,0.239454,1,Kahalost
+holdout,syn60sub_h206,30,0.66364,0.390521,0,Micho
+holdout,syn60sub_h206,31,0.266292,0.635189,0,Annelgorqui
+holdout,syn60sub_h206,32,0.614772,0.493945,0,Junsa
+holdout,syn60sub_h206,33,0.863362,0.433256,1,Halmielqui
+holdout,syn60sub_h206,34,0.717365,0.445656,0,Gortorlois Is
+holdout,syn60sub_h206,35,0.98,0.37607,1,Sakirjun Pra
+holdout,syn60sub_h206,36,0.678291,0.200385,0,Kirkirka An
+holdout,syn60sub_h206,37,0.655005,0.553649,0,Isostjun Lokir
+holdout,syn60sub_h206,38,0.461213,0.61464,0,Fachopraka
+holdout,syn60sub_h206,39,0.531601,0.603189,0,Anlodun
+holdout,syn60sub_h206,40,0.463217,0.870588,0,Dunren
+holdout,syn60sub_h206,41,0.697428,0.624423,0,Dunrenmitor
+holdout,syn60sub_h206,42,0.253386,0.659368,1,Renmordunmi
+holdout,syn60sub_h206,43,0.053491,0.637937,1,Lumelvel
+holdout,syn60sub_h206,44,0.453801,0.777697,0,Mijun El
+holdout,syn60sub_h206,45,0.625368,0.200916,0,Briostmihal
+holdout,syn60sub_h206,46,0.887621,0.688241,0,Velhal
+holdout,syn60sub_h206,47,0.254168,0.723122,0,Halhaldun
+holdout,syn60sub_h206,48,0.783178,0.225737,1,Chobripralo
+holdout,syn60sub_h206,49,0.779226,0.462154,0,Anmorgor Dun
+holdout,syn60sub_h206,50,0.826188,0.586554,0,Anpra
+holdout,syn60sub_h206,51,0.565432,0.274383,0,Chosamorlum Mi
+holdout,syn60sub_h206,52,0.858943,0.406569,0,Elmorloqui
+holdout,syn60sub_h206,53,0.473611,0.777407,0,Quinelbri
+holdout,syn60sub_h206,54,0.756007,0.295679,0,Dunrentorqui
+holdout,syn60sub_h206,55,0.470567,0.76677,1,Rennel
+holdout,syn60sub_h206,56,0.815938,0.130037,1,Lumkacho Sasa
+holdout,syn60sub_h206,57,0.752508,0.692611,0,Mikirlum
+holdout,syn60sub_h206,58,0.697873,0.741215,1,Sadundunost
+holdout,syn60sub_h206,59,0.391828,0.670786,0,Halgor Sa
+holdout,syn60sub_h207,0,0.913671,0.556544,1,Fagor
+holdout,syn60sub_h207,1,0.98,0.736743,0,Velbri
+holdout,syn60sub_h207,2,0.725682,0.615095,0,Lumost
+holdout,syn60sub_h207,3,0.771014,0.673564,0,Ostfa
+holdout,syn60sub_h207,4,0.620429,0.565733,0,Kalumlumhal
+holdout,syn60sub_h207,5,0.527648,0.622024,0,Falo
+holdout,syn60sub_h207,6,0.684884,0.774148,1,Sakabrimi
+holdout,syn60sub_h207,7,0.546212,0.67728,0,Gorlum Ren
+holdout,syn60sub_h207,8,0.81717,0.545322,0,Fator Nelhal
+holdout,syn60sub_h207,9,0.563927,0.717663,0,Renel Veltor
+holdout,syn60sub_h207,10,0.885107,0.809763,0,Mirenkircho
+holdout,syn60sub_h207,11,0.618698,0.642213,0,Dunvelsa
+holdout,syn60sub_h207,12,0.70635,0.645348,0,Isostkirlo
+holdout,syn60sub_h207,13,0.735432,0.585288,0,Prachovelfa
+holdout,syn60sub_h207,14,0.854825,0.759989,1,Anandun Pra
+holdout,syn60sub_h207,15,0.588636,0.749908,0,Saan Anka
+holdout,syn60sub_h207,16,0.98,0.585929,0,Junelvel
+holdout,syn60sub_h207,17,0.606628,0.57846,1,Sasa
+holdout,syn60sub_h207,18,0.689399,0.66434,0,Mornel Veltor
+holdout,syn60sub_h207,19,0.98,0.727776,0,Sajun
+holdout,syn60sub_h207,20,0.98,0.77861,1,Luman Sakir
+holdout,syn60sub_h207,21,0.722717,0.655678,0,Anrendun Isvel
+holdout,syn60sub_h207,22,0.563307,0.330807,1,Ismichonel Gor
+holdout,syn60sub_h207,23,0.468392,0.682624,1,Chomor
+holdout,syn60sub_h207,24,0.551504,0.37978,0,Kirfa
+holdout,syn60sub_h207,25,0.556908,0.55915,0,Samidun
+holdout,syn60sub_h207,26,0.562625,0.886584,0,Lumlorenmor
+holdout,syn60sub_h207,27,0.46438,0.679248,0,Halan
+holdout,syn60sub_h207,28,0.625292,0.61192,1,Migorvelis
+holdout,syn60sub_h207,29,0.651968,0.962047,0,Morhal
+holdout,syn60sub_h207,30,0.617927,0.591313,1,Gortormi Pra
+holdout,syn60sub_h207,31,0.614117,0.718724,0,Junelfaren
+holdout,syn60sub_h207,32,0.586225,0.275072,1,Renjun Kamor
+holdout,syn60sub_h207,33,0.497452,0.482478,0,Kavelhalmor
+holdout,syn60sub_h207,34,0.461917,0.71849,0,Sahal
+holdout,syn60sub_h207,35,0.604225,0.458725,0,Ostvelquidun
+holdout,syn60sub_h207,36,0.786184,0.589587,0,Gordun Quigor
+holdout,syn60sub_h207,37,0.638614,0.559386,1,Dunkir
+holdout,syn60sub_h207,38,0.540032,0.36811,0,Junqui Famor
+holdout,syn60sub_h207,39,0.737657,0.421436,1,Tordunchofa
+holdout,syn60sub_h207,40,0.620072,0.639131,0,Issa
+holdout,syn60sub_h207,41,0.67581,0.680445,0,Eljun
+holdout,syn60sub_h207,42,0.572983,0.850991,1,Isostan
+holdout,syn60sub_h207,43,0.603029,0.798483,1,Prator
+holdout,syn60sub_h207,44,0.686163,0.531902,0,Veltornelpra
+holdout,syn60sub_h207,45,0.889311,0.881601,0,Mielren Lum
+holdout,syn60sub_h207,46,0.696681,0.310503,0,Renvel
+holdout,syn60sub_h207,47,0.922356,0.454845,1,Lomor
+holdout,syn60sub_h207,48,0.974708,0.741733,1,Morostmiqui
+holdout,syn60sub_h207,49,0.66472,0.535944,0,Ostsaelmor
+holdout,syn60sub_h207,50,0.786852,0.629809,0,Dunsaischo
+holdout,syn60sub_h207,51,0.539055,0.912426,1,Junelka Fa
+holdout,syn60sub_h207,52,0.844671,0.98,1,Midunost
+holdout,syn60sub_h207,53,0.502386,0.669468,0,Anpradun
+holdout,syn60sub_h207,54,0.711057,0.843581,0,Kaduncho
+holdout,syn60sub_h207,55,0.494128,0.616779,1,Anhalfa Misa
+holdout,syn60sub_h207,56,0.709201,0.59636,1,Ostostren
+holdout,syn60sub_h207,57,0.584217,0.513972,0,Mibribripra
+holdout,syn60sub_h207,58,0.481185,0.55637,0,Kirfakirka
+holdout,syn60sub_h207,59,0.868914,0.633473,0,Kami
+holdout,syn60sub_h208,0,0.045858,0.832088,0,Tornelsajun
+holdout,syn60sub_h208,1,0.22716,0.678212,1,Isrenvel
+holdout,syn60sub_h208,2,0.299281,0.864527,1,Dunsais
+holdout,syn60sub_h208,3,0.412394,0.845905,0,Rennelmortor
+holdout,syn60sub_h208,4,0.069912,0.731573,0,Morkirel
+holdout,syn60sub_h208,5,0.587521,0.584807,0,Velmorsalum
+holdout,syn60sub_h208,6,0.151526,0.564806,0,Elgormor
+holdout,syn60sub_h208,7,0.095111,0.766346,1,Morrenkirjun
+holdout,syn60sub_h208,8,0.255495,0.935455,0,Brikael
+holdout,syn60sub_h208,9,0.164819,0.616175,1,Tordun
+holdout,syn60sub_h208,10,0.561773,0.697402,0,Dunkirgor
+holdout,syn60sub_h208,11,0.212572,0.711854,0,Junpraelka
+holdout,syn60sub_h208,12,0.252218,0.682425,0,Gormidun
+holdout,syn60sub_h208,13,0.020771,0.870415,1,Quianel
+holdout,syn60sub_h208,14,0.5358,0.493608,0,Quifa An
+holdout,syn60sub_h208,15,0.755767,0.569435,0,Kirlumlummi
+holdout,syn60sub_h208,16,0.02,0.562276,0,Lokaost
+holdout,syn60sub_h208,17,0.171979,0.554867,1,Iskaminel
+holdout,syn60sub_h208,18,0.199677,0.796329,1,Elbriel
+holdout,syn60sub_h208,19,0.647401,0.627293,0,Halloren Vel
+holdout,syn60sub_h208,20,0.575333,0.789815,1,Kirfahal Choan
+holdout,syn60sub_h208,21,0.092363,0.744207,0,Halhalveltor
+holdout,syn60sub_h208,22,0.606136,0.556675,1,Lumhalcho
+holdout,syn60sub_h208,23,0.172639,0.809102,0,Loost
+holdout,syn60sub_h208,24,0.246011,0.977218,1,Nelgor Hal
+holdout,syn60sub_h208,25,0.285382,0.832943,0,Neltorostvel
+holdout,syn60sub_h208,26,0.192806,0.851605,1,Renvel
+holdout,syn60sub_h208,27,0.106352,0.645641,0,Tordunvel
+holdout,syn60sub_h208,28,0.256778,0.688057,1,Renmorrendun
+holdout,syn60sub_h208,29,0.634254,0.489202,0,Brichokadun
+holdout,syn60sub_h208,30,0.252136,0.709267,0,Kasalum Mor
+holdout,syn60sub_h208,31,0.120907,0.690426,0,Gorkachois
+holdout,syn60sub_h208,32,0.599389,0.852979,1,Ostelnelkir
+holdout,syn60sub_h208,33,0.02,0.734425,1,Quiostjunbri
+holdout,syn60sub_h208,34,0.31029,0.826561,0,Lumjunlogor
+holdout,syn60sub_h208,35,0.274382,0.91513,1,Mipratorel
+holdout,syn60sub_h208,36,0.524917,0.565392,0,Morsaduntor
+holdout,syn60sub_h208,37,0.077611,0.644803,0,Anjunmor
+holdout,syn60sub_h208,38,0.221029,0.738348,0,Halkadunka
+holdout,syn60sub_h208,39,0.597173,0.569101,1,Choislo
+holdout,syn60sub_h208,40,0.182982,0.784676,0,Kachodunel
+holdout,syn60sub_h208,41,0.077159,0.817426,1,Mifalumcho
+holdout,syn60sub_h208,42,0.186877,0.683039,1,Mihal
+holdout,syn60sub_h208,43,0.724262,0.854234,0,Quihalostgor
+holdout,syn60sub_h208,44,0.275459,0.892371,1,Morfakahal
+holdout,syn60sub_h208,45,0.106177,0.729174,0,Annelis Haldun
+holdout,syn60sub_h208,46,0.435515,0.589633,0,Dunfa
+holdout,syn60sub_h208,47,0.156816,0.959702,0,Kaisgor Ancho
+holdout,syn60sub_h208,48,0.43081,0.752746,0,Renhalvel
+holdout,syn60sub_h208,49,0.353747,0.774104,0,Elvelqui
+holdout,syn60sub_h208,50,0.688044,0.765024,0,Torsa
+holdout,syn60sub_h208,51,0.290393,0.643449,0,Haltor
+holdout,syn60sub_h208,52,0.396256,0.730998,0,Brikir
+holdout,syn60sub_h208,53,0.370809,0.587339,0,Ostbri Morqui
+holdout,syn60sub_h208,54,0.084097,0.933181,0,Gorgorkabri
+holdout,syn60sub_h208,55,0.298961,0.709543,1,Briquifahal
+holdout,syn60sub_h208,56,0.427581,0.640409,0,Faostnelsa
+holdout,syn60sub_h208,57,0.339925,0.761257,0,Kiran Kirfa
+holdout,syn60sub_h208,58,0.175186,0.63211,0,Kirqui
+holdout,syn60sub_h208,59,0.070492,0.653009,0,Elprafa Ka
+holdout,syn60sub_h209,0,0.793194,0.624241,0,Anjun
+holdout,syn60sub_h209,1,0.786663,0.394286,0,Ostsakirlum
+holdout,syn60sub_h209,2,0.327429,0.434619,1,Quijun
+holdout,syn60sub_h209,3,0.302149,0.689069,0,Dungor Kahal
+holdout,syn60sub_h209,4,0.287073,0.75751,0,Pranel Dun
+holdout,syn60sub_h209,5,0.799919,0.388192,0,Brijunvel Ren
+holdout,syn60sub_h209,6,0.700657,0.582049,0,Quisasa
+holdout,syn60sub_h209,7,0.235922,0.459557,1,Sagordunjun
+holdout,syn60sub_h209,8,0.594606,0.736148,0,Choquibrisa
+holdout,syn60sub_h209,9,0.737502,0.328971,1,Annelchois
+holdout,syn60sub_h209,10,0.152312,0.481869,0,Renisfaren
+holdout,syn60sub_h209,11,0.741119,0.38787,1,Briqui
+holdout,syn60sub_h209,12,0.705338,0.784727,0,Chokir
+holdout,syn60sub_h209,13,0.771169,0.762211,0,Savelelis Fasa
+holdout,syn60sub_h209,14,0.87707,0.41798,1,Junsarenlo
+holdout,syn60sub_h209,15,0.600127,0.819519,0,Ismor
+holdout,syn60sub_h209,16,0.626257,0.546864,1,Dunhalost
+holdout,syn60sub_h209,17,0.724127,0.921218,0,Tormorloel
+holdout,syn60sub_h209,18,0.731636,0.243605,1,Quinelnel
+holdout,syn60sub_h209,19,0.923911,0.693857,0,Kirhalanren
+holdout,syn60sub_h209,20,0.78859,0.175781,1,Junnelka
+holdout,syn60sub_h209,21,0.67735,0.786199,0,Velloel Pra
+holdout,syn60sub_h209,22,0.727689,0.105746,0,Chochochoan
+holdout,syn60sub_h209,23,0.216257,0.609492,1,Pravelsalo
+holdout,syn60sub_h209,24,0.673468,0.856185,0,Dunvel
+holdout,syn60sub_h209,25,0.754613,0.701816,0,Katorissa Ren
+holdout,syn60sub_h209,26,0.845608,0.759307,0,Pramifa
+holdout,syn60sub_h209,27,0.203038,0.486366,0,Nelpralumren
+holdout,syn60sub_h209,28,0.809551,0.494281,1,Britorhal
+holdout,syn60sub_h209,29,0.771701,0.619548,0,Nelpra Is
+holdout,syn60sub_h209,30,0.876178,0.258142,0,Faanbrikir
+holdout,syn60sub_h209,31,0.826307,0.165696,1,Quiankir Mi
+holdout,syn60sub_h209,32,0.897354,0.454328,0,Neltor
+holdout,syn60sub_h209,33,0.573536,0.80087,1,Osthalqui
+holdout,syn60sub_h209,34,0.711425,0.239367,1,Mimoran Mordun
+holdout,syn60sub_h209,35,0.896197,0.335843,1,Lorenmorbri
+holdout,syn60sub_h209,36,0.205724,0.300013,0,Mirenkir
+holdout,syn60sub_h209,37,0.318149,0.338184,0,Safanelan
+holdout,syn60sub_h209,38,0.201196,0.368645,0,Tormi
+holdout,syn60sub_h209,39,0.324554,0.242059,0,Junka
+holdout,syn60sub_h209,40,0.59718,0.76295,0,Ostan Ost
+holdout,syn60sub_h209,41,0.14081,0.504279,0,Moran
+holdout,syn60sub_h209,42,0.343726,0.61561,0,Fadunlobri Qui
+holdout,syn60sub_h209,43,0.494756,0.463433,0,Briel
+holdout,syn60sub_h209,44,0.267853,0.425326,1,Junpravelren
+holdout,syn60sub_h209,45,0.318738,0.475775,1,Ostkanel
+holdout,syn60sub_h209,46,0.816629,0.590284,0,Velvelrenren
+holdout,syn60sub_h209,47,0.709974,0.435622,0,Mifaloan
+holdout,syn60sub_h209,48,0.720102,0.266353,0,Tortor
+holdout,syn60sub_h209,49,0.744483,0.791808,0,Torkagor
+holdout,syn60sub_h209,50,0.714487,0.731628,1,Gorpradun
+holdout,syn60sub_h209,51,0.846248,0.71666,0,Brihalpranel
+holdout,syn60sub_h209,52,0.750273,0.247512,1,Renjungor
+holdout,syn60sub_h209,53,0.368538,0.35239,0,Michojunis
+holdout,syn60sub_h209,54,0.79515,0.346533,0,Kamorlum Kahal
+holdout,syn60sub_h209,55,0.114624,0.579079,0,Nelostpra
+holdout,syn60sub_h209,56,0.733486,0.43299,0,Nelpra Elhal
+holdout,syn60sub_h209,57,0.126595,0.452395,0,Halpraka
+holdout,syn60sub_h209,58,0.127865,0.426151,1,Ansakir
+holdout,syn60sub_h209,59,0.661653,0.424051,1,Kircho Qui
+holdout,syn60sub_h210,0,0.532666,0.421907,1,Velqui Ost
+holdout,syn60sub_h210,1,0.768716,0.661109,0,Nelvel
+holdout,syn60sub_h210,2,0.820475,0.717508,0,Pralogorost
+holdout,syn60sub_h210,3,0.088677,0.342844,1,Toranmorren
+holdout,syn60sub_h210,4,0.174522,0.414348,1,Quikirlo
+holdout,syn60sub_h210,5,0.690814,0.86503,1,Kirvel
+holdout,syn60sub_h210,6,0.763081,0.47271,1,Choeljunbri
+holdout,syn60sub_h210,7,0.371782,0.32072,1,Prabrirenhal
+holdout,syn60sub_h210,8,0.419692,0.09709,0,Junbri Quika
+holdout,syn60sub_h210,9,0.719042,0.496684,1,Ostchoren Dun
+holdout,syn60sub_h210,10,0.732727,0.738764,0,Torel Ostmor
+holdout,syn60sub_h210,11,0.459519,0.201061,1,Quijun
+holdout,syn60sub_h210,12,0.209557,0.255573,1,Chois
+holdout,syn60sub_h210,13,0.586552,0.454122,1,Kamiispra Mor
+holdout,syn60sub_h210,14,0.348978,0.318807,0,Velbrisaost
+holdout,syn60sub_h210,15,0.190214,0.132454,0,Morbri
+holdout,syn60sub_h210,16,0.289127,0.593287,0,Vellummorpra
+holdout,syn60sub_h210,17,0.312671,0.185687,0,Duntorvel
+holdout,syn60sub_h210,18,0.875772,0.84918,0,Nelelfa Briqui
+holdout,syn60sub_h210,19,0.357798,0.328319,0,Jundun Isren
+holdout,syn60sub_h210,20,0.363353,0.466942,0,Elquiren
+holdout,syn60sub_h210,21,0.707658,0.579297,0,Lotor
+holdout,syn60sub_h210,22,0.662374,0.692589,0,Morhalfael
+holdout,syn60sub_h210,23,0.153715,0.176287,1,Prakirmorjun
+holdout,syn60sub_h210,24,0.665062,0.657315,0,Gorka
+holdout,syn60sub_h210,25,0.336679,0.290793,0,Halmimilo
+holdout,syn60sub_h210,26,0.10162,0.286602,0,Lobrilo Vel
+holdout,syn60sub_h210,27,0.899668,0.98,0,Kirka
+holdout,syn60sub_h210,28,0.379252,0.033274,0,Dunchofa
+holdout,syn60sub_h210,29,0.171937,0.318548,0,Ostanchohal
+holdout,syn60sub_h210,30,0.409077,0.294242,1,Torpralo
+holdout,syn60sub_h210,31,0.275166,0.421414,0,Morhal
+holdout,syn60sub_h210,32,0.166031,0.416086,0,Juntor
+holdout,syn60sub_h210,33,0.36218,0.512408,0,Gorostmi
+holdout,syn60sub_h210,34,0.090499,0.18488,0,Brihal
+holdout,syn60sub_h210,35,0.359015,0.365801,0,Midunrentor Lo
+holdout,syn60sub_h210,36,0.086122,0.205423,0,Chovel Lum
+holdout,syn60sub_h210,37,0.192135,0.258446,1,Morantorfa
+holdout,syn60sub_h210,38,0.087504,0.319948,0,Falopra
+holdout,syn60sub_h210,39,0.049607,0.264451,0,Fasa
+holdout,syn60sub_h210,40,0.298861,0.527056,0,Ananjunnel
+holdout,syn60sub_h210,41,0.059369,0.179651,0,Ishalnellum
+holdout,syn60sub_h210,42,0.317464,0.452281,0,Ismor
+holdout,syn60sub_h210,43,0.248712,0.529927,0,Mivel
+holdout,syn60sub_h210,44,0.62567,0.649952,1,Nelkir
+holdout,syn60sub_h210,45,0.123065,0.212877,0,Mihalsa
+holdout,syn60sub_h210,46,0.27984,0.355813,1,Quinelsajun
+holdout,syn60sub_h210,47,0.286249,0.308186,0,Kirbri Fa
+holdout,syn60sub_h210,48,0.046259,0.10334,0,Gorel Halvel
+holdout,syn60sub_h210,49,0.755323,0.703245,1,Velren
+holdout,syn60sub_h210,50,0.217751,0.533311,0,Duntormilum
+holdout,syn60sub_h210,51,0.24427,0.193195,0,Falumost
+holdout,syn60sub_h210,52,0.25882,0.300635,1,Kirel Kir
+holdout,syn60sub_h210,53,0.782328,0.589412,0,Lumdunquiqui
+holdout,syn60sub_h210,54,0.508995,0.32544,0,Kajunqui Kajun
+holdout,syn60sub_h210,55,0.716144,0.6247,0,Kiranvel
+holdout,syn60sub_h210,56,0.230528,0.422423,0,Famorfavel
+holdout,syn60sub_h210,57,0.459921,0.02,1,Torkami
+holdout,syn60sub_h210,58,0.63547,0.539935,1,Vello
+holdout,syn60sub_h210,59,0.498483,0.719795,1,Isnel
+holdout,syn60sub_h211,0,0.688079,0.330901,0,Bribribri
+holdout,syn60sub_h211,1,0.509694,0.231054,0,Quiost Nel
+holdout,syn60sub_h211,2,0.230776,0.314443,0,Ostfagor
+holdout,syn60sub_h211,3,0.632286,0.386722,1,Morgorjunmi
+holdout,syn60sub_h211,4,0.335507,0.240076,1,Lorenost Gor
+holdout,syn60sub_h211,5,0.379942,0.304706,0,Isneljunka
+holdout,syn60sub_h211,6,0.754683,0.315614,0,Halrenneljun
+holdout,syn60sub_h211,7,0.306846,0.108895,1,Prakirqui
+holdout,syn60sub_h211,8,0.333064,0.226205,1,Halfa
+holdout,syn60sub_h211,9,0.796481,0.153846,1,Nelsafa El
+holdout,syn60sub_h211,10,0.527057,0.482437,0,Renbrikalo Cho
+holdout,syn60sub_h211,11,0.394014,0.321077,0,Safael Anis
+holdout,syn60sub_h211,12,0.957854,0.358524,0,Gorren
+holdout,syn60sub_h211,13,0.412977,0.204848,0,Dunmirenel
+holdout,syn60sub_h211,14,0.455947,0.032504,1,Lummoran
+holdout,syn60sub_h211,15,0.938825,0.559367,0,Junrenchois
+holdout,syn60sub_h211,16,0.868193,0.300866,0,Hallumbri
+holdout,syn60sub_h211,17,0.851989,0.273274,0,Choost
+holdout,syn60sub_h211,18,0.78478,0.27105,0,Renbrijun
+holdout,syn60sub_h211,19,0.55268,0.279925,0,Lojunvelbri
+holdout,syn60sub_h211,20,0.830001,0.475483,0,Ostost Brilum
+holdout,syn60sub_h211,21,0.492546,0.22006,1,Gormifa
+holdout,syn60sub_h211,22,0.667747,0.262697,0,Pracholum Qui
+holdout,syn60sub_h211,23,0.729706,0.33904,1,Saquibriis
+holdout,syn60sub_h211,24,0.444538,0.345534,0,Lumrenostsa An
+holdout,syn60sub_h211,25,0.960295,0.231594,0,Torpra
+holdout,syn60sub_h211,26,0.804347,0.473426,0,Elanbrimor
+holdout,syn60sub_h211,27,0.642382,0.351249,0,Mihalkael
+holdout,syn60sub_h211,28,0.158973,0.340935,1,Quiel
+holdout,syn60sub_h211,29,0.602279,0.325801,0,Toris
+holdout,syn60sub_h211,30,0.637623,0.360279,0,Kacho
+holdout,syn60sub_h211,31,0.731613,0.366251,1,Lumchoka
+holdout,syn60sub_h211,32,0.83501,0.211177,1,Gorelhal
+holdout,syn60sub_h211,33,0.311545,0.328716,0,Brinel
+holdout,syn60sub_h211,34,0.548449,0.205954,1,Quitorlumlum
+holdout,syn60sub_h211,35,0.653824,0.289058,0,Elkator Qui
+holdout,syn60sub_h211,36,0.099991,0.302475,0,Anhal
+holdout,syn60sub_h211,37,0.546081,0.345994,1,Nelrenlois
+holdout,syn60sub_h211,38,0.557137,0.234994,1,Gorgor Quivel
+holdout,syn60sub_h211,39,0.774237,0.349452,0,Junfa
+holdout,syn60sub_h211,40,0.74193,0.197457,0,Kapra Dunfa
+holdout,syn60sub_h211,41,0.445521,0.342401,1,Fabri Ka
+holdout,syn60sub_h211,42,0.489029,0.370319,1,Ansa
+holdout,syn60sub_h211,43,0.712514,0.195293,1,Morcho Cho
+holdout,syn60sub_h211,44,0.161803,0.231208,0,Prahalneltor
+holdout,syn60sub_h211,45,0.542217,0.02,0,Renmor Hal
+holdout,syn60sub_h211,46,0.618244,0.306375,0,Mortor
+holdout,syn60sub_h211,47,0.926825,0.41832,1,Lofa
+holdout,syn60sub_h211,48,0.430902,0.56117,1,Chodunpra
+holdout,syn60sub_h211,49,0.315941,0.289563,0,Chobrielfa
+holdout,syn60sub_h211,50,0.466718,0.200456,0,Chomorbri
+holdout,syn60sub_h211,51,0.596073,0.381727,0,Lomoris Is
+holdout,syn60sub_h211,52,0.853617,0.306324,0,Junfakir
+holdout,syn60sub_h211,53,0.839513,0.376161,0,Hallo
+holdout,syn60sub_h211,54,0.191186,0.381395,0,Isanquihal Kir
+holdout,syn60sub_h211,55,0.825733,0.614576,1,Velgormorgor
+holdout,syn60sub_h211,56,0.935702,0.449413,0,Renmi Lum
+holdout,syn60sub_h211,57,0.253746,0.394,0,Loquika
+holdout,syn60sub_h211,58,0.539125,0.286916,0,Mibri Junnel
+holdout,syn60sub_h211,59,0.637941,0.265185,0,Halpraismor
+holdout,syn60sub_h212,0,0.631858,0.223271,0,Brifajun
+holdout,syn60sub_h212,1,0.584801,0.09988,1,Morlolobri
+holdout,syn60sub_h212,2,0.629591,0.02,1,Kirchopra Fa
+holdout,syn60sub_h212,3,0.660379,0.209482,0,Faprajun
+holdout,syn60sub_h212,4,0.606927,0.1267,0,Nelfafagor
+holdout,syn60sub_h212,5,0.563521,0.424843,1,Renfa
+holdout,syn60sub_h212,6,0.573964,0.315983,0,Jundunkir
+holdout,syn60sub_h212,7,0.605182,0.317203,0,Isvel
+holdout,syn60sub_h212,8,0.457655,0.374322,1,Junqui
+holdout,syn60sub_h212,9,0.534592,0.45827,0,Ostelel Dunmi
+holdout,syn60sub_h212,10,0.658164,0.264053,0,Gorgor Kirka
+holdout,syn60sub_h212,11,0.569172,0.354005,1,Facho
+holdout,syn60sub_h212,12,0.614667,0.228917,0,Nelmi
+holdout,syn60sub_h212,13,0.517452,0.47224,0,Satoran
+holdout,syn60sub_h212,14,0.468194,0.318172,0,Neljunkabri
+holdout,syn60sub_h212,15,0.420845,0.331965,0,Faelqui
+holdout,syn60sub_h212,16,0.550835,0.435496,0,Chokirost
+holdout,syn60sub_h212,17,0.354563,0.293378,1,Kaprael
+holdout,syn60sub_h212,18,0.658997,0.271298,1,Quiprachotor
+holdout,syn60sub_h212,19,0.494129,0.359637,0,Isvellum
+holdout,syn60sub_h212,20,0.719364,0.127666,0,Eljun
+holdout,syn60sub_h212,21,0.400618,0.273611,0,Kaka Ost
+holdout,syn60sub_h212,22,0.541849,0.181233,0,Halbrikirtor
+holdout,syn60sub_h212,23,0.522888,0.380748,1,Antor
+holdout,syn60sub_h212,24,0.627285,0.360071,1,Gorbrifa
+holdout,syn60sub_h212,25,0.416939,0.402194,1,Miisan
+holdout,syn60sub_h212,26,0.614666,0.314553,0,Hallomifa Mi
+holdout,syn60sub_h212,27,0.459347,0.245708,1,Bribri
+holdout,syn60sub_h212,28,0.656407,0.12734,0,Lumlumnel
+holdout,syn60sub_h212,29,0.55909,0.12795,0,Mijunfa
+holdout,syn60sub_h212,30,0.420435,0.241678,0,Velan
+holdout,syn60sub_h212,31,0.616542,0.250785,0,Elvelnel
+holdout,syn60sub_h212,32,0.598576,0.19494,0,Sael
+holdout,syn60sub_h212,33,0.679979,0.162134,0,Kafa
+holdout,syn60sub_h212,34,0.666884,0.433207,1,Praqui
+holdout,syn60sub_h212,35,0.538642,0.25487,0,Brijun Sa
+holdout,syn60sub_h212,36,0.73542,0.614324,0,Junvelgor
+holdout,syn60sub_h212,37,0.642745,0.250006,1,Renpradun
+holdout,syn60sub_h212,38,0.61086,0.282618,0,Fafaquivel
+holdout,syn60sub_h212,39,0.571744,0.510392,1,Briquilo
+holdout,syn60sub_h212,40,0.544069,0.574461,1,Elprarenmor Lo
+holdout,syn60sub_h212,41,0.628696,0.424936,0,Isloelmi
+holdout,syn60sub_h212,42,0.493403,0.335096,0,Junren
+holdout,syn60sub_h212,43,0.525859,0.350386,0,Nellumostcho
+holdout,syn60sub_h212,44,0.464247,0.520879,0,Loostmorpra
+holdout,syn60sub_h212,45,0.633828,0.212967,1,Junhal Junkir
+holdout,syn60sub_h212,46,0.703324,0.408765,1,Gormi
+holdout,syn60sub_h212,47,0.776844,0.465025,0,Torkirgor
+holdout,syn60sub_h212,48,0.518805,0.662253,0,Junel
+holdout,syn60sub_h212,49,0.676184,0.267916,0,Loello
+holdout,syn60sub_h212,50,0.493264,0.434158,0,Ischobri
+holdout,syn60sub_h212,51,0.427405,0.312293,0,Prarennel
+holdout,syn60sub_h212,52,0.535469,0.336041,0,Lumisjunpra
+holdout,syn60sub_h212,53,0.871569,0.301019,0,Tormi
+holdout,syn60sub_h212,54,0.449457,0.252091,1,Mikirpra
+holdout,syn60sub_h212,55,0.49832,0.441923,1,Renkir Bri
+holdout,syn60sub_h212,56,0.713147,0.283231,0,Junchomor
+holdout,syn60sub_h212,57,0.543466,0.289686,0,Sanel
+holdout,syn60sub_h212,58,0.592179,0.370142,0,Ostsa
+holdout,syn60sub_h212,59,0.553638,0.155164,1,Salum
+holdout,syn60sub_h213,0,0.365482,0.40959,0,Choelmipra Lo
+holdout,syn60sub_h213,1,0.34351,0.496594,1,Neltor
+holdout,syn60sub_h213,2,0.349076,0.645753,1,Choan
+holdout,syn60sub_h213,3,0.655656,0.717326,0,Lummorlo
+holdout,syn60sub_h213,4,0.764652,0.47849,0,Ananpravel
+holdout,syn60sub_h213,5,0.633903,0.526688,0,Toranrendun
+holdout,syn60sub_h213,6,0.374787,0.657688,0,Velfamorgor
+holdout,syn60sub_h213,7,0.179427,0.611953,1,Luman
+holdout,syn60sub_h213,8,0.196857,0.747479,1,Mornelrenfa
+holdout,syn60sub_h213,9,0.499301,0.636831,0,Islo
+holdout,syn60sub_h213,10,0.404868,0.634845,0,Mormortor
+holdout,syn60sub_h213,11,0.408064,0.623427,0,Chojunelpra
+holdout,syn60sub_h213,12,0.413933,0.601743,0,Faelquiel Ismi
+holdout,syn60sub_h213,13,0.379693,0.334696,0,Lumkir
+holdout,syn60sub_h213,14,0.653263,0.370725,0,Haljunchosa
+holdout,syn60sub_h213,15,0.309525,0.413916,0,Dunprafa
+holdout,syn60sub_h213,16,0.59463,0.506326,1,Famor
+holdout,syn60sub_h213,17,0.237424,0.618936,1,Ancho Tor
+holdout,syn60sub_h213,18,0.440462,0.441556,1,Ostlo
+holdout,syn60sub_h213,19,0.730447,0.501027,0,Ostdunren
+holdout,syn60sub_h213,20,0.452034,0.365573,0,Velel
+holdout,syn60sub_h213,21,0.296739,0.642427,0,Velostren
+holdout,syn60sub_h213,22,0.02,0.721119,0,Halren
+holdout,syn60sub_h213,23,0.500969,0.73011,0,Torelren
+holdout,syn60sub_h213,24,0.11045,0.436675,1,Chomorello
+holdout,syn60sub_h213,25,0.264085,0.398744,1,Halvel
+holdout,syn60sub_h213,26,0.674223,0.555777,1,Mormorvelost
+holdout,syn60sub_h213,27,0.527972,0.564038,1,Quilo
+holdout,syn60sub_h213,28,0.702596,0.350721,0,Elissami
+holdout,syn60sub_h213,29,0.45231,0.453524,0,Ananis
+holdout,syn60sub_h213,30,0.493632,0.564859,1,Mielost Rennel
+holdout,syn60sub_h213,31,0.658288,0.629951,0,Renmiren Qui
+holdout,syn60sub_h213,32,0.690127,0.31678,0,Issa Is
+holdout,syn60sub_h213,33,0.27655,0.674016,0,Quihalan
+holdout,syn60sub_h213,34,0.264727,0.827254,0,Rendungorlo
+holdout,syn60sub_h213,35,0.328161,0.484548,1,Torjunvelka
+holdout,syn60sub_h213,36,0.210738,0.439654,1,Mornel
+holdout,syn60sub_h213,37,0.403968,0.510144,0,Dunkiran
+holdout,syn60sub_h213,38,0.277896,0.45999,0,Nellovelmi
+holdout,syn60sub_h213,39,0.077074,0.699515,0,Lumosttor
+holdout,syn60sub_h213,40,0.645434,0.561458,0,Lolomorbri
+holdout,syn60sub_h213,41,0.651391,0.442666,0,Dunisdun
+holdout,syn60sub_h213,42,0.254136,0.565284,1,Lumkirantor
+holdout,syn60sub_h213,43,0.244722,0.628844,0,Elishal
+holdout,syn60sub_h213,44,0.255584,0.528855,1,Quidun
+holdout,syn60sub_h213,45,0.209576,0.574502,0,Brilo
+holdout,syn60sub_h213,46,0.609984,0.656159,0,Morelmi Kael
+holdout,syn60sub_h213,47,0.586668,0.418431,0,Ansahal Ostdun
+holdout,syn60sub_h213,48,0.356014,0.664045,0,Mortor Gorlum
+holdout,syn60sub_h213,49,0.289508,0.745661,0,Goristor
+holdout,syn60sub_h213,50,0.609241,0.48581,1,Nellumbrian
+holdout,syn60sub_h213,51,0.779727,0.694631,0,Faelvel
+holdout,syn60sub_h213,52,0.391571,0.52724,0,Nelquifapra
+holdout,syn60sub_h213,53,0.184615,0.425032,0,Morel An
+holdout,syn60sub_h213,54,0.586419,0.50151,0,Dunrendundun
+holdout,syn60sub_h213,55,0.343197,0.715917,1,Nelkaduntor
+holdout,syn60sub_h213,56,0.336755,0.549541,1,Saloelgor
+holdout,syn60sub_h213,57,0.377555,0.596286,0,Ostpraprami El
+holdout,syn60sub_h213,58,0.602444,0.281761,1,Miislo Lummi
+holdout,syn60sub_h213,59,0.228177,0.77574,0,Dunlumhal
+holdout,syn60sub_h214,0,0.175453,0.370624,1,Faostdun
+holdout,syn60sub_h214,1,0.113875,0.435271,0,Haljunka
+holdout,syn60sub_h214,2,0.334233,0.262102,0,Ostbrivel
+holdout,syn60sub_h214,3,0.60851,0.485329,0,Migordun
+holdout,syn60sub_h214,4,0.171883,0.384808,1,Quiquifa
+holdout,syn60sub_h214,5,0.254149,0.279538,1,Chovel
+holdout,syn60sub_h214,6,0.02,0.225549,1,Kael
+holdout,syn60sub_h214,7,0.207526,0.250936,1,Faqui
+holdout,syn60sub_h214,8,0.069667,0.279879,0,Pragorsa
+holdout,syn60sub_h214,9,0.22637,0.5289,0,Junpra
+holdout,syn60sub_h214,10,0.248509,0.295241,0,Mifaquicho
+holdout,syn60sub_h214,11,0.336497,0.164615,1,Gornelmorkir
+holdout,syn60sub_h214,12,0.174166,0.403052,0,Antor
+holdout,syn60sub_h214,13,0.02,0.617416,0,Quivelren
+holdout,syn60sub_h214,14,0.254806,0.316476,0,Morpraost
+holdout,syn60sub_h214,15,0.154142,0.251882,0,Gorsa Lokir
+holdout,syn60sub_h214,16,0.192077,0.456962,1,Velloren Fadun
+holdout,syn60sub_h214,17,0.286689,0.245203,1,Chosaisfa
+holdout,syn60sub_h214,18,0.146572,0.228072,1,Nelvel Pra
+holdout,syn60sub_h214,19,0.02,0.333694,0,Lumjun
+holdout,syn60sub_h214,20,0.02,0.735676,0,Kirmor
+holdout,syn60sub_h214,21,0.434574,0.358498,0,Vellumgor
+holdout,syn60sub_h214,22,0.346174,0.235589,1,Renlumtor
+holdout,syn60sub_h214,23,0.319105,0.705787,0,Ostlumost Fa
+holdout,syn60sub_h214,24,0.460799,0.688596,0,Ostlogorfa
+holdout,syn60sub_h214,25,0.048025,0.160561,0,Kaost
+holdout,syn60sub_h214,26,0.261413,0.743925,0,Lumfa
+holdout,syn60sub_h214,27,0.195577,0.868594,0,Chominelsa
+holdout,syn60sub_h214,28,0.226003,0.401329,1,Torostis
+holdout,syn60sub_h214,29,0.479205,0.377208,0,Fafaren Kir
+holdout,syn60sub_h214,30,0.084256,0.319102,0,Brian
+holdout,syn60sub_h214,31,0.21983,0.391257,0,Torsa
+holdout,syn60sub_h214,32,0.119558,0.957971,0,Falumdunis
+holdout,syn60sub_h214,33,0.107296,0.660985,1,Ostjun Bri
+holdout,syn60sub_h214,34,0.036905,0.257297,1,Lumcho
+holdout,syn60sub_h214,35,0.090795,0.711127,0,Lumlumost
+holdout,syn60sub_h214,36,0.256934,0.301196,0,Neljunel
+holdout,syn60sub_h214,37,0.02,0.768141,0,Anmigorfa
+holdout,syn60sub_h214,38,0.242662,0.440182,0,Iskapra
+holdout,syn60sub_h214,39,0.060991,0.795346,0,Junbrilumvel
+holdout,syn60sub_h214,40,0.209938,0.258643,1,Lumnelel Mor
+holdout,syn60sub_h214,41,0.4187,0.401914,0,Bripra
+holdout,syn60sub_h214,42,0.395458,0.378419,1,Iskirkalo
+holdout,syn60sub_h214,43,0.284617,0.166776,0,Prabriostis
+holdout,syn60sub_h214,44,0.034938,0.037494,0,Kirbri
+holdout,syn60sub_h214,45,0.303408,0.100504,0,Ostost
+holdout,syn60sub_h214,46,0.188238,0.312256,0,Kiransajun
+holdout,syn60sub_h214,47,0.13489,0.284475,0,Ostpra
+holdout,syn60sub_h214,48,0.260851,0.677687,0,Brimorchodun
+holdout,syn60sub_h214,49,0.278511,0.378108,1,Misa
+holdout,syn60sub_h214,50,0.256763,0.77451,1,Anlobri
+holdout,syn60sub_h214,51,0.387084,0.286571,1,Lumrenmiost
+holdout,syn60sub_h214,52,0.146408,0.254203,1,Ostsadunost
+holdout,syn60sub_h214,53,0.02,0.743375,0,Dunanchoan Lo
+holdout,syn60sub_h214,54,0.108589,0.225216,1,Kanelpra
+holdout,syn60sub_h214,55,0.221362,0.47816,0,Elrenbri
+holdout,syn60sub_h214,56,0.221473,0.179499,0,Morchoren Elis
+holdout,syn60sub_h214,57,0.197139,0.760912,0,Brilo Mormi
+holdout,syn60sub_h214,58,0.305583,0.436611,0,Renpra
+holdout,syn60sub_h214,59,0.209674,0.267277,0,Pracho
+holdout,syn60sub_h215,0,0.70647,0.530803,0,Velnel Halgor
+holdout,syn60sub_h215,1,0.464827,0.630673,1,Kadunquiost
+holdout,syn60sub_h215,2,0.604462,0.564102,1,Halvel Dun
+holdout,syn60sub_h215,3,0.487618,0.547011,0,Jungortor Pra
+holdout,syn60sub_h215,4,0.680719,0.384256,0,Dunmorpra Lo
+holdout,syn60sub_h215,5,0.518198,0.758842,1,Dunkirkir
+holdout,syn60sub_h215,6,0.632893,0.562335,0,Nelneldunren
+holdout,syn60sub_h215,7,0.545212,0.504768,0,Kanel Lum
+holdout,syn60sub_h215,8,0.346298,0.218223,0,Ostanrentor
+holdout,syn60sub_h215,9,0.698536,0.443238,0,Veljunan
+holdout,syn60sub_h215,10,0.490733,0.260936,0,Gormorelmi
+holdout,syn60sub_h215,11,0.530145,0.46717,0,Velvelsaka Jun
+holdout,syn60sub_h215,12,0.343177,0.532856,1,Kacho
+holdout,syn60sub_h215,13,0.479753,0.539237,1,Kirfalum
+holdout,syn60sub_h215,14,0.646352,0.262728,1,Chois
+holdout,syn60sub_h215,15,0.702703,0.442032,0,Velpra
+holdout,syn60sub_h215,16,0.648875,0.68715,1,Halhalel
+holdout,syn60sub_h215,17,0.715321,0.602533,0,Lumqui
+holdout,syn60sub_h215,18,0.521138,0.61358,1,Lokir Lum
+holdout,syn60sub_h215,19,0.415206,0.671505,0,Elkir
+holdout,syn60sub_h215,20,0.743565,0.741674,0,Lumbribriel
+holdout,syn60sub_h215,21,0.737022,0.489508,0,Nellum
+holdout,syn60sub_h215,22,0.388185,0.569708,1,Gordunmilo
+holdout,syn60sub_h215,23,0.633845,0.344772,1,Anmijuncho
+holdout,syn60sub_h215,24,0.530719,0.496441,0,Anpradun
+holdout,syn60sub_h215,25,0.549,0.622121,1,Velvel
+holdout,syn60sub_h215,26,0.554813,0.348335,1,Morlonel
+holdout,syn60sub_h215,27,0.525131,0.428167,0,Nelqui
+holdout,syn60sub_h215,28,0.593151,0.323357,1,Gortorchocho
+holdout,syn60sub_h215,29,0.770977,0.415272,0,Briisrenbri El
+holdout,syn60sub_h215,30,0.675527,0.51034,1,Veljun
+holdout,syn60sub_h215,31,0.548642,0.478299,0,Quiispra
+holdout,syn60sub_h215,32,0.396429,0.166327,0,Dunkaost
+holdout,syn60sub_h215,33,0.484277,0.381076,1,Isnelcho
+holdout,syn60sub_h215,34,0.630333,0.621312,0,Dunmorel
+holdout,syn60sub_h215,35,0.658524,0.38158,0,Mijunis Pralum
+holdout,syn60sub_h215,36,0.554337,0.599873,1,Isdunjungor
+holdout,syn60sub_h215,37,0.668812,0.474044,0,Elquimi
+holdout,syn60sub_h215,38,0.712721,0.689293,1,Torjunkircho
+holdout,syn60sub_h215,39,0.567751,0.800622,0,Tormoranbri
+holdout,syn60sub_h215,40,0.657353,0.816374,0,Gorvel
+holdout,syn60sub_h215,41,0.6646,0.615098,0,Kaostbrinel
+holdout,syn60sub_h215,42,0.410662,0.20417,1,Junis
+holdout,syn60sub_h215,43,0.634939,0.588155,0,Lojun
+holdout,syn60sub_h215,44,0.537725,0.700963,0,Halfami
+holdout,syn60sub_h215,45,0.758441,0.500702,1,Quikir Qui
+holdout,syn60sub_h215,46,0.655541,0.779202,0,Minelmornel
+holdout,syn60sub_h215,47,0.258095,0.341827,1,Prajunren
+holdout,syn60sub_h215,48,0.574506,0.658683,0,Lumsa
+holdout,syn60sub_h215,49,0.588783,0.610598,0,Faren
+holdout,syn60sub_h215,50,0.491834,0.568518,0,Anisan
+holdout,syn60sub_h215,51,0.431225,0.348615,0,Brijunismi Bri
+holdout,syn60sub_h215,52,0.593982,0.473534,0,Anmidunkir
+holdout,syn60sub_h215,53,0.790593,0.594387,0,Velsaanka Hal
+holdout,syn60sub_h215,54,0.415214,0.348174,0,Saelgoran
+holdout,syn60sub_h215,55,0.543399,0.309402,0,Anlumtorbri
+holdout,syn60sub_h215,56,0.651919,0.36327,0,Lumhalanan
+holdout,syn60sub_h215,57,0.479865,0.639992,0,Elquidunpra
+holdout,syn60sub_h215,58,0.456242,0.137694,0,Annelsa Junlum
+holdout,syn60sub_h215,59,0.427347,0.355188,0,Kirgor
+holdout,syn60sub_h216,0,0.267511,0.575403,0,Choan
+holdout,syn60sub_h216,1,0.354129,0.640218,0,Velostelqui
+holdout,syn60sub_h216,2,0.78719,0.700698,0,Ostmorkir Is
+holdout,syn60sub_h216,3,0.751915,0.577764,1,Elveldun
+holdout,syn60sub_h216,4,0.343401,0.712872,1,Velmorjun
+holdout,syn60sub_h216,5,0.594571,0.599108,1,Elsafaren
+holdout,syn60sub_h216,6,0.338516,0.837446,0,Anel
+holdout,syn60sub_h216,7,0.679355,0.359422,0,Karenkator
+holdout,syn60sub_h216,8,0.332392,0.532518,0,Ostpraqui
+holdout,syn60sub_h216,9,0.12302,0.828934,1,Miloka
+holdout,syn60sub_h216,10,0.761534,0.785649,1,Halnelkirmi
+holdout,syn60sub_h216,11,0.838559,0.441871,0,Falo Is
+holdout,syn60sub_h216,12,0.167968,0.429551,0,Halchohal
+holdout,syn60sub_h216,13,0.17847,0.497123,1,Ostgorcho
+holdout,syn60sub_h216,14,0.628111,0.620154,0,Torlumvelsa
+holdout,syn60sub_h216,15,0.309894,0.720347,0,Morchofa
+holdout,syn60sub_h216,16,0.791534,0.674975,0,Quiduntornel
+holdout,syn60sub_h216,17,0.796437,0.478325,0,Loan
+holdout,syn60sub_h216,18,0.874727,0.632813,1,Gorelsagor
+holdout,syn60sub_h216,19,0.708928,0.823972,1,Loost Lo
+holdout,syn60sub_h216,20,0.187777,0.750509,0,Quigorbrifa
+holdout,syn60sub_h216,21,0.938446,0.482825,1,Briel Nelel
+holdout,syn60sub_h216,22,0.621267,0.63606,0,Iskirmor
+holdout,syn60sub_h216,23,0.871961,0.738683,0,Ostka
+holdout,syn60sub_h216,24,0.333452,0.630558,0,Kavelanvel
+holdout,syn60sub_h216,25,0.02,0.606941,0,Lumanlum
+holdout,syn60sub_h216,26,0.516156,0.667728,0,Loostis
+holdout,syn60sub_h216,27,0.602234,0.670524,1,Sakirgorcho
+holdout,syn60sub_h216,28,0.228922,0.50745,1,Lummorlo
+holdout,syn60sub_h216,29,0.80192,0.816832,0,Kaostquitor Mi
+holdout,syn60sub_h216,30,0.6964,0.400256,0,Lojunkir Lo
+holdout,syn60sub_h216,31,0.621757,0.543081,0,Kirsafa
+holdout,syn60sub_h216,32,0.417732,0.676782,0,Mirencho
+holdout,syn60sub_h216,33,0.70092,0.45975,0,Rensamordun
+holdout,syn60sub_h216,34,0.621374,0.543209,0,Sajunlo
+holdout,syn60sub_h216,35,0.65664,0.716002,1,Torsagor
+holdout,syn60sub_h216,36,0.651206,0.687966,1,Isprael
+holdout,syn60sub_h216,37,0.420719,0.654881,0,Torjunan Ost
+holdout,syn60sub_h216,38,0.810847,0.4308,0,Lumrentor Lum
+holdout,syn60sub_h216,39,0.43796,0.73512,0,Choello Lum
+holdout,syn60sub_h216,40,0.02,0.753647,1,Lumhalneldun
+holdout,syn60sub_h216,41,0.642784,0.645899,0,Dunbriel
+holdout,syn60sub_h216,42,0.283776,0.776722,1,Tortorelan
+holdout,syn60sub_h216,43,0.800435,0.505561,0,Lodunmor Morel
+holdout,syn60sub_h216,44,0.260435,0.656612,1,Moranlumren
+holdout,syn60sub_h216,45,0.721417,0.7444,1,Nelquimor
+holdout,syn60sub_h216,46,0.98,0.657481,0,Halmi
+holdout,syn60sub_h216,47,0.674286,0.667839,0,Tordun Ostvel
+holdout,syn60sub_h216,48,0.298088,0.780933,0,Chohal Miost
+holdout,syn60sub_h216,49,0.390492,0.686502,0,Veliska
+holdout,syn60sub_h216,50,0.478396,0.820371,1,Kaprais
+holdout,syn60sub_h216,51,0.651641,0.585809,0,Hallo
+holdout,syn60sub_h216,52,0.98,0.779833,0,Velsa
+holdout,syn60sub_h216,53,0.860826,0.641429,0,Brinelqui Tor
+holdout,syn60sub_h216,54,0.41046,0.768537,0,Choqui
+holdout,syn60sub_h216,55,0.203642,0.789887,1,Junlum
+holdout,syn60sub_h216,56,0.252969,0.778607,1,Islumqui
+holdout,syn60sub_h216,57,0.853849,0.639257,0,Miqui
+holdout,syn60sub_h216,58,0.801838,0.405331,0,Lokirka
+holdout,syn60sub_h216,59,0.637797,0.541187,0,Velfa Lo
+holdout,syn60sub_h217,0,0.539824,0.72735,0,Lumvelprabri
+holdout,syn60sub_h217,1,0.415979,0.410089,0,Renrenhal
+holdout,syn60sub_h217,2,0.394146,0.74088,1,Brijun
+holdout,syn60sub_h217,3,0.538569,0.332254,0,Halelost
+holdout,syn60sub_h217,4,0.189762,0.611792,0,Renlum
+holdout,syn60sub_h217,5,0.392053,0.378382,0,Junfa
+holdout,syn60sub_h217,6,0.506883,0.408682,1,Junandun
+holdout,syn60sub_h217,7,0.261563,0.741873,0,Halan Lummor
+holdout,syn60sub_h217,8,0.061735,0.50641,0,Elostlo
+holdout,syn60sub_h217,9,0.048431,0.477131,1,Anbrifa Vellum
+holdout,syn60sub_h217,10,0.412997,0.847597,1,Lumchoren Gor
+holdout,syn60sub_h217,11,0.377615,0.102456,1,Junlopra
+holdout,syn60sub_h217,12,0.154284,0.476242,0,Vellofaost
+holdout,syn60sub_h217,13,0.467425,0.671723,0,Elmor Ostlo
+holdout,syn60sub_h217,14,0.615454,0.652614,0,Mielvel
+holdout,syn60sub_h217,15,0.316922,0.672134,1,Morgorgor
+holdout,syn60sub_h217,16,0.189078,0.604491,1,Kamor
+holdout,syn60sub_h217,17,0.204255,0.500844,1,Ellojun
+holdout,syn60sub_h217,18,0.365312,0.63627,0,Kamika Sais
+holdout,syn60sub_h217,19,0.436038,0.081604,1,Mipra
+holdout,syn60sub_h217,20,0.239318,0.609545,0,Ostmoran
+holdout,syn60sub_h217,21,0.492496,0.211072,1,Morisnelgor
+holdout,syn60sub_h217,22,0.196795,0.509748,0,Dunkami
+holdout,syn60sub_h217,23,0.08469,0.506952,0,Velmor
+holdout,syn60sub_h217,24,0.456912,0.645322,0,Osttorfapra
+holdout,syn60sub_h217,25,0.316778,0.246792,0,Lumjun
+holdout,syn60sub_h217,26,0.557692,0.915216,0,Velkaistor Kir
+holdout,syn60sub_h217,27,0.274591,0.257877,0,Nelsaan
+holdout,syn60sub_h217,28,0.42938,0.319067,0,Morquidun
+holdout,syn60sub_h217,29,0.295981,0.701977,1,Sanel Rensa
+holdout,syn60sub_h217,30,0.412527,0.485871,0,Anlum
+holdout,syn60sub_h217,31,0.299554,0.209427,0,Sabrilotor
+holdout,syn60sub_h217,32,0.48141,0.772089,0,Sanel
+holdout,syn60sub_h217,33,0.176304,0.258781,0,Gorelsael
+holdout,syn60sub_h217,34,0.02,0.605748,0,Kanelanfa
+holdout,syn60sub_h217,35,0.396343,0.174345,0,Kachokirjun
+holdout,syn60sub_h217,36,0.130493,0.53269,1,Favelkir
+holdout,syn60sub_h217,37,0.46202,0.136374,1,Lofaren
+holdout,syn60sub_h217,38,0.323142,0.546702,0,Gornelost Ello
+holdout,syn60sub_h217,39,0.241115,0.622825,0,Fasa
+holdout,syn60sub_h217,40,0.221266,0.571383,0,Elgorren Elgor
+holdout,syn60sub_h217,41,0.119099,0.525554,1,Elisfaan
+holdout,syn60sub_h217,42,0.625175,0.08419,1,Samipraka
+holdout,syn60sub_h217,43,0.320262,0.931679,0,Prasa
+holdout,syn60sub_h217,44,0.21035,0.289013,0,Praostjun
+holdout,syn60sub_h217,45,0.552702,0.633008,1,Goreljunka
+holdout,syn60sub_h217,46,0.590492,0.387179,0,Nelfagordun
+holdout,syn60sub_h217,47,0.362294,0.612185,0,Mimi Sa
+holdout,syn60sub_h217,48,0.329283,0.701756,1,Quivel Gorhal
+holdout,syn60sub_h217,49,0.428616,0.160525,0,Ostrenjun
+holdout,syn60sub_h217,50,0.178552,0.98,0,Ostlumkiris
+holdout,syn60sub_h217,51,0.107971,0.58911,1,Nelqui
+holdout,syn60sub_h217,52,0.45505,0.125647,0,Nelfa Lojun
+holdout,syn60sub_h217,53,0.627273,0.848073,1,Velmi
+holdout,syn60sub_h217,54,0.343498,0.197994,0,Isankirmi
+holdout,syn60sub_h217,55,0.405314,0.743644,0,Kahal
+holdout,syn60sub_h217,56,0.157343,0.693599,0,Renanpra
+holdout,syn60sub_h217,57,0.613084,0.096022,0,Pracho
+holdout,syn60sub_h217,58,0.400537,0.37246,0,Mibrimi
+holdout,syn60sub_h217,59,0.174141,0.573657,1,Torlum Hal
+holdout,syn60sub_h218,0,0.408372,0.646071,0,Brigorgor
+holdout,syn60sub_h218,1,0.220113,0.679394,1,Kirhalquiel
+holdout,syn60sub_h218,2,0.493318,0.352461,0,Lumkanel
+holdout,syn60sub_h218,3,0.282472,0.337926,1,Faissa
+holdout,syn60sub_h218,4,0.467199,0.336259,0,Nelminelpra
+holdout,syn60sub_h218,5,0.407453,0.555453,0,Brilum Kagor
+holdout,syn60sub_h218,6,0.277068,0.178379,0,Dunan Istor
+holdout,syn60sub_h218,7,0.483011,0.47528,0,Junbrilumost
+holdout,syn60sub_h218,8,0.220387,0.239097,0,Quiis Ren
+holdout,syn60sub_h218,9,0.288133,0.686758,0,Mivelgorjun
+holdout,syn60sub_h218,10,0.185068,0.601581,0,Neldunmi
+holdout,syn60sub_h218,11,0.52289,0.738206,1,Dunel Mikir
+holdout,syn60sub_h218,12,0.528783,0.517714,0,Lumprabri
+holdout,syn60sub_h218,13,0.286111,0.711855,0,Cholumgor
+holdout,syn60sub_h218,14,0.536639,0.326602,1,Dunelostmi
+holdout,syn60sub_h218,15,0.666043,0.810161,0,Lummimorkir
+holdout,syn60sub_h218,16,0.313126,0.474175,0,Quimilo Lo
+holdout,syn60sub_h218,17,0.429502,0.609372,0,Kiran Osttor
+holdout,syn60sub_h218,18,0.631951,0.705933,0,Ostkir
+holdout,syn60sub_h218,19,0.392063,0.417551,0,Annelanlo
+holdout,syn60sub_h218,20,0.143934,0.513109,0,Kamiqui
+holdout,syn60sub_h218,21,0.391982,0.22375,0,Lovel
+holdout,syn60sub_h218,22,0.255673,0.75085,1,Anbrijunvel
+holdout,syn60sub_h218,23,0.350939,0.663002,0,Quidunren
+holdout,syn60sub_h218,24,0.475497,0.350348,1,Loannelmi
+holdout,syn60sub_h218,25,0.080763,0.678205,0,Quiost
+holdout,syn60sub_h218,26,0.32669,0.485379,1,Nellokir
+holdout,syn60sub_h218,27,0.392132,0.698112,1,Halprahalpra
+holdout,syn60sub_h218,28,0.510074,0.223398,1,Nelrenis
+holdout,syn60sub_h218,29,0.432702,0.392669,0,Halhalcho
+holdout,syn60sub_h218,30,0.250471,0.649271,1,Ostmilo
+holdout,syn60sub_h218,31,0.384453,0.681345,0,Kaankir
+holdout,syn60sub_h218,32,0.489115,0.702727,1,Lofa
+holdout,syn60sub_h218,33,0.296959,0.636168,0,Nelan
+holdout,syn60sub_h218,34,0.371973,0.768043,0,Kircho
+holdout,syn60sub_h218,35,0.357251,0.544152,0,Morlo
+holdout,syn60sub_h218,36,0.427863,0.521393,0,Halka Ostren
+holdout,syn60sub_h218,37,0.378314,0.599125,1,Brilumnel
+holdout,syn60sub_h218,38,0.352599,0.285587,1,Ellodun
+holdout,syn60sub_h218,39,0.525871,0.477567,1,Sami Jun
+holdout,syn60sub_h218,40,0.420317,0.449678,0,Gorost
+holdout,syn60sub_h218,41,0.438031,0.036297,0,Elelmivel
+holdout,syn60sub_h218,42,0.525061,0.582021,0,Logorlo Britor
+holdout,syn60sub_h218,43,0.484075,0.218988,1,Duntorkanel
+holdout,syn60sub_h218,44,0.490334,0.253812,1,Halkirmi
+holdout,syn60sub_h218,45,0.361607,0.736697,1,Lumsahal
+holdout,syn60sub_h218,46,0.332209,0.595833,0,Gormi Cho
+holdout,syn60sub_h218,47,0.212054,0.581408,0,Mian
+holdout,syn60sub_h218,48,0.118537,0.482712,0,Quigorvelsa
+holdout,syn60sub_h218,49,0.349,0.256445,1,Ostjun
+holdout,syn60sub_h218,50,0.440817,0.575058,0,Nelgor
+holdout,syn60sub_h218,51,0.36879,0.46058,0,Quikir Gor
+holdout,syn60sub_h218,52,0.419019,0.540033,0,Gorlum
+holdout,syn60sub_h218,53,0.471268,0.575117,0,Tortormilum
+holdout,syn60sub_h218,54,0.275474,0.783111,1,Anlumtor
+holdout,syn60sub_h218,55,0.340846,0.64834,0,Kirel Mor
+holdout,syn60sub_h218,56,0.406879,0.413958,0,Choostdun
+holdout,syn60sub_h218,57,0.449795,0.264166,0,Chodunchopra
+holdout,syn60sub_h218,58,0.231525,0.778188,1,Elan
+holdout,syn60sub_h218,59,0.300294,0.353443,0,Antor
+holdout,syn60sub_h219,0,0.308531,0.461653,0,Renlo Miren
+holdout,syn60sub_h219,1,0.335535,0.362641,0,Miprasa
+holdout,syn60sub_h219,2,0.529079,0.768628,1,Brifa
+holdout,syn60sub_h219,3,0.573903,0.747088,0,Gorfajun
+holdout,syn60sub_h219,4,0.119677,0.434669,0,Lolumsanel Mor
+holdout,syn60sub_h219,5,0.492734,0.39747,0,Gormi
+holdout,syn60sub_h219,6,0.547527,0.762778,1,Prais
+holdout,syn60sub_h219,7,0.493852,0.381643,0,Ostchoren
+holdout,syn60sub_h219,8,0.356404,0.180548,0,Eltortor Iska
+holdout,syn60sub_h219,9,0.63819,0.500428,1,Kalogorpra
+holdout,syn60sub_h219,10,0.430647,0.443392,0,Praquifa
+holdout,syn60sub_h219,11,0.311638,0.457506,0,Junostan
+holdout,syn60sub_h219,12,0.624966,0.769193,0,Nelan
+holdout,syn60sub_h219,13,0.483493,0.656886,1,Ostprapraan
+holdout,syn60sub_h219,14,0.394573,0.488138,0,Migorfator
+holdout,syn60sub_h219,15,0.334792,0.464393,1,Anbrisa
+holdout,syn60sub_h219,16,0.524336,0.776088,0,Velostfa
+holdout,syn60sub_h219,17,0.274322,0.224876,0,Fasa
+holdout,syn60sub_h219,18,0.618338,0.262712,1,Mian Pra
+holdout,syn60sub_h219,19,0.724745,0.807233,0,Chohalvelel
+holdout,syn60sub_h219,20,0.392768,0.501207,0,Brimivelvel
+holdout,syn60sub_h219,21,0.426244,0.123608,0,Dunelis
+holdout,syn60sub_h219,22,0.5884,0.42241,1,Faelmi
+holdout,syn60sub_h219,23,0.48625,0.22736,1,Morlomor
+holdout,syn60sub_h219,24,0.609063,0.749363,1,Renmi
+holdout,syn60sub_h219,25,0.353737,0.333798,0,Prami
+holdout,syn60sub_h219,26,0.89404,0.702176,1,Rennelneldun
+holdout,syn60sub_h219,27,0.496586,0.188246,0,Morlum
+holdout,syn60sub_h219,28,0.517284,0.776944,0,Fasapra
+holdout,syn60sub_h219,29,0.431075,0.432402,0,Veltortor
+holdout,syn60sub_h219,30,0.513612,0.715491,1,Renmipra Saost
+holdout,syn60sub_h219,31,0.738509,0.780668,1,Misanelqui
+holdout,syn60sub_h219,32,0.493319,0.396517,0,Pralumis
+holdout,syn60sub_h219,33,0.335456,0.496666,0,Nelquifa Ostfa
+holdout,syn60sub_h219,34,0.438945,0.363913,0,Halsa
+holdout,syn60sub_h219,35,0.528785,0.683911,0,Choren
+holdout,syn60sub_h219,36,0.536076,0.87858,0,Quika
+holdout,syn60sub_h219,37,0.681987,0.622018,0,Nelkatorbri
+holdout,syn60sub_h219,38,0.616399,0.877745,1,Elantor
+holdout,syn60sub_h219,39,0.369896,0.284566,0,Elmor
+holdout,syn60sub_h219,40,0.445051,0.534572,0,Morelgor An
+holdout,syn60sub_h219,41,0.616861,0.274843,1,Quiisgorka
+holdout,syn60sub_h219,42,0.642639,0.795124,1,Kajunbrika
+holdout,syn60sub_h219,43,0.688519,0.686036,0,Dunanloost
+holdout,syn60sub_h219,44,0.27111,0.267688,0,Fafahalmi
+holdout,syn60sub_h219,45,0.450677,0.664964,0,Torfaan
+holdout,syn60sub_h219,46,0.338647,0.222575,0,Torlo
+holdout,syn60sub_h219,47,0.333221,0.531439,0,Junmorgor Bri
+holdout,syn60sub_h219,48,0.564059,0.144672,1,Torfa
+holdout,syn60sub_h219,49,0.382802,0.342599,0,Mormikirfa
+holdout,syn60sub_h219,50,0.354946,0.276463,1,Kirvelsa
+holdout,syn60sub_h219,51,0.351167,0.546223,0,Duntorjunqui
+holdout,syn60sub_h219,52,0.60706,0.76255,0,Elchoka Elel
+holdout,syn60sub_h219,53,0.587942,0.343727,0,Fajun
+holdout,syn60sub_h219,54,0.572174,0.836903,1,Anrentorhal
+holdout,syn60sub_h219,55,0.36314,0.40193,0,Morismormi
+holdout,syn60sub_h219,56,0.58959,0.426565,1,Morvel
+holdout,syn60sub_h219,57,0.759065,0.89369,0,Ismorrenhal
+holdout,syn60sub_h219,58,0.154905,0.29966,0,Sasamor
+holdout,syn60sub_h219,59,0.298167,0.316728,1,Praprakir
+holdout,syn60sub_h220,0,0.541088,0.461537,1,Velmi
+holdout,syn60sub_h220,1,0.71544,0.244345,0,Kirtor
+holdout,syn60sub_h220,2,0.710441,0.543228,0,Halsalo
+holdout,syn60sub_h220,3,0.790669,0.739471,1,Sasa
+holdout,syn60sub_h220,4,0.323897,0.727096,0,Losator Pra
+holdout,syn60sub_h220,5,0.644019,0.362481,0,Ostkirren
+holdout,syn60sub_h220,6,0.550892,0.98,1,Elmor
+holdout,syn60sub_h220,7,0.488195,0.453003,1,Miost Lumdun
+holdout,syn60sub_h220,8,0.292622,0.657481,1,Neljunelpra
+holdout,syn60sub_h220,9,0.26185,0.708742,0,Halka
+holdout,syn60sub_h220,10,0.726307,0.375548,0,Luman
+holdout,syn60sub_h220,11,0.662804,0.654793,0,Juntorkami Qui
+holdout,syn60sub_h220,12,0.754783,0.89106,0,Cholo
+holdout,syn60sub_h220,13,0.498039,0.256835,0,Gorost
+holdout,syn60sub_h220,14,0.580937,0.430083,0,Isgorostqui
+holdout,syn60sub_h220,15,0.975097,0.565132,0,Nelnellumcho
+holdout,syn60sub_h220,16,0.613678,0.510853,0,Morlo
+holdout,syn60sub_h220,17,0.567605,0.738515,0,Saisostren
+holdout,syn60sub_h220,18,0.699188,0.780223,0,Quivel Milo
+holdout,syn60sub_h220,19,0.316461,0.689663,0,Praelishal Ost
+holdout,syn60sub_h220,20,0.235903,0.838672,1,Nelanis
+holdout,syn60sub_h220,21,0.188362,0.98,0,Milumbri
+holdout,syn60sub_h220,22,0.744821,0.671106,1,Veltordun Lo
+holdout,syn60sub_h220,23,0.049946,0.715588,0,Renqui
+holdout,syn60sub_h220,24,0.396213,0.519346,0,Elrenhalbri
+holdout,syn60sub_h220,25,0.764305,0.848383,0,Pramorhalnel
+holdout,syn60sub_h220,26,0.158033,0.790509,0,Bridunmor
+holdout,syn60sub_h220,27,0.209055,0.485271,1,Kanel
+holdout,syn60sub_h220,28,0.62035,0.365098,0,Kirgor Chodun
+holdout,syn60sub_h220,29,0.538929,0.347843,0,Gorlumka
+holdout,syn60sub_h220,30,0.769785,0.799856,0,Choquimiren
+holdout,syn60sub_h220,31,0.503808,0.061743,0,Britorostan
+holdout,syn60sub_h220,32,0.81287,0.511389,0,Nellotor
+holdout,syn60sub_h220,33,0.71915,0.972182,1,Renren
+holdout,syn60sub_h220,34,0.582166,0.143345,0,Chomi
+holdout,syn60sub_h220,35,0.770465,0.501486,1,Junquirenmor
+holdout,syn60sub_h220,36,0.19314,0.712652,1,Junnel Qui
+holdout,syn60sub_h220,37,0.133492,0.721142,1,Loka
+holdout,syn60sub_h220,38,0.844969,0.628097,1,Samorkadun
+holdout,syn60sub_h220,39,0.342673,0.969606,0,Torhal
+holdout,syn60sub_h220,40,0.200426,0.684535,0,Nelhalnel
+holdout,syn60sub_h220,41,0.142715,0.822525,1,Kator
+holdout,syn60sub_h220,42,0.441741,0.318351,0,Kirbrian
+holdout,syn60sub_h220,43,0.078573,0.773052,0,Fagorsa
+holdout,syn60sub_h220,44,0.586005,0.244448,0,Sarentor Fafa
+holdout,syn60sub_h220,45,0.422944,0.550943,1,Elcho
+holdout,syn60sub_h220,46,0.066504,0.811515,1,Brichomi
+holdout,syn60sub_h220,47,0.581245,0.462012,1,Rennelhalhal
+holdout,syn60sub_h220,48,0.634121,0.383174,0,Saloren
+holdout,syn60sub_h220,49,0.884154,0.6778,0,Neldunren
+holdout,syn60sub_h220,50,0.442875,0.345177,1,Lovelquipra
+holdout,syn60sub_h220,51,0.74677,0.693012,0,Neldunmikir
+holdout,syn60sub_h220,52,0.823629,0.649915,0,Kalo
+holdout,syn60sub_h220,53,0.631458,0.345052,0,Lohaljun
+holdout,syn60sub_h220,54,0.864566,0.748205,0,Islo
+holdout,syn60sub_h220,55,0.138196,0.732388,1,Haljunfa
+holdout,syn60sub_h220,56,0.330804,0.915074,0,Quitorkirkir
+holdout,syn60sub_h220,57,0.691227,0.127415,0,Junkirvelsa
+holdout,syn60sub_h220,58,0.170396,0.53249,0,Renlum Sagor
+holdout,syn60sub_h220,59,0.184262,0.701058,1,Ostanpra
+rule,liferes12,0,6.697034247666484,72.0,1,Albania
+rule,liferes12,1,6.131226489483141,74.0,1,Armenia
+rule,liferes12,2,10.19727594341967,79.0,0,Austria
+rule,liferes12,3,6.173786103901937,71.0,1,Azerbaijan
+rule,liferes12,4,7.687080155783135,68.0,0,Belarus
+rule,liferes12,5,10.14171674126838,78.0,0,Belgium
+rule,liferes12,6,7.106606137727303,71.0,0,Bulgaria
+rule,liferes12,7,8.438149984075784,73.0,0,Croatia
+rule,liferes12,8,8.546751993657782,75.0,0,Czech Republic
+rule,liferes12,9,10.40547422763492,76.0,0,Denmark
+rule,liferes12,10,8.11969625295725,70.0,0,Estonia
+rule,liferes12,11,10.09740824517344,77.0,0,Finland
+rule,liferes12,12,10.0945210499321,78.0,0,France
+rule,liferes12,13,6.877296071497429,73.0,1,Georgia
+rule,liferes12,14,10.18753803875386,77.0,0,Germany
+rule,liferes12,15,9.370757093382087,78.0,0,Greece
+rule,liferes12,16,8.414052432496725,71.0,0,Hungary
+rule,liferes12,17,9.836813419268136,76.0,0,Ireland
+rule,liferes12,18,9.90797745780898,78.0,0,Italy
+rule,liferes12,19,7.200424892944957,65.0,1,Kazakhstan
+rule,liferes12,20,5.940171252720432,67.0,0,Kyrgyz Republic
+rule,liferes12,21,7.791522819150732,70.0,0,Latvia
+rule,liferes12,22,7.839919360012582,72.0,0,Lithuania
+rule,liferes12,23,7.162397497355718,73.0,1,Macedonia FYR
+rule,liferes12,24,5.940171252720432,67.0,0,Moldova
+rule,liferes12,25,10.11779215518313,78.0,0,Netherlands
+rule,liferes12,26,10.4431921358525,78.0,0,Norway
+rule,liferes12,27,8.271292652979412,73.0,0,Poland
+rule,liferes12,28,9.275191344295799,75.0,0,Portugal
+rule,liferes12,29,7.215239978730097,69.0,0,Romania
+rule,liferes12,30,7.723120092266331,67.0,1,Russian Federation
+rule,liferes12,31,8.216088098632316,73.0,0,Slovak Republic
+rule,liferes12,32,9.188094763028863,75.0,0,Slovenia
+rule,liferes12,33,9.55393007636626,78.0,0,Spain
+rule,liferes12,34,10.14956607513283,79.0,0,Sweden
+rule,liferes12,35,10.59613460805439,79.0,0,Switzerland
+rule,liferes12,36,5.91350300563827,69.0,0,Tajikistan
+rule,liferes12,37,8.058327306580958,69.0,0,Turkey
+rule,liferes12,38,6.887552571664617,67.0,0,Ukraine
+rule,liferes12,39,9.971613381583728,77.0,0,United Kingdom
+rule,liferes12,40,6.856461984594587,69.0,0,Uzbekistan
+rule,liferes12,41,9.86110183603969,79.0,0,Canada
+rule,liferes12,42,7.478734825567875,71.0,0,Dominican Republic
+rule,liferes12,43,7.52294091807237,69.0,0,El Salvador
+rule,liferes12,44,7.402451520818244,64.0,1,Guatemala
+rule,liferes12,45,6.016157159698354,54.0,1,Haiti
+rule,liferes12,46,6.606650186198215,69.0,0,Honduras
+rule,liferes12,47,7.461640392208575,75.0,1,Jamaica
+rule,liferes12,48,8.253227645581772,72.0,0,Mexico
+rule,liferes12,49,7.547501682814967,68.0,0,Nicaragua
+rule,liferes12,50,8.003028666384733,74.0,0,Panama
+rule,liferes12,51,8.416267272826277,73.0,0,Trinidad and Tobago
+rule,liferes12,52,10.28329291386371,77.0,0,United States
+rule,liferes12,53,8.990939806940807,73.0,0,Argentina
+rule,liferes12,54,6.917705609835305,62.0,1,Bolivia
+rule,liferes12,55,8.440312147080279,67.0,1,Brazil
+rule,liferes12,56,8.515191188745565,75.0,0,Chile
+rule,liferes12,57,7.811973429622022,70.0,0,Colombia
+rule,liferes12,58,7.326465613840322,70.0,0,Ecuador
+rule,liferes12,59,7.473069088032197,70.0,0,Paraguay
+rule,liferes12,60,7.799753318287247,69.0,0,Peru
+rule,liferes12,61,8.711113884053544,74.0,0,Uruguay
+rule,liferes12,62,8.169053149927343,73.0,0,Venezuela

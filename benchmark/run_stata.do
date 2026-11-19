@@ -12,9 +12,10 @@
 * Environment variables:
 *   BENCH_METHODS    methods to run (default: default gpolish labrepel). gpolish060 must run on its own,
 *                    because one Stata session cannot hold two versions of gpolish.
-*   BENCH_SETS       scenario sets to run (main perm scale fontmark; default: all whose manifest exists)
+*   BENCH_SETS       scenario sets to run (main perm scale fontmark holdout rule; default: all whose manifest exists)
 *   BENCH_SCENARIOS  run only these scenarios
 *   BENCH_PLUS       another ado folder, added to the end of the ado path to find labrepel
+*   BENCH_SEED       the random seed set before each labrepel call (default 12345)
 * Writes out/stata/<scenario>__<method>.svg, out/stata/geometry_<method>_<set>.csv and, for methods
 * that draw leader lines, out/stata/leaders_<method>_<set>.csv.
 * Fonts: every label is drawn in Open Sans. The run records the current graph set svg fontface (and,
@@ -72,7 +73,7 @@ program _bench_run
     * ------------------------------------------------------------ scenario list
     tempfile all
     local first 1
-    foreach f in real synthetic perm scale fontmark {
+    foreach f in real synthetic perm scale fontmark holdout rule {
         capture confirm file "data/manifest_`f'.csv"
         if _rc continue
         import delimited using "data/manifest_`f'.csv", clear varnames(1) stringcols(1 2 3) asdouble
@@ -113,8 +114,8 @@ program _bench_run
     tempname gf lh
     local fontshown 0
     foreach method of local methods {
-        local msets main perm scale fontmark
-        if inlist("`method'", "labrepel", "gpolish060") local msets main perm
+        local msets main perm scale fontmark holdout rule
+        if inlist("`method'", "labrepel", "gpolish060") local msets main perm holdout rule
         local leaders = inlist("`method'", "gpolish", "gpolish060", "labrepel")
         foreach set of local msets {
             local any 0
@@ -186,9 +187,11 @@ program _bench_run
                     * labrepel 1.0 accepts seed() but does not apply it; its random jitter draws from the
                     * session's random-number stream. Setting the seed here makes each graph's result the
                     * same whichever scenarios ran before it.
-                    set seed 12345
+                    local lseed : environment BENCH_SEED
+                    if "`lseed'" == "" local lseed 12345
+                    set seed `lseed'
                     timer on 1
-                    capture noisily labrepel y x if lab == 1, label(label) mlabsize(2.6) xsize(7) ysize(4.6) seed(12345)
+                    capture noisily labrepel y x if lab == 1, label(label) mlabsize(2.6) xsize(7) ysize(4.6) seed(`lseed')
                     local rc = _rc
                     timer off 1
                     if `rc' == 0 {

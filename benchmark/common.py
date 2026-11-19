@@ -16,13 +16,15 @@ MARKER_PT = 6.0          # marker diameter, points (every set except "fontmark")
 #   perm      the 4 real-data scenarios with their rows in 10 random orders (permutation seeds 1 to 10)
 #   scale     synthetic scatterplots with 150 and 300 points, all labelled, 5 seeds each
 #   fontmark  the 60-of-60 synthetic design (seeds 1 to 10) at other font and marker sizes
-SETS = ["main", "perm", "scale", "fontmark"]
+SETS = ["main", "perm", "scale", "fontmark", "holdout", "rule"]
 ALL_METHODS = ["default", "labrepel", "gpolish", "gpolish060", "adjusttext", "ggrepel", "ggrepel_inf"]
 SET_METHODS = {
     "main": ALL_METHODS,
     "perm": ALL_METHODS,
     "scale": ["default", "gpolish", "adjusttext", "ggrepel", "ggrepel_inf"],
     "fontmark": ["default", "gpolish", "adjusttext", "ggrepel", "ggrepel_inf"],
+    "holdout": ALL_METHODS,
+    "rule": ALL_METHODS,
 }
 STATA = ["default", "gpolish", "gpolish060", "labrepel"]
 MANIFEST_FIELDS = ["scenario", "set", "design", "seed", "n", "nlab", "fit", "fa", "fb", "fx0", "fx1",
@@ -33,7 +35,8 @@ def manifest_files():
     """The manifest of every scenario set, in a fixed order."""
     return [("main", "data/manifest_real.csv"), ("main", "data/manifest_synthetic.csv"),
             ("perm", "data/manifest_perm.csv"), ("scale", "data/manifest_scale.csv"),
-            ("fontmark", "data/manifest_fontmark.csv")]
+            ("fontmark", "data/manifest_fontmark.csv"),
+            ("holdout", "data/manifest_holdout.csv"), ("rule", "data/manifest_rule.csv")]
 
 
 def manifest():

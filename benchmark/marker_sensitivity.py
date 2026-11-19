@@ -41,6 +41,20 @@ def main():
                 cells.append(" / ".join(f"{v:.2f}" for v in vals))
             out.append(f"| {dname} | " + " | ".join(cells) + " |")
         out.append("")
+    # largest fall of each method's clean share from the 2.75 pt rule, from unrounded means, so that
+    # the bounds quoted in README.md are not read off the two-decimal cells above
+    out += ["## Largest fall in the clean share from the 2.75 pt rule", "",
+            "Computed from unrounded per-scenario means, over the scenarios of the main set.", "",
+            "| Method | " + " | ".join(lab for t, lab in THRESHOLDS[1:]) + " |", "|---|" + "---|" * (len(THRESHOLDS) - 1)]
+    for m in methods:
+        cells = []
+        for t, _ in THRESHOLDS[1:]:
+            falls = [st.mean(r["clean_share"] for r in res[(THRESHOLDS[0][0], d, m)])
+                     - st.mean(r["clean_share"] for r in res[(t, d, m)])
+                     for d, _ in designs if (t, d, m) in res]
+            cells.append(f"{max(falls):.4f} (smallest {min(falls):.4f})")
+        out.append(f"| {NAMES[m]} | " + " | ".join(cells) + " |")
+    out.append("")
     open("results/marker_sensitivity.md", "w").write("\n".join(out) + "\n")
     print("\n".join(out))
 

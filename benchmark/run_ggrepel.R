@@ -27,6 +27,9 @@
 # Run from the benchmark folder after run_stata.do:  Rscript run_ggrepel.R [scenario ...]
 # With no scenarios named, BENCH_SCENARIOS (if set) names them; BENCH_SETS and BENCH_METHODS limit the
 # sets and the two versions. BENCH_PNG_DPI keeps every drawn image at that resolution (see audit_ink.py).
+# Options for the further runs (see extra.py): BENCH_MAXITER sets max.iter (default 10000), BENCH_SEED
+# the seed of both calls (default 12345), and BENCH_LINEPTS=1 gives informed ggrepel the fitted line as
+# unlabelled points every 4 points along it, so its labels also avoid the line.
 suppressPackageStartupMessages({ library(ggplot2); library(ggrepel); library(grid) })
 args <- commandArgs(trailingOnly = TRUE)
 envlist <- function(v) { x <- strsplit(trimws(Sys.getenv(v)), "[[:space:]]+")[[1]]; x[nzchar(x)] }
@@ -34,9 +37,11 @@ if (!length(args)) args <- envlist("BENCH_SCENARIOS")
 sets <- envlist("BENCH_SETS")
 meths <- envlist("BENCH_METHODS")
 SET_METHODS <- list(main = c("ggrepel", "ggrepel_inf"), perm = c("ggrepel", "ggrepel_inf"),
-                    scale = c("ggrepel", "ggrepel_inf"), fontmark = c("ggrepel", "ggrepel_inf"))
+                    scale = c("ggrepel", "ggrepel_inf"), fontmark = c("ggrepel", "ggrepel_inf"),
+                    holdout = c("ggrepel", "ggrepel_inf"), rule = c("ggrepel", "ggrepel_inf"))
 files <- c(main = "data/manifest_real.csv", main = "data/manifest_synthetic.csv", perm = "data/manifest_perm.csv",
-           scale = "data/manifest_scale.csv", fontmark = "data/manifest_fontmark.csv")
+           scale = "data/manifest_scale.csv", fontmark = "data/manifest_fontmark.csv",
+           holdout = "data/manifest_holdout.csv", rule = "data/manifest_rule.csv")
 man <- do.call(rbind, lapply(seq_along(files), function(i) {
   if (!file.exists(files[i]) || (length(sets) && !(names(files)[i] %in% sets))) return(NULL)
   read.csv(files[i], colClasses = c(scenario = "character", set = "character", design = "character"))
@@ -44,10 +49,11 @@ man <- do.call(rbind, lapply(seq_along(files), function(i) {
 if (length(args)) man <- man[man$scenario %in% args, ]
 PNG_DPI <- Sys.getenv("BENCH_PNG_DPI")
 geo <- do.call(rbind, lapply(Sys.glob("out/stata/geometry_default_*.csv"), read.csv))
-MAX_ITER <- 10000                     # ggrepel's default, written out
+MAX_ITER <- as.numeric(Sys.getenv("BENCH_MAXITER", "10000"))   # ggrepel's default unless BENCH_MAXITER is set
+SEED <- as.integer(Sys.getenv("BENCH_SEED", "12345"))   # random seed for both ggrepel calls
 MAX_TIME <- Inf                       # no time limit (the default 0.5 s makes results depend on the machine)
 cat("ggrepel", as.character(packageVersion("ggrepel")), "ggplot2", as.character(packageVersion("ggplot2")),
-    "max.iter =", MAX_ITER, "max.time =", MAX_TIME, "\n")
+    "max.iter =", MAX_ITER, "max.time =", MAX_TIME, "seed =", SEED, "\n")
 
 # every scenario of a set in manifest order, whatever scenarios this run was limited to
 set_order <- function(set) unlist(lapply(seq_along(files), function(i)
@@ -80,13 +86,22 @@ run_one <- function(i, method) {
   p <- p + geom_point(size = ptsize, colour = "#0B5D7A", alpha = 0.7)
   if (method == "ggrepel") {
     p <- p + geom_text_repel(data = d[d$lab == 1, ], aes(label = label), size = labsize, family = "Open Sans",
-                             seed = 12345, max.overlaps = Inf, max.iter = MAX_ITER, max.time = MAX_TIME,
+                             seed = SEED, max.overlaps = Inf, max.iter = MAX_ITER, max.time = MAX_TIME,
                              segment.colour = "grey60", segment.size = 0.25,
                              verbose = TRUE)
   } else {
     d$lab2 <- ifelse(d$lab == 1, d$label, "")
-    p <- p + geom_text_repel(data = d, aes(label = lab2), size = labsize, family = "Open Sans",
-                             point.size = ptsize, seed = 12345, max.overlaps = Inf, max.iter = MAX_ITER,
+    dr <- d
+    if (man$fit[i] == 1 && nzchar(Sys.getenv("BENCH_LINEPTS"))) {
+      # the fitted line, sampled every 4 pt (as gpolish samples lines), as unlabelled points to avoid
+      X0 <- g$xA + g$xB * man$fx0[i]; X1 <- g$xA + g$xB * man$fx1[i]
+      Y0 <- g$yA + g$yB * (man$fa[i] + man$fb[i] * man$fx0[i]); Y1 <- g$yA + g$yB * (man$fa[i] + man$fb[i] * man$fx1[i])
+      k <- floor(sqrt((X1 - X0)^2 + (Y1 - Y0)^2) / 4) + 1
+      xv <- man$fx0[i] + (man$fx1[i] - man$fx0[i]) * (0:k) / k
+      dr <- rbind(d[, c("x", "y", "lab2")], data.frame(x = xv, y = man$fa[i] + man$fb[i] * xv, lab2 = ""))
+    }
+    p <- p + geom_text_repel(data = dr, aes(label = lab2), size = labsize, family = "Open Sans",
+                             point.size = ptsize, seed = SEED, max.overlaps = Inf, max.iter = MAX_ITER,
                              max.time = MAX_TIME, segment.colour = "grey60", segment.size = 0.25, verbose = TRUE)
   }
   p <- p + scale_x_continuous(limits = xl, expand = c(0, 0)) + scale_y_continuous(limits = yl, expand = c(0, 0)) +

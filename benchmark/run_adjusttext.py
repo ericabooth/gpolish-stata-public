@@ -12,6 +12,8 @@ adjustText drew one, its leader line, all in points with y up) and timing_<set>.
 iterations). score.py measures each box from the anchor with the same rule as the other methods; the
 box adjustText worked with comes from this 72 dpi figure, whose text extents are rounded to whole
 pixels. A run limited by BENCH_SCENARIOS keeps the rows of the set's other scenarios.
+BENCH_LINEPTS=1 also gives adjust_text() the fitted line as extra points every 4 points along it, so its
+labels also avoid the line (a further run, see extra.py).
 Run from the benchmark folder after run_stata.do:  python run_adjusttext.py [iterations]
 """
 import csv
@@ -97,10 +99,20 @@ def main(iter_lim):
                 ax.plot([x0, x1], [fa + fb * x0, fa + fb * x1], color="0.55", lw=1)
             ax.scatter(xs, ys, s=mpt ** 2, color=(11 / 255, 93 / 255, 122 / 255, 0.7), edgecolor="white", lw=0.4, zorder=3)
             lab = [r for r in d if r["lab"]]
+            ox, oy = list(xs), list(ys)
+            if m["fit"] == "1" and os.environ.get("BENCH_LINEPTS"):
+                # the fitted line, sampled every 4 pt (as gpolish samples lines), as extra points to avoid
+                X0, X1 = g["xA"] + g["xB"] * x0, g["xA"] + g["xB"] * x1
+                Y0, Y1 = g["yA"] + g["yB"] * (fa + fb * x0), g["yA"] + g["yB"] * (fa + fb * x1)
+                k = int(((X1 - X0) ** 2 + (Y1 - Y0) ** 2) ** 0.5 // 4) + 1
+                for j in range(k + 1):
+                    xv = x0 + (x1 - x0) * j / k
+                    ox.append(xv)
+                    oy.append(fa + fb * xv)
             texts = [ax.text(r["x"], r["y"], r["label"], fontsize=lpt, family=FONT) for r in lab]
             counter.steps = None
             t0 = time.perf_counter()
-            _, patches = adjust_text(texts, x=xs, y=ys, ax=ax, iter_lim=iter_lim, time_lim=None,
+            _, patches = adjust_text(texts, x=ox, y=oy, ax=ax, iter_lim=iter_lim, time_lim=None,
                                      arrowprops=dict(arrowstyle="-", color="0.6", lw=0.5))
             secs = time.perf_counter() - t0
             fig.canvas.draw()

@@ -20,9 +20,18 @@ left alone. It needs a finished run (data/, out/ and results/ present). It check
   5. with Rscript present: the box score.py builds for a ggrepel label sits where grid draws the
      text (grid applies vjust to the string height without descent): a label drawn by grid at
      vjust 0.5 has its descender ink at the bottom of the box, the baseline run_ggrepel.R writes
-     matches the one score.py computes when that column is missing, and both are 0.6 pt below
-     the baseline of a box centred with matplotlib's va="center".
+     matches the one score.py computes when that column is missing, and both are about 0.8 pt
+     below the baseline of a box centred with matplotlib's va="center" (0.6 pt under the earlier
+     72 dpi measuring rule).
+  6. the further runs (extra.py) and the reports built from archived results: make_synthetic.py and
+     make_real.do write the holdout and rule manifests only when BENCH_EXTRA is set, so the main run
+     never draws them; run_ggrepel.R keeps seed 12345 and max.iter = 10000 unless BENCH_SEED or
+     BENCH_MAXITER is set; extra.py --report and marker_sensitivity.py rebuild results/extra/extra.md
+     and results/marker_sensitivity.md byte for byte from the archived CSV files; the marker table
+     gives its bounds from unrounded means; and _gpl_placeparms() in src still holds the tuned values,
+     so the sensitivity runs changed no setting.
 Check 5 needs no finished run:  python selftest.py --baseline
+Check 6 needs only the files in results/:  python selftest.py --extra
 Run from the benchmark folder:  python selftest.py [stata executable]
 """
 import csv
@@ -142,13 +151,68 @@ def check_baseline():
     meas.close()
 
 
+def check_extra(stata=None):
+    """Check 6: the further runs' options and the reports built from archived results."""
+    import make_gpolish060
+    src = open(os.path.join(HERE, "..", "src", "gpolish.ado"), encoding="utf-8").read()
+    m = make_gpolish060.PARM_RE.search(src)
+    check(m and tuple(float(v) for v in m.group(2).split(",")) == tuple(float(v) for v in make_gpolish060.TUNED),
+          "_gpl_placeparms() in src holds the tuned settings")
+    with tempfile.TemporaryDirectory() as root:
+        bench = os.path.join(root, "benchmark")
+        os.makedirs(os.path.join(bench, "data"))
+        for f in ("common.py", "make_synthetic.py", "extra.py", "score.py", "summarize.py", "marker_sensitivity.py",
+                  "make_real.do"):
+            shutil.copy(os.path.join(HERE, f), bench)
+        shutil.copytree(os.path.join(HERE, "results"), os.path.join(bench, "results"))
+        r = run([PY, "make_synthetic.py"], bench)
+        check(r.returncode == 0 and not os.path.exists(os.path.join(bench, "data/manifest_holdout.csv")),
+              "make_synthetic.py writes no holdout manifest without BENCH_EXTRA")
+        r = run([PY, "make_synthetic.py"], bench, {"BENCH_EXTRA": "1"})
+        hold = os.path.join(bench, "data/manifest_holdout.csv")
+        n = len(list(csv.DictReader(open(hold)))) if os.path.exists(hold) else 0
+        check(r.returncode == 0 and n == 60, f"with BENCH_EXTRA=1 it writes the 60 holdout scenarios ({n})")
+        main_syn = open(os.path.join(bench, "data/manifest_synthetic.csv")).read()
+        check(main_syn == open(os.path.join(HERE, "data/manifest_synthetic.csv")).read()
+              if os.path.exists(os.path.join(HERE, "data/manifest_synthetic.csv")) else True,
+              "the main synthetic manifest is the same with BENCH_EXTRA set")
+        do = open(os.path.join(HERE, "make_real.do")).read()
+        check(do.index('environment BENCH_EXTRA') < do.index('manifest_rule.csv'),
+              "make_real.do writes the rule manifest only when BENCH_EXTRA is set")
+        rs = open(os.path.join(HERE, "run_ggrepel.R")).read()
+        check('Sys.getenv("BENCH_MAXITER", "10000")' in rs and 'Sys.getenv("BENCH_SEED", "12345")' in rs
+              and rs.count("seed = SEED") == 2 and "seed = 12345" not in rs,
+              "run_ggrepel.R uses seed 12345 and max.iter = 10000 unless BENCH_SEED or BENCH_MAXITER is set")
+        if os.path.exists(os.path.join(HERE, "results/extra/extra.md")):
+            r = run([PY, "extra.py", "--report"], bench)
+            check(r.returncode == 0 and filecmp.cmp(os.path.join(HERE, "results/extra/extra.md"),
+                                                    os.path.join(bench, "results/extra/extra.md"), shallow=False),
+                  "extra.py --report rebuilds results/extra/extra.md from the archived CSV files")
+            md = open(os.path.join(HERE, "results/extra/extra.md")).read()
+            check(all(h in md for h in ("## Raised iteration limits", "## Fitted line given as an obstacle",
+                                        "## Holdout seeds", "## Random seeds")),
+                  "results/extra/extra.md reports all four further runs")
+        r = run([PY, "marker_sensitivity.py"], bench)
+        ms = os.path.join(bench, "results/marker_sensitivity.md")
+        check(r.returncode == 0 and filecmp.cmp(os.path.join(HERE, "results/marker_sensitivity.md"), ms, shallow=False),
+              "marker_sensitivity.py rebuilds results/marker_sensitivity.md from the archive")
+        txt = open(ms).read()
+        check("## Largest fall in the clean share" in txt and re.search(r"\| `?gpolish ptlabel.*\| 0\.0270 ", txt),
+              "the marker table gives unrounded bounds (gpolish falls 0.0270 at 3.0 pt)")
+
+
 def main():
+    if sys.argv[1:2] == ["--extra"]:
+        check_extra()
+        print(passed, "checks passed")
+        return
     if sys.argv[1:2] == ["--baseline"]:
         check_baseline()
         print(passed, "checks passed")
         return
     stata = sys.argv[1] if len(sys.argv) > 1 else None
     check_baseline()
+    check_extra()
     for need in ("data/manifest_real.csv", "out/stata/geometry_default_main.csv", "results/positions.csv"):
         if not os.path.exists(os.path.join(HERE, need)):
             sys.exit(f"{need} is missing: run the benchmark first")

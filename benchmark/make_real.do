@@ -71,4 +71,26 @@ foreach scen in life12 lifeall autosub autoall {
     }
 }
 file close `mf'
+* ---------------------------------------------------------------- rule set: a rule-based subset
+* the 12 countries farthest from the fitted line (largest absolute residual), a rule fixed before running.
+* Written only for extra.py (BENCH_EXTRA=1), so the main run never draws it.
+local extra : environment BENCH_EXTRA
+if "`extra'" == "" {
+    di as res "real-data scenarios written"
+    exit
+}
+file open `mf' using "data/manifest_rule.csv", write text replace
+file write `mf' "scenario,set,design,seed,n,nlab,fit,fa,fb,fx0,fx1,label_pt,marker_pt" _n
+import delimited using "data/lifeall.csv", clear varnames(1) stringcols(3) encoding("utf-8") asdouble
+gen double ares = abs(y - (`=word(subinstr("`fit_life'", ",", " ", .), 1)' + `=word(subinstr("`fit_life'", ",", " ", .), 2)'*x))
+gen long o = _n
+gsort -ares
+replace lab = _n <= 12
+sort o
+list label ares if lab, noobs
+drop ares o
+export delimited x y label lab using "data/liferes12.csv", replace
+quietly count if lab
+file write `mf' "liferes12,rule,liferes12,0,`=_N',`r(N)',1,`fit_life',8.6,6.0" _n
+file close `mf'
 di as res "real-data scenarios written"
