@@ -863,6 +863,18 @@ class Panel:
             ax.set_yticklabels(labs)
         self.rotate_ticks(ax, which, angle)
 
+    def minor_ticks(self, ax, which, raw):
+        """xmlabel() / ymlabel(): labelled minor ticks, drawn in a smaller font."""
+        ticks = [(num(t[0]), tick_text(t[1])) for t in (raw or [])]
+        ticks = [t for t in ticks if t[0] is not None]
+        if not ticks:
+            return
+        pos = [t[0] for t in ticks]
+        labs = [t[1] for t in ticks]
+        (ax.set_xticks if which == "x" else ax.set_yticks)(pos, labs, minor=True)
+        ax.tick_params(axis=which, which="minor", labelsize=(self.xtickfs if which == "x" else self.ytickfs) * 0.8,
+                       length=2.5, width=0.7, color=AXIS, labelcolor=MUTED)
+
     def rotate_ticks(self, ax, which, angle):
         """Tick-label angle set in Stata (xlabel(, angle())). The y axis keeps the
         house style (horizontal labels) unless the angle is a diagonal one."""
@@ -947,6 +959,10 @@ class Panel:
             if ticks:
                 self.set_ticks(ax, which, ticks, self.axis_format(key if key != "y2axis" else key),
                                parse_angle({"angle": a.get("tickangle", "")}))
+            elif a.get("ticks_none"):
+                # xlabel(none) / ylabel(none): no major ticks, labels or gridlines
+                (ax.set_xticks if which == "x" else ax.set_yticks)([])
+            self.minor_ticks(ax, which, a.get("ticks_minor"))
             if is_log:
                 ax.tick_params(axis=which, which="minor", length=0, labelbottom=False,
                                labelleft=False)
@@ -1585,6 +1601,9 @@ class Panel:
             if sticks:
                 ax.set_xticks([t[0] for t in sticks])
                 ax.set_xticklabels([t[1] for t in sticks])
+            elif s.get("scaleaxis_none"):
+                ax.set_xticks([])
+            self.minor_ticks(ax, "x", s.get("scaleaxis_minor"))
             if not self.f.nogrid:
                 ax.grid(axis="x", color=GRID, lw=0.9)
             ax.spines["bottom"].set_visible(False)
@@ -1602,6 +1621,9 @@ class Panel:
             if sticks:
                 ax.set_yticks([t[0] for t in sticks])
                 ax.set_yticklabels([t[1] for t in sticks])
+            elif s.get("scaleaxis_none"):
+                ax.set_yticks([])
+            self.minor_ticks(ax, "y", s.get("scaleaxis_minor"))
             if not self.f.nogrid:
                 ax.grid(axis="y", color=GRID, lw=0.9)
 
@@ -1848,6 +1870,12 @@ class Figure:
                 ax.set_axis_off()
             self.panels.append(p)
         self.share_bar_scale()
+        asp = num(s.get("aspect"), 0.0) or 0.0
+        if asp > 0 and not self.multi and self.panels:
+            # aspectratio(): Stata's ratio is plot-region height over width
+            for a in (self.panels[0].ax, self.panels[0].ax2):
+                if a is not None:
+                    a.set_box_aspect(asp)
 
         # titles shared by all panels, taken from the panels when they agree
         xt = {p.axis_title("x") for p in self.panels}
@@ -2148,6 +2176,10 @@ class Figure:
             xt = [t.get_text().replace("\n", "/") for t in ax.get_xticklabels()]
             out.append(f"{tag}.xticks=" + "|".join(xt))
             out.append(f"{tag}.yticks=" + "|".join(t.get_text() for t in ax.get_yticklabels()))
+            out.append(f"{tag}.xminor=" + "|".join(t.get_text() for t in ax.get_xticklabels(minor=True)))
+            out.append(f"{tag}.yminor=" + "|".join(t.get_text() for t in ax.get_yticklabels(minor=True)))
+            ba = ax.get_box_aspect()
+            out.append(f"{tag}.box_aspect={0 if ba is None else ba:g}")
             rot = [t.get_rotation() for t in ax.get_xticklabels()]
             out.append(f"{tag}.xtickangle={rot[0] if rot else 0:g}")
             fs = [t.get_fontsize() for t in ax.get_xticklabels()]
