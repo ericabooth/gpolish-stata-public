@@ -162,7 +162,8 @@ The tip points to the left of the direction from {opt from()} to {opt to()}; {op
 {phang}
 {cmd:gpolish arrow} draws an arrow between two points, straight by default; {opt curve(#)} bends it.
 {opt from()} and {opt to()} must be different points. When either lies outside the plot region,
-{cmd:arrow} (and {cmd:brace}) prints a note and still draws.
+{cmd:arrow} (and {cmd:brace}) prints a note and still draws. On a log axis, {cmd:arrow}, {cmd:brace} and {cmd:bracket}
+stop with r(198) before any edit when a position is zero or negative, and name the option.
 Together with {cmd:gpolish note} it builds simple flow charts on an empty plot.
 
 {phang}
@@ -198,7 +199,9 @@ as used to mark a comparison between two bars. Its ticks point down, and its lab
 {opt tick(#)} sets their length in points. An optional label sits beside the middle of the bracket, on the side
 away from the ticks, {opt gap(#)} points from it. The label's position is fixed: unlike the other layout commands,
 {cmd:bracket} does not check it against markers, lines, bars or earlier labels, and prints no note if they overlap.
-The two ends ({opt y0()} and {opt y1()}, or {opt x0()} and {opt x1()}) must differ. For a curly brace, use {cmd:gpolish brace}.
+The two ends ({opt y0()} and {opt y1()}, or {opt x0()} and {opt x1()}) must differ. When an end lies outside the plot region,
+{cmd:bracket} prints a note and still draws; a bracket above the bars usually needs headroom, which
+{cmd:yscale(range(}{it:#}{cmd:))} on the graph command provides. For a curly brace, use {cmd:gpolish brace}.
 
 {phang}
 {cmd:gpolish legend} colors each legend label to match its key and makes it bold. Labels of more than one
@@ -247,8 +250,10 @@ It stops with an error when {cmd:endlabel}, {cmd:callout}, {cmd:note}, {cmd:arro
 {p2col:{cmd:ptlabel} on many points}run time grows quickly with the number of labels; a note is printed above 300 labels and more than {opt maxlabels()} (default 1000) are refused{p_end}
 {p2col:{cmd:bracket} labels}placed at a fixed spot beside the spine and not checked against the data or other labels; move the bracket with {opt x()} or {opt left} (or {opt y()} or {opt below}) if its label covers something{p_end}
 {p2col:{cmd:endlabel} with {cmd:aspectratio()}}when a y axis is drawn on the labeled side, the room for labels would have to be made inside a plot region whose shape is fixed, which distorts the axes; {cmd:endlabel} stops with r(198) before any edit. Drop {cmd:aspectratio()} or label the other side with {opt side()}{p_end}
-{p2col:Positions outside the plot region}{cmd:callout} and {cmd:note} refuse a {opt to()} outside the axis ranges; {opt at()}, {opt from()}, {cmd:arrow} and {cmd:brace} get a note; ranges are given in the axis's own units, so dates show as numbers{p_end}
+{p2col:Positions outside the plot region}{cmd:callout} and {cmd:note} refuse a {opt to()} outside the axis ranges; {opt at()}, {opt from()}, {cmd:arrow}, {cmd:brace} and {cmd:bracket} get a note; ranges are given in the axis's own units, so dates show as numbers{p_end}
 {p2col:Labels wider than the plot region}{cmd:ptlabel} skips them with a note; an automatically placed callout or note stops with an error; {cmd:gpolish} does not wrap text itself{p_end}
+{p2col:Zero or negative positions on a log axis}{cmd:arrow}, {cmd:brace} and {cmd:bracket} stop with r(198) before any edit; {cmd:ptlabel} skips such points{p_end}
+{p2col:Plot-region outlines}when a scheme such as {cmd:s1mono} outlines the plot region and the end labels sit outside it, {cmd:endlabel} starts them {opt xgap()} points beyond the outline rather than beyond the line end. An outline counts as drawn when its colour differs from the graph background, so an outline turned off with {cmd:plotregion(lstyle(none))} still moves the labels out{p_end}
 {p2col:Positions on a second axis}{opt at()}, {opt to()} and {opt from()} use the first axes unless {opt xaxis()} or {opt yaxis()} says otherwise{p_end}
 {p2col:Graphs edited by {cmd:gpolish} 0.6.1 or earlier}these carry no {cmd:endlabel} record; their end labels are found in the graph's edit log (see {help gpolish##technical:Technical notes}){p_end}
 {p2line}

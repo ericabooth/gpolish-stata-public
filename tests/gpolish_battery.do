@@ -1326,6 +1326,56 @@ capture gpolish bracket "x", x(3) y0(20) y1(22) below
 chk r4_vbr_below _rc==198
 chk r4_hbr_nochange "`.r4h.plotregion1.added_lines.arrnels'"=="6"
 
+* ---- r5: endlabel clears a plot-region outline; log-axis checks; bracket outside note --
+sysuse uslifeexp, clear
+line le_male year, scheme(s1mono) name(r5o, replace)
+gpolish endlabel, values
+gpolish geom, name(r5o)
+local labx = r(xa) + r(xb)*`.r5o.plotregion1.added_text[1].xpos.val'
+* the label starts at least gap() (4pt) beyond the outlined plot-region edge
+chk r5_outline_gap `labx' >= r(gx1) + 4/72*r(gpi)
+local valx = r(xa) + r(xb)*`.r5o.plotregion1.added_text[2].xpos.val'
+chk r5_outline_val `valx' > `labx'
+* default scheme: no outline, the label still sits beyond the line end
+line le_male year, name(r5d, replace)
+gpolish endlabel
+gpolish geom, name(r5d)
+chk r5_noout_gap r(xa) + r(xb)*`.r5d.plotregion1.added_text[1].xpos.val' > r(xa) + r(xb)*1999
+sysuse auto, clear
+scatter price mpg, yscale(log) name(r5l, replace)
+capture gpolish bracket "zero", x(30) y0(0) y1(10000)
+chk r5_log_bracket _rc==198
+capture gpolish bracket "neg", y(-1) x0(20) x1(30)
+chk r5_log_hbracket _rc==198
+capture gpolish brace "neg", from(30 -5) to(30 10000)
+chk r5_log_brace _rc==198
+capture gpolish arrow, from(30 0) to(20 10000)
+chk r5_log_arrow _rc==198
+chk r5_log_nothing "`.r5l.plotregion1.added_lines.arrnels'"=="" | "`.r5l.plotregion1.added_lines.arrnels'"=="0"
+gpolish bracket "ok", x(30) y0(5000) y1(10000)
+chk r5_log_ok "`.r5l.plotregion1.added_lines.arrnels'"=="3"
+scatter price weight, name(r5b, replace)
+capture log close _r5b
+tempfile r5lg
+log using `"`r5lg'"', text name(_r5b) replace
+gpolish bracket "hi", x(6000) y0(20) y1(30)
+gpolish bracket "in", x(3000) y0(5000) y1(9000)
+log close _r5b
+local nn 0
+local nr 0
+tempname fh
+file open `fh' using `"`r5lg'"', read text
+file read `fh' line
+while r(eof)==0 {
+    if strpos(`"`macval(line)'"', "note: gpolish bracket") local ++nn
+    if strpos(`"`macval(line)'"', "make roo") local ++nr
+    file read `fh' line
+}
+file close `fh'
+chk r5_bracket_note `nn'==2
+chk r5_bracket_hint `nr'==1
+chk r5_bracket_drawn "`.r5b.plotregion1.added_lines.arrnels'"=="6"
+
 gpolish limits
 
 if `"`_wf0'"'!="" graph set window fontface `"`_wf0'"'

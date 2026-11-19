@@ -271,6 +271,22 @@ program _gpl_toreg1
     c_local `p'y `y1'
 end
 
+* stop before any edit when a coordinate cannot be drawn on a log axis (zero or negative).
+* args: cmd name reg xopt x yopt y; reg is the plot region whose data units x and y are in
+program _gpl_logpos
+    args cmd name reg xopt x yopt y
+    if "`reg'"=="" local reg 1
+    _gpl_geom, name(`name') region(`reg')
+    if r(xlog) & `x' <= 0 {
+        di as err "gpolish `cmd': `xopt'() must be positive on a log x axis"
+        exit 198
+    }
+    if r(ylog) & `y' <= 0 {
+        di as err "gpolish `cmd': `yopt'() must be positive on a log y axis"
+        exit 198
+    }
+end
+
 * is a point (in plot region 1 data units) inside the plot region? cmd opt name x y mode
 * mode err stops with rc 198; mode note prints a note. c_local _gpl_out is 1 when outside
 program _gpl_inplot
@@ -908,11 +924,33 @@ program _gpl_endlabel
     local maxw = `maxn' + `maxv' + cond("`values'"!="", 0.9, 0)
     * make room on the chosen side, then read the (new) transform
     _gpl_geom, name(`name')
-    local m = (`xgap' + `maxw'*`size' + 4)*r(relperpt)
-    local plotw = 100*r(xsize)/min(r(xsize), r(ysize))
-    if `m' > 0.35*`plotw' {
-        di as txt "note: the end labels take about `=round(100*`m'/`plotw')'% of the graph width. Shorten them, use wrap(),"
-        di as txt "      a smaller size(), or a wider graph (xsize())."
+    * A scheme such as s1mono draws an outline around the plot region. Labels outside the plot
+    * region then start beyond that outline (plus xgap()), not just beyond the line end, so the
+    * text never sits on the frame. The outline counts as drawn when its colour differs from the
+    * graph background and its pattern is not blank.
+    local pro .`name'.plotregion1.style.boxstyle.linestyle
+    local olc `"``pro'.color.setting'"'
+    local obg `"`.`name'.style.boxstyle.shadestyle.color.setting'"'
+    local outl = (`"`olc'"'!="" & `"`olc'"'!=`"`obg'"' & "``pro'.pattern.setting'"!="blank")
+    local olw = real("``pro'.width.val'")
+    if missing(`olw') local olw 0
+    * the edge is measured on the current layout, so a margin given back by the undo above
+    * must be drawn first
+    if `outl' gr_draw `name'
+    _gpl_geom, name(`name')
+    * outline width in points (linewidths are in relative units, percent of the shorter side)
+    local olwpt = `olw'/r(relperpt)
+    local relperpt = r(relperpt)
+    local gxs = r(xsize)
+    local gys = r(ysize)
+    local oext 0
+    if `outl' {
+        local gedge = cond(`s' > 0, r(gx1), r(gx0))
+        forvalues j = 1/`np' {
+            local xl = `Y'[`j',4]
+            local g = r(xa) + r(xb)*cond(r(xlog), ln(`xl'), `xl')
+            local oext = max(`oext', (`s'*(`gedge' - `g'))/r(gpi)*72 + `olwpt')
+        }
     }
     * Outside the plot the labels would sit on a y axis drawn on that side (its line, ticks and
     * labels). Then the room is made inside the plot region instead, between the axis and the lines.
@@ -924,6 +962,13 @@ program _gpl_endlabel
         local ax1 `.`name'.yaxis`a'.gdi_x1'
         if "`ax0'"=="" | "`ax1'"=="" continue
         if `s'*((`ax0' + `ax1')/2 - `pc') > 0 local inner 1
+    }
+    if `inner' local oext 0
+    local m = (`xgap' + `oext' + `maxw'*`size' + 4)*`relperpt'
+    local plotw = 100*`gxs'/min(`gxs', `gys')
+    if `m' > 0.35*`plotw' {
+        di as txt "note: the end labels take about `=round(100*`m'/`plotw')'% of the graph width. Shorten them, use wrap(),"
+        di as txt "      a smaller size(), or a wider graph (xsize())."
     }
     local mside = cond("`side'"=="right", "r", "l")
     if `inner' {
@@ -981,12 +1026,17 @@ program _gpl_endlabel
     local bal = cond(`s' > 0, "east", "west")
     local hzv = cond(`s' > 0, "right", "left")
     local bav = cond(`s' > 0, "west", "east")
+    * the outline edge after the redraw; used only when the labels sit outside the plot region
+    local clamp = (`outl' & !`inner')
+    if `clamp' local gedge = cond(`s' > 0, max(`.`name'.plotregion1.gdi_x0', `.`name'.plotregion1.gdi_x1'), ///
+        min(`.`name'.plotregion1.gdi_x0', `.`name'.plotregion1.gdi_x1')) + `s'*`olwpt'/72*`gpi'
     * the value column is shared: it sits beyond the line end farthest out on the label side
     local gxe .
     forvalues j = 1/`np' {
         local rg = `Y'[`j',6]
         local xl = `Y'[`j',4]
         local g = `xa`rg'' + `xb`rg''*cond(`xlog`rg'', ln(`xl'), `xl')
+        if `clamp' local g = cond(`s' > 0, max(`g', `gedge'), min(`g', `gedge'))
         if `gxe'==. local gxe = `g'
         else local gxe = cond(`s' > 0, max(`gxe', `g'), min(`gxe', `g'))
     }
@@ -998,7 +1048,9 @@ program _gpl_endlabel
         local xl = `Y'[`j',4]
         local yl = `Y'[`j',1]
         local gxl = `xa`rg'' + `xb`rg''*cond(`xlog`rg'', ln(`xl'), `xl')
-        local xpos = (`gxl' + `s'*`xgap'/72*`gpi' - `xa1')/`xb1'
+        local gxa = `gxl'
+        if `clamp' local gxa = cond(`s' > 0, max(`gxl', `gedge'), min(`gxl', `gedge'))
+        local xpos = (`gxa' + `s'*`xgap'/72*`gpi' - `xa1')/`xb1'
         local xval = (`gxe' + `s'*(`xgap' + `maxw'*`size')/72*`gpi' - `xa1')/`xb1'
         local xdot = (`gxl' - `xa1')/`xb1'
         local ydot = (`Y'[`j',2] - `ya1')/`yb1'
@@ -1365,6 +1417,8 @@ program _gpl_arrow
     _gpl_name `name'
     local name `r(name)'
     _gpl_axpos `name' "`xaxis'" "`yaxis'"
+    _gpl_logpos arrow `name' "`_gpl_reg'" from `fromx' from `fromy'
+    _gpl_logpos arrow `name' "`_gpl_reg'" to `tox' to `toy'
     _gpl_toreg1 `name' "`_gpl_reg'" from `fromx' `fromy'
     _gpl_toreg1 `name' "`_gpl_reg'" to `tox' `toy'
     _gpl_inplot arrow from `name' `fromx' `fromy' note
@@ -1403,6 +1457,8 @@ program _gpl_brace
     _gpl_name `name'
     local name `r(name)'
     _gpl_axpos `name' "`xaxis'" "`yaxis'"
+    _gpl_logpos brace `name' "`_gpl_reg'" from `fromx' from `fromy'
+    _gpl_logpos brace `name' "`_gpl_reg'" to `tox' to `toy'
     _gpl_toreg1 `name' "`_gpl_reg'" from `fromx' `fromy'
     _gpl_toreg1 `name' "`_gpl_reg'" to `tox' `toy'
     _gpl_inplot brace from `name' `fromx' `fromy' note
@@ -1504,8 +1560,29 @@ program _gpl_bracket
         local b0y `y0v'
         local b1y `y1v'
     }
+    if `horiz' {
+        _gpl_logpos bracket `name' "`_gpl_reg'" x0 `b0x' y `b0y'
+        _gpl_logpos bracket `name' "`_gpl_reg'" x1 `b1x' y `b1y'
+    }
+    else {
+        _gpl_logpos bracket `name' "`_gpl_reg'" x `b0x' y0 `b0y'
+        _gpl_logpos bracket `name' "`_gpl_reg'" x `b1x' y1 `b1y'
+    }
     _gpl_toreg1 `name' "`_gpl_reg'" b0 `b0x' `b0y'
     _gpl_toreg1 `name' "`_gpl_reg'" b1 `b1x' `b1y'
+    local _gpl_out 0
+    if `horiz' {
+        _gpl_inplot bracket x0 `name' `b0x' `b0y' note
+        local o0 `_gpl_out'
+        _gpl_inplot bracket x1 `name' `b1x' `b1y' note
+        if `o0' | `_gpl_out' di as txt "      add yscale(range(#)) or xscale(range(#)) to the graph command to make room for the bracket"
+    }
+    else {
+        _gpl_inplot bracket y0 `name' `b0x' `b0y' note
+        local o0 `_gpl_out'
+        _gpl_inplot bracket y1 `name' `b1x' `b1y' note
+        if `o0' | `_gpl_out' di as txt "      add xscale(range(#)) or yscale(range(#)) to the graph command to make room for the bracket"
+    }
     _gpl_geom, name(`name')
     * device units run left to right and bottom to top on screen whatever the axis direction
     local g0x = r(xa) + r(xb)*cond(r(xlog), ln(`b0x'), `b0x')
