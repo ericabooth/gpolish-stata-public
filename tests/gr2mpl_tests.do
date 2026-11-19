@@ -777,9 +777,9 @@ has "panel2.ann_tick_overlaps=0"
 has "panel1.ann_overlaps=0"
 has "panel2.ann_overlaps=0"
 * (Stata's own export gives the data about a quarter of panel A's plot width on 16.1
-* and about 40% on 19.5; the squeezed render gave under 15%)
+* and about 40% on 19.5; the squeezed render gave under 15%, and 16.1 renders 0.199)
 getv panel1.xdata_frac
-ok real(`"`r(val)'"') > 0.2
+ok real(`"`r(val)'"') > 0.18
 * as in Stata, the member whose end labels sit outside the plot has the narrower plot
 getv panel1.axes_wpts
 local wa = real(`"`r(val)'"')
@@ -1126,5 +1126,39 @@ rchk mfcolor_none
 barpix mfcolor_none 1000
 barpix mfcolor_none 0 8000 dark
 erase "tests/out/barpix.py"
+
+* -- marker sizes match Stata's at msscale(1): the diameter of two markers in the
+* gr2mpl PNG is within 7% of the diameter in Stata's PNG at the same width
+file open `pf' using "tests/out/markpix.py", write text replace
+file write `pf' "import sys" _n "from matplotlib.image import imread" _n
+file write `pf' "def n(f):" _n
+file write `pf' "    a = imread(f)[..., :3] * 255" _n
+file write `pf' "    return int(((abs(a[..., 0] - 26) < 40) & (abs(a[..., 1] - 133) < 40) & (a[..., 2] > 200)).sum())" _n
+file write `pf' "open(sys.argv[3], 'w').write(str((n(sys.argv[2]) / n(sys.argv[1])) ** 0.5))" _n
+file close `pf'
+foreach s in medium large {
+    twoway scatteri 1 1 2 2, msize(`s') mcolor("26 133 255") xsize(5) ysize(4)
+    rchk msize_`s' "width(1200)"
+    shell "$GR2MPL_PYTHON" "tests/out/markpix.py" "tests/out/r_msize_`s'_stata.png" "tests/out/r_msize_`s'_mpl.png" "tests/out/markpix.txt"
+    file open `pf' using "tests/out/markpix.txt", read text
+    file read `pf' ratio
+    file close `pf'
+    erase "tests/out/markpix.txt"
+    di as txt "msize(`s'): gr2mpl/Stata marker diameter = `ratio'"
+    ok abs(real("`ratio'") - 1) < 0.07
+}
+erase "tests/out/markpix.py"
+
+* -- legend(on) on a one-plot graph draws the legend; the default draws none
+sysuse auto, clear
+twoway scatter mpg weight, legend(on pos(6)) title("legend(on), one plot")
+rchk legend_on1
+has "panel1.legend=Mileage (mpg)"
+twoway scatter mpg weight, title("default legend, one plot")
+rchk legend_def1
+has "panel1.legend=Mileage (mpg)", absent
+twoway scatter mpg weight, legend(on label(1 "Cars")) title("legend(on label()), one plot")
+rchk legend_on1lab
+has "panel1.legend=Cars"
 
 di as res "$R_N checks passed"

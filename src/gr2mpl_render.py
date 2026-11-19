@@ -19,6 +19,10 @@ import re
 import sys
 
 import numpy as np
+
+# Stata draws a marker of size s about 4/pi times wider than s in points; this factor
+# makes matplotlib's marker diameter match Stata's at msscale(1)
+MSTATA = 4.0 / math.pi
 import matplotlib
 
 matplotlib.use("Agg")
@@ -421,8 +425,8 @@ class Panel:
     def ms(self, p, floor=2.0):
         v = num(p.get("msize"))
         if v is None:
-            return 5.0 * self.f.k * self.gmult
-        return max(floor, self.pts(v) * self.f.msscale * self.gmult)
+            return 5.0 * MSTATA * self.f.k * self.f.msscale * self.gmult
+        return max(floor, self.pts(v) * MSTATA * self.f.msscale * self.gmult)
 
     def skip(self, msg):
         where = f"panel {self.index + 1}: " if self.f.multi else ""
@@ -591,7 +595,7 @@ class Panel:
                 return dict(marker=marker, ms=self.ms(p), mfc="white", mec=mline,
                             mew=max(1.0, self.pts(mlw)) if mlw else 1.2)
             size = self.ms(p)
-            if same and (self.s.get("role") == "matrix" or size < 4.5):
+            if same and (self.s.get("role") == "matrix" or size < 4.5 * MSTATA):
                 # a white rim would eat a small marker; draw it solid instead
                 return dict(marker=marker, ms=size, mfc=mfill, mec=mfill, mew=0.0)
             return dict(marker=marker, ms=size, mfc=mfill,
@@ -1321,7 +1325,8 @@ class Panel:
             texts.append(lab)
             self._legend_styles.append((col, bold))
             self._legend_plots.append(k)
-        if nplot == 0 or (len(handles) == 1 and len(self.infos) == 1):
+        forced = self.s.get("legend", {}).get("draw") == "yes"
+        if nplot == 0 or (len(handles) == 1 and len(self.infos) == 1 and not forced):
             return [], []
         return handles, texts
 
