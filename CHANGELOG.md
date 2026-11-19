@@ -41,6 +41,12 @@ This release contains gpolish 0.7.0 and gr2mpl 0.6.0. The changes listed under 0
 - `arrow`, `brace` and `bracket`: a zero or negative position on a log axis now stops with r(198) before any edit and names the option, for example "gpolish bracket: y0() must be positive on a log y axis". Before, the command failed with ". is not a number" and left part of the object in the graph.
 - `bracket`: an end outside the plot region now prints the same note as `arrow` and `brace`, with the axis ranges, plus a hint to add `yscale(range(#))` or `xscale(range(#))` to make room, naming the axis the bracket spans first. The bracket is still drawn.
 
+- `endlabel` prints a note when `labels()` has a different number of entries than there are plots; plots without an entry keep their own label and extra entries are ignored.
+- `endlabel` stops with r(198) when `wrap()`, `gap()` or `xgap()` is negative, and when `format()` is not a numeric display format.
+- `endlabel`, `ptlabel`, `callout`, `note`, `brace` and `bracket` stop with r(198) when `size()` is zero or negative; `callout`, `note` and `arrow` do the same for `headsize()`. A negative `pad()`, `offset()`, `msize()` or `gap()` (`brace`, `bracket`) also stops with r(198). Before, such values were accepted and a PNG export of the graph came out blank.
+- `bracket` tests its shared position and its two ends separately, so its out-of-range note names the option that is off the plot (for example `y()` rather than `x0()` and `x1()`) and gives the `xscale(range(#))` or `yscale(range(#))` to add, with the value.
+- `at()`, `to()` and `from()` accept an expression with spaces inside parentheses, such as `to(tc(02jan2020 05:00:00) 0)` on a clock-time axis; the error for a wrong number of values shows that form.
+
 ### gr2mpl 0.6.0
 
 - graph bar, hbar, box and dot with by(): every panel is now drawn on the scale range Stata shares across the panels, so bars in panels without tick labels have the right height against the labelled axis. by(, yrescale) keeps each panel on its own scale.
@@ -69,6 +75,10 @@ This release contains gpolish 0.7.0 and gr2mpl 0.6.0. The changes listed under 0
 - The render record (render_info.txt) gains `xminor=`, `yminor=` and `box_aspect=` lines per panel.
 - `scatter` (and other marker plots) with `mcolor(none)` or `mfcolor(none)` and a visible `mlcolor()` draw hollow markers. Before, the spec recorded the marker fill as black, because Stata stores a `none` marker fill as black and only its style name says it is none, so the markers were drawn filled black.
 
+- `lwscale()` and `msscale()` values below 1 (for example `msscale(0.5)` or `lwscale(.75)`) now render. Before, the spec was written with `.5`, which is not valid JSON, and rendering failed with r(698). This also fixes `gpolish render` with these options, which passes them to gr2mpl.
+- `lwscale()` and `msscale()` reject values of 0 or less with r(198). Before, `msscale(-1)` was accepted without a message.
+- `gr2mpl doctor` returns `r(mplok)` as a numeric scalar (1, 0, or missing when the matplotlib version cannot be read), so `assert r(mplok)==1` works. Before, it was a string macro.
+
 ### Benchmark
 
 - The benchmark numbers changed. Release 0.6.1 measured the Open Sans labels with `gpolish`'s Helvetica width table in batch runs; `run_stata.do` and `tune.do` now set the svg font to Open Sans, check that `gpolish` used its Open Sans table, and set the recorded font back afterwards. The six placement settings were not tuned again. adjustText now runs a fixed 100 iterations and ggrepel runs with `max.time = Inf`, so repeated runs give identical positions; ggrepel's label and marker sizes were corrected (they were 0.4 percent too large). `labrepel` gets its seed set before each call, because version 1.0 ignores `seed()`.
@@ -83,6 +93,9 @@ This release contains gpolish 0.7.0 and gr2mpl 0.6.0. The changes listed under 0
 - The reported seconds for the main and scale sets come from a separate timing run with one process at a time and no other benchmark job running. It gave the same positions as the archived run for every method and graph; only the seconds changed.
 - benchmark/README.md: the 150-point paragraph now matches results/summary.md and graphs.csv for adjustText, and the distance finding says `gpolish` places labels farther from their points than ggrepel in every scenario (it said "usually").
 
+- The further runs are options of the harness: `extra.py` runs each in its own working copy and writes results/extra/. `raised` gives adjustText `iter_lim=1000` and both ggrepel columns `max.iter = 100000`; `fitline` gives adjustText and informed ggrepel the fitted line as points; `holdout` draws synthetic seeds 201 to 220 and the rule-based list of the 12 countries farthest from the fitted line; `seeds` draws ggrepel, informed ggrepel and `labrepel` on the real-data graphs with seeds 1 to 20. With the raised limits, both ggrepel columns pass `gpolish` with every car labelled (clean shares 0.64 and 0.74 against 0.59) but not with every country labelled (0.62 and 0.70 against 0.75); adjustText reaches 0.46 and 0.41. On the holdout seeds, `gpolish`'s clean shares are 0.99, 0.98 and 0.92 in the three synthetic designs, against 0.97, 0.91 and 0.86 for informed ggrepel. Across seeds 1 to 20 with every car labelled, informed ggrepel's clean share is above `gpolish`'s 0.59 on 6 seeds and equal on 3.
+- New `sensitivity.py` varies, one at a time and on the tuning seeds only, the constants of the placement search that were set by hand. No single constant moves the mean clean share by more than 0.014 (against 0.958). It also checks convergence of the four passes: 20 of 1,100 labels (1.8 percent) move between the 3-pass and 4-pass drawings, and 8 passes place 14 labels (1.3 percent) differently from 4. Pass counts of 1 to 8 (except 4, the default) change the mean clean share by -0.009 to +0.002. `--only` redraws named variants and merges their rows into results/sensitivity.csv.
+
 ### Documentation
 
 - README: describes batch-mode fonts, `GPOLISH_FONT`, the matplotlib 3.6 minimum, second-axis options, the output formats of `gr2mpl`, and the handling of graphs saved by 0.6.1 or earlier; the benchmark paragraph reports the current numbers.
@@ -91,6 +104,7 @@ This release contains gpolish 0.7.0 and gr2mpl 0.6.0. The changes listed under 0
 - Help files and docs/OBJECT_MODEL.md updated for each change above.
 - README and `gpolish` help: the quick-start example sets short variable labels for the four `uslifeexp` series ("White women", "White men", "Black women", "Black men"), so it gives the end labels shown in images/before_after.png and no longer prints the end-label width note.
 - README and benchmark/README.md: `gpolish` has the highest clean share with every country labelled "of the five methods at their defaults", and the release 0.6.0 settings also score higher than the tuned ones with 19 of 74 cars labelled (0.89 against 0.84).
+- New gallery/fidelity.md measures how far each text item in the 22 `gr2mpl` gallery images sits from the same item in Stata's own export (`fidelity.do`, `fidelity.py`, per-item data in fidelity.csv). Of 545 matched items, half are within 10.0 points and 90 percent within 20.9 points; the largest distance is 62.2 points, a legend entry of the heatmap. Legend entries are farthest off (median 25.9 points).
 
 ## 0.6.1 (2026-11-17)
 

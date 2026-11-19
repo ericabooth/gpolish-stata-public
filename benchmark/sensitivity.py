@@ -14,14 +14,16 @@ constants that were set by hand during development, with the benchmark in view, 
     passes     4 passes over the labels, with no other stopping rule
 (The 35 percent threshold only decides which labels the note reports as still overlapping; it does not
 move any label, so it is not varied.)
-Each constant is halved and doubled on its own (directions: 8 and 32; passes: 2, 3, 5, 6 and 8), with
+Each constant is halved and doubled on its own (directions: 8 and 32; passes: 1, 2, 3, 5, 6, 7 and 8), with
 everything else as in src. Every variant draws the 30 tuning scenarios (seeds 101 to 110, never the
 test seeds) with tune.do and is scored as tune.py scores them. This run reports; it does not choose
 settings, and src/gpolish.ado is not changed.
 Convergence: the search is deterministic, so a label moved in the fourth pass is a label whose position
 differs between the 3-pass and the 4-pass drawing. The same comparison is made for 4 against 8 passes.
 Writes results/sensitivity.csv and results/sensitivity.md.  Run from the benchmark folder after
-make_synthetic.py:   python sensitivity.py [stata executable] [parallel workers]
+make_synthetic.py:   python sensitivity.py [stata executable] [parallel workers] [--only variant,variant]
+With --only, only the named variants are drawn and scored; their rows replace or join the rows already in
+results/sensitivity.csv, and the convergence section of results/sensitivity.md is kept from the full run.
 With more than one worker, graph set svg fontface must already be Open Sans (as for tune.py).
 """
 import concurrent.futures as cf
@@ -36,6 +38,11 @@ import sys
 import score
 import tune
 
+ONLY = None
+if "--only" in sys.argv:
+    i = sys.argv.index("--only")
+    ONLY = set(sys.argv[i + 1].split(","))
+    del sys.argv[i:i + 2]
 STATA = sys.argv[1] if len(sys.argv) > 1 else "stata-mp"
 WORKERS = int(sys.argv[2]) if len(sys.argv) > 2 else 4
 
@@ -59,7 +66,7 @@ def variants():
     yield "base", None, None, 1
     for name, (_, _, _, v) in CONSTS.items():
         if name == "passes":
-            vals = [2, 3, 5, 6, 8]
+            vals = [1, 2, 3, 5, 6, 7, 8]
         elif name == "dirs":
             vals = [45, 11.25]           # 8 and 32 directions
         else:
@@ -128,7 +135,10 @@ def moved(a, b):
 def main():
     if WORKERS > 1 and tune.svg_font() != "Open Sans":
         sys.exit("graph set svg fontface is not Open Sans: set it first, or run with 1 worker")
-    vs = list(variants())
+    allvs = list(variants())
+    vs = [v for v in allvs if ONLY is None or v[0] in ONLY]
+    if ONLY and len(vs) != len(ONLY):
+        sys.exit(f"unknown variant in --only: {sorted(ONLY - {v[0] for v in vs})}")
     with cf.ThreadPoolExecutor(WORKERS) as ex:
         list(ex.map(lambda v: draw(v[0], v[1], v[2]), vs))
     with cf.ProcessPoolExecutor(WORKERS) as ex:
@@ -143,12 +153,19 @@ def main():
                          **{f"clean_{d}": round(res[d][1], 4) for d in designs},
                          clean_mean=round(st.mean(res[d][1] for d in designs), 4),
                          dist_em=round(st.mean(res[d][2] for d in designs), 3)))
+    if ONLY:
+        old = {r["variant"]: r for r in csv.DictReader(open("results/sensitivity.csv"))}
+        for r in old.values():
+            for k in r:
+                if k not in ("variant", "constant", "value", "factor"):
+                    r[k] = float(r[k])
+        new = {r["variant"]: r for r in rows}
+        rows = [new.get(v[0]) or old[v[0]] for v in allvs if v[0] in new or v[0] in old]
     with open("results/sensitivity.csv", "w", newline="") as fh:
         w = csv.DictWriter(fh, fieldnames=list(rows[0]))
         w.writeheader()
         w.writerows(rows)
     base = rows[0]
-    m34, m48 = moved("passes_3", "base"), moved("base", "passes_8")
     L = ["# Sensitivity to the hand-set constants", "",
          "Written by `sensitivity.py`. Tuning scenarios only (synthetic seeds 101 to 110 of the three designs, 30 "
          "graphs). Each row changes one constant of `src/gpolish.ado` and keeps everything else, including the six "
@@ -165,8 +182,16 @@ def main():
     halfdouble = [r for r in rows[1:] if r["constant"] not in ("passes", "dirs")]
     L += ["", f"Largest change in the mean clean share from halving or doubling one cost constant: "
           f"{max(abs(r['clean_mean'] - base['clean_mean']) for r in halfdouble):.3f}; over every row: "
-          f"{abs(big['clean_mean'] - base['clean_mean']):.3f} ({big['variant']}).", "",
-          "## Convergence of the four passes", "",
+          f"{abs(big['clean_mean'] - base['clean_mean']):.3f} ({big['variant']}).", ""]
+    if ONLY:
+        prev = open("results/sensitivity.md", encoding="utf-8").read()
+        L.append(prev[prev.index("## Convergence"):].rstrip("\n"))
+        L.append("")
+        open("results/sensitivity.md", "w", encoding="utf-8").write("\n".join(L))
+        print("\n".join(L))
+        return
+    m34, m48 = moved("passes_3", "base"), moved("base", "passes_8")
+    L += ["## Convergence of the four passes", "",
           "The search always runs four passes. A label moved in the fourth pass is one whose drawn position "
           "differs between the 3-pass and the 4-pass drawing; the same comparison is made for 4 against 8 passes.", "",
           "| Design | Labels | Moved in pass 4 | Share | Differ, 8 passes against 4 | Share |", "|---|---|---|---|---|---|"]

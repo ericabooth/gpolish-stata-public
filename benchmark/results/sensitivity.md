@@ -22,10 +22,12 @@ Written by `sensitivity.py`. Tuning scenarios only (synthetic seeds 101 to 110 o
 | trigger | 0.02 | 0.04 | 0.928 | -0.012 | 0.948 | -0.010 | 0.84 |
 | dirs | 22.5 | 45 | 0.928 | -0.012 | 0.944 | -0.013 | 0.85 |
 | dirs | 22.5 | 11.25 | 0.951 | +0.010 | 0.966 | +0.008 | 0.85 |
+| passes | 4 | 1 | 0.932 | -0.008 | 0.949 | -0.009 | 0.85 |
 | passes | 4 | 2 | 0.935 | -0.006 | 0.951 | -0.007 | 0.84 |
 | passes | 4 | 3 | 0.939 | -0.001 | 0.958 | +0.000 | 0.85 |
 | passes | 4 | 5 | 0.939 | -0.001 | 0.957 | -0.001 | 0.85 |
 | passes | 4 | 6 | 0.943 | +0.002 | 0.959 | +0.002 | 0.85 |
+| passes | 4 | 7 | 0.942 | +0.002 | 0.959 | +0.002 | 0.85 |
 | passes | 4 | 8 | 0.943 | +0.003 | 0.960 | +0.002 | 0.85 |
 
 Largest change in the mean clean share from halving or doubling one cost constant: 0.014; over every row: 0.014 (obstacle_4).
