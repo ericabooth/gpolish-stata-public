@@ -119,5 +119,12 @@ class Measurer:
         b = self.t.get_window_extent(self.r)
         return (b.x0, b.y0, b.x1, b.y1)
 
+    def m_ascent(self, size=None):
+        """Height of the ink of "M" above the baseline, in points (grid's string height for one line)."""
+        from matplotlib.textpath import TextPath
+        from matplotlib.font_manager import FontProperties
+        tp = TextPath((0, 0), "M", size=size or self.size, prop=FontProperties(family=FONT))
+        return float(tp.get_extents().y1)
+
     def close(self):
         plt.close(self.fig)

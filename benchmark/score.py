@@ -222,6 +222,16 @@ def method_outputs():
     return times, at, at_lead, gg, leads, iters
 
 
+def ggrepel_box(meas, label, cx, cy, vjust=0.5, by=None, size=None):
+    """The box of a ggrepel label, measured by the same baseline-anchored rule as the Stata labels.
+    grid applies vjust to the string height, which it takes from the ascent of "M" (no descent), so
+    the baseline is cy - vjust * that height. run_ggrepel.R writes this baseline (by); for output
+    without it, the height is the ink ascent of "M" in the same font and size."""
+    if by in (None, "", "NA"):
+        by = cy - vjust * meas.m_ascent(size)
+    return meas.box(label, cx, float(by), ha="center", va="baseline", size=size)
+
+
 def collect(only=None):
     """Measures every method's labels. Returns geometry rows, position rows and point rows."""
     times, at, at_lead, gg, leads, iters = method_outputs()
@@ -256,7 +266,8 @@ def collect(only=None):
                 boxes = {}
                 for r in gg.get((scen, meth), []):
                     if r["label"] in labels:
-                        boxes[r["label"]] = meas.box(r["label"], float(r["cx"]), float(r["cy"]), ha="center", va="center")
+                        boxes[r["label"]] = ggrepel_box(meas, r["label"], float(r["cx"]), float(r["cy"]),
+                                                          float(r.get("vjust") or 0.5), r.get("by"))
                         if r["lx0"] not in ("", "NA"):
                             lead[r["label"]] = tuple(float(r[k]) for k in ("lx0", "ly0", "lx1", "ly1"))
             geo_rows.append(dict(set=m["set"], scenario=scen, design=m["design"], seed=m["seed"], method=meth,
