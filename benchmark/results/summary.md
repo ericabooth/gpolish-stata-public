@@ -287,6 +287,18 @@ the main-set value above.
 | Life expectancy, all 63 labelled | 0.24 (0.24 to 0.24) | 0.00 (0.00 to 0.03) | 0.66 (0.57 to 0.70) | 0.48 (0.41 to 0.49) | 0.33 (0.29 to 0.37) | 0.50 (0.41 to 0.56) | 0.56 (0.51 to 0.65) |
 | Auto, all 74 labelled | 0.09 (0.09 to 0.09) | 0.00 (0.00 to 0.00) | 0.39 (0.30 to 0.47) | 0.23 (0.18 to 0.31) | 0.22 (0.16 to 0.28) | 0.32 (0.26 to 0.35) | 0.35 (0.27 to 0.41) |
 
+### Original order against the median over the orders
+
+Each cell gives the main-set value (original row order), then the median over the orders
+with the range in brackets (clean, then clean and near).
+
+| Scenario | Stata mlabel() | labrepel (Stata) | gpolish ptlabel (Stata) | gpolish 0.6.0 settings | adjustText (Python) | ggrepel (R) | ggrepel (informed) |
+|---|---|---|---|---|---|---|---|
+| Life expectancy, 12 of 63 labelled | 0.58 vs 0.58 (0.58 to 0.58); 0.58 vs 0.58 (0.58 to 0.58) | 0.00 vs 0.00 (0.00 to 0.00); 0.00 vs 0.00 (0.00 to 0.00) | 1.00 vs 1.00 (1.00 to 1.00); 1.00 vs 1.00 (1.00 to 1.00) | 0.92 vs 1.00 (0.92 to 1.00); 0.92 vs 1.00 (0.92 to 1.00) | 0.50 vs 0.54 (0.50 to 0.58); 0.50 vs 0.54 (0.50 to 0.58) | 0.33 vs 0.33 (0.25 to 0.42); 0.33 vs 0.33 (0.25 to 0.42) | 0.75 vs 0.88 (0.75 to 0.92); 0.75 vs 0.88 (0.75 to 0.92) |
+| Auto, 19 of 74 labelled | 0.16 vs 0.16 (0.16 to 0.16); 0.16 vs 0.16 (0.16 to 0.16) | 0.00 vs 0.00 (0.00 to 0.00); 0.00 vs 0.00 (0.00 to 0.00) | 0.84 vs 0.84 (0.74 to 0.89); 0.68 vs 0.71 (0.63 to 0.79) | 0.89 vs 0.84 (0.74 to 0.89); 0.68 vs 0.68 (0.58 to 0.74) | 0.37 vs 0.34 (0.32 to 0.37); 0.37 vs 0.34 (0.32 to 0.37) | 0.16 vs 0.16 (0.16 to 0.16); 0.16 vs 0.16 (0.16 to 0.16) | 0.63 vs 0.74 (0.63 to 0.74); 0.63 vs 0.74 (0.63 to 0.74) |
+| Life expectancy, all 63 labelled | 0.24 vs 0.24 (0.24 to 0.24); 0.24 vs 0.24 (0.24 to 0.24) | 0.02 vs 0.00 (0.00 to 0.03); 0.02 vs 0.00 (0.00 to 0.03) | 0.75 vs 0.79 (0.65 to 0.84); 0.63 vs 0.66 (0.57 to 0.70) | 0.83 vs 0.68 (0.59 to 0.76); 0.59 vs 0.48 (0.41 to 0.49) | 0.30 vs 0.43 (0.40 to 0.44); 0.24 vs 0.33 (0.29 to 0.37) | 0.57 vs 0.54 (0.46 to 0.59); 0.56 vs 0.50 (0.41 to 0.56) | 0.67 vs 0.64 (0.57 to 0.73); 0.59 vs 0.56 (0.51 to 0.65) |
+| Auto, all 74 labelled | 0.09 vs 0.09 (0.09 to 0.09); 0.09 vs 0.09 (0.09 to 0.09) | 0.00 vs 0.00 (0.00 to 0.00); 0.00 vs 0.00 (0.00 to 0.00) | 0.59 vs 0.54 (0.50 to 0.59); 0.35 vs 0.39 (0.30 to 0.47) | 0.51 vs 0.51 (0.42 to 0.62); 0.22 vs 0.23 (0.18 to 0.31) | 0.38 vs 0.38 (0.35 to 0.47); 0.22 vs 0.22 (0.16 to 0.28) | 0.51 vs 0.53 (0.46 to 0.59); 0.31 vs 0.32 (0.26 to 0.35) | 0.58 vs 0.57 (0.49 to 0.61); 0.34 vs 0.35 (0.27 to 0.41) |
+
 ### gpolish against each other method, order by order
 
 Number of row orders in which gpolish's share is higher / equal / lower than the other method's
