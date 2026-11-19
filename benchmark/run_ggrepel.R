@@ -30,6 +30,11 @@
 # Options for the further runs (see extra.py): BENCH_MAXITER sets max.iter (default 10000), BENCH_SEED
 # the seed of both calls (default 12345), and BENCH_LINEPTS=1 gives informed ggrepel the fitted line as
 # unlabelled points every 4 points along it, so its labels also avoid the line.
+# Tuned column (see tune_others.py): ggrepel_tuned is the informed call with the settings in
+# BENCH_GG_PARMS, for example "box.padding=0.5;point.padding=0.1;force=2;force_pull=1" (lengths in lines,
+# as ggrepel reads plain numbers); a setting not named stays at its default. It runs only when BENCH_METHODS
+# names it. BENCH_OUTDIR replaces the output folder out/<method>/ (used by tune_others.py with one method).
+# The tuning set (synthetic seeds 101 to 110) runs only when BENCH_SETS names it.
 suppressPackageStartupMessages({ library(ggplot2); library(ggrepel); library(grid) })
 args <- commandArgs(trailingOnly = TRUE)
 envlist <- function(v) { x <- strsplit(trimws(Sys.getenv(v)), "[[:space:]]+")[[1]]; x[nzchar(x)] }
@@ -38,12 +43,20 @@ sets <- envlist("BENCH_SETS")
 meths <- envlist("BENCH_METHODS")
 SET_METHODS <- list(main = c("ggrepel", "ggrepel_inf"), perm = c("ggrepel", "ggrepel_inf"),
                     scale = c("ggrepel", "ggrepel_inf"), fontmark = c("ggrepel", "ggrepel_inf"),
-                    holdout = c("ggrepel", "ggrepel_inf"), rule = c("ggrepel", "ggrepel_inf"))
+                    holdout = c("ggrepel", "ggrepel_inf"), rule = c("ggrepel", "ggrepel_inf"),
+                    realhold = c("ggrepel", "ggrepel_inf", "ggrepel_tuned"),
+                    rhperm = c("ggrepel", "ggrepel_inf", "ggrepel_tuned"),
+                    tuning = c("ggrepel", "ggrepel_inf", "ggrepel_tuned"))
+SET_METHODS$main <- c(SET_METHODS$main, "ggrepel_tuned")
+SET_METHODS$perm <- c(SET_METHODS$perm, "ggrepel_tuned")
 files <- c(main = "data/manifest_real.csv", main = "data/manifest_synthetic.csv", perm = "data/manifest_perm.csv",
            scale = "data/manifest_scale.csv", fontmark = "data/manifest_fontmark.csv",
-           holdout = "data/manifest_holdout.csv", rule = "data/manifest_rule.csv")
+           holdout = "data/manifest_holdout.csv", rule = "data/manifest_rule.csv",
+           realhold = "data/manifest_realhold.csv", rhperm = "data/manifest_rhperm.csv",
+           tuning = "data/manifest_tuning.csv")
 man <- do.call(rbind, lapply(seq_along(files), function(i) {
   if (!file.exists(files[i]) || (length(sets) && !(names(files)[i] %in% sets))) return(NULL)
+  if (names(files)[i] == "tuning" && !("tuning" %in% sets)) return(NULL)
   read.csv(files[i], colClasses = c(scenario = "character", set = "character", design = "character"))
 }))
 if (length(args)) man <- man[man$scenario %in% args, ]
@@ -51,9 +64,17 @@ PNG_DPI <- Sys.getenv("BENCH_PNG_DPI")
 geo <- do.call(rbind, lapply(Sys.glob("out/stata/geometry_default_*.csv"), read.csv))
 MAX_ITER <- as.numeric(Sys.getenv("BENCH_MAXITER", "10000"))   # ggrepel's default unless BENCH_MAXITER is set
 SEED <- as.integer(Sys.getenv("BENCH_SEED", "12345"))   # random seed for both ggrepel calls
+GG_PARMS <- list()                    # settings of the tuned column, from BENCH_GG_PARMS
+for (kv in strsplit(Sys.getenv("BENCH_GG_PARMS"), ";")[[1]]) {
+  if (!nzchar(trimws(kv))) next
+  kv <- strsplit(kv, "=")[[1]]
+  GG_PARMS[[trimws(kv[1])]] <- as.numeric(kv[2])
+}
+OUTDIR <- Sys.getenv("BENCH_OUTDIR")
+outdir <- function(method) if (nzchar(OUTDIR)) OUTDIR else file.path("out", method)
 MAX_TIME <- Inf                       # no time limit (the default 0.5 s makes results depend on the machine)
 cat("ggrepel", as.character(packageVersion("ggrepel")), "ggplot2", as.character(packageVersion("ggplot2")),
-    "max.iter =", MAX_ITER, "max.time =", MAX_TIME, "seed =", SEED, "\n")
+    "max.iter =", MAX_ITER, "tuned settings:", paste(names(GG_PARMS), unlist(GG_PARMS), sep = "=", collapse = " "), "max.time =", MAX_TIME, "seed =", SEED, "\n")
 
 # every scenario of a set in manifest order, whatever scenarios this run was limited to
 set_order <- function(set) unlist(lapply(seq_along(files), function(i)
@@ -100,9 +121,11 @@ run_one <- function(i, method) {
       xv <- man$fx0[i] + (man$fx1[i] - man$fx0[i]) * (0:k) / k
       dr <- rbind(d[, c("x", "y", "lab2")], data.frame(x = xv, y = man$fa[i] + man$fb[i] * xv, lab2 = ""))
     }
-    p <- p + geom_text_repel(data = dr, aes(label = lab2), size = labsize, family = "Open Sans",
-                             point.size = ptsize, seed = SEED, max.overlaps = Inf, max.iter = MAX_ITER,
-                             max.time = MAX_TIME, segment.colour = "grey60", segment.size = 0.25, verbose = TRUE)
+    a <- list(data = dr, mapping = aes(label = lab2), size = labsize, family = "Open Sans",
+              point.size = ptsize, seed = SEED, max.overlaps = Inf, max.iter = MAX_ITER,
+              max.time = MAX_TIME, segment.colour = "grey60", segment.size = 0.25, verbose = TRUE)
+    if (method == "ggrepel_tuned") a <- c(a, GG_PARMS)
+    p <- p + do.call(geom_text_repel, a)
   }
   p <- p + scale_x_continuous(limits = xl, expand = c(0, 0)) + scale_y_continuous(limits = yl, expand = c(0, 0)) +
     theme_void() + theme(plot.margin = margin(H - g$py1, W - g$px1, g$py0, g$px0, unit = "bigpts"))
@@ -110,7 +133,7 @@ run_one <- function(i, method) {
   # scenario run at BENCH_PNG_DPI when it is set (for audit_ink.py); the resolution does not change
   # the placement
   keep <- nzchar(PNG_DPI) || (man$set[i] == "main" && man$seed[i] <= 1)
-  f <- file.path("out", method, paste0(scen, if (keep) ".png" else ".tmp.png"))
+  f <- file.path(outdir(method), paste0(scen, if (keep) ".png" else ".tmp.png"))
   png(f, width = W / 72, height = H / 72, units = "in",
       res = if (nzchar(PNG_DPI)) as.numeric(PNG_DPI) else if (keep) 200 else 72)
   # verbose = TRUE only makes ggrepel report its iterations and time as a message; it does not change
@@ -169,14 +192,15 @@ for (set in unique(man$set)) {
   rows <- which(man$set == set)
   for (method in SET_METHODS[[set]]) {
     if (length(meths) && !(method %in% meths)) next
-    dir.create(file.path("out", method), showWarnings = FALSE, recursive = TRUE)
+    if (method == "ggrepel_tuned" && !("ggrepel_tuned" %in% meths)) next
+    dir.create(outdir(method), showWarnings = FALSE, recursive = TRUE)
     out <- lapply(rows, run_one, method = method)
     scens <- man$scenario[rows]
     ord <- set_order(set)
-    merge_write(do.call(rbind, lapply(out, `[[`, "res")), file.path("out", method, paste0("results_", set, ".csv")), scens, ord)
+    merge_write(do.call(rbind, lapply(out, `[[`, "res")), file.path(outdir(method), paste0("results_", set, ".csv")), scens, ord)
     # a run with BENCH_PNG_DPI draws larger images, so its seconds are not kept
     if (!nzchar(PNG_DPI))
-      merge_write(do.call(rbind, lapply(out, `[[`, "tim")), file.path("out", method, paste0("timing_", set, ".csv")), scens, ord)
+      merge_write(do.call(rbind, lapply(out, `[[`, "tim")), file.path(outdir(method), paste0("timing_", set, ".csv")), scens, ord)
     cat(method, set, length(rows), "scenarios\n")
   }
 }

@@ -12,7 +12,8 @@
 * Environment variables:
 *   BENCH_METHODS    methods to run (default: default gpolish labrepel). gpolish060 must run on its own,
 *                    because one Stata session cannot hold two versions of gpolish.
-*   BENCH_SETS       scenario sets to run (main perm scale fontmark holdout rule; default: all whose manifest exists)
+*   BENCH_SETS       scenario sets to run (main perm scale fontmark holdout rule realhold rhperm; default: all
+*                    whose manifest exists). The tuning set (synthetic seeds 101 to 110) runs only when named here.
 *   BENCH_SCENARIOS  run only these scenarios
 *   BENCH_PLUS       another ado folder, added to the end of the ado path to find labrepel
 *   BENCH_SEED       the random seed set before each labrepel call (default 12345)
@@ -73,9 +74,12 @@ program _bench_run
     * ------------------------------------------------------------ scenario list
     tempfile all
     local first 1
-    foreach f in real synthetic perm scale fontmark holdout rule {
+    local only_set : environment BENCH_SETS
+    foreach f in real synthetic perm scale fontmark holdout rule realhold rhperm tuning {
         capture confirm file "data/manifest_`f'.csv"
         if _rc continue
+        * the tuning seeds are drawn only when BENCH_SETS names them (tune_others.py needs their geometry)
+        if "`f'" == "tuning" & !`: list posof "tuning" in only_set' continue
         import delimited using "data/manifest_`f'.csv", clear varnames(1) stringcols(1 2 3) asdouble
         if !`first' append using `all'
         save `all', replace
@@ -114,8 +118,8 @@ program _bench_run
     tempname gf lh
     local fontshown 0
     foreach method of local methods {
-        local msets main perm scale fontmark holdout rule
-        if inlist("`method'", "labrepel", "gpolish060") local msets main perm holdout rule
+        local msets main perm scale fontmark holdout rule realhold rhperm tuning
+        if inlist("`method'", "labrepel", "gpolish060") local msets main perm holdout rule realhold rhperm
         local leaders = inlist("`method'", "gpolish", "gpolish060", "labrepel")
         foreach set of local msets {
             local any 0

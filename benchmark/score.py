@@ -39,6 +39,8 @@ from common import (manifest, data, geometry, geometry_table, Measurer, methods_
                     STATA, ALL_METHODS)
 
 ALL = ALL_METHODS
+AT_METHODS = ["adjusttext", "adjusttext_tuned"]          # adjustText outputs, at its defaults and tuned
+GG_METHODS = ["ggrepel", "ggrepel_inf", "ggrepel_tuned"]  # ggrepel outputs
 TEXT_RE = re.compile(r'<text x="([-\d.]+)" y="([-\d.]+)" style="[^"]*font-size:([\d.]+)px[^"]*"( text-anchor="(\w+)")?>([^<]*)</text>')
 HA = {None: "left", "start": "left", "middle": "center", "end": "right"}
 # A label touches a marker when its box comes closer than this to a data point: the marker's radius
@@ -203,20 +205,21 @@ def method_outputs():
             leads.setdefault((r["scenario"], meth), {})[r["label"]] = tuple(float(r[k]) for k in ("x0", "y0", "x1", "y1"))
     for (scen, meth), g in geometry_table().items():
         times[(scen, meth)] = g["seconds"]
-    for f in sorted(glob.glob("out/adjusttext/results_*.csv")):
-        for r in read_csv(f):
-            # the text anchor and alignment when the output has them, else adjustText's own box
-            if r.get("tx", "") != "":
-                at.setdefault(r["scenario"], {})[r["label"]] = ("anchor", float(r["tx"]), float(r["ty"]), r["ha"], r["va"])
-            else:
-                at.setdefault(r["scenario"], {})[r["label"]] = tuple(float(r[k]) for k in ("x0", "y0", "x1", "y1"))
-            if r["lx0"] != "":
-                at_lead.setdefault(r["scenario"], {})[r["label"]] = tuple(float(r[k]) for k in ("lx0", "ly0", "lx1", "ly1"))
-    for meth in ("ggrepel", "ggrepel_inf"):
+    for meth in AT_METHODS:
+        for f in sorted(glob.glob(f"out/{meth}/results_*.csv")):
+            for r in read_csv(f):
+                # the text anchor and alignment when the output has them, else adjustText's own box
+                if r.get("tx", "") != "":
+                    at.setdefault((r["scenario"], meth), {})[r["label"]] = ("anchor", float(r["tx"]), float(r["ty"]), r["ha"], r["va"])
+                else:
+                    at.setdefault((r["scenario"], meth), {})[r["label"]] = tuple(float(r[k]) for k in ("x0", "y0", "x1", "y1"))
+                if r["lx0"] != "":
+                    at_lead.setdefault((r["scenario"], meth), {})[r["label"]] = tuple(float(r[k]) for k in ("lx0", "ly0", "lx1", "ly1"))
+    for meth in GG_METHODS:
         for f in sorted(glob.glob(f"out/{meth}/results_*.csv")):
             for r in read_csv(f):
                 gg.setdefault((r["scenario"], meth), []).append(r)
-    for meth in ("adjusttext", "ggrepel", "ggrepel_inf"):
+    for meth in AT_METHODS + GG_METHODS:
         for f in sorted(glob.glob(f"out/{meth}/timing_*.csv")):
             for r in read_csv(f):
                 times[(r["scenario"], meth)] = float(r["seconds"])
@@ -265,10 +268,10 @@ def collect(only=None):
                 boxes = stata_boxes(scen, meth, labels, meas, g["H"])
                 for s, (x0, y0, x1, y1) in leads.get((scen, meth), {}).items():
                     lead[s] = (g["xA"] + g["xB"] * x0, g["yA"] + g["yB"] * y0, g["xA"] + g["xB"] * x1, g["yA"] + g["yB"] * y1)
-            elif meth == "adjusttext":
+            elif meth in AT_METHODS:
                 boxes = {s: (meas.box(s, b[1], b[2], ha=b[3], va=b[4]) if b[0] == "anchor" else b)
-                         for s, b in at.get(scen, {}).items() if s in labels}
-                lead = dict(at_lead.get(scen, {}))
+                         for s, b in at.get((scen, meth), {}).items() if s in labels}
+                lead = dict(at_lead.get((scen, meth), {}))
             else:
                 boxes = {}
                 for r in gg.get((scen, meth), []):

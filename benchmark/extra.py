@@ -15,6 +15,10 @@ results/extra/graphs_<run>.csv, positions_<run>.csv and geometry_<run>.csv.
               (set "rule")
     seeds     ggrepel, informed ggrepel and labrepel on the four real-data graphs with seeds 1 to 20
               instead of 12345 (BENCH_SEED); graphs_seeds.csv has a run_seed column
+    tuned     adjustText and informed ggrepel at the settings tune_others.py chose on the tuning seeds
+              (columns adjusttext_tuned and ggrepel_tuned), on the main and perm sets
+    realhold  every method, the two tuned columns included, on four held-out real-data scatterplots
+              (census, hsng and states; set "realhold") and their 10 row orders (set "rhperm")
 
     python extra.py [run ...]          (default: all four; then writes results/extra/extra.md)
     python extra.py --report           (only rewrites results/extra/extra.md)
@@ -34,7 +38,8 @@ HERE = os.path.abspath(os.path.dirname(__file__))
 STATA = os.environ.get("STATA", "stata-mp")
 REAL = "life12 autosub lifeall autoall"
 SCRIPTS = ["common.py", "score.py", "make_synthetic.py", "make_gpolish060.py", "run_adjusttext.py",
-           "run_ggrepel.R", "run_stata.do", "make_real.do"]
+           "run_ggrepel.R", "run_stata.do", "make_real.do", "tune_others.py"]
+TUNED = ["adjusttext_tuned", "ggrepel_tuned"]
 RUNS = {
     # run: (sets kept, methods kept)
     "raised": ({"main"}, {"adjusttext", "ggrepel", "ggrepel_inf"}),
@@ -42,6 +47,9 @@ RUNS = {
     "holdout": ({"holdout", "rule"}, {"default", "labrepel", "gpolish", "gpolish060", "adjusttext", "ggrepel",
                                       "ggrepel_inf"}),
     "seeds": ({"main"}, {"labrepel", "ggrepel", "ggrepel_inf"}),
+    "tuned": ({"main", "perm"}, set(TUNED)),
+    "realhold": ({"realhold", "rhperm"}, {"default", "labrepel", "gpolish", "gpolish060", "adjusttext", "ggrepel",
+                                          "ggrepel_inf"} | set(TUNED)),
 }
 SEEDS = range(1, 21)
 
@@ -101,7 +109,7 @@ def keep(d, run, extra=None):
         if extra:
             rows = [dict(extra, **r) for r in rows]
         out[name] = rows
-    if run == "holdout":
+    if run in ("holdout", "realhold"):
         out["points"] = [r for r in read(os.path.join(d, "results", "points.csv")) if r["set"] in sets]
     return out
 
@@ -137,6 +145,36 @@ def run_holdout(d):
     sh(d, ["Rscript", "run_ggrepel.R"], BENCH_SETS="holdout rule")
     score(d, BENCH_SETS="holdout rule")
     return keep(d, "holdout")
+
+
+def tuned_parms():
+    import tune_others
+    return tune_others.chosen("ggrepel"), tune_others.chosen("adjusttext")
+
+
+def draw_tuned(d, sets):
+    gg, at = tuned_parms()
+    sh(d, [sys.executable, "run_adjusttext.py"], BENCH_SETS=sets, BENCH_AT_METHOD="adjusttext_tuned", BENCH_AT_PARMS=at)
+    sh(d, ["Rscript", "run_ggrepel.R"], BENCH_SETS=sets, BENCH_METHODS="ggrepel_tuned", BENCH_GG_PARMS=gg)
+
+
+def run_tuned(d):
+    stata(d, "run_stata.do", BENCH_METHODS="default", BENCH_SETS="main perm")
+    draw_tuned(d, "main perm")
+    score(d, BENCH_SETS="main perm")
+    return keep(d, "tuned")
+
+
+def run_realhold(d):
+    stata(d, "make_real.do", BENCH_EXTRA=1)
+    sh(d, [sys.executable, "make_gpolish060.py"])
+    stata(d, "run_stata.do", BENCH_SETS="realhold rhperm")
+    stata(d, "run_stata.do", BENCH_SETS="realhold rhperm", BENCH_METHODS="gpolish060")
+    sh(d, [sys.executable, "run_adjusttext.py"], BENCH_SETS="realhold rhperm")
+    sh(d, ["Rscript", "run_ggrepel.R"], BENCH_SETS="realhold rhperm")
+    draw_tuned(d, "realhold rhperm")
+    score(d, BENCH_SETS="realhold rhperm")
+    return keep(d, "realhold")
 
 
 def run_seeds(d):
@@ -244,14 +282,85 @@ def report():
                          f"{mm[(des, m)][0]:.2f} | {mm[(des, 'gpolish')][0]:.2f} | {st.median(w):.2f} | "
                          f"{min(w):.2f} to {max(w):.2f} |")
         L.append("")
+    L += tuned_report(res, mm, names, head, cols)
     with open(os.path.join(res, "extra", "extra.md"), "w", encoding="utf-8") as fh:
         fh.write("\n".join(L))
     print("results/extra/extra.md written")
 
 
+def tuned_report(res, mm, names, head, cols):
+    """Tables for the tuned and realhold runs."""
+    head.update({"adjusttext_tuned": "adjustText, tuned", "ggrepel_tuned": "ggrepel (informed), tuned"})
+    names.update({"censall": "Census: deaths per 1,000 by median age, all 50 states",
+                  "censsub": "Census: the same, 13 of 50 states labelled",
+                  "hsngall": "hsng: median rent by family income, all 50 states",
+                  "statesall": "states: divorce rate by median age, all 50 states"})
+    L = []
+    allc = cols + TUNED
+
+    def cell(v):
+        return f"{v[0]:.2f} / {v[1]:.2f}"
+
+    def by(rows, sets):
+        out = {}
+        for r in rows:
+            if r["set"] in sets:
+                out.setdefault((r["design"], r["method"]), []).append(
+                    (float(r["clean_share"]), float(r["clean_near_share"])))
+        return out
+
+    f = os.path.join(res, "extra", "graphs_tuned.csv")
+    if os.path.exists(f):
+        rows = read(f)
+        t = {k: (st.mean(a for a, _ in v), st.mean(b for _, b in v)) for k, v in by(rows, {"main"}).items()}
+        mm2 = {k: v[:2] for k, v in mm.items()}
+        L += ["## adjustText and ggrepel tuned", "",
+              "adjustText and informed ggrepel at the settings `tune_others.py` chose on the tuning seeds (101 to "
+              "110) with `gpolish`'s objective (see `results/tuned_settings.md`). The other columns are the main "
+              "run. Clean share / clean-and-near share; synthetic designs are means over the 20 test seeds.", "",
+              "| Scenario | " + " | ".join(head[m] for m in allc) + " |", "|---" * (len(allc) + 1) + "|"]
+        for des in ["life12", "autosub", "lifeall", "autoall", "syn30all", "syn60sub", "syn60all"]:
+            L.append(f"| {names[des]} | " + " | ".join(
+                cell(t[(des, m)]) if (des, m) in t else (cell(mm2[(des, m)]) if (des, m) in mm2 else "") for m in allc) + " |")
+        pm = by(rows, {"perm"})
+        main_perm = by(read(os.path.join(res, "graphs.csv")), {"perm"})
+        L += ["", "Clean share over the 10 row orders of the four real-data graphs: median (minimum to maximum).", "",
+              "| Scenario | " + " | ".join(head[m] for m in allc) + " |", "|---" * (len(allc) + 1) + "|"]
+        for des in ["life12", "autosub", "lifeall", "autoall"]:
+            cs = []
+            for m in allc:
+                v = [a for a, _ in (pm.get((des, m)) or main_perm.get((des, m)) or [])]
+                cs.append(f"{st.median(v):.2f} ({min(v):.2f} to {max(v):.2f})" if v else "")
+            L.append(f"| {names[des]} | " + " | ".join(cs) + " |")
+        L.append("")
+    f = os.path.join(res, "extra", "graphs_realhold.csv")
+    if os.path.exists(f):
+        rows = read(f)
+        o = by(rows, {"realhold"})
+        p = by(rows, {"rhperm"})
+        L += ["## Held-out real data", "",
+              "Four scatterplots from Stata example datasets never used while `gpolish` was developed or tuned, "
+              "chosen by a rule fixed before any was drawn (see `make_real.do`). Every method at the main run's "
+              "settings and the two tuned columns. First table: the original row order, clean share / clean-and-"
+              "near share. Second: median clean share over 10 random row orders (minimum to maximum).", "",
+              "| Scenario | " + " | ".join(head[m] for m in allc) + " |", "|---" * (len(allc) + 1) + "|"]
+        des_list = ["censall", "censsub", "hsngall", "statesall"]
+        for des in des_list:
+            L.append(f"| {names[des]} | " + " | ".join(cell(o[(des, m)][0]) if (des, m) in o else "" for m in allc) + " |")
+        L += ["", "| Scenario | " + " | ".join(head[m] for m in allc) + " |", "|---" * (len(allc) + 1) + "|"]
+        for des in des_list:
+            cs = []
+            for m in allc:
+                v = [a for a, _ in p.get((des, m), [])]
+                cs.append(f"{st.median(v):.2f} ({min(v):.2f} to {max(v):.2f})" if v else "")
+            L.append(f"| {names[des]} | " + " | ".join(cs) + " |")
+        L.append("")
+    return L
+
+
 def main(argv):
     if argv[:1] != ["--report"]:
-        runs = argv or list(RUNS)
+        runs = argv or [r for r in RUNS if r not in ("tuned", "realhold")]
         os.makedirs(os.path.join(HERE, "results", "extra"), exist_ok=True)
         for run in runs:
             d = sandbox(run)
