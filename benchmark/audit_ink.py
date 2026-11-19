@@ -12,9 +12,12 @@ Only labels whose window holds no marker, no plot edge and no other label are us
 would add or hide ink.
 
 Run from the benchmark folder after score.py:
-    BENCH_PNG_DPI=600 BENCH_SCENARIOS="life12 autoall" Rscript run_ggrepel.R
-    BENCH_PNG_DPI=600 BENCH_SCENARIOS="life12 autoall" python run_adjusttext.py
-    python audit_ink.py life12 autoall
+    AUDIT="life12 lifeall autosub autoall syn30all_s01 syn60all_s01 syn60sub_s01 syn60all_f7_s01 syn60all_f11_s01 syn60all_m9_s01"
+    BENCH_PNG_DPI=600 BENCH_SCENARIOS="$AUDIT" Rscript run_ggrepel.R
+    BENCH_PNG_DPI=600 BENCH_SCENARIOS="$AUDIT" python run_adjusttext.py
+    python audit_ink.py $AUDIT
+These are the 10 scenarios of the archived results/ink_audit.md; a shorter list rewrites both result files
+with fewer labels.
 Runs with BENCH_PNG_DPI give the same positions as the reported run (both tools are deterministic) and
 do not rewrite the timing files. The Chrome executable is found on the PATH (google-chrome, chromium,
 chrome) or in the usual macOS location; BENCH_CHROME names another. AUDIT_DPI (default 600) must
