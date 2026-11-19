@@ -1146,6 +1146,11 @@ barpix rarea_narrowaxis 1450
 twoway rbar mpg trunk rep78, horizontal || scatteri 5000 10, title("narrow horizontal rbar")
 rchk rbar_narrowh
 barpix rbar_narrowh 1500
+* the band sits at y = 2001 to 2005, away from the x axis line, which would hide it
+gen rep2k = rep78 + 2000
+twoway rarea mpg trunk rep2k, horizontal sort || scatteri 5000 10 0 10, title("narrow horizontal rarea")
+rchk rarea_narrowh
+barpix rarea_narrowh 1450
 restore
 * color(none) and fcolor(none) draw no fill, as in Stata (not black bars)
 twoway rbar lo hi weight, color(none) barwidth(40) title("rbar, color(none)")

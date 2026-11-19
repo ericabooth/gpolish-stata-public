@@ -53,6 +53,11 @@ This release contains gpolish 0.7.0 and gr2mpl 0.6.0. The changes listed under 0
 - `endlabel, side(left)` adds a right graph margin when switching the legend off would let the last x tick label of axis 1 run past the right edge of the graph. The record keeps this margin, so a rerun or `gpolish clear` gives it back. Only horizontal tick labels on the first x axis are measured; the help's Limits table names `graphregion(margin())` for other cases.
 - `callout` and `note` print a note when a box placed with `at()` runs past an edge of the graph. The note names the edge and suggests `align(right)`, `align(left)`, or moving `at()`.
 
+- `gpolish endlabel` moves a kept legend out past the end labels when the legend sits beside the plot region on the label side. This applies to `keeplegend` and to the legend kept because two plots get the same label. The room is made as an outer margin on the legend's inner side; `gpolish clear` or a rerun moves the legend back. A legend above or below the plot, or inside the plot region, is not moved. Before, the legend covered the labels (seen with scheme `stcolor`). The endlabel record has a 10th field for this margin.
+- `gpolish legend, plots()` stops with r(198) and "plots(#) is out of range; graph NAME has N plot(s)" when a plot number is larger than the graph's plot count, as `endlabel` does. Before, it did nothing and printed nothing.
+- `gpolish ptlabel` labels only points the graph draws. It reads the (x, y) pairs from the sersets of every plot that draws y() against x() and skips selected observations that match no drawn pair, with the note "k selected point(s) are not drawn in the graph and were not labelled". The new option `undrawn` keeps the earlier behaviour. The data in memory are unchanged. The check runs only when some plot draws the y() variable against the x() variable, and an observation left out of the graph with the same (x, y) as a drawn point is still labelled; both limits are in the help.
+- The help file describes `ptlabel`'s `msize(#)` (drawn marker diameter in points, default 6) and `offset(#)` (gap in points between the marker edge and the label, default 3).
+
 ### gr2mpl 0.6.0
 
 - graph bar, hbar, box and dot with by(): every panel is now drawn on the scale range Stata shares across the panels, so bars in panels without tick labels have the right height against the labelled axis. by(, yrescale) keeps each panel on its own scale.
@@ -89,6 +94,8 @@ This release contains gpolish 0.7.0 and gr2mpl 0.6.0. The changes listed under 0
 - In `graph combine`, gr2mpl now draws each member's `subtitle()` under the member's title, and the member's `note()` and `caption()` left-aligned under its x axis (this includes the bandwidth note that `kdensity` adds). Before, only the member's title was drawn. The caption is drawn at the note's size.
 - The render record (render_info.txt, kept with `keepspec`) gains `panelN.psubtitle`, `panelN.pnote`, `panelN.ylabel` and placement checks.
 
+- `rbar`, `bar` and `rarea` series that end up under about two pixels wide on the axis that carries their x() values are outlined in their own colour, so they draw as at least a hairline. Before, a narrow series on an axis that another series widened (for example `twoway rbar mpg trunk rep78 || scatteri 10 5000`) was covered by white bar edges or drawn with no outline and vanished. This includes `horizontal` bars and `horizontal` rarea bands, which are tested against the y axis.
+
 ### Benchmark
 
 - The benchmark numbers changed. Release 0.6.1 measured the Open Sans labels with `gpolish`'s Helvetica width table in batch runs; `run_stata.do` and `tune.do` now set the svg font to Open Sans, check that `gpolish` used its Open Sans table, and set the recorded font back afterwards. The six placement settings were not tuned again. adjustText now runs a fixed 100 iterations and ggrepel runs with `max.time = Inf`, so repeated runs give identical positions; ggrepel's label and marker sizes were corrected (they were 0.4 percent too large). `labrepel` gets its seed set before each call, because version 1.0 ignores `seed()`.
@@ -113,6 +120,11 @@ This release contains gpolish 0.7.0 and gr2mpl 0.6.0. The changes listed under 0
 - benchmark/README.md, Tuning: reports the spacings below the grid. The clean-and-near share is 0.949 at 0.2, 0.944 at 0.3 and 0.941 at 0.4 label heights; the clean share is 0.952, 0.958 and 0.958.
 - benchmark/README.md, points of process: reports the cutoff check. The order of the methods is the same at every cutoff in 3 of 7 scenarios. At 2 ems both ggrepel columns (0.24) lead `gpolish` (0.22) with every car labelled, and with every country labelled `gpolish` ties informed ggrepel (0.49) and trails its 0.6.0 settings (0.57). At 3, 4 and 6 ems `gpolish` is first among the five methods at their defaults in every scenario.
 
+- results/summary.md has a table setting each method's original-row-order value beside its median and range over the 10 row orders for the four real-data scenarios (summarize.py).
+- New `box_sensitivity.py` and results/box_sensitivity.md rescore `gpolish`'s labels in the main and perm sets with its search's core box (text width by 0.4 times the font size) and padded box (plus 3 points per side), beside the scored glyph box. With the core box its clean share is 0.73 with every car labelled, 0.83 with every country and 0.95 for 19 cars; with the padded box 0.32, 0.62 and 0.74 (against 0.59, 0.75 and 0.84 scored). The check was made after the results were seen, approximates the search's box, and changes no setting.
+- benchmark/README.md: the row-order bullet says the real-data cells are one graph each in the original order, that with every car labelled this order gave `gpolish`'s highest clean share of the 10 (0.59; median 0.54), and that `gpolish` was lower than informed ggrepel in 6 of 10 orders. New findings and caveats bullets describe the box mismatch.
+- benchmark/README.md: the own-marker wording matches the code (side candidates at the marker radius plus 3 points, diagonal ones at 0.7 times that), and the tuning result lists per-design shares in the usual order (0.97, 0.95 and 0.88 with 30 of 30, 20 of 60 and 60 of 60).
+
 ### Documentation
 
 - README: describes batch-mode fonts, `GPOLISH_FONT`, the matplotlib 3.6 minimum, second-axis options, the output formats of `gr2mpl`, and the handling of graphs saved by 0.6.1 or earlier; the benchmark paragraph reports the current numbers.
@@ -123,6 +135,9 @@ This release contains gpolish 0.7.0 and gr2mpl 0.6.0. The changes listed under 0
 - README and benchmark/README.md: `gpolish` has the highest clean share with every country labelled "of the five methods at their defaults", and the release 0.6.0 settings also score higher than the tuned ones with 19 of 74 cars labelled (0.89 against 0.84).
 - New gallery/fidelity.md measures how far each text item in the 22 `gr2mpl` gallery images sits from the same item in Stata's own export (`fidelity.do`, `fidelity.py`, per-item data in fidelity.csv). Of 545 matched items, half are within 10.0 points and 90 percent within 20.9 points; the largest distance is 62.2 points, a legend entry of the heatmap. Legend entries are farthest off (median 25.9 points).
 - README and `gpolish` help: brace labels, like bracket labels, are described as set at a fixed position (beyond the brace tip) and not checked against the data; the help's Limits table has a row for them.
+
+- README: the measurement audit is described as covering a sample of about 845 isolated labels across 10 scenarios, not every label box. The benchmark paragraph adds the row-order caveat (the every-car figure is the best of 10 row orders) and the post hoc box-sensitivity check.
+- `gpolish` help: `ptlabel` syntax adds `undrawn`; the endlabel, ptlabel and legend descriptions and the Limits table cover the changes above. `gr2mpl` help: the narrow-series outline sentence covers `horizontal` bars and rarea bands.
 
 ## 0.6.1 (2026-11-17)
 

@@ -736,7 +736,7 @@ class Panel:
                             ax.plot(x, edge_y, color=aline, lw=lw, zorder=1.6)
                     shown = aline
                     h = Rectangle((0, 0), 1, 1, facecolor="none", edgecolor=aline, lw=lw)
-            info.update(handle=h, color=shown, band=True)
+            info.update(handle=h, color=shown, band=True, narrow_horizontal=horizontal)
         elif t in ("rcap", "rspike", "rcapsym"):
             if y2 is None:
                 return None
@@ -2403,7 +2403,9 @@ class Figure:
                 ax = info.get("ax") or pnl.ax
                 if info.get("type") not in ("bar", "rbar", "rarea") or ax is None:
                     continue
-                horiz = bool(info.get("horizontal"))
+                # a horizontal series spans its x() values on the y axis (rarea
+                # records this separately, so it does not change the axis layout)
+                horiz = bool(info.get("horizontal") or info.get("narrow_horizontal"))
                 lo, hi = ax.get_ylim() if horiz else ax.get_xlim()
                 bb = ax.get_window_extent()
                 pix = bb.height if horiz else bb.width
