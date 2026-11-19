@@ -19,6 +19,14 @@ program gr2mpl, rclass
         di as err "gr2mpl: unknown subcommand `sub'"
         exit 198
     }
+    if `width' < 0 {
+        di as err "gr2mpl: width() must be a positive integer (0 = default)"
+        exit 198
+    }
+    if `dpi' <= 0 {
+        di as err "gr2mpl: dpi() must be greater than 0"
+        exit 198
+    }
     foreach o in lwscale msscale {
         if ``o'' <= 0 | ``o'' >= . {
             di as err "gr2mpl: `o'() must be a number greater than 0"
@@ -174,6 +182,7 @@ program gr2mpl, rclass
         foreach t in title subtitle note caption {
             _g2m_textarr `fh' "`t'" "`g'.`t'"
         }
+        _g2m_colors `fh' "`g'" "`fam'"
         * text sizes, in Stata's relative units (percent of the shorter graph side)
         file write `fh' "  "
         _g2m_pairs `fh' "`g'" "title_size title.style.size.gmval" ///
@@ -1216,6 +1225,48 @@ program _g2m_pairs
     }
 end
 
+* region fills and text colours set by options in the graph command: the
+* house style keeps the scheme's own colours out, so only the colours that
+* graphregion(), plotregion(), title(), xtitle(), ytitle(), xlabel() and
+* ylabel() set on the command line are written to the spec
+program _g2m_colors
+    args fh g fam
+    local cmd
+    capture local cmd `"``g'.command'"'
+    local cmd = strlower(`"`cmd'"')
+    * each item: key  option  minimum abbreviation  colour path
+    local items `""gfill graphregion 6 style.boxstyle.shadestyle.color""'
+    if inlist("`fam'", "twoway", "bar") {
+        local items `"`items' "pfill plotregion 5 plotregion1.style.boxstyle.shadestyle.color""'
+    }
+    local items `"`items' "title_color title 2 title.style.color""'
+    local items `"`items' "subtitle_color subtitle 4 subtitle.style.color""'
+    if "`fam'" == "twoway" {
+        local items `"`items' "xtitle_color xtitle 3 xaxis1.title.style.color""'
+        local items `"`items' "ytitle_color ytitle 3 yaxis1.title.style.color""'
+        local items `"`items' "xtick_color xlabel 4 xaxis1.style.majorstyle.tickstyle.textstyle.color""'
+        local items `"`items' "ytick_color ylabel 4 yaxis1.style.majorstyle.tickstyle.textstyle.color""'
+    }
+    file write `fh' "  "
+    foreach it of local items {
+        tokenize `"`it'"'
+        mata: st_local("body", _g2m_optbody(st_local("cmd"), "`2'", `3'))
+        local val
+        if "`2'" == "xlabel" | "`2'" == "ylabel" local pat "(^|[ ,])labc[a-z]*[(]"
+        else local pat "(^|[ ,])f?c[a-z]*[(]"
+        if regexm(`"`body'"', "`pat'") {
+            capture local val ``g'.`4'.setting'
+            if _rc local val
+            local snm
+            capture local snm ``g'.`4'.snm'
+            if "`snm'" == "none" local val "none"
+            local val : list retokenize val
+        }
+        file write `fh' `""`1'": "`val'", "'
+    }
+    file write `fh' _n
+end
+
 program _g2m_rawfmt
     capture ds, has(type numeric)
     if _rc exit
@@ -1256,6 +1307,53 @@ program _g2m_textarr
 end
 
 mata:
+/* the bodies of every option in cmd whose name abbreviates full (at least
+   minlen letters), joined by spaces; quoted text is skipped when matching
+   parentheses and left out of the result, so a title such as
+   "rbar, color(none)" is not read as a color() option */
+string scalar _g2m_optbody(string scalar cmd, string scalar full, real scalar minlen)
+{
+    real scalar i, j, n, depth, inq
+    string scalar out, c, w, body
+
+    out = ""
+    n = strlen(cmd)
+    inq = 0
+    for (i = 1; i <= n; i++) {
+        c = substr(cmd, i, 1)
+        if (c == char(34)) inq = !inq
+        if (inq) continue
+        if (i > 1) {
+            if (!anyof((" ", ","), substr(cmd, i - 1, 1))) continue
+        }
+        j = i
+        while (j <= n & strpos("abcdefghijklmnopqrstuvwxyz", substr(cmd, j, 1))) j++
+        w = substr(cmd, i, j - i)
+        if (strlen(w) < minlen | w != substr(full, 1, strlen(w))) continue
+        if (substr(cmd, j, 1) != "(") continue
+        depth = 0
+        body = ""
+        for (i = j; i <= n; i++) {
+            c = substr(cmd, i, 1)
+            if (c == char(34)) {
+                inq = !inq
+                body = body + " "
+                continue
+            }
+            if (inq) continue
+            if (c == "(") depth++
+            else if (c == ")") {
+                depth--
+                if (depth == 0) break
+            }
+            body = body + c
+        }
+        out = out + " " + substr(body, 2, .)
+        inq = 0
+    }
+    return(out)
+}
+
 string scalar _g2m_escape(string scalar s)
 {
     string scalar t

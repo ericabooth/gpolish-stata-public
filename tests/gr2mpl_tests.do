@@ -1341,6 +1341,55 @@ ok real("`r(val)'") > 0 & real("`r(val)'") < 0.1
 getv ytitle_gap
 ok real("`r(val)'") > 0 & real("`r(val)'") < 0.05
 
+* -- colours set by options on the command: graphregion() and plotregion()
+*    fills, title, axis-title and tick-label colours carry over; scheme
+*    colours that no option set stay in the house style
+sysuse auto, clear
+scatter mpg weight, plotregion(color(yellow)) graphregion(color(navy)) ///
+    title("On navy", color(white)) ylabel(, labcolor(white)) ///
+    xlabel(, labcolor(white)) xtitle(, color(red))
+rchk optcolors
+has "fig_face=#1a476f"
+has "panel1.face=#ffff00"
+has "title_color=#ffffff"
+has "panel1.xtick_color=#ffffff"
+has "panel1.ytick_color=#ffffff"
+has "xtitle_color=#ff0000"
+scatter mpg weight, graphr(margin(small) fcolor(gs14)) title("T (a, b)") plotr(margin(zero))
+rchk optcolors_abbrev
+has "fig_face=#e0e0e0"
+has "panel1.face=#ffffff"
+has "title_color=#ffffff", absent
+* colour words inside a quoted title are text, not a color() option
+scatter mpg weight, title("rbar, color(none)")
+rchk optcolors_quoted
+getv title_color
+local tc "`r(val)'"
+scatter mpg weight, title("plain")
+rchk optcolors_plain
+has "title_color=`tc'"
+scatter mpg weight, title("T") scheme(s2color)
+rchk optcolors_scheme
+has "fig_face=#ffffff"
+scatter mpg weight, title("T") scheme(economist)
+rchk optcolors_econ
+has "fig_face=#ffffff"
+has "panel1.face=#ffffff"
+graph bar mpg, over(foreign) graphregion(color(gs14)) title("B", color(red))
+rchk optcolors_bar
+has "fig_face=#e0e0e0"
+has "title_color=#ff0000"
+
+* -- width() and dpi() are checked before Python runs
+capture gr2mpl, width(-5) saving("tests/out/r_wd.png") replace
+ok _rc == 198
+capture gr2mpl, dpi(-10) saving("tests/out/r_wd.png") replace
+ok _rc == 198
+capture gr2mpl, dpi(0) saving("tests/out/r_wd.png") replace
+ok _rc == 198
+capture confirm file "tests/out/r_wd.png"
+ok _rc != 0
+
 * -- gr2mpl doctor returns r(mplok) as a number
 gr2mpl doctor
 ok r(mplok) == 1
