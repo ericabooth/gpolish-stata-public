@@ -20,9 +20,6 @@ import sys
 
 import numpy as np
 
-# Stata draws a marker of size s about 4/pi times wider than s in points; this factor
-# makes matplotlib's marker diameter match Stata's at msscale(1)
-MSTATA = 4.0 / math.pi
 import matplotlib
 
 matplotlib.use("Agg")
@@ -35,6 +32,10 @@ from matplotlib.colors import to_rgba  # noqa: E402
 from matplotlib.transforms import Bbox  # noqa: E402
 from matplotlib.offsetbox import AnnotationBbox, DrawingArea  # noqa: E402
 from matplotlib.patches import FancyBboxPatch, Polygon, Rectangle  # noqa: E402
+
+# Stata draws a marker of size s about 4/pi times wider than s in points; this factor
+# makes matplotlib's marker diameter match Stata's at msscale(1)
+MSTATA = 4.0 / math.pi
 
 # oldest matplotlib the renderer supports: Axes.legend(alignment=) arrived in 3.6
 MIN_MPL = (3, 6)

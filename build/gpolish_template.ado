@@ -725,12 +725,20 @@ end
 
 program _gpl_endlabel
     syntax [, name(string) SIZe(real 9.5) GAP(real 1.3) VALues FORmat(string) noBOLD ///
-              DOTs DOTSIze(real 5.5) PLOTs(numlist integer >0) XGap(real 8) LABels(string asis) noREPEL ///
+              DOTs DOTSIze(real -1) PLOTs(numlist integer >0) XGap(real 8) LABels(string asis) noREPEL ///
               WRAP(integer 0) SIDe(string) COLor(string) KEEPLegend]
     _gpl_name `name'
     local name `r(name)'
     * dotsize() on its own asks for dots
-    if "`dots'"=="" & `dotsize'!=5.5 local dots dots
+    * the sentinel -1 means not given, so dotsize(5.5) also turns dots on
+    if `dotsize'!=-1 {
+        if `dotsize'<=0 {
+            di as err "dotsize() must be positive"
+            exit 198
+        }
+        local dots dots
+    }
+    else local dotsize 5.5
     if "`format'"=="" local format %4.1f
     if "`side'"=="" local side right
     if !inlist("`side'", "right", "left") {
