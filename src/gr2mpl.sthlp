@@ -139,7 +139,7 @@ To set the interpreter once, put {cmd:global GR2MPL_PYTHON "/path/to/python"} in
 {p2col:graph bar, hbar, box, hbox, dot}yes{p_end}
 {p2col:blabel() bar labels, second over() group labels}yes{p_end}
 {p2col:graph matrix (half honoured)}yes{p_end}
-{p2col:by() on twoway and graph bar; graph combine}yes{p_end}
+{p2col:by() on twoway and graph bar (one shared scale unless yrescale); graph combine}yes{p_end}
 {p2col:marginsplot (also with by()), coefplot (several models)}yes{p_end}
 {p2col:avplot, rvfplot, lvr2plot, cluster dendrogram}yes{p_end}
 {p2col:heatplot and other nodropbase area polygons}yes, with a stepped colour legend{p_end}
@@ -172,6 +172,7 @@ Other differences are limits of the translation:
 {p 8 12 2}o Characters that no installed font can draw appear as empty boxes; {cmd:gr2mpl} tries the CJK fonts that come with macOS, Windows and Noto.{p_end}
 {p 8 12 2}o With {cmd:gpolish endlabel, values}, the value column is spaced from the widths matplotlib measures, so it can sit a little further right than in Stata.{p_end}
 {p 8 12 2}o Plot-region margins of 4 or less (in Stata's relative units; the default margins of Stata's schemes and of {cmd:pypolish} are 3 or less) are replaced by {cmd:gr2mpl}'s own padding of about 2.5% of the axis range at each end (none below a y axis that starts at 0). A wider margin is kept, in points, as Stata draws it: for example the room {cmd:gpolish endlabel} makes between a y axis and the lines with {cmd:side(left)}, {cmd:yscale(alt)} or {cmd:yaxis(2)}, or {cmd:plotregion(margin(large))}.{p_end}
+{p 8 12 2}o The number of legend columns set by {cmd:legend(cols())} or {cmd:legend(rows())} is not followed: {cmd:gr2mpl} puts as many keys on a row as fit the figure width. The keys read row by row, in Stata's order, and column by column with {cmd:legend(colfirst)}.{p_end}
 {p 8 12 2}o {cmd:xscale(alt)} is not followed: the x axis stays at the bottom. When Stata draws both y axes on one side (as it does with a third y axis), the second is drawn on the other side.{p_end}
 
 

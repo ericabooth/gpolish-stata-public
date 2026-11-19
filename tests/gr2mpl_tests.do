@@ -829,6 +829,67 @@ twoway (scatter mpg weight if foreign) (scatter mpg weight if !foreign) (lfit mp
 rchk legend_text
 has "panel1.legend=A|group|B|A again"
 
+* -- graph bar by(): every panel is drawn on the scale Stata shares across panels
+sysuse auto, clear
+graph bar mpg, over(rep78) by(foreign)
+rchk barby_scale
+getv panel1.barscale
+local s1 `"`r(val)'"'
+getv panel2.barscale
+ok `"`r(val)'"' == `"`s1'"'
+ok real(word(subinstr(`"`s1'"', ",", " ", .), 2)) >= 32
+graph hbar mpg, over(rep78) by(foreign)
+rchk hbarby_scale
+getv panel1.barscale
+local s1 `"`r(val)'"'
+getv panel2.barscale
+ok `"`r(val)'"' == `"`s1'"'
+* yrescale keeps each panel on its own scale
+graph bar mpg, over(rep78) by(foreign, yrescale)
+rchk barby_yres
+getv panel1.barscale
+local s1 `"`r(val)'"'
+getv panel2.barscale
+ok `"`r(val)'"' != `"`s1'"'
+
+* -- legends with more than one row read row by row, as Stata fills them
+sysuse uslifeexp, clear
+* (the variable labels differ between Stata releases, so the order is built from them)
+local want
+foreach v in le_wm le_bm le_wf le_bf le {
+    local want `"`want'`: variable label `v''|"'
+}
+local want = substr(`"`want'"', 1, strlen(`"`want'"') - 1)
+twoway line le_wm le_bm le_wf le_bf le year, legend(cols(3))
+rchk leg_rowfirst
+has "panel1.legend=`want'"
+twoway line le_wm le_bm le_wf le_bf le year, legend(cols(2) colfirst)
+rchk leg_colfirst
+* colfirst keeps matplotlib's column-first fill, so the keys do not read in plot order
+has "panel1.legend=`want'", absent
+sysuse auto, clear
+graph bar (count), over(rep78) blabel(bar) asyvars
+rchk leg_asy
+has "panel1.legend=1|2|3|4|5"
+sysuse auto, clear
+twoway (scatter mpg weight) (lfit mpg weight) (qfit mpg weight) (mspline mpg weight) (lowess mpg weight), by(foreign) legend(cols(3))
+rchk leg_by
+getv fig_legend
+local fl `"`r(val)'"'
+getv fig_legend_read
+ok `"`r(val)'"' == `"`fl'"'
+
+* -- two over() groups: the outer labels sit below the inner labels, rotated or not
+sysuse auto, clear
+graph bar mpg, over(foreign) over(rep78) title("Bar")
+rchk bar_two_over
+has "panel1.sup_overlaps=0"
+has "panel1.sup_below=1"
+graph bar mpg, over(foreign) over(rep78) xsize(8)
+rchk bar_two_over_wide
+has "panel1.sup_overlaps=0"
+has "panel1.sup_below=1"
+
 * -- matplotlib version: gr2mpl needs 3.6 or later
 gr2mpl doctor
 ok "`r(mplok)'" == "1"
