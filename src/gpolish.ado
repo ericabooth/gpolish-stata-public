@@ -271,6 +271,38 @@ program _gpl_toreg1
     c_local `p'y `y1'
 end
 
+* is a point (in plot region 1 data units) inside the plot region? cmd opt name x y mode
+* mode err stops with rc 198; mode note prints a note. c_local _gpl_out is 1 when outside
+program _gpl_inplot
+    args cmd opt name x y mode
+    _gpl_geom, name(`name')
+    local gx = r(xa) + r(xb)*cond(r(xlog), ln(`x'), `x')
+    local gy = r(ya) + r(yb)*cond(r(ylog), ln(`y'), `y')
+    local tol = 0.001*max(r(gx1)-r(gx0), r(gy1)-r(gy0))
+    local out = missing(`gx', `gy') | `gx' < r(gx0)-`tol' | `gx' > r(gx1)+`tol' | `gy' < r(gy0)-`tol' | `gy' > r(gy1)+`tol'
+    c_local _gpl_out `out'
+    if !`out' exit
+    foreach d in x y {
+        local D = upper("`d'")
+        local a = (r(g`d'0) - r(`d'a))/r(`d'b)
+        local b = (r(g`d'1) - r(`d'a))/r(`d'b)
+        if r(`d'log) {
+            local a = exp(`a')
+            local b = exp(`b')
+        }
+        local `d'lo : di %9.0g min(`a', `b')
+        local `d'hi : di %9.0g max(`a', `b')
+        local `d'lo = trim("``d'lo'")
+        local `d'hi = trim("``d'hi'")
+    }
+    local msg "gpolish `cmd': `opt'() lies outside the plot region (x range `xlo' to `xhi', y range `ylo' to `yhi')"
+    if "`mode'"=="err" {
+        di as err "`msg'"
+        exit 198
+    }
+    di as txt "note: `msg'"
+end
+
 * an endlabel record, kept in the graph itself as a hidden text box so that it lasts through
 * graph save and graph use and belongs to this graph only. Its text is
 * gpolish-endlabel|<text boxes>|<markers>|<side>|<margin>|<legend>|<where>|<first-line lengths>
@@ -918,6 +950,15 @@ program _gpl_endlabel
     local bal = cond(`s' > 0, "east", "west")
     local hzv = cond(`s' > 0, "right", "left")
     local bav = cond(`s' > 0, "west", "east")
+    * the value column is shared: it sits beyond the line end farthest out on the label side
+    local gxe .
+    forvalues j = 1/`np' {
+        local rg = `Y'[`j',6]
+        local xl = `Y'[`j',4]
+        local g = `xa`rg'' + `xb`rg''*cond(`xlog`rg'', ln(`xl'), `xl')
+        if `gxe'==. local gxe = `g'
+        else local gxe = cond(`s' > 0, max(`gxe', `g'), min(`gxe', `g'))
+    }
     * every object goes into plot region 1, so positions are given in its data units
     forvalues j = 1/`np' {
         local rg = `Y'[`j',6]
@@ -927,7 +968,7 @@ program _gpl_endlabel
         local yl = `Y'[`j',1]
         local gxl = `xa`rg'' + `xb`rg''*cond(`xlog`rg'', ln(`xl'), `xl')
         local xpos = (`gxl' + `s'*`xgap'/72*`gpi' - `xa1')/`xb1'
-        local xval = (`gxl' + `s'*(`xgap' + `maxw'*`size')/72*`gpi' - `xa1')/`xb1'
+        local xval = (`gxe' + `s'*(`xgap' + `maxw'*`size')/72*`gpi' - `xa1')/`xb1'
         local xdot = (`gxl' - `xa1')/`xb1'
         local ydot = (`Y'[`j',2] - `ya1')/`yb1'
         if `xlog1' {
@@ -1168,6 +1209,14 @@ program _gpl_callout
         exit 198
     }
     _gpl_segcheck `segments'
+    local nonblank 0
+    foreach l of local txt {
+        if trim(`"`l'"')!="" local nonblank 1
+    }
+    if !`nonblank' {
+        di as err "gpolish `cmd': text is empty"
+        exit 198
+    }
     * positions first: an expression in them may read the caller's r()
     foreach o in at to from {
         if `"``o''"'!="" _gpl_xy `o' `"``o''"'
@@ -1178,6 +1227,11 @@ program _gpl_callout
     foreach o in at to from {
         if `"``o''"'!="" _gpl_toreg1 `name' "`_gpl_reg'" `o' ``o'x' ``o'y'
     }
+    * a point off the axes is almost always a typo or the wrong axis
+    foreach o in to at {
+        if `"``o''"'!="" _gpl_inplot `cmd' `o' `name' ``o'x' ``o'y' err
+    }
+    if `"`from'"'!="" _gpl_inplot `cmd' from `name' `fromx' `fromy' note
     if "`color'"=="" local color "26 26 26"
     if "`align'"=="" local align left
     if "`isnote'"!="" & "`fill'"=="" {
@@ -1214,6 +1268,10 @@ program _gpl_callout
         * automatic placement around the target, avoiding what is already drawn
         _gpl_obstacles `name'
         _gpl_geom, name(`name')
+        if `bw' > r(gx1) - r(gx0) | `bh' > r(gy1) - r(gy0) {
+            di as err "gpolish `cmd': the text is wider or taller than the plot region; shorten it, split it into lines, or use a smaller size()"
+            exit 198
+        }
         local gtx = `xa' + `xb'*cond(`xlog', ln(`tox'), `tox')
         local gty = `ya' + `yb'*cond(`ylog', ln(`toy'), `toy')
         mata: _gpl_autobox("`B'", `gtx', `gty', `bw', `bh', `fs', `r(gx0)', `r(gx1)', `r(gy0)', `r(gy1)')
@@ -1277,6 +1335,8 @@ program _gpl_arrow
     _gpl_axpos `name' "`xaxis'" "`yaxis'"
     _gpl_toreg1 `name' "`_gpl_reg'" from `fromx' `fromy'
     _gpl_toreg1 `name' "`_gpl_reg'" to `tox' `toy'
+    _gpl_inplot arrow from `name' `fromx' `fromy' note
+    _gpl_inplot arrow to `name' `tox' `toy' note
     _gpl_geom, name(`name')
     local gfx = r(xa) + r(xb)*cond(r(xlog), ln(`fromx'), `fromx')
     local gfy = r(ya) + r(yb)*cond(r(ylog), ln(`fromy'), `fromy')
@@ -1313,6 +1373,8 @@ program _gpl_brace
     _gpl_axpos `name' "`xaxis'" "`yaxis'"
     _gpl_toreg1 `name' "`_gpl_reg'" from `fromx' `fromy'
     _gpl_toreg1 `name' "`_gpl_reg'" to `tox' `toy'
+    _gpl_inplot brace from `name' `fromx' `fromy' note
+    _gpl_inplot brace to `name' `tox' `toy' note
     _gpl_geom, name(`name')
     local gpi = r(gpi)
     local xa = r(xa)
@@ -1361,6 +1423,10 @@ program _gpl_bracket
     _gpl_val x `"`x'"'
     _gpl_val y0 `"`y0'"'
     _gpl_val y1 `"`y1'"'
+    if `y0v'==`y1v' {
+        di as err "gpolish bracket: y0() and y1() are the same; a bracket needs two different ends"
+        exit 198
+    }
     _gpl_name `name'
     local name `r(name)'
     _gpl_axpos `name' "`xaxis'" "`yaxis'"
@@ -1447,7 +1513,7 @@ end
 
 * ================================================================ ptlabel
 program _gpl_ptlabel
-    syntax varname(string) [if] [in], x(varname numeric) y(varname numeric) [name(string) SIZe(real 8.6) ///
+    syntax varname [if] [in], x(varname numeric) y(varname numeric) [name(string) SIZe(real 8.6) ///
         COLor(string) OFFset(real 3) MSize(real 6) HALO noLEADer LColor(string) LWidth(string) ///
         XAXis(string) YAXis(string) MAXLabels(integer 1000)]
     _gpl_name `name'
@@ -1457,6 +1523,17 @@ program _gpl_ptlabel
         exit 198
     }
     marksample touse, novarlist strok
+    * a numeric variable labels with its value label, else its display format, as mlabel() does
+    capture confirm string variable `varlist'
+    if _rc {
+        tempvar lab
+        local vl : value label `varlist'
+        if "`vl'"!="" quietly decode `varlist', gen(`lab')
+        else quietly gen strL `lab' = ""
+        local fmt : format `varlist'
+        quietly replace `lab' = string(`varlist', "`fmt'") if `lab'=="" & !missing(`varlist')
+        local varlist `lab'
+    }
     quietly count if `touse' & !missing(`x', `y') & `varlist'!=""
     if r(N)==0 {
         di as txt "note: gpolish ptlabel: no observations to label (check the if/in condition and x(), y())"
@@ -1521,6 +1598,14 @@ program _gpl_ptlabel
     if `nsel' > 300 {
         di as txt "note: gpolish ptlabel: placing `nsel' labels; run time grows quickly with the number of labels"
         di as txt "      (about 40 seconds for 600 labels); use if/in to label fewer points"
+    }
+    * a label wider than the plot region cannot be placed anywhere inside it
+    _gpl_geom, name(`name')
+    mata: st_local("nwide", strofreal(_gpl_skipwide("`varlist'", "`sel'", `size'/72*`gpi', `r(gx1)'-`r(gx0)')))
+    if `nwide' > 0 {
+        di as txt "note: gpolish ptlabel: `nwide' label(s) are wider than the plot region and were skipped; shorten them or use a smaller size()"
+        quietly count if `sel'
+        if r(N)==0 exit
     }
     _gpl_geom, name(`name')
     tempname R
@@ -2454,6 +2539,26 @@ real scalar _gpl_obscost(real rowvector b, real matrix O)
 // joined to the point by a leader line.
 // result rows: obs, anchor x, anchor y, halign (-1 left, 0 centre, 1 right), box alignment
 // (1 E, 2 W, 3 N, 4 S, 5 centre), overlap flag, leader flag, leader x0 y0 x1 y1 (device units)
+// drop labels wider than the plot region from the selection; returns how many were dropped
+real scalar _gpl_skipwide(string scalar labv, string scalar selv, real scalar fs, real scalar pw)
+{
+    real colvector sel, idx
+    string colvector L
+    real scalar i, n
+
+    st_view(sel, ., selv)
+    idx = selectindex(sel :!= 0)
+    n = 0
+    for (i=1; i<=length(idx); i++) {
+        L = st_sdata(idx[i], labv)
+        if (_gpl_textw(st_global("GPL_FONT"), _gpl_esc(L[1]), 0)*fs > pw) {
+            sel[idx[i]] = 0
+            n++
+        }
+    }
+    return(n)
+}
+
 void _gpl_place(string scalar gxv, string scalar gyv, string scalar labv, string scalar selv, string scalar out,
                 real scalar fs, real scalar rad, real scalar off,
                 real scalar x0, real scalar x1, real scalar y0, real scalar y1, real scalar leader)

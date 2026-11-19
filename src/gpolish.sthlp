@@ -35,7 +35,7 @@
 {p 8 16 2}{cmd:gpolish arrow,} {opt fr:om(x y)} {opt to(x y)}
 [{opt cur:ve(#)} {opt head:size(#)} {opt seg:ments(#)} {opt shr:ink(#)} {opt lc:olor(rgb)} {opt lw:idth(str)} {opt xax:is(#)} {opt yax:is(#)} {opt name(graphname)}]
 
-{p 8 16 2}{cmd:gpolish ptlabel} {it:strvar} {ifin}{cmd:,} {opt x(varname)} {opt y(varname)}
+{p 8 16 2}{cmd:gpolish ptlabel} {it:varname} {ifin}{cmd:,} {opt x(varname)} {opt y(varname)}
 [{opt siz:e(#)} {opt col:or(rgb)} {opt off:set(#)} {opt ms:ize(#)} {opt halo} {opt nolead:er} {opt lc:olor(rgb)} {opt lw:idth(str)} {opt xax:is(#)} {opt yax:is(#)} {opt maxl:abels(#)} {opt name(graphname)}]
 
 {p 8 16 2}{cmd:gpolish bracket} [{it:"label line 1"} ...]{cmd:,} {opt x(#)} {opt y0(#)} {opt y1(#)} [{opt tick(#)} {opt left} {opt gap(#)} {opt siz:e(#)} {opt col:or(rgb)} {opt lc:olor(rgb)} {opt lw:idth(str)}
@@ -103,7 +103,8 @@ nonmissing values are skipped with a note.
 Label text is the plot's legend text when it differs from the variable label, as it does for a fit line from {cmd:lfit} or a line drawn by {cmd:marginsplot}; otherwise it is the variable label.
 {opt labels()} overrides both, one label per plot in the order of {opt plots()}.
 When two plots would get the same label, {cmd:endlabel} prints a note, keeps the legend and suggests {opt labels()}.
-{opt values} adds the last value in a column, formatted with {opt format()}.
+{opt values} adds the last value in a column, formatted with {opt format()}. The column sits beyond the line end
+farthest out on the labeled side, so a line that ends early still has its value in the same column.
 {opt dots} adds a marker at each line end. {opt color()} sets one text color for all labels instead of each line's color.
 {opt side(left)} labels the left ends of the lines instead of the right; on a reversed axis
 ({cmd:xscale(reverse)}) the labels follow the screen, not the data.
@@ -145,6 +146,9 @@ When the target lies inside the text, or {opt from()} equals {opt to()}, no arro
 change the box colors (the default border is used only when {opt fill()} is not given), and {opt pad(#)} sets the
 padding in points. {cmd:gpolish callout} draws the same box when {opt fill()} is given.
 With {opt to()} it draws an arrow from the box; with {opt at()} alone it is a plain box.
+{cmd:callout} and {cmd:note} stop with an error when the text is empty, when {opt to()} or {opt at()} lies outside
+the plot region (the message gives the axis ranges), or, with automatic placement, when the text box is wider or
+taller than the plot region. A {opt from()} outside the plot region gets a note.
 With the default {opt align(left)} the left edge of the box sits on {opt at()}, with {opt align(right)} its right
 edge does, and with {opt align(center)} the box is centered on {opt at()}, which suits flow charts.
 
@@ -156,11 +160,14 @@ The tip points to the left of the direction from {opt from()} to {opt to()}; {op
 
 {phang}
 {cmd:gpolish arrow} draws an arrow between two points, straight by default; {opt curve(#)} bends it.
-{opt from()} and {opt to()} must be different points.
+{opt from()} and {opt to()} must be different points. When either lies outside the plot region,
+{cmd:arrow} (and {cmd:brace}) prints a note and still draws.
 Together with {cmd:gpolish note} it builds simple flow charts on an empty plot.
 
 {phang}
-{cmd:gpolish ptlabel} labels selected points of a scatterplot with the string variable {it:strvar}.
+{cmd:gpolish ptlabel} labels selected points of a scatterplot with the variable {it:varname}.
+A string variable is used as it is. A numeric variable is shown with its value label when it has one and
+otherwise with its display format, as {cmd:mlabel()} does; points with a missing value are not labeled.
 Each label is tried in eight positions next to its point and placed where it overlaps markers, lines and other
 labels least. If even the best of the eight still overlaps something, the label is also tried farther out, on
 rings around its point, and joined to the point by a thin leader line; it moves out only when that spot costs less
@@ -175,6 +182,7 @@ When the {opt y()} variable is drawn only on other y axes than {opt yaxis()} nam
 only on other x axes than {opt xaxis()} names), or when no plot region carries an axis of each variable,
 {cmd:gpolish ptlabel} stops before any edit and names the option to use. Log axes are detected, and points with zero or negative values on a log axis are skipped.
 Selected points that fall outside the axis range of the plot region are skipped with a note that gives how many.
+A label wider than the plot region is skipped with a note; shorten it or use a smaller {opt size()}.
 {cmd:ptlabel} is meant for tens to a few hundred labels. Above 300 labels it prints a note, because run time
 grows quickly with the number of labels (about 40 seconds for 600). {opt maxlabels(#)} refuses a selection of more
 than # points before any edit; the default is 1000.
@@ -184,7 +192,7 @@ Placement avoids the same drawn objects as an automatic {cmd:gpolish callout}.
 {cmd:gpolish bracket} draws a square bracket from {opt y0()} to {opt y1()} at {opt x()}.
 Its ticks point right on the screen, whatever the axis direction; {opt left} points them left.
 {opt tick(#)} sets their length in points. An optional label sits beside the middle of the bracket, on the side
-away from the ticks, {opt gap(#)} points from it. For a labeled span across x, use {cmd:gpolish brace}.
+away from the ticks, {opt gap(#)} points from it. {opt y0()} and {opt y1()} must differ. For a labeled span across x, use {cmd:gpolish brace}.
 
 {phang}
 {cmd:gpolish legend} colors each legend label to match its key and makes it bold. Labels of more than one
@@ -228,6 +236,8 @@ It stops with an error when a layout command is used on a graph that is not a tw
 {p2col:{cmd:graph bar}, {cmd:by()} and combined graphs}layout commands are refused with a message; plain {cmd:gpolish} still makes the title bold; {helpb gr2mpl} redraws them{p_end}
 {p2col:{cmd:graph pie}}layout commands are refused; {helpb gr2mpl} does not redraw pie charts either{p_end}
 {p2col:{cmd:ptlabel} on many points}run time grows quickly with the number of labels; a note is printed above 300 labels and more than {opt maxlabels()} (default 1000) are refused{p_end}
+{p2col:Positions outside the plot region}{cmd:callout} and {cmd:note} refuse {opt to()} or {opt at()} outside the axis ranges; {cmd:arrow}, {cmd:brace} and a callout's {opt from()} get a note; ranges are given in the axis's own units, so dates show as numbers{p_end}
+{p2col:Labels wider than the plot region}{cmd:ptlabel} skips them with a note; an automatically placed callout or note stops with an error; {cmd:gpolish} does not wrap text itself{p_end}
 {p2col:Positions on a second axis}{opt at()}, {opt to()} and {opt from()} use the first axes unless {opt xaxis()} or {opt yaxis()} says otherwise{p_end}
 {p2col:Graphs edited by {cmd:gpolish} 0.6.1 or earlier}these carry no {cmd:endlabel} record; their end labels are found in the graph's edit log (see {help gpolish##technical:Technical notes}){p_end}
 {p2line}

@@ -1161,6 +1161,52 @@ if "`c(mode)'"=="batch" {
     chk batch_font "$GPL_FONT"==lower("`r(fontface)'") | ("`r(fontface)'"=="" & "$GPL_FONT"=="helvetica")
 }
 
+* ---- 36. round 3: off-axis targets, wide labels, empty text, bracket ends, value column, numeric labels
+sysuse uslifeexp, clear
+line le_wmale year, name(r3a, replace)
+capture gpolish callout "Far away", to(2100 100)
+chk r3_callout_off _rc==198
+chk r3_callout_off_noedit "`.r3a.plotregion1.added_text.arrnels'"=="" | "`.r3a.plotregion1.added_text.arrnels'"=="0"
+capture gpolish note "Far", at(1950 1e10)
+chk r3_note_at_off _rc==198
+capture gpolish note "", at(1950 60)
+chk r3_note_empty _rc==198
+capture gpolish callout " ", to(1950 60)
+chk r3_callout_empty _rc==198
+capture gpolish bracket, x(1950) y0(60) y1(60)
+chk r3_bracket_equal _rc==198
+capture noisily gpolish callout "Fine", to(1950 60)
+chk r3_callout_ok _rc==0
+capture gpolish arrow, from(1950 60) to(2100 60)
+chk r3_arrow_off_note _rc==0
+local wide = 70*"W"
+capture gpolish callout "`wide'", to(1950 60)
+chk r3_callout_wide _rc==198
+* a line that ends early: every value still sits in one column
+sysuse uslifeexp, clear
+replace le_bmale = . if year==2000
+line le_wmale le_wfemale le_bmale year, name(r3b, replace)
+gpolish endlabel, values
+local x2 `.r3b.plotregion1.added_text[2].xpos.val'
+local x4 `.r3b.plotregion1.added_text[4].xpos.val'
+local x6 `.r3b.plotregion1.added_text[6].xpos.val'
+chk r3_valcol abs(`x2'-`x6') < 1e-6 & abs(`x4'-`x6') < 1e-6
+* a label wider than the plot is skipped, the others are placed
+sysuse auto, clear
+gen str80 s = make
+replace s = 60*"W" in 1
+scatter price mpg, name(r3c, replace)
+gpolish ptlabel s in 1/3, x(mpg) y(price)
+chk r3_wide_skip "`.r3c.plotregion1.added_text.arrnels'"=="2"
+* numeric label variables: value label, else display format
+scatter price mpg, name(r3d, replace)
+gpolish ptlabel foreign if price>13000, x(mpg) y(price)
+chk r3_num_vl inlist(`"`.r3d.plotregion1.added_text[1].text[1]'"', "Domestic", "Foreign")
+scatter price mpg, name(r3e, replace)
+gpolish ptlabel rep78 if price>13000 & !missing(rep78), x(mpg) y(price)
+local t `"`.r3e.plotregion1.added_text[1].text[1]'"'
+chk r3_num_fmt inlist(`"`t'"', "1", "2", "3", "4", "5")
+
 gpolish limits
 
 if `"`_wf0'"'!="" graph set window fontface `"`_wf0'"'
