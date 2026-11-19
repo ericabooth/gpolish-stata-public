@@ -895,6 +895,12 @@ program _gpl_endlabel
     }
     * a second endlabel replaces the first instead of stacking on it
     _gpl_regundo `name'
+    * text boxes and lines added before this run (callouts, notes, point labels, arrows) keep their
+    * data positions; the margin and legend changes below move the plot region under them
+    _gpl_prior `name'
+    local nprior = r(n)
+    local ntxt0 = r(ntext)
+    local nlin0 = r(nlines)
     if `_gpl_legn' > 0 {
         di as txt "note: end labels added to graph {bf:`name'} by gpolish 0.6.1 or earlier were found in its"
         di as txt "      edit log; they are hidden and their margin is given back before the new labels"
@@ -1284,6 +1290,14 @@ program _gpl_endlabel
             local regtxt `regtxt' `r(k)'
         }
     }
+    if `nprior' > 0 {
+        di as txt "note: graph {bf:`name'} already held `ntxt0' text box(es) and `nlin0' line segment(s)"
+        di as txt "      added earlier (callouts, notes, point labels, arrows). The end labels"
+        di as txt "      changed the plot region, and those objects keep their data positions,"
+        di as txt "      so text placed automatically may now overlap its arrow or the data."
+        di as txt "      Run {bf:gpolish endlabel} first, or use {bf:gpolish clear} and add them"
+        di as txt "      again after it."
+    }
     * record what was added, in the graph itself, so a re-run or gpolish clear can undo it
     local lens
     foreach k of local regtxt {
@@ -1315,6 +1329,25 @@ program _gpl_endlabel
 end
 
 * ================================================================ clear
+* count the visible text boxes (other than endlabel's record) and line segments on a graph; r(n)
+program _gpl_prior, rclass
+    args name
+    foreach a in added_text added_lines {
+        local n`a' 0
+        _gpl_count `name' `a'
+        forvalues k = 1/`r(k)' {
+            if "`.`name'.plotregion1.`a'[`k'].draw_view.setting'"=="no" continue
+            if "`a'"=="added_text" {
+                if substr(`"`.`name'.plotregion1.added_text[`k'].text[1]'"', 1, 16)=="gpolish-endlabel" continue
+            }
+            local ++n`a'
+        }
+    }
+    return scalar ntext = `nadded_text'
+    return scalar nlines = `nadded_lines'
+    return scalar n = `nadded_text' + `nadded_lines'
+end
+
 * remove every added text box, line and marker, and undo endlabel's margin and legend changes
 program _gpl_clear
     syntax [, name(string)]
@@ -1516,6 +1549,10 @@ program _gpl_callout
     _gpl_name `name'
     local name `r(name)'
     _gpl_axpos `name' "`xaxis'" "`yaxis'"
+    * on a log axis a position at or below zero cannot be drawn: stop before any edit or note
+    foreach o in at to from {
+        if `"``o''"'!="" _gpl_logpos `cmd' `name' "`_gpl_reg'" `o' ``o'x' `o' ``o'y'
+    }
     foreach o in at to from {
         if `"``o''"'!="" _gpl_toreg1 `name' "`_gpl_reg'" `o' ``o'x' ``o'y'
     }

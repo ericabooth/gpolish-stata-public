@@ -13,6 +13,41 @@ import statistics as st
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+import re
+
+
+def _hu(x, nd):
+    """Round half up on the value as printed to 9 decimals, so 0.855 (513/600) gives 0.86."""
+    from decimal import Decimal, ROUND_HALF_UP
+    try:
+        if x != x or x in (float("inf"), float("-inf")):
+            return x
+        return float(Decimal(repr(round(float(x), 9))).quantize(Decimal(1).scaleb(-nd), rounding=ROUND_HALF_UP))
+    except (TypeError, ValueError):
+        return x
+
+
+SHARE_COUNTS = ("clean_share", "clean_near_share", "clean_xown_share", "on_marker_share",
+                "on_marker_other_share", "on_line_share", "outside_share", "ambiguous_share")
+
+
+def _exact_share(v, n):
+    """graphs*.csv stores each share to 4 decimals; a share of labels is a count over n_labels, so
+    recover the exact fraction before averaging (513/600 must print as 0.86, not 0.85)."""
+    try:
+        v, n = float(v), float(n)
+    except (TypeError, ValueError):
+        return v
+    if n <= 0 or v != v:
+        return v
+    k = round(v * n)
+    return k / n if abs(v * n - k) < 0.02 else v
+
+
+def _fmt(fmt, x):
+    m = re.search(r"\.(\d+)f", fmt)
+    return fmt.format(_hu(x, int(m.group(1))) if m else x)
+
 
 METHODS = ["default", "labrepel", "gpolish", "gpolish060", "adjusttext", "ggrepel", "ggrepel_inf"]
 NAMES = {"default": "Stata mlabel()", "labrepel": "labrepel (Stata)", "gpolish": "gpolish ptlabel (Stata)",
@@ -63,12 +98,12 @@ def cell(vals, fmt):
         return "n/a", float("nan"), 0.0
     m, h = ci(vals)
     if len(vals) < 2:
-        return fmt.format(m), m, 0.0
-    return fmt.format(m) + " ± " + fmt.format(h), m, h
+        return _fmt(fmt, m), m, 0.0
+    return _fmt(fmt, m) + " ± " + _fmt(fmt, h), m, h
 
 
 def rng(vals, fmt="{:.2f}"):
-    return f"{fmt.format(st.median(vals))} ({fmt.format(min(vals))} to {fmt.format(max(vals))})"
+    return f"{_fmt(fmt, st.median(vals))} ({_fmt(fmt, min(vals))} to {_fmt(fmt, max(vals))})"
 
 
 def table(head, rows):
@@ -81,6 +116,9 @@ def main():
         for k, v in r.items():
             if k not in ("set", "scenario", "design", "method"):
                 r[k] = float(v)
+        for k in SHARE_COUNTS:
+            if k in r and "n_labels" in r:
+                r[k] = _exact_share(r[k], r["n_labels"])
     main_rows = [r for r in rows if r["set"] == "main"]
     methods = [m for m in METHODS if any(r["method"] == m for r in main_rows)]
     designs = [(d, n) for d, n in DESIGNS if any(r["design"] == d for r in main_rows)]
@@ -122,8 +160,8 @@ def main():
             L, lab = sum(r["leaders"] for r in rs), sum(r["n_labels"] for r in rs)
             def pc(k):
                 v = sum(r[k] for r in rs)
-                return f"{v:.0f} ({v / L:.2f})" if L else "0"
-            body.append([dname, f"{L:.0f} of {lab:.0f}", pc("lead_x_label"), pc("lead_x_marker"),
+                return f"{_hu(v, 0):.0f} ({_hu(v / L, 2):.2f})" if L else "0"
+            body.append([dname, f"{_hu(L, 0):.0f} of {_hu(lab, 0):.0f}", pc("lead_x_label"), pc("lead_x_marker"),
                          pc("lead_x_leader"), pc("lead_x_any")])
         out += [f"### {NAMES[m]}", ""] + table(["Scenario", "Leaders (of labels)", "Cross a label (share)",
                                                  "Cross a marker (share)", "Cross a leader (share)",
@@ -139,8 +177,8 @@ def main():
         for m in methods:
             rs = sel(d, m)
             L, NL = sum(r["leaders"] for r in rs), sum(r["nolead"] for r in rs)
-            a = f"{sum(r['amb_lead'] for r in rs) / L:.2f}" if L else "n/a"
-            b = f"{sum(r['amb_nolead'] for r in rs) / NL:.2f}" if NL else "n/a"
+            a = f"{_hu(sum(r['amb_lead'] for r in rs) / L, 2):.2f}" if L else "n/a"
+            b = f"{_hu(sum(r['amb_nolead'] for r in rs) / NL, 2):.2f}" if NL else "n/a"
             cells.append(f"{a} / {b}")
         body.append([dname] + cells)
     out += table(["Scenario (with / without)"] + [NAMES[m] for m in methods], body)
@@ -207,7 +245,7 @@ def main():
                 for key in ("clean_share", "clean_near_share"):
                     o = [r[key] for r in main_rows if r["design"] == d and r["method"] == m]
                     v = [r[key] for r in perm if r["design"] == d and r["method"] == m]
-                    cc.append(f"{o[0]:.2f} vs {rng(v)}" if o and v else "n/a")
+                    cc.append(f"{_hu(o[0], 2):.2f} vs {rng(v)}" if o and v else "n/a")
                 cells.append("; ".join(cc))
             body.append([dname] + cells)
         out += table(["Scenario"] + [NAMES[m] for m in pm], body)
@@ -244,7 +282,7 @@ def main():
                 cells = []
                 for m in sm:
                     v = [r[key] for r in sc if r["design"] == d and r["method"] == m]
-                    cells.append(f"{f.format(st.mean(v))} ({f.format(min(v))} to {f.format(max(v))})" if v else "n/a")
+                    cells.append(f"{_fmt(f, st.mean(v))} ({_fmt(f, min(v))} to {_fmt(f, max(v))})" if v else "n/a")
                 body.append([f"{dname}, {lab}"] + cells)
         out += table(["Design, measure"] + [NAMES[m] for m in sm], body)
 
@@ -285,7 +323,7 @@ def main():
                                    for k in ("iteration limit", "settled", "time limit"))
                 differ = str(sum(1 for g in gs if g["iterations_drawn"] != g["iterations"]))
             it_rows.append([NAMES[m], sname, str(len(gs)), f"{min(its)} to {max(its)}", stops,
-                            f"{min(secs):.2f} to {max(secs):.2f}", differ])
+                            f"{_hu(min(secs), 2):.2f} to {_hu(max(secs), 2):.2f}", differ])
     if it_rows:
         out += ["## Stopping rules: iterations of adjustText and ggrepel", "",
                 "adjustText runs at most 100 iterations (iter_lim=100, no time limit) and stops earlier when its labels",

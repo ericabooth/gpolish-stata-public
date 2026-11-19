@@ -136,6 +136,9 @@ overlap without a note.
 Labels are bold unless {opt nobold} is given; a label with an unmatched {cmd:{c )-}} is shown as typed, because the
 brace would end the bold markup early.
 Running {cmd:gpolish endlabel} again replaces the earlier labels instead of adding a second set.
+Run {cmd:endlabel} before {cmd:callout}, {cmd:note}, {cmd:ptlabel} and {cmd:arrow}: the end labels change the plot region, and
+text and lines added earlier keep their data positions, so an automatically placed callout can end up crossing its own arrow.
+When the graph already holds such text boxes or lines, {cmd:endlabel} prints a note and leaves them as they are.
 
 {phang}
 {cmd:gpolish callout} adds a note of one or more lines, with a curved arrow to {opt to()}.
@@ -163,6 +166,7 @@ With {opt to()} it draws an arrow from the box; with {opt at()} alone it is a pl
 the plot region (the message gives the axis ranges), or, with automatic placement, when the text box is wider or
 taller than the plot region. An {opt at()} or {opt from()} outside the plot region gets a note and is drawn where
 it is, so a box can still be placed by hand in the graph margin.
+On a log axis, an {opt at()}, {opt to()} or {opt from()} at or below zero stops with r(198) before any edit, and the message names the option.
 A box placed with {opt at()} that runs past an edge of the graph also gets a note, which suggests {opt align()} or a different {opt at()}.
 With the default {opt align(left)} the left edge of the box sits on {opt at()}, with {opt align(right)} its right
 edge does, and with {opt align(center)} the box is centered on {opt at()}, which suits flow charts.
@@ -181,7 +185,7 @@ against markers, lines, bars or earlier labels, and prints no note if they overl
 {opt shrink(#)} stops the arrowhead # points short of {opt to()} (default 0), for example so it does not cover a marker;
 a negative value stops with r(198).
 {opt from()} and {opt to()} must be different points. When either lies outside the plot region,
-{cmd:arrow} (and {cmd:brace}) prints a note and still draws. On a log axis, {cmd:arrow}, {cmd:brace} and {cmd:bracket}
+{cmd:arrow} (and {cmd:brace}) prints a note and still draws. On a log axis, {cmd:arrow}, {cmd:brace}, {cmd:bracket}, {cmd:callout} and {cmd:note}
 stop with r(198) before any edit when a position is zero or negative, and name the option.
 Together with {cmd:gpolish note} it builds simple flow charts on an empty plot.
 
@@ -190,7 +194,7 @@ Together with {cmd:gpolish note} it builds simple flow charts on an empty plot.
 A string variable is used as it is. A numeric variable is shown with its value label when it has one and
 otherwise with its display format, as {cmd:mlabel()} does; points with a missing value are not labeled.
 Each label is tried in eight positions next to its point and placed where it overlaps markers, lines and other
-labels least. If even the best of the eight still overlaps something, the label is also tried farther out, on
+labels least, including marker labels drawn by {opt mlabel()}. If even the best of the eight still overlaps something, the label is also tried farther out, on
 rings around its point, and joined to the point by a thin leader line; it moves out only when that spot costs less
 than the best spot next to the point. {opt noleader} keeps every
 label next to its point; {opt lcolor()} and {opt lwidth()} style the leader lines.
@@ -292,7 +296,7 @@ It stops with an error when {cmd:endlabel}, {cmd:callout}, {cmd:note}, {cmd:arro
 {p2col:Positions outside the plot region}{cmd:callout} and {cmd:note} refuse a {opt to()} outside the axis ranges; {opt at()}, {opt from()}, {cmd:arrow}, {cmd:brace} and {cmd:bracket} get a note; a {cmd:callout} or {cmd:note} box placed with {opt at()} that runs past an edge of the graph gets a note and is drawn where it is, so the part outside is cut off; ranges are given in the axis's own units, so dates show as numbers; a {cmd:bracket} note names only the option that is off the plot and gives the {cmd:xscale(range(#))} or {cmd:yscale(range(#))} to add{p_end}
 {p2col:Labels wider than the plot region}{cmd:ptlabel} skips them with a note; an automatically placed callout or note stops with an error; {cmd:gpolish} does not wrap text itself{p_end}
 {p2col:{cmd:ptlabel} and points the graph leaves out}a selected point is matched to the drawn points by its {opt x()} and {opt y()} values; the check is made only when a plot draws the {opt y()} variable against the {opt x()} variable, so a graph of other variables (for example a transformed copy) is not checked; an observation left out of the graph that has the same values as a drawn point is still labeled{p_end}
-{p2col:Zero or negative positions on a log axis}{cmd:arrow}, {cmd:brace} and {cmd:bracket} stop with r(198) before any edit; {cmd:ptlabel} skips such points{p_end}
+{p2col:Zero or negative positions on a log axis}{cmd:arrow}, {cmd:brace}, {cmd:bracket}, {cmd:callout} and {cmd:note} stop with r(198) before any edit; {cmd:ptlabel} skips such points{p_end}
 {p2col:{cmd:endlabel} and the last x tick label}the right margin added for the last x tick label (with {opt side(left)} after the legend is switched off, or beside labels on the right) is sized for the tick labels of x axis 1 drawn horizontally; a second x axis or angled tick labels are not measured, and {cmd:graphregion(margin())} can add room by hand{p_end}
 {p2col:Plot-region outlines}when a scheme such as {cmd:s1mono} outlines the plot region and the end labels sit outside it, {cmd:endlabel} starts them {opt xgap()} points beyond the outline rather than beyond the line end. An outline counts as drawn when its colour differs from the graph background, so an outline turned off with {cmd:plotregion(lstyle(none))} still moves the labels out{p_end}
 {p2col:Positions on a second axis}{opt at()}, {opt to()} and {opt from()} use the first axes unless {opt xaxis()} or {opt yaxis()} says otherwise{p_end}
@@ -318,7 +322,7 @@ It stops with an error when {cmd:endlabel}, {cmd:callout}, {cmd:note}, {cmd:arro
 {pstd}In batch mode ({cmd:stata -b}), {cmd:graph set window fontface} is not available; use
 {cmd:graph set svg fontface "Open Sans"} instead (see {help gpolish##technical:Technical notes}).{p_end}
 
-{pstd}A line on a second axis, labeled at its own scale, and a note placed on that axis:{p_end}
+{pstd}A line on a second axis, labeled at its own scale, and a callout placed on that axis:{p_end}
 {phang2}{cmd:. sysuse uslifeexp, clear}{p_end}
 {phang2}{cmd:. generate pop = 1000 + 20*(year-1900)}{p_end}
 {phang2}{cmd:. twoway (line le year) (line pop year, yaxis(2)), scheme(pypolish)}{p_end}
@@ -332,7 +336,7 @@ It stops with an error when {cmd:endlabel}, {cmd:callout}, {cmd:note}, {cmd:arro
 {phang2}{cmd:. marginsplot, scheme(pypolish) recast(line) recastci(rarea) legend(off)}{p_end}
 {phang2}{cmd:. gpolish endlabel, labels("No degree" "College graduate") values format(%4.2f)}{p_end}
 
-{pstd}A note on a date axis, then undo everything and start again:{p_end}
+{pstd}A callout on a date axis, then undo everything and start again:{p_end}
 {phang2}{cmd:. sysuse sp500, clear}{p_end}
 {phang2}{cmd:. line close date, scheme(pypolish)}{p_end}
 {phang2}{cmd:. gpolish callout "Low of 966", to(td(21sep2001) 966)}{p_end}

@@ -17,7 +17,7 @@ gpolish measured label widths with its width table for: open sans.
 | Auto, 19 of 74 labelled | 0.16 | 0.00 | 0.84 | 0.89 | 0.37 | 0.16 | 0.63 |
 | Life expectancy, all 63 labelled | 0.24 | 0.02 | 0.75 | 0.83 | 0.30 | 0.57 | 0.67 |
 | Auto, all 74 labelled | 0.09 | 0.00 | 0.59 | 0.51 | 0.38 | 0.51 | 0.58 |
-| Synthetic, 30 of 30 labelled | 0.61 ± 0.07 | 0.46 ± 0.06 | 0.99 ± 0.01 | 0.96 ± 0.01 | 0.60 ± 0.04 | 0.59 ± 0.03 | 0.95 ± 0.02 |
+| Synthetic, 30 of 30 labelled | 0.61 ± 0.07 | 0.46 ± 0.06 | 0.99 ± 0.01 | 0.96 ± 0.01 | 0.60 ± 0.04 | 0.59 ± 0.03 | 0.96 ± 0.02 |
 | Synthetic, 20 of 60 labelled | 0.47 ± 0.05 | 0.35 ± 0.05 | 0.96 ± 0.01 | 0.86 ± 0.04 | 0.49 ± 0.05 | 0.40 ± 0.04 | 0.86 ± 0.04 |
 | Synthetic, 60 of 60 labelled | 0.33 ± 0.03 | 0.25 ± 0.03 | 0.92 ± 0.03 | 0.83 ± 0.04 | 0.56 ± 0.03 | 0.60 ± 0.03 | 0.86 ± 0.03 |
 
@@ -29,8 +29,8 @@ gpolish measured label widths with its width table for: open sans.
 | Auto, 19 of 74 labelled | 0.16 | 0.00 | 0.68 | 0.68 | 0.37 | 0.16 | 0.63 |
 | Life expectancy, all 63 labelled | 0.24 | 0.02 | 0.63 | 0.59 | 0.24 | 0.56 | 0.59 |
 | Auto, all 74 labelled | 0.09 | 0.00 | 0.35 | 0.22 | 0.22 | 0.31 | 0.34 |
-| Synthetic, 30 of 30 labelled | 0.61 ± 0.07 | 0.32 ± 0.05 | 0.99 ± 0.01 | 0.95 ± 0.02 | 0.59 ± 0.04 | 0.58 ± 0.03 | 0.95 ± 0.02 |
-| Synthetic, 20 of 60 labelled | 0.47 ± 0.05 | 0.29 ± 0.05 | 0.95 ± 0.02 | 0.84 ± 0.04 | 0.49 ± 0.04 | 0.40 ± 0.04 | 0.86 ± 0.04 |
+| Synthetic, 30 of 30 labelled | 0.61 ± 0.07 | 0.32 ± 0.05 | 0.99 ± 0.01 | 0.95 ± 0.02 | 0.59 ± 0.04 | 0.59 ± 0.03 | 0.95 ± 0.02 |
+| Synthetic, 20 of 60 labelled | 0.47 ± 0.05 | 0.30 ± 0.05 | 0.95 ± 0.02 | 0.85 ± 0.04 | 0.49 ± 0.04 | 0.40 ± 0.04 | 0.86 ± 0.04 |
 | Synthetic, 60 of 60 labelled | 0.33 ± 0.03 | 0.16 ± 0.03 | 0.88 ± 0.04 | 0.76 ± 0.05 | 0.53 ± 0.03 | 0.58 ± 0.03 | 0.84 ± 0.04 |
 
 ## Clean labels, not counting the label's own marker (share)
@@ -41,8 +41,8 @@ gpolish measured label widths with its width table for: open sans.
 | Auto, 19 of 74 labelled | 0.16 | 0.21 | 0.84 | 0.89 | 0.42 | 0.21 | 0.63 |
 | Life expectancy, all 63 labelled | 0.24 | 0.22 | 0.75 | 0.83 | 0.41 | 0.60 | 0.67 |
 | Auto, all 74 labelled | 0.09 | 0.04 | 0.59 | 0.51 | 0.42 | 0.53 | 0.58 |
-| Synthetic, 30 of 30 labelled | 0.61 ± 0.07 | 0.50 ± 0.05 | 0.99 ± 0.01 | 0.96 ± 0.01 | 0.89 ± 0.03 | 0.96 ± 0.02 | 0.97 ± 0.02 |
-| Synthetic, 20 of 60 labelled | 0.47 ± 0.05 | 0.42 ± 0.06 | 0.96 ± 0.01 | 0.86 ± 0.04 | 0.70 ± 0.04 | 0.70 ± 0.04 | 0.90 ± 0.03 |
+| Synthetic, 30 of 30 labelled | 0.61 ± 0.07 | 0.50 ± 0.05 | 0.99 ± 0.01 | 0.96 ± 0.01 | 0.89 ± 0.03 | 0.97 ± 0.02 | 0.97 ± 0.02 |
+| Synthetic, 20 of 60 labelled | 0.47 ± 0.05 | 0.43 ± 0.06 | 0.96 ± 0.01 | 0.86 ± 0.04 | 0.70 ± 0.04 | 0.70 ± 0.04 | 0.90 ± 0.03 |
 | Synthetic, 60 of 60 labelled | 0.33 ± 0.03 | 0.27 ± 0.03 | 0.92 ± 0.03 | 0.83 ± 0.04 | 0.75 ± 0.03 | 0.87 ± 0.02 | 0.87 ± 0.03 |
 
 ## Overlapping label pairs
@@ -53,9 +53,9 @@ gpolish measured label widths with its width table for: open sans.
 | Auto, 19 of 74 labelled | 4.0 | 5.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 |
 | Life expectancy, all 63 labelled | 45.0 | 67.0 | 2.0 | 2.0 | 21.0 | 5.0 | 12.0 |
 | Auto, all 74 labelled | 90.0 | 168.0 | 8.0 | 14.0 | 17.0 | 14.0 | 19.0 |
-| Synthetic, 30 of 30 labelled | 6.2 ± 1.8 | 7.8 ± 1.6 | 0.0 ± 0.0 | 0.0 ± 0.0 | 0.2 ± 0.3 | 0.1 ± 0.1 | 0.1 ± 0.1 |
+| Synthetic, 30 of 30 labelled | 6.3 ± 1.8 | 7.8 ± 1.6 | 0.0 ± 0.0 | 0.0 ± 0.0 | 0.3 ± 0.3 | 0.1 ± 0.1 | 0.1 ± 0.1 |
 | Synthetic, 20 of 60 labelled | 4.1 ± 0.9 | 3.8 ± 1.0 | 0.0 ± 0.0 | 0.0 ± 0.0 | 0.1 ± 0.1 | 0.1 ± 0.1 | 0.3 ± 0.2 |
-| Synthetic, 60 of 60 labelled | 35.6 ± 5.1 | 34.4 ± 4.9 | 0.1 ± 0.2 | 2.0 ± 0.9 | 1.9 ± 1.0 | 1.6 ± 0.6 | 3.0 ± 1.0 |
+| Synthetic, 60 of 60 labelled | 35.7 ± 5.1 | 34.4 ± 4.9 | 0.2 ± 0.2 | 2.1 ± 0.9 | 1.9 ± 1.0 | 1.6 ± 0.6 | 3.0 ± 1.0 |
 
 ## Labels touching a marker, own marker included (share)
 
@@ -65,9 +65,9 @@ gpolish measured label widths with its width table for: open sans.
 | Auto, 19 of 74 labelled | 0.68 | 1.00 | 0.16 | 0.11 | 0.63 | 0.84 | 0.11 |
 | Life expectancy, all 63 labelled | 0.52 | 0.92 | 0.21 | 0.17 | 0.46 | 0.32 | 0.11 |
 | Auto, all 74 labelled | 0.61 | 0.97 | 0.30 | 0.28 | 0.39 | 0.32 | 0.15 |
-| Synthetic, 30 of 30 labelled | 0.17 ± 0.04 | 0.24 ± 0.04 | 0.01 ± 0.01 | 0.04 ± 0.01 | 0.39 ± 0.04 | 0.41 ± 0.03 | 0.04 ± 0.02 |
-| Synthetic, 20 of 60 labelled | 0.38 ± 0.05 | 0.48 ± 0.04 | 0.04 ± 0.01 | 0.14 ± 0.04 | 0.51 ± 0.05 | 0.60 ± 0.04 | 0.12 ± 0.03 |
-| Synthetic, 60 of 60 labelled | 0.38 ± 0.03 | 0.42 ± 0.03 | 0.07 ± 0.03 | 0.14 ± 0.03 | 0.41 ± 0.02 | 0.38 ± 0.03 | 0.08 ± 0.02 |
+| Synthetic, 30 of 30 labelled | 0.17 ± 0.04 | 0.25 ± 0.04 | 0.01 ± 0.01 | 0.04 ± 0.01 | 0.39 ± 0.04 | 0.41 ± 0.03 | 0.04 ± 0.02 |
+| Synthetic, 20 of 60 labelled | 0.38 ± 0.05 | 0.49 ± 0.04 | 0.04 ± 0.01 | 0.14 ± 0.04 | 0.51 ± 0.05 | 0.60 ± 0.04 | 0.12 ± 0.03 |
+| Synthetic, 60 of 60 labelled | 0.38 ± 0.03 | 0.42 ± 0.03 | 0.07 ± 0.03 | 0.14 ± 0.03 | 0.41 ± 0.02 | 0.38 ± 0.03 | 0.09 ± 0.02 |
 
 ## Labels touching another point's marker (share)
 
@@ -77,7 +77,7 @@ gpolish measured label widths with its width table for: open sans.
 | Auto, 19 of 74 labelled | 0.68 | 0.68 | 0.16 | 0.11 | 0.53 | 0.79 | 0.11 |
 | Life expectancy, all 63 labelled | 0.52 | 0.49 | 0.21 | 0.17 | 0.33 | 0.22 | 0.06 |
 | Auto, all 74 labelled | 0.61 | 0.80 | 0.30 | 0.28 | 0.34 | 0.31 | 0.14 |
-| Synthetic, 30 of 30 labelled | 0.17 ± 0.04 | 0.19 ± 0.03 | 0.01 ± 0.01 | 0.04 ± 0.01 | 0.10 ± 0.03 | 0.03 ± 0.02 | 0.02 ± 0.01 |
+| Synthetic, 30 of 30 labelled | 0.17 ± 0.04 | 0.19 ± 0.03 | 0.01 ± 0.01 | 0.04 ± 0.01 | 0.10 ± 0.03 | 0.03 ± 0.02 | 0.03 ± 0.01 |
 | Synthetic, 20 of 60 labelled | 0.38 ± 0.05 | 0.39 ± 0.04 | 0.04 ± 0.01 | 0.14 ± 0.04 | 0.30 ± 0.04 | 0.30 ± 0.04 | 0.08 ± 0.02 |
 | Synthetic, 60 of 60 labelled | 0.38 ± 0.03 | 0.38 ± 0.03 | 0.07 ± 0.03 | 0.14 ± 0.03 | 0.23 ± 0.02 | 0.10 ± 0.02 | 0.07 ± 0.02 |
 
@@ -100,7 +100,7 @@ gpolish measured label widths with its width table for: open sans.
 | Life expectancy, 12 of 63 labelled | 0.083 | 0.083 | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 |
 | Auto, 19 of 74 labelled | 0.053 | 0.053 | 0.000 | 0.000 | 0.000 | 0.000 | 0.000 |
 | Life expectancy, all 63 labelled | 0.016 | 0.032 | 0.000 | 0.000 | 0.016 | 0.000 | 0.000 |
-| Auto, all 74 labelled | 0.027 | 0.013 | 0.000 | 0.000 | 0.013 | 0.000 | 0.000 |
+| Auto, all 74 labelled | 0.027 | 0.014 | 0.000 | 0.000 | 0.014 | 0.000 | 0.000 |
 | Synthetic, 30 of 30 labelled | 0.040 ± 0.020 | 0.028 ± 0.014 | 0.000 ± 0.000 | 0.000 ± 0.000 | 0.000 ± 0.000 | 0.000 ± 0.000 | 0.000 ± 0.000 |
 | Synthetic, 20 of 60 labelled | 0.025 ± 0.016 | 0.023 ± 0.016 | 0.000 ± 0.000 | 0.000 ± 0.000 | 0.000 ± 0.000 | 0.000 ± 0.000 | 0.000 ± 0.000 |
 | Synthetic, 60 of 60 labelled | 0.019 ± 0.011 | 0.011 ± 0.007 | 0.000 ± 0.000 | 0.000 ± 0.000 | 0.000 ± 0.000 | 0.000 ± 0.000 | 0.000 ± 0.000 |
@@ -114,7 +114,7 @@ gpolish measured label widths with its width table for: open sans.
 | Life expectancy, all 63 labelled | 0.54 | 0.16 | 0.52 | 0.52 | 0.52 | 0.41 | 0.35 |
 | Auto, all 74 labelled | 0.81 | 0.23 | 0.74 | 0.76 | 0.64 | 0.59 | 0.58 |
 | Synthetic, 30 of 30 labelled | 0.23 ± 0.05 | 0.65 ± 0.05 | 0.09 ± 0.04 | 0.13 ± 0.04 | 0.13 ± 0.04 | 0.04 ± 0.02 | 0.06 ± 0.02 |
-| Synthetic, 20 of 60 labelled | 0.46 ± 0.04 | 0.71 ± 0.04 | 0.26 ± 0.05 | 0.31 ± 0.06 | 0.28 ± 0.03 | 0.28 ± 0.04 | 0.17 ± 0.04 |
+| Synthetic, 20 of 60 labelled | 0.46 ± 0.04 | 0.71 ± 0.04 | 0.26 ± 0.05 | 0.31 ± 0.06 | 0.28 ± 0.03 | 0.29 ± 0.04 | 0.17 ± 0.04 |
 | Synthetic, 60 of 60 labelled | 0.45 ± 0.03 | 0.82 ± 0.02 | 0.28 ± 0.04 | 0.34 ± 0.04 | 0.35 ± 0.03 | 0.22 ± 0.04 | 0.23 ± 0.03 |
 
 ## Distance from own point (em)
@@ -135,7 +135,7 @@ gpolish measured label widths with its width table for: open sans.
 |---|---|---|---|---|---|---|---|
 | Life expectancy, 12 of 63 labelled | 0.00 | 0.00 | 0.10 | 0.10 | 0.03 | 0.10 | 0.08 |
 | Auto, 19 of 74 labelled | 0.00 | 0.20 | 0.23 | 0.21 | 0.12 | 0.09 | 0.12 |
-| Life expectancy, all 63 labelled | 0.00 | 0.65 | 1.14 | 0.90 | 1.26 | 0.49 | 0.43 |
+| Life expectancy, all 63 labelled | 0.00 | 0.65 | 1.14 | 0.90 | 1.26 | 0.49 | 0.44 |
 | Auto, all 74 labelled | 0.00 | 2.79 | 2.03 | 1.59 | 2.54 | 0.56 | 0.54 |
 | Synthetic, 30 of 30 labelled | 0.00 ± 0.00 | 0.06 ± 0.01 | 0.16 ± 0.01 | 0.16 ± 0.01 | 0.11 ± 0.03 | 0.15 ± 0.00 | 0.15 ± 0.00 |
 | Synthetic, 20 of 60 labelled | 0.00 ± 0.00 | 0.03 ± 0.00 | 0.13 ± 0.00 | 0.12 ± 0.00 | 0.10 ± 0.01 | 0.10 ± 0.01 | 0.12 ± 0.00 |
@@ -191,7 +191,7 @@ test seeds. A leader is the part of a drawn segment outside the label's own box,
 | Auto, 19 of 74 labelled | 11 of 19 | 3 (0.27) | 5 (0.45) | 0 (0.00) | 6 (0.55) |
 | Life expectancy, all 63 labelled | 42 of 63 | 19 (0.45) | 9 (0.21) | 0 (0.00) | 21 (0.50) |
 | Auto, all 74 labelled | 56 of 74 | 40 (0.71) | 14 (0.25) | 0 (0.00) | 41 (0.73) |
-| Synthetic, 30 of 30 labelled | 160 of 600 | 16 (0.10) | 6 (0.04) | 0 (0.00) | 20 (0.12) |
+| Synthetic, 30 of 30 labelled | 160 of 600 | 16 (0.10) | 6 (0.04) | 0 (0.00) | 20 (0.13) |
 | Synthetic, 20 of 60 labelled | 108 of 400 | 6 (0.06) | 15 (0.14) | 0 (0.00) | 20 (0.19) |
 | Synthetic, 60 of 60 labelled | 636 of 1200 | 129 (0.20) | 33 (0.05) | 0 (0.00) | 147 (0.23) |
 
@@ -216,7 +216,7 @@ test seeds. A leader is the part of a drawn segment outside the label's own box,
 | Life expectancy, all 63 labelled | 22 of 63 | 8 (0.36) | 4 (0.18) | 2 (0.09) | 13 (0.59) |
 | Auto, all 74 labelled | 36 of 74 | 29 (0.81) | 6 (0.17) | 2 (0.06) | 29 (0.81) |
 | Synthetic, 30 of 30 labelled | 11 of 600 | 1 (0.09) | 0 (0.00) | 0 (0.00) | 1 (0.09) |
-| Synthetic, 20 of 60 labelled | 16 of 400 | 3 (0.19) | 2 (0.12) | 0 (0.00) | 4 (0.25) |
+| Synthetic, 20 of 60 labelled | 16 of 400 | 3 (0.19) | 2 (0.13) | 0 (0.00) | 4 (0.25) |
 | Synthetic, 60 of 60 labelled | 159 of 1200 | 50 (0.31) | 9 (0.06) | 0 (0.00) | 56 (0.35) |
 
 ## Ambiguity, labels with and without a leader
@@ -227,7 +227,7 @@ Share of labels nearer another point than their own, among labels with a leader 
 | Scenario (with / without) | Stata mlabel() | labrepel (Stata) | gpolish ptlabel (Stata) | gpolish 0.6.0 settings | adjustText (Python) | ggrepel (R) | ggrepel (informed) |
 |---|---|---|---|---|---|---|---|
 | Life expectancy, 12 of 63 labelled | n/a / 0.17 | n/a / 0.00 | n/a / 0.00 | 1.00 / 0.18 | 0.00 / 0.10 | n/a / 0.17 | n/a / 0.25 |
-| Auto, 19 of 74 labelled | n/a / 0.84 | 1.00 / 0.00 | 0.71 / 0.42 | 1.00 / 0.46 | 0.91 / 0.12 | 1.00 / 0.56 | 1.00 / 0.41 |
+| Auto, 19 of 74 labelled | n/a / 0.84 | 1.00 / 0.00 | 0.71 / 0.42 | 1.00 / 0.46 | 0.91 / 0.13 | 1.00 / 0.56 | 1.00 / 0.41 |
 | Life expectancy, all 63 labelled | n/a / 0.54 | 0.43 / 0.00 | 0.96 / 0.17 | 0.90 / 0.35 | 0.67 / 0.24 | 0.67 / 0.22 | 0.77 / 0.12 |
 | Auto, all 74 labelled | n/a / 0.81 | 0.65 / 0.00 | 0.82 / 0.50 | 0.87 / 0.59 | 0.79 / 0.17 | 0.85 / 0.27 | 0.81 / 0.37 |
 | Synthetic, 30 of 30 labelled | n/a / 0.23 | 0.68 / 0.00 | 0.59 / 0.07 | 0.79 / 0.11 | 0.39 / 0.04 | 0.64 / 0.03 | 0.73 / 0.05 |
@@ -253,7 +253,7 @@ difference with its 95% t interval, then the number of seeds where gpolish is hi
 |---|---|---|---|---|---|---|
 | Synthetic, 30 of 30 labelled | +0.372 (+0.309 to +0.434); 20/0/0 | +0.662 (+0.611 to +0.712); 20/0/0 | +0.037 (+0.020 to +0.053); 15/4/1 | +0.393 (+0.358 to +0.428); 20/0/0 | +0.400 (+0.360 to +0.440); 20/0/0 | +0.032 (+0.010 to +0.053); 13/4/3 |
 | Synthetic, 20 of 60 labelled | +0.480 (+0.426 to +0.534); 20/0/0 | +0.657 (+0.602 to +0.713); 20/0/0 | +0.107 (+0.070 to +0.145); 18/2/0 | +0.465 (+0.418 to +0.512); 20/0/0 | +0.552 (+0.511 to +0.594); 20/0/0 | +0.095 (+0.055 to +0.135); 16/3/1 |
-| Synthetic, 60 of 60 labelled | +0.553 (+0.513 to +0.594); 20/0/0 | +0.720 (+0.668 to +0.772); 20/0/0 | +0.123 (+0.095 to +0.152); 19/0/1 | +0.355 (+0.322 to +0.388); 20/0/0 | +0.303 (+0.263 to +0.342); 20/0/0 | +0.043 (+0.014 to +0.073); 13/3/4 |
+| Synthetic, 60 of 60 labelled | +0.553 (+0.513 to +0.594); 20/0/0 | +0.720 (+0.668 to +0.772); 20/0/0 | +0.123 (+0.095 to +0.152); 19/0/1 | +0.355 (+0.322 to +0.388); 20/0/0 | +0.302 (+0.263 to +0.342); 20/0/0 | +0.043 (+0.014 to +0.073); 13/3/4 |
 
 ### Clean except own marker
 
@@ -333,7 +333,7 @@ The marker rule and the 3-em distance follow each condition's marker and font si
 
 | Condition | gpolish ptlabel (Stata) | adjustText (Python) | ggrepel (R) | ggrepel (informed) |
 |---|---|---|---|---|
-| 8.6 pt labels, 6 pt markers (main set, seeds 1 to 10) | 0.92 ± 0.05 | 0.55 ± 0.04 | 0.59 ± 0.04 | 0.85 ± 0.06 |
+| 8.6 pt labels, 6 pt markers (main set, seeds 1 to 10) | 0.92 ± 0.05 | 0.55 ± 0.04 | 0.59 ± 0.04 | 0.86 ± 0.06 |
 | 7 pt labels, 6 pt markers | 0.96 ± 0.03 | 0.42 ± 0.04 | 0.92 ± 0.04 | 0.90 ± 0.05 |
 | 11 pt labels, 6 pt markers | 0.76 ± 0.06 | 0.44 ± 0.03 | 0.58 ± 0.05 | 0.74 ± 0.05 |
 | 8.6 pt labels, 4 pt markers | 0.92 ± 0.04 | 0.70 ± 0.05 | 0.90 ± 0.04 | 0.87 ± 0.04 |
@@ -344,9 +344,9 @@ The marker rule and the 3-em distance follow each condition's marker and font si
 | Condition | gpolish ptlabel (Stata) | adjustText (Python) | ggrepel (R) | ggrepel (informed) |
 |---|---|---|---|---|
 | 8.6 pt labels, 6 pt markers (main set, seeds 1 to 10) | 0.86 ± 0.06 | 0.52 ± 0.04 | 0.57 ± 0.04 | 0.82 ± 0.07 |
-| 7 pt labels, 6 pt markers | 0.93 ± 0.04 | 0.41 ± 0.03 | 0.91 ± 0.04 | 0.88 ± 0.05 |
+| 7 pt labels, 6 pt markers | 0.94 ± 0.04 | 0.41 ± 0.03 | 0.91 ± 0.04 | 0.89 ± 0.05 |
 | 11 pt labels, 6 pt markers | 0.69 ± 0.07 | 0.39 ± 0.03 | 0.55 ± 0.05 | 0.71 ± 0.06 |
-| 8.6 pt labels, 4 pt markers | 0.87 ± 0.05 | 0.66 ± 0.06 | 0.87 ± 0.06 | 0.85 ± 0.05 |
+| 8.6 pt labels, 4 pt markers | 0.88 ± 0.05 | 0.66 ± 0.06 | 0.87 ± 0.06 | 0.85 ± 0.05 |
 | 8.6 pt labels, 9 pt markers | 0.87 ± 0.07 | 0.29 ± 0.03 | 0.28 ± 0.04 | 0.78 ± 0.07 |
 
 ## Stopping rules: iterations of adjustText and ggrepel

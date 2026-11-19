@@ -1146,9 +1146,8 @@ class Panel:
             col = stata_color(r.get("color"), to_rgba(MUTED))
             if col[:3] == (0, 0, 0):
                 col = to_rgba(MUTED)
-            dash = DASHES.get(r.get("pattern", "solid"), "-")
-            if dash == "-":
-                dash = (0, (4, 3))
+            # the pattern Stata drew, from the option or the scheme; solid stays solid
+            dash = DASHES.get(r.get("pattern") or "solid", "-")
             w = num(r.get("lw"))
             kw = dict(color=col, lw=max(0.8, self.pts(w)) if w else 1.0, ls=dash, zorder=1.9)
             if r.get("ord") == "x":
@@ -2498,10 +2497,13 @@ class Figure:
                     yd = np.asarray(ln.get_ydata(), dtype=float)
                     if xd.size == 2 and ln.get_transform() != a_ax.transData:
                         # axhline / axvline: a reference line
+                        pat = "solid" if ln.get_linestyle() in ("-", "solid") else "dashed"
                         if np.allclose(yd, yd[0]) and not np.allclose(xd, xd[0]):
                             out.append(f"{tag}.refline={which}:y:{yd[0]:g}")
+                            out.append(f"{tag}.reflinestyle={which}:y:{yd[0]:g}|{pat}")
                         elif np.allclose(xd, xd[0]):
                             out.append(f"{tag}.refline={which}:x:{xd[0]:g}")
+                            out.append(f"{tag}.reflinestyle={which}:x:{xd[0]:g}|{pat}")
                         continue
                     ds = ln.get_drawstyle()
                     if ds and ds != "default":

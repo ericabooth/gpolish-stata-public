@@ -33,6 +33,41 @@ import shutil
 import statistics as st
 import subprocess
 import sys
+import re
+
+
+def _hu(x, nd):
+    """Round half up on the value as printed to 9 decimals, so 0.855 (513/600) gives 0.86."""
+    from decimal import Decimal, ROUND_HALF_UP
+    try:
+        if x != x or x in (float("inf"), float("-inf")):
+            return x
+        return float(Decimal(repr(round(float(x), 9))).quantize(Decimal(1).scaleb(-nd), rounding=ROUND_HALF_UP))
+    except (TypeError, ValueError):
+        return x
+
+
+SHARE_COUNTS = ("clean_share", "clean_near_share", "clean_xown_share", "on_marker_share",
+                "on_marker_other_share", "on_line_share", "outside_share", "ambiguous_share")
+
+
+def _exact_share(v, n):
+    """graphs*.csv stores each share to 4 decimals; a share of labels is a count over n_labels, so
+    recover the exact fraction before averaging (513/600 must print as 0.86, not 0.85)."""
+    try:
+        v, n = float(v), float(n)
+    except (TypeError, ValueError):
+        return v
+    if n <= 0 or v != v:
+        return v
+    k = round(v * n)
+    return k / n if abs(v * n - k) < 0.02 else v
+
+
+def _fmt(fmt, x):
+    m = re.search(r"\.(\d+)f", fmt)
+    return fmt.format(_hu(x, int(m.group(1))) if m else x)
+
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 STATA = os.environ.get("STATA", "stata-mp")
@@ -87,7 +122,12 @@ def stata(d, do, **env):
 
 def read(path):
     with open(path, newline="", encoding="utf-8") as fh:
-        return list(csv.DictReader(fh))
+        rows = list(csv.DictReader(fh))
+    for r in rows:
+        for k in SHARE_COUNTS:
+            if r.get(k) not in (None, "") and r.get("n_labels") not in (None, ""):
+                r[k] = repr(_exact_share(r[k], r["n_labels"]))
+    return rows
 
 
 def write(path, rows, fields=None):
@@ -213,7 +253,7 @@ def report():
         out = ["| Scenario | " + " | ".join(head[m] + note for m in meths) + " |", "|---" * (len(meths) + 1) + "|"]
         for des in designs:
             out.append(f"| {names.get(des, des)} | " + " | ".join(
-                f"{cells[(des, m)][0]:.2f} / {cells[(des, m)][1]:.2f}" if (des, m) in cells else "" for m in meths) + " |")
+                f"{_hu(cells[(des, m)][0], 2):.2f} / {_hu(cells[(des, m)][1], 2):.2f}" if (des, m) in cells else "" for m in meths) + " |")
         return out
 
     mm = means(main, {"main"})
@@ -278,9 +318,9 @@ def report():
                 w = [float(r["clean_near_share"]) for r in rows if r["design"] == des and r["method"] == m]
                 if not v:
                     continue
-                L.append(f"| {names[des]} | {head[m]} | {st.median(v):.2f} | {min(v):.2f} to {max(v):.2f} | "
-                         f"{mm[(des, m)][0]:.2f} | {mm[(des, 'gpolish')][0]:.2f} | {st.median(w):.2f} | "
-                         f"{min(w):.2f} to {max(w):.2f} |")
+                L.append(f"| {names[des]} | {head[m]} | {_hu(st.median(v), 2):.2f} | {_hu(min(v), 2):.2f} to {_hu(max(v), 2):.2f} | "
+                         f"{_hu(mm[(des, m)][0], 2):.2f} | {_hu(mm[(des, 'gpolish')][0], 2):.2f} | {_hu(st.median(w), 2):.2f} | "
+                         f"{_hu(min(w), 2):.2f} to {_hu(max(w), 2):.2f} |")
         L.append("")
     L += tuned_report(res, mm, names, head, cols)
     with open(os.path.join(res, "extra", "extra.md"), "w", encoding="utf-8") as fh:
@@ -299,7 +339,7 @@ def tuned_report(res, mm, names, head, cols):
     allc = cols + TUNED
 
     def cell(v):
-        return f"{v[0]:.2f} / {v[1]:.2f}"
+        return f"{_hu(v[0], 2):.2f} / {_hu(v[1], 2):.2f}"
 
     def by(rows, sets):
         out = {}
@@ -330,7 +370,7 @@ def tuned_report(res, mm, names, head, cols):
             cs = []
             for m in allc:
                 v = [a for a, _ in (pm.get((des, m)) or main_perm.get((des, m)) or [])]
-                cs.append(f"{st.median(v):.2f} ({min(v):.2f} to {max(v):.2f})" if v else "")
+                cs.append(f"{_hu(st.median(v), 2):.2f} ({_hu(min(v), 2):.2f} to {_hu(max(v), 2):.2f})" if v else "")
             L.append(f"| {names[des]} | " + " | ".join(cs) + " |")
         L.append("")
     f = os.path.join(res, "extra", "graphs_realhold.csv")
@@ -352,7 +392,7 @@ def tuned_report(res, mm, names, head, cols):
             cs = []
             for m in allc:
                 v = [a for a, _ in p.get((des, m), [])]
-                cs.append(f"{st.median(v):.2f} ({min(v):.2f} to {max(v):.2f})" if v else "")
+                cs.append(f"{_hu(st.median(v), 2):.2f} ({_hu(min(v), 2):.2f} to {_hu(max(v), 2):.2f})" if v else "")
             L.append(f"| {names[des]} | " + " | ".join(cs) + " |")
         L.append("")
     return L

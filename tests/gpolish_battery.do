@@ -1910,6 +1910,52 @@ local ba `.r13d.plotregion1.added_text[`k'].style.box_alignment.setting'
 local onml = ("`ba'"=="east") & abs(`ty'-`py') < 0.5*1.3*`.r13d.plotregion1.added_text[`k'].style.size.gmval'*r(gpi)/72/r(relperpt) & `tx' > `px'
 chk r13_ptlabel_mlabel `onml'==0
 
+* ---- r14 ------------------------------------------------------------------
+* callout and note stop with r(198) naming the option when at(), to() or from() is at or
+* below zero on a log axis, before any edit and before the edge notes
+sysuse auto, clear
+twoway scatter price weight, yscale(log) name(r14l, replace)
+local nlog `.r14l.__LOG.arrnels'
+if "`nlog'"=="" local nlog 0
+capture noisily gpolish note "neg", at(3000 0) name(r14l)
+chk r14_note_at_logy _rc==198
+capture noisily gpolish callout "tail", to(3000 5000) from(2500 -1) at(3500 12000) name(r14l)
+chk r14_callout_from_logy _rc==198
+capture noisily gpolish callout "t", to(3000 -5) name(r14l)
+chk r14_callout_to_logy _rc==198
+local nlog2 `.r14l.__LOG.arrnels'
+if "`nlog2'"=="" local nlog2 0
+chk r14_log_noedit `nlog2'==`nlog'
+twoway scatter price weight, xscale(log) name(r14x, replace)
+capture noisily gpolish note "neg", at(0 8000) name(r14x)
+chk r14_note_at_logx _rc==198
+* the message names the option and the axis
+capture log close _r14
+tempfile r14log
+log using `"`r14log'"', text name(_r14)
+capture noisily gpolish callout "tail", to(3000 5000) from(-1 6000) at(3500 12000) name(r14x)
+log close _r14
+local r14txt = fileread(`"`r14log'"')
+chk r14_msg_from strpos(`"`r14txt'"', "from() must be positive on a log x axis") > 0
+chk r14_msg_noedge strpos(`"`r14txt'"', "edge") == 0
+* endlabel after a callout prints a note; endlabel before it prints none
+sysuse sp500, clear
+tsset date
+tsline close, name(r14e, replace)
+gpolish callout "Sept 11", to(td(17sep2001) 1038.77) name(r14e)
+log using `"`r14log'"', text replace name(_r14)
+gpolish endlabel, values name(r14e)
+log close _r14
+local r14txt = fileread(`"`r14log'"')
+chk r14_endlabel_after_note strpos(`"`r14txt'"', "already held 1 text box(es)") > 0
+tsline close, name(r14f, replace)
+log using `"`r14log'"', text replace name(_r14)
+gpolish endlabel, values name(r14f)
+gpolish endlabel, values name(r14f)
+log close _r14
+local r14txt = fileread(`"`r14log'"')
+chk r14_endlabel_first_nonote strpos(`"`r14txt'"', "endlabel first") == 0
+
 gpolish limits
 
 if `"`_wf0'"'!="" graph set window fontface `"`_wf0'"'

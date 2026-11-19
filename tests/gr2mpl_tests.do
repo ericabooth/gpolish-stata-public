@@ -1493,4 +1493,20 @@ graph bar (count), over(rep78)
 rchk r13_vbar_title
 has "ytitle_side=left"
 
+* -- r14: reference lines keep the pattern Stata drew (solid stays solid, dash stays dashed)
+sysuse auto, clear
+scatter mpg weight, xline(3000, lpattern(solid) lcolor(red)) yline(20, lpattern(dash))
+rchk r14_refpat
+has "panel1.reflinestyle=y1:x:3000|solid"
+has "panel1.reflinestyle=y1:y:20|dashed"
+* the scheme's own pattern is kept: solid in s2color, dashed in stcolor (Stata 18 and later)
+scatter mpg weight, xline(3000) scheme(s2color)
+rchk r14_refdefault
+has "panel1.reflinestyle=y1:x:3000|solid"
+if c(stata_version) >= 18 {
+    scatter mpg weight, xline(3000) scheme(stcolor)
+    rchk r14_refstcolor
+    has "panel1.reflinestyle=y1:x:3000|dashed"
+}
+
 di as res "$R_N checks passed"
