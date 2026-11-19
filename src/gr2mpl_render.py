@@ -288,6 +288,29 @@ def repel_1d(pos, sep, lo, hi):
     return out
 
 
+def legend_perm(n, ncol, colfirst=False):
+    """Indices of n legend keys in the order matplotlib places them, so that a
+    legend with ncol columns reads row by row, as Stata fills it. matplotlib fills
+    column by column; with colfirst (Stata's legend(colfirst)) no change is made."""
+    ncol = max(1, min(ncol, n))
+    if colfirst or ncol == 1:
+        return list(range(n))
+    rows = -(-n // ncol)
+    return [r * ncol + c for c in range(ncol) for r in range(rows) if r * ncol + c < n]
+
+
+def legend_reading(leg, r):
+    """Legend texts in reading order (top row first, then left to right)."""
+    ts = []
+    for t in leg.get_texts():
+        b = t.get_window_extent(r)
+        # rows are told apart by the text anchor, which descenders do not move
+        y = t.get_transform().transform(t.get_position())[1]
+        ts.append((-round(y / 3.0), b.x0, t.get_text()))
+    ts.sort(key=lambda e: (e[0], e[1]))
+    return [e[2] for e in ts]
+
+
 def read_csv_columns(path):
     """CSV -> list of columns (lists of strings), addressed by position."""
     with open(path, newline="", encoding="utf-8") as fh:
@@ -1261,7 +1284,10 @@ class Panel:
 
     def restyle_legend(self, leg):
         styles = getattr(self, "_legend_styles", [])
+        perm = getattr(leg, "_g2m_perm", None)
         for k, txt in enumerate(leg.get_texts()):
+            if perm is not None and k < len(perm):
+                k = perm[k]
             col, bold = styles[k] if k < len(styles) else (None, False)
             if col is not None and col[:3] != (0, 0, 0) and col[3] > 0:
                 txt.set_color(col)
@@ -1330,7 +1356,8 @@ class Panel:
         one_row = num(leg.get("rows")) == 1 or len(handles) <= 6
         title = clean_text(leg.get("title", ""))
         self._leg_args = dict(handles=handles, texts=texts, title=title,
-                              fs=self.f.tsize(leg.get("size"), 9.0, self.gmult))
+                              fs=self.f.tsize(leg.get("size"), 9.0, self.gmult),
+                              colfirst=leg.get("colfirst") == "yes")
         self.make_legend(len(handles) if one_row else 4)
         self.has_legend = True
         return True
@@ -1340,11 +1367,15 @@ class Panel:
         if self.leg is not None:
             self.leg.remove()
         k = self.f.k
-        leg = self.ax.legend(a["handles"], a["texts"], loc="lower left", bbox_to_anchor=(0, 1.0),
+        n = len(a["handles"])
+        perm = legend_perm(n, max(1, ncol), a.get("colfirst", False))
+        leg = self.ax.legend([a["handles"][i] for i in perm], [a["texts"][i] for i in perm],
+                             loc="lower left", bbox_to_anchor=(0, 1.0),
                              ncol=max(1, ncol), frameon=False, fontsize=a["fs"],
                              handlelength=1.6, handletextpad=0.5, columnspacing=1.4,
                              borderaxespad=0.2, labelcolor=INK, title=a["title"] or None,
                              title_fontsize=a["fs"], alignment="left")
+        leg._g2m_perm = perm
         if a["title"]:
             leg.get_title().set_color(MUTED)
         # the legend widens the figure only through its rows: it is left out of the
@@ -1560,12 +1591,31 @@ class Panel:
                             ha="right", va="center", fontsize=fs, fontweight="bold",
                             color="#374151", annotation_clip=False)
         else:
-            hmax = max([t.get_window_extent(r).height for t in ax.get_xticklabels()] or [0])
+            self._sup = []
             for pos, lab in sup:
-                ax.annotate(lab, xy=(pos, 0), xycoords=("data", "axes fraction"),
-                            xytext=(0, -(hmax * px2pt + 14)), textcoords="offset points",
-                            ha="center", va="top", fontsize=fs, fontweight="bold",
-                            color="#374151", annotation_clip=False)
+                self._sup.append(ax.annotate(
+                    lab, xy=(pos, 0), xycoords=("data", "axes fraction"), xytext=(0, -14),
+                    textcoords="offset points", ha="center", va="top", fontsize=fs,
+                    fontweight="bold", color="#374151", annotation_clip=False))
+            self.place_sup()
+
+    def place_sup(self):
+        """Put the second over() row below the lowest edge of the inner category
+        labels, rotated or not, so the two rows never overprint."""
+        sup = getattr(self, "_sup", None)
+        if not sup:
+            return
+        ax, fig = self.ax, self.f.fig
+        fig.canvas.draw()
+        r = fig.canvas.get_renderer()
+        px2pt = 72.0 / fig.dpi
+        y_axis = ax.get_window_extent(r).y0
+        lows = [t.get_window_extent(r).y0 for t in ax.get_xticklabels()
+                if t.get_text() and t.get_visible()]
+        depth = max(0.0, y_axis - min(lows)) if lows else 0.0
+        off = -(depth * px2pt + 6 * self.f.k)
+        for a in sup:
+            a.xyann = (0, off)
 
     def bar_legend(self):
         leg = self.s.get("legend", {})
@@ -1587,7 +1637,8 @@ class Panel:
         texts = [clean_text(e[1]) for e in entries]
         self._legend_styles = []
         self._leg_args = dict(handles=handles, texts=texts, title="",
-                              fs=self.f.tsize(leg.get("size"), 9.0, self.gmult))
+                              fs=self.f.tsize(leg.get("size"), 9.0, self.gmult),
+                              colfirst=leg.get("colfirst") == "yes")
         self.make_legend(min(len(handles), 4))
         self.has_legend = True
         return True
@@ -1607,6 +1658,7 @@ class Panel:
                 t.set_rotation(38)
                 t.set_ha("right")
                 t.set_rotation_mode("anchor")
+            self.place_sup()
             return True
         return False
 
@@ -1746,6 +1798,7 @@ class Figure:
                 p.skip(f"{what} (not drawn)")
                 ax.set_axis_off()
             self.panels.append(p)
+        self.share_bar_scale()
 
         # titles shared by all panels, taken from the panels when they agree
         xt = {p.axis_title("x") for p in self.panels}
@@ -1817,6 +1870,34 @@ class Figure:
             self.layout()
         self.save()
 
+    def share_bar_scale(self):
+        """by() panels of graph bar/hbar/box/dot share one scale axis in Stata
+        (unless the y axis is rescaled per panel), so every panel gets the range
+        Stata used, not its own autoscaled one."""
+        s = self.s
+        if s.get("family") != "by" or s.get("indiv_yrescale") == "yes":
+            return
+        bars = [p for p in self.panels if p.s.get("family") == "bar"]
+        if len(bars) < 2:
+            return
+        horizontal = bars[0].horizontal
+        lk, hk = ("xmin", "xmax") if horizontal else ("smin", "smax")
+        los = [num(p.s.get(lk)) for p in bars]
+        his = [num(p.s.get(hk)) for p in bars]
+        if any(v is None for v in los + his):
+            # fall back on the union of the ranges matplotlib chose
+            get = (lambda p: p.ax.get_xlim()) if horizontal else (lambda p: p.ax.get_ylim())
+            lims = [get(p) for p in bars]
+            lo, hi = min(l[0] for l in lims), max(l[1] for l in lims)
+        else:
+            lo, hi = min(los), max(his)
+            if hi <= lo:
+                return
+            pad = 0.02 * (hi - lo)
+            lo, hi = lo - (pad if lo != 0 else 0), hi + pad
+        for p in bars:
+            (p.ax.set_xlim if horizontal else p.ax.set_ylim)(lo, hi)
+
     def layout(self):
         """Place titles, then solve the panel grid so that every tick label, end
         label and legend fits inside the figure."""
@@ -1876,8 +1957,11 @@ class Figure:
             fs_leg = self.tsize((s.get("legend") or {}).get("size"), 9.0)
             rr = fig.canvas.get_renderer()
             ncol = min(len(handles), 5)
+            colfirst = (s.get("legend") or {}).get("colfirst") == "yes"
             while True:
-                leg = fig.legend(handles, texts, loc="upper left",
+                perm = legend_perm(len(handles), ncol, colfirst)
+                leg = fig.legend([handles[i] for i in perm], [texts[i] for i in perm],
+                                 loc="upper left",
                                  bbox_to_anchor=(left - 4 * k / W, ycur / H), ncol=ncol,
                                  frameon=False, fontsize=fs_leg, handlelength=1.6,
                                  handletextpad=0.5, columnspacing=1.4, borderaxespad=0.0,
@@ -1886,6 +1970,8 @@ class Figure:
                     break
                 leg.remove()
                 ncol -= 1
+            leg._g2m_perm = perm
+            self._fig_leg_artist = leg
             lp.restyle_legend(leg)
             arts.append(leg)
             ycur -= leg.get_window_extent(rr).height * 72.0 / fig.dpi + 2 * k
@@ -1969,6 +2055,9 @@ class Figure:
         fl = getattr(self, "fig_legend", None)
         if fl:
             out.append("fig_legend=" + "|".join(str(t) for t in fl[1]))
+            fa = getattr(self, "_fig_leg_artist", None)
+            if fa is not None:
+                out.append("fig_legend_read=" + "|".join(legend_reading(fa, r)))
             out.append("fig_legend_plots=" + "|".join(
                 str(k) for k in getattr(fl[2], "_legend_plots", [])))
         arts = getattr(self, "_title_artists", [])
@@ -1988,6 +2077,19 @@ class Figure:
             pos = ax.get_position()
             axbb = ax.get_window_extent(r)
             out.append(f"{tag}.axes={pos.x0:.3f},{pos.y0:.3f},{pos.width:.3f},{pos.height:.3f}")
+            if p.s.get("family") == "bar":
+                vlo, vhi = sorted(ax.get_xlim() if p.horizontal else ax.get_ylim())
+                out.append(f"{tag}.barscale={vlo:.4g},{vhi:.4g}")
+                sup = getattr(p, "_sup", None) or []
+                if sup:
+                    inner = [t.get_window_extent(r) for t in ax.get_xticklabels()
+                             if t.get_text() and t.get_visible()]
+                    sb = [a.get_window_extent(r) for a in sup]
+                    sov = sum(1 for a in sb for b in inner
+                              if min(a.x1, b.x1) - max(a.x0, b.x0) > 0.5
+                              and min(a.y1, b.y1) - max(a.y0, b.y0) > 0.5)
+                    out.append(f"{tag}.sup_overlaps={sov}")
+                    out.append(f"{tag}.sup_below={int(max(a.y1 for a in sb) <= min(b.y0 for b in inner) + 0.5)}")
             pt = ax.get_title(loc="left")
             if pt:
                 out.append(f"{tag}.ptitle={pt}")
@@ -2009,7 +2111,7 @@ class Figure:
                 out.append(f"{tag}.y2label={p.ax2.get_ylabel()}")
             if p.leg is not None:
                 lb = p.leg.get_window_extent(r)
-                out.append(f"{tag}.legend=" + "|".join(t.get_text() for t in p.leg.get_texts()))
+                out.append(f"{tag}.legend=" + "|".join(legend_reading(p.leg, r)))
                 out.append(f"{tag}.legend_plots=" + "|".join(
                     str(k) for k in getattr(p, "_legend_plots", [])))
                 out.append(f"{tag}.legend_title={p.leg.get_title().get_text()}")

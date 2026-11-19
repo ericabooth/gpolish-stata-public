@@ -1031,7 +1031,7 @@ program _g2m_bar
     local nk ``g'.legend.map.arrnels'
     if "`nk'" == "" local nk 0
     local lsize ``g'.legend.plotregion1.label[1].style.size.gmval'
-    file write `fh' `"  "legend": {"draw": "`ldraw'", "size": "`lsize'", "entries": ["'
+    file write `fh' `"  "legend": {"draw": "`ldraw'", "size": "`lsize'", "rows": "``g'.legend.style.rows.val'", "cols": "``g'.legend.style.cols.val'", "colfirst": "``g'.legend.style.col_first.setting'", "entries": ["'
     forvalues k = 1/`nk' {
         local lab `"``g'.legend.plotregion1.label[`k'].text[1]'"'
         local c ``g'.barstyles[`k'].area.shadestyle.color.setting'
@@ -1092,7 +1092,7 @@ program _g2m_legend
     _g2m_esc `"`ltitle'"'
     local lsize ``g'.legend.plotregion1.label[1].style.size.gmval'
     file write `fh' `"  "legend": {"draw": "`ldraw'", "title": "`s(esc)'", "size": "`lsize'", "rows": "``g'.legend.style.rows.val'", "' ///
-        `""cols": "``g'.legend.style.cols.val'", "position": "``g'.style.legend_position.setting'", "entries": ["'
+        `""cols": "``g'.legend.style.cols.val'", "colfirst": "``g'.legend.style.col_first.setting'", "position": "``g'.style.legend_position.setting'", "entries": ["'
     forvalues k = 1/`nk' {
         local m ``g'.legend.map[`k']'
         if "`rord'" != "" & real("`m'") >= 1 & real("`m'") < . {
