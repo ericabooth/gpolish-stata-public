@@ -1372,9 +1372,114 @@ while r(eof)==0 {
     file read `fh' line
 }
 file close `fh'
-chk r5_bracket_note `nn'==2
+* only x(6000) is off the plot (y0() and y1() lie inside the y range): one note naming x()
+chk r5_bracket_note `nn'==1
 chk r5_bracket_hint `nr'==1
 chk r5_bracket_drawn "`.r5b.plotregion1.added_lines.arrnels'"=="6"
+
+* ---- r6. size checks, labels() count, clock-time positions, bracket notes ---
+capture program drop logcount
+* r(n) counts lines of log file f holding text s
+program logcount, rclass
+    args f s
+    local n 0
+    tempname fh
+    file open `fh' using `"`f'"', read text
+    file read `fh' line
+    while r(eof)==0 {
+        if strpos(`"`macval(line)'"', `"`s'"') local ++n
+        file read `fh' line
+    }
+    file close `fh'
+    return scalar n = `n'
+end
+sysuse uslifeexp, clear
+twoway line le le_male le_female year, name(r6e, replace)
+capture gpolish endlabel, size(-2)
+chk r6_endlabel_negsize _rc==198
+capture gpolish endlabel, size(0)
+chk r6_endlabel_zerosize _rc==198
+capture gpolish endlabel, wrap(-3)
+chk r6_endlabel_negwrap _rc==198
+capture gpolish endlabel, values format(abc)
+chk r6_endlabel_badformat _rc==198
+chk r6_endlabel_untouched "`.r6e.plotregion1.added_text.arrnels'"=="" | "`.r6e.plotregion1.added_text.arrnels'"=="0"
+capture log close _r6
+tempfile r6lg
+log using `"`r6lg'"', text name(_r6) replace
+gpolish endlabel, labels("only one")
+log close _r6
+logcount `"`r6lg'"' "labels() has 1 entries for 3 plots"
+chk r6_labels_few_note r(n)==1
+ntext r6e added_text
+chk r6_labels_few_drawn r(k)==3
+twoway line le_male le_female year, name(r6f, replace)
+log using `"`r6lg'"', text name(_r6) replace
+gpolish endlabel, labels("a" "b" "c")
+log close _r6
+logcount `"`r6lg'"' "labels() has 3 entries for 2 plots"
+chk r6_labels_many_note r(n)==1
+twoway line le_male le_female year, name(r6g, replace)
+log using `"`r6lg'"', text name(_r6) replace
+gpolish endlabel, labels("a" "b")
+log close _r6
+logcount `"`r6lg'"' "labels() has"
+chk r6_labels_match_quiet r(n)==0
+sysuse auto, clear
+scatter price mpg, name(r6p, replace)
+capture gpolish ptlabel make if price>13000, x(mpg) y(price) size(-1)
+chk r6_ptlabel_negsize _rc==198
+capture gpolish ptlabel make if price>13000, x(mpg) y(price) offset(-1)
+chk r6_ptlabel_negoffset _rc==198
+capture gpolish callout "Hi", to(20 10000) size(-3)
+chk r6_callout_negsize _rc==198
+capture gpolish note "Hi", at(20 10000) size(0)
+chk r6_note_zerosize _rc==198
+capture gpolish callout "Hi", to(20 10000) headsize(-1)
+chk r6_callout_neghead _rc==198
+capture gpolish callout "Hi", to(20 10000) pad(-1)
+chk r6_callout_negpad _rc==198
+capture gpolish arrow, from(20 10000) to(25 8000) headsize(0)
+chk r6_arrow_zerohead _rc==198
+capture gpolish brace "b", from(20 5000) to(20 9000) size(-1)
+chk r6_brace_negsize _rc==198
+capture gpolish bracket "b", x(30) y0(5000) y1(10000) size(-1)
+chk r6_bracket_negsize _rc==198
+chk r6_nothing_added "`.r6p.plotregion1.added_text.arrnels'"=="" | "`.r6p.plotregion1.added_text.arrnels'"=="0"
+* a %tc position written as the standard literal, with a space inside the parentheses
+clear
+set obs 48
+gen double t = tc(01jan2020 00:00:00) + (_n-1)*3600000
+format t %tc
+gen y = sin(_n/5)
+line y t, name(r6t, replace)
+capture noisily gpolish callout "Hour 30", to(tc(02jan2020 05:00:00) 0) at(tc(01jan2020 12:00:00) 0.5)
+chk r6_tc_space _rc==0
+ntext r6t added_text
+chk r6_tc_drawn r(k)==1
+capture gpolish callout "x", to(tc(02jan2020 05:00:00) 0 1)
+chk r6_tc_three _rc==198
+capture gpolish callout "x", to(1 2 3)
+chk r6_xy_three _rc==198
+* bracket: only the option that is off the plot is named
+clear
+input grp mean
+1 3
+2 5
+3 4.2
+end
+twoway bar mean grp, name(r6b, replace)
+log using `"`r6lg'"', text name(_r6) replace
+gpolish bracket "p<0.01", x0(1) x1(2) y(5.6)
+log close _r6
+logcount `"`r6lg'"' "y() lies outside"
+chk r6_bracket_y_named r(n)==1
+logcount `"`r6lg'"' "x0() lies outside"
+local n0 = r(n)
+logcount `"`r6lg'"' "x1() lies outside"
+chk r6_bracket_ends_quiet `n0'==0 & r(n)==0
+logcount `"`r6lg'"' "yscale(range(5.6))"
+chk r6_bracket_hint_value r(n)==1
 
 gpolish limits
 

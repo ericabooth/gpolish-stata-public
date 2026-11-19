@@ -51,9 +51,12 @@
 
 {p 8 16 2}{cmd:gpolish geom} [{cmd:,} {opt name(graphname)}]
 
-{pstd}All sizes are in points. Positions are in the units of the graph's axes.
+{pstd}All sizes are in points and must be positive; a zero or negative {opt size()}, {opt headsize()} or {opt dotsize()}
+stops with r(198), as does a negative {opt gap()}, {opt xgap()}, {opt wrap()}, {opt pad()}, {opt offset()} or {opt msize()}.
+Positions are in the units of the graph's axes.
 Each value in {opt at()}, {opt to()}, {opt from()} and the {opt x()}, {opt y0()}, {opt y1()}, {opt y()}, {opt x0()} and {opt x1()} of {cmd:bracket}
-may be a number or an expression written without spaces, such as {cmd:to(td(21sep2001) 966)} on a date axis.
+may be a number or an expression, such as {cmd:to(td(21sep2001) 966)} on a date axis or
+{cmd:to(tc(02jan2020 05:00:00) 0)} on a clock-time axis. In {opt at()}, {opt to()} and {opt from()}, spaces are allowed only inside parentheses.
 An expression may use the results of the previous command, such as {cmd:to(1999 r(max))} after {cmd:summarize}.
 Positions are read on the first x and y axes; on a graph with a second axis, {opt xaxis(#)} and {opt yaxis(#)}
 say which axis the positions belong to. {cmd:ptlabel} finds the axes of its {opt x()} and {opt y()} variables
@@ -102,8 +105,9 @@ By default every line plot is labeled; {opt plots()} names the plots to label by
 nonmissing values are skipped with a note.
 Label text is the plot's legend text when it differs from the variable label, as it does for a fit line from {cmd:lfit} or a line drawn by {cmd:marginsplot}; otherwise it is the variable label.
 {opt labels()} overrides both, one label per plot in the order of {opt plots()}.
+With fewer labels than plots the rest keep their own label; extra labels are ignored, with a note.
 When two plots would get the same label, {cmd:endlabel} prints a note, keeps the legend and suggests {opt labels()}.
-{opt values} adds the last value in a column, formatted with {opt format()}. The column sits beyond the line end
+{opt values} adds the last value in a column, formatted with {opt format()} (default {cmd:%4.1f}). The column sits beyond the line end
 farthest out on the labeled side, so a line that ends early still has its value in the same column.
 {opt dots} adds a marker at each line end. {opt dotsize(#)} sets its size in points (default 5.5) and implies {opt dots}. {opt color()} sets one text color for all labels instead of each line's color.
 {opt side(left)} labels the left ends of the lines instead of the right; on a reversed axis
@@ -250,7 +254,7 @@ It stops with an error when {cmd:endlabel}, {cmd:callout}, {cmd:note}, {cmd:arro
 {p2col:{cmd:ptlabel} on many points}run time grows quickly with the number of labels; a note is printed above 300 labels and more than {opt maxlabels()} (default 1000) are refused{p_end}
 {p2col:{cmd:bracket} labels}placed at a fixed spot beside the spine and not checked against the data or other labels; move the bracket with {opt x()} or {opt left} (or {opt y()} or {opt below}) if its label covers something{p_end}
 {p2col:{cmd:endlabel} with {cmd:aspectratio()}}when a y axis is drawn on the labeled side, the room for labels would have to be made inside a plot region whose shape is fixed, which distorts the axes; {cmd:endlabel} stops with r(198) before any edit. Drop {cmd:aspectratio()} or label the other side with {opt side()}{p_end}
-{p2col:Positions outside the plot region}{cmd:callout} and {cmd:note} refuse a {opt to()} outside the axis ranges; {opt at()}, {opt from()}, {cmd:arrow}, {cmd:brace} and {cmd:bracket} get a note; ranges are given in the axis's own units, so dates show as numbers{p_end}
+{p2col:Positions outside the plot region}{cmd:callout} and {cmd:note} refuse a {opt to()} outside the axis ranges; {opt at()}, {opt from()}, {cmd:arrow}, {cmd:brace} and {cmd:bracket} get a note; ranges are given in the axis's own units, so dates show as numbers; a {cmd:bracket} note names only the option that is off the plot and gives the {cmd:xscale(range(#))} or {cmd:yscale(range(#))} to add{p_end}
 {p2col:Labels wider than the plot region}{cmd:ptlabel} skips them with a note; an automatically placed callout or note stops with an error; {cmd:gpolish} does not wrap text itself{p_end}
 {p2col:Zero or negative positions on a log axis}{cmd:arrow}, {cmd:brace} and {cmd:bracket} stop with r(198) before any edit; {cmd:ptlabel} skips such points{p_end}
 {p2col:Plot-region outlines}when a scheme such as {cmd:s1mono} outlines the plot region and the end labels sit outside it, {cmd:endlabel} starts them {opt xgap()} points beyond the outline rather than beyond the line end. An outline counts as drawn when its colour differs from the graph background, so an outline turned off with {cmd:plotregion(lstyle(none))} still moves the labels out{p_end}

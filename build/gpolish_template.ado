@@ -145,22 +145,39 @@ end
 * so an expression may read it, e.g. to(1999 r(max)).
 program _gpl_xy
     args opt val
-    tokenize `"`val'"'
-    if `"`2'"'=="" | `"`3'"'!="" {
-        di as err "gpolish: `opt'() needs two values, x and y, for example `opt'(1990 45) or `opt'(td(01sep2001) 1000);"
-        di as err "         write each value without spaces"
+    * a parenthesized expression such as tc(02jan2020 05:00:00) stays one value
+    gettoken a1 rest : val, bind
+    gettoken a2 rest : rest, bind
+    if `"`a2'"'=="" | trim(`"`rest'"')!="" {
+        di as err "gpolish: `opt'() needs two values, x and y, for example `opt'(1990 45), `opt'(td(01sep2001) 1000)"
+        di as err "         or `opt'(tc(02jan2020 05:00:00) 0); spaces are allowed only inside parentheses"
         exit 198
     }
     if "$GPL_RHOLD"!="" capture _return restore $GPL_RHOLD, hold
     forvalues i = 1/2 {
-        capture local v`i' = ``i''
+        capture local v`i' = `a`i''
         if _rc | missing(real("`v`i''")) {
-            di as err `"gpolish: `opt'(): cannot read {bf:``i''} as a number or expression"'
+            di as err `"gpolish: `opt'(): cannot read {bf:`a`i''} as a number or expression"'
             exit 198
         }
     }
     c_local `opt'x `v1'
     c_local `opt'y `v2'
+end
+
+* stop with r(198) when a size option is not positive (strict) or is negative (nonneg)
+program _gpl_poschk
+    args cmd opt val mode
+    if "`mode'"=="nonneg" {
+        if `val' < 0 {
+            di as err "gpolish `cmd': `opt'() must be 0 or more"
+            exit 198
+        }
+    }
+    else if `val' <= 0 {
+        di as err "gpolish `cmd': `opt'() must be positive"
+        exit 198
+    }
 end
 
 * evaluate one value the same way; the result comes back in the caller's local <opt>v
@@ -290,12 +307,17 @@ end
 * is a point (in plot region 1 data units) inside the plot region? cmd opt name x y mode
 * mode err stops with rc 198; mode note prints a note. c_local _gpl_out is 1 when outside
 program _gpl_inplot
-    args cmd opt name x y mode
+    args cmd opt name x y mode only
     _gpl_geom, name(`name')
     local gx = r(xa) + r(xb)*cond(r(xlog), ln(`x'), `x')
     local gy = r(ya) + r(yb)*cond(r(ylog), ln(`y'), `y')
     local tol = 0.001*max(r(gx1)-r(gx0), r(gy1)-r(gy0))
-    local out = missing(`gx', `gy') | `gx' < r(gx0)-`tol' | `gx' > r(gx1)+`tol' | `gy' < r(gy0)-`tol' | `gy' > r(gy1)+`tol'
+    * only = x or y tests that coordinate alone
+    local outx = missing(`gx') | `gx' < r(gx0)-`tol' | `gx' > r(gx1)+`tol'
+    local outy = missing(`gy') | `gy' < r(gy0)-`tol' | `gy' > r(gy1)+`tol'
+    if "`only'"=="x" local out `outx'
+    else if "`only'"=="y" local out `outy'
+    else local out = `outx' | `outy'
     c_local _gpl_out `out'
     if !`out' exit
     foreach d in x y {
@@ -755,7 +777,16 @@ program _gpl_endlabel
         local dots dots
     }
     else local dotsize 5.5
+    _gpl_poschk endlabel size `size'
+    _gpl_poschk endlabel gap `gap' nonneg
+    _gpl_poschk endlabel xgap `xgap' nonneg
+    _gpl_poschk endlabel wrap `wrap' nonneg
     if "`format'"=="" local format %4.1f
+    capture confirm numeric format `format'
+    if _rc {
+        di as err "gpolish endlabel: format() must be a numeric display format such as %4.1f"
+        exit 198
+    }
     if "`side'"=="" local side right
     if !inlist("`side'", "right", "left") {
         di as err "gpolish endlabel: side() must be right or left"
@@ -914,6 +945,13 @@ program _gpl_endlabel
         local w2 0
         if "`values'"!="" mata: st_local("w2", strofreal(_gpl_textw(st_global("GPL_FONT"), st_local("val`j'"), 0)))
         local maxv = max(`maxv', `w2')
+    }
+    if `"`labels'"'!="" {
+        local nlab : word count `labels'
+        if `nlab' != `q' {
+            di as txt "note: gpolish endlabel: labels() has `nlab' entries for `q' plots; plots without one keep"
+            di as txt "      their own label, extra entries are ignored"
+        }
     }
     if `j'==0 {
         di as err "gpolish endlabel: none of the plots has nonmissing values to label"
@@ -1287,6 +1325,9 @@ program _gpl_callout
         LColor(string) ALign(string) HEADsize(real 4.5) SEGments(integer 24) LWidth(string) ANGle(real 0) HALO noARROW ///
         FILL(string) BORder(string) PAD(real 5) ISNOTE XAXis(string) YAXis(string)]
     local cmd = cond("`isnote'"!="", "note", "callout")
+    _gpl_poschk `cmd' size `size'
+    _gpl_poschk `cmd' headsize `headsize'
+    _gpl_poschk `cmd' pad `pad' nonneg
     if `"`at'"'=="" & `"`to'"'=="" {
         di as err "gpolish `cmd': give at(x y) for the text, to(x y) for the arrow target, or both"
         exit 198
@@ -1412,6 +1453,7 @@ program _gpl_arrow
     syntax , FRom(string) to(string) [name(string) CURve(real 0) HEADsize(real 4.5) ///
         SEGments(integer 24) LColor(string) LWidth(string) SHRink(real 0) XAXis(string) YAXis(string)]
     _gpl_segcheck `segments'
+    _gpl_poschk arrow headsize `headsize'
     _gpl_xy from `"`from'"'
     _gpl_xy to `"`to'"'
     _gpl_name `name'
@@ -1452,6 +1494,8 @@ program _gpl_brace
     syntax [anything(name=txt everything)], FRom(string) to(string) [name(string) ///
         Width(real 7) FLIP SIZe(real 8.8) COLor(string) LColor(string) LWidth(string) GAP(real 4) ///
         XAXis(string) YAXis(string)]
+    _gpl_poschk brace size `size'
+    _gpl_poschk brace gap `gap' nonneg
     _gpl_xy from `"`from'"'
     _gpl_xy to `"`to'"'
     _gpl_name `name'
@@ -1511,6 +1555,8 @@ program _gpl_bracket
     syntax [anything(name=txt everything)], [x(string) y0(string) y1(string) y(string) x0(string) x1(string) ///
         name(string) TICK(real 4) LColor(string) LWidth(string) LEFT BELOW SIZe(real 8.8) COLor(string) ///
         GAP(real 4) XAXis(string) YAXis(string)]
+    _gpl_poschk bracket size `size'
+    _gpl_poschk bracket gap `gap' nonneg
     local nv = (`"`x'"'!="") + (`"`y0'"'!="") + (`"`y1'"'!="")
     local nh = (`"`y'"'!="") + (`"`x0'"'!="") + (`"`x1'"'!="")
     if !((`nv'==3 & `nh'==0) | (`nv'==0 & `nh'==3)) {
@@ -1571,18 +1617,32 @@ program _gpl_bracket
     _gpl_toreg1 `name' "`_gpl_reg'" b0 `b0x' `b0y'
     _gpl_toreg1 `name' "`_gpl_reg'" b1 `b1x' `b1y'
     local _gpl_out 0
+    * the shared position and each end are tested on their own axis, so a note names the
+    * option that is off the plot; the hint gives the value to add to the axis range
     if `horiz' {
-        _gpl_inplot bracket x0 `name' `b0x' `b0y' note
-        local o0 `_gpl_out'
-        _gpl_inplot bracket x1 `name' `b1x' `b1y' note
-        if `o0' | `_gpl_out' di as txt "      add xscale(range(#)) or yscale(range(#)) to the graph command to make room for the bracket"
+        local so y
+        local eo x
+        local sv `yv'
+        local e0 x0
+        local e1 x1
+        local v0 `x0v'
+        local v1 `x1v'
     }
     else {
-        _gpl_inplot bracket y0 `name' `b0x' `b0y' note
-        local o0 `_gpl_out'
-        _gpl_inplot bracket y1 `name' `b1x' `b1y' note
-        if `o0' | `_gpl_out' di as txt "      add yscale(range(#)) or xscale(range(#)) to the graph command to make room for the bracket"
+        local so x
+        local eo y
+        local sv `xv'
+        local e0 y0
+        local e1 y1
+        local v0 `y0v'
+        local v1 `y1v'
     }
+    _gpl_inplot bracket `so' `name' `b0x' `b0y' note `so'
+    if `_gpl_out' di as txt "      add `so'scale(range(`sv')) to the graph command to make room for the bracket"
+    _gpl_inplot bracket `e0' `name' `b0x' `b0y' note `eo'
+    if `_gpl_out' di as txt "      add `eo'scale(range(`v0')) to the graph command to make room for the bracket"
+    _gpl_inplot bracket `e1' `name' `b1x' `b1y' note `eo'
+    if `_gpl_out' di as txt "      add `eo'scale(range(`v1')) to the graph command to make room for the bracket"
     _gpl_geom, name(`name')
     * device units run left to right and bottom to top on screen whatever the axis direction
     local g0x = r(xa) + r(xb)*cond(r(xlog), ln(`b0x'), `b0x')
@@ -1695,6 +1755,9 @@ program _gpl_ptlabel
         XAXis(string) YAXis(string) MAXLabels(integer 1000)]
     _gpl_name `name'
     local name `r(name)'
+    _gpl_poschk ptlabel size `size'
+    _gpl_poschk ptlabel msize `msize' nonneg
+    _gpl_poschk ptlabel offset `offset' nonneg
     if `maxlabels' < 1 {
         di as err "gpolish ptlabel: maxlabels() must be 1 or more"
         exit 198
