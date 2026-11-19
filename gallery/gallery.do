@@ -16,11 +16,20 @@ capture mkdir "gallery/img"
 capture program drop shotA
 program shotA
     args tag
+    if "$GALLERY_FIDELITY" != "" exit
     graph export "gallery/img/`tag'_a.png", replace width(1400)
 end
 capture program drop shotBC
 program shotBC
     args tag opts
+    if "$GALLERY_FIDELITY" != "" {
+        * fidelity.do: Stata's SVG plus gr2mpl's spec folder, no gallery images
+        graph export "$GALLERY_FIDELITY/`tag'.svg", replace
+        capture noisily gr2mpl, saving("$GALLERY_FIDELITY/`tag'_c.png") replace width(1400) ///
+            keepspec specdir("$GALLERY_FIDELITY/`tag'") `opts'
+        if _rc di as err "gr2mpl could not draw `tag'"
+        exit
+    }
     graph export "gallery/img/`tag'_b.png", replace width(1400)
     capture noisily gr2mpl, saving("gallery/img/`tag'_c.png") replace width(1400) `opts'
     if _rc di as err "gr2mpl could not draw `tag'"
