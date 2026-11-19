@@ -194,6 +194,23 @@ def main():
                     cells.append(rng(v) if v else "n/a")
                 body.append([dname] + cells)
             out += [f"### {title}", ""] + table(["Scenario"] + [NAMES[m] for m in pm], body)
+        # the main tables give one graph per real-data scenario, in the original row order; this table
+        # sets that value beside the median over the orders, so a reader can see where the original falls
+        out += ["### Original order against the median over the orders", "",
+                "Each cell gives the main-set value (original row order), then the median over the orders",
+                "with the range in brackets (clean, then clean and near).", ""]
+        body = []
+        for d, dname in DESIGNS[:4]:
+            cells = []
+            for m in pm:
+                cc = []
+                for key in ("clean_share", "clean_near_share"):
+                    o = [r[key] for r in main_rows if r["design"] == d and r["method"] == m]
+                    v = [r[key] for r in perm if r["design"] == d and r["method"] == m]
+                    cc.append(f"{o[0]:.2f} vs {rng(v)}" if o and v else "n/a")
+                cells.append("; ".join(cc))
+            body.append([dname] + cells)
+        out += table(["Scenario"] + [NAMES[m] for m in pm], body)
         if "gpolish" in pm:
             out += ["### gpolish against each other method, order by order", "",
                     "Number of row orders in which gpolish's share is higher / equal / lower than the other method's",
