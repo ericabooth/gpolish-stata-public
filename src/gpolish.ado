@@ -343,7 +343,7 @@ end
 
 * an endlabel record, kept in the graph itself as a hidden text box so that it lasts through
 * graph save and graph use and belongs to this graph only. Its text is
-* gpolish-endlabel|<text boxes>|<markers>|<side>|<margin>|<legend>|<where>|<first-line lengths>|<right margin>
+* gpolish-endlabel|<text boxes>|<markers>|<side>|<margin>|<legend>|<where>|<first-line lengths>|<right margin>|<legend margin>
 * (the last field, kept for side(left) only, is the right graph margin that holds the last x tick label)
 program _gpl_regget, rclass
     args name
@@ -392,6 +392,9 @@ program _gpl_regget, rclass
     }
     capture confirm number `m'
     if _rc local m
+    capture confirm number `lm'
+    if _rc local lm
+    return local lm `lm'
     return local rec `rec'
     return local ok = !`stale'
     return local nchg `nchg'
@@ -423,6 +426,7 @@ program _gpl_regundo
     local leg `r(leg)'
     local pm `r(pm)'
     local rm `r(rm)'
+    local lm `r(lm)'
     local nchg `r(nchg)'
     c_local _gpl_legn 0
     c_local _gpl_nchg 0
@@ -453,6 +457,11 @@ program _gpl_regundo
         else _gpl_ge `name' .style.editstyle margin(`s'-`m') editcopy
     }
     if "`rm'"!="" _gpl_ge `name' .style.editstyle margin(r-`rm') editcopy
+    * a kept legend that was moved away from the labels is moved back
+    if "`lm'"!="" {
+        local s = cond("`side'"=="left", "r", "l")
+        _gpl_ge `name' .legend.style.editstyle boxmargin(`s'-`lm') editcopy
+    }
     if "`leg'"=="1" _gpl_ge `name' .legend.draw_view.setstyle, style(yes)
 end
 
@@ -1026,7 +1035,36 @@ program _gpl_endlabel
     }
     local mside = cond("`side'"=="right", "r", "l")
     local rm
-    if `inner' {
+    local lm
+    local mrec `m'
+    * A legend that stays drawn outside the plot region on the label side sits where the labels go.
+    * The room is then made between the plot region and the legend, as an outer margin on the legend's
+    * inner side, so the legend moves out past the labels.
+    local legin 0
+    if !`inner' & "`.`name'.legend.draw_view.setting'"=="yes" & "`keeplegend'"!="" {
+        gr_draw `name'
+        local lx0 `.`name'.legend.gdi_x0'
+        local lx1 `.`name'.legend.gdi_x1'
+        local px0 `.`name'.plotregion1.gdi_x0'
+        local px1 `.`name'.plotregion1.gdi_x1'
+        local lok 1
+        foreach v in lx0 lx1 px0 px1 {
+            capture confirm number ``v''
+            if _rc local lok 0
+        }
+        if `lok' {
+            local ltol = 0.001*abs(`px1' - `px0')
+            if `s' > 0 & min(`lx0', `lx1') >= max(`px0', `px1') - `ltol' local legin 1
+            if `s' < 0 & max(`lx0', `lx1') <= min(`px0', `px1') + `ltol' local legin 1
+        }
+    }
+    if `legin' {
+        local lside = cond("`side'"=="right", "l", "r")
+        _gpl_ge `name' .legend.style.editstyle boxmargin(`lside'+`m') editcopy
+        local lm `m'
+        local mrec
+    }
+    else if `inner' {
         forvalues rg = 1/`npr' {
             _gpl_ge `name' .plotregion`rg'.style.editstyle margin(`mside'+`m') editcopy
         }
@@ -1180,7 +1218,7 @@ program _gpl_endlabel
         mata: st_local("tl", strofreal(strlen(st_local("t"))))
         local lens `lens' `tl'
     }
-    local rec `"gpolish-endlabel|`regtxt'|`regmk'|`side'|`m'|`leg'|`inner'|`lens'|`rm'"'
+    local rec `"gpolish-endlabel|`regtxt'|`regmk'|`side'|`mrec'|`leg'|`inner'|`lens'|`rm'|`lm'"'
     * an earlier record box (spent by the undo above) is reused, so a graph holds at most one
     _gpl_count `name' added_text
     local nt = r(k)
@@ -1769,6 +1807,12 @@ program _gpl_legend
     _gpl_plots `name'
     local n = r(n)
     local regs `r(regs)'
+    foreach i of local plots {
+        if `i' > `n' {
+            di as err "gpolish legend: plots(`i') is out of range; graph {bf:`name'} has `n' plot(s)"
+            exit 198
+        }
+    }
     if "`.`name'.legend.draw_view.setting'"!="yes" {
         di as txt "note: graph {bf:`name'} shows no legend; nothing to colour"
         exit
@@ -1828,7 +1872,7 @@ end
 program _gpl_ptlabel
     syntax varname [if] [in], x(varname numeric) y(varname numeric) [name(string) SIZe(real 8.6) ///
         COLor(string) OFFset(real 3) MSize(real 6) HALO noLEADer LColor(string) LWidth(string) ///
-        XAXis(string) YAXis(string) MAXLabels(integer 1000)]
+        XAXis(string) YAXis(string) MAXLabels(integer 1000) UNDRAWN]
     _gpl_name `name'
     local name `r(name)'
     _gpl_poschk ptlabel size `size'
@@ -1886,6 +1930,66 @@ program _gpl_ptlabel
     if r(N)==0 {
         di as txt "note: gpolish ptlabel: none of the selected points is drawn (zero or negative values on a log axis); nothing to label"
         exit
+    }
+    * ptlabel reads the data in memory. A graph drawn with its own if/in leaves some of those
+    * observations out, so labels go only on (x, y) pairs that a plot of y() against x() draws; the
+    * pairs are read from the plots' sersets. undrawn keeps every selected observation.
+    if "`undrawn'"=="" {
+        _gpl_plots `name'
+        local n = r(n)
+        local regs `r(regs)'
+        local ids
+        local cols
+        forvalues i = 1/`n' {
+            local j : word `i' of `regs'
+            local pr .`name'.plotregion`j'
+            local yn
+            local xn
+            local sid
+            capture {
+                local yv = ``pr'.plot`i'.yvar'
+                local xv = ``pr'.plot`i'.xvar'
+                local yn ``pr'.plot`i'.serset.sers[`yv'].name'
+                local xn ``pr'.plot`i'.serset.sers[`xv'].name'
+                local sid ``pr'.plot`i'.serset.id'
+            }
+            if "`yn'"=="`y'" & "`xn'"=="`x'" & "`sid'"!="" {
+                local ids `ids' `sid'
+                local cols `cols' `xv' `yv'
+            }
+        }
+        if "`ids'"!="" {
+            local sok 1
+            mata: _gpl_dp = J(0, 2, .)
+            preserve
+            local q 0
+            foreach sid of local ids {
+                local xv : word `=2*`q'+1' of `cols'
+                local yv : word `=2*`q'+2' of `cols'
+                local ++q
+                capture serset set `sid'
+                if !_rc capture serset use, clear
+                if _rc {
+                    local sok 0
+                    continue, break
+                }
+                mata: _gpl_dp = _gpl_dp \ st_data(., (`xv', `yv'))
+            }
+            restore
+            if `sok' {
+                mata: _gpl_drawn("`x'", "`y'", "`sel'", _gpl_dp)
+                if `ndrop' > 0 {
+                    di as txt "note: gpolish ptlabel: `ndrop' selected point(s) are not drawn in the graph and were not labelled"
+                    di as txt "      (give ptlabel the same if/in as the graph command, or use undrawn to label them anyway)"
+                }
+            }
+            mata: mata drop _gpl_dp
+            quietly count if `sel'
+            if r(N)==0 {
+                di as txt "note: gpolish ptlabel: none of the selected points is drawn in the graph; nothing to label"
+                exit
+            }
+        }
     }
     * points outside the axis range of the plot region are not drawn, so they are not labelled
     _gpl_geom, name(`name')
@@ -2649,8 +2753,8 @@ void _gpl_recparse(string scalar s)
         p = strpos(s, "|")
     }
     f = f, s
-    nm = ("", "txt", "mk", "side", "m", "leg", "pm", "lens", "rm")
-    for (i=2; i<=9; i++) st_local(nm[i], (i <= cols(f) ? f[i] : ""))
+    nm = ("", "txt", "mk", "side", "m", "leg", "pm", "lens", "rm", "lm")
+    for (i=2; i<=10; i++) st_local(nm[i], (i <= cols(f) ? f[i] : ""))
 }
 // End labels added by gpolish 0.6.1 or earlier, read from a graph's edit log L (see _gpl_legundo).
 // Sets the caller's locals n (runs whose margin was not given back), txt and mk (their text boxes and
@@ -2849,6 +2953,30 @@ real scalar _gpl_obscost(real rowvector b, real matrix O)
 }
 
 // drop labels wider than the plot region from the selection; returns how many were dropped
+// ptlabel: clears the selection of each observation whose (x, y) pair matches no row of P, the
+// pairs the graph draws (relative tolerance 1e-6); sets the caller's local ndrop to the count
+void _gpl_drawn(string scalar xv, string scalar yv, string scalar selv, real matrix P)
+{
+    real colvector s
+    real colvector X
+    real colvector Y
+    real scalar i
+    real scalar nd
+
+    s = st_data(., selv)
+    X = st_data(., xv)
+    Y = st_data(., yv)
+    nd = 0
+    for (i=1; i<=rows(s); i++) {
+        if (s[i] != 1) continue
+        if (!any((abs(P[., 1] :- X[i]) :<= 1e-6*max((1, abs(X[i])))) :& (abs(P[., 2] :- Y[i]) :<= 1e-6*max((1, abs(Y[i])))))) {
+            s[i] = 0
+            nd++
+        }
+    }
+    st_store(., selv, s)
+    st_local("ndrop", strofreal(nd))
+}
 real scalar _gpl_skipwide(string scalar labv, string scalar selv, real scalar fs, real scalar pw)
 {
     real colvector sel, idx

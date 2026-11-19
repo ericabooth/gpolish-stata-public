@@ -36,7 +36,7 @@
 [{opt cur:ve(#)} {opt head:size(#)} {opt seg:ments(#)} {opt shr:ink(#)} {opt lc:olor(rgb)} {opt lw:idth(str)} {opt xax:is(#)} {opt yax:is(#)} {opt name(graphname)}]
 
 {p 8 16 2}{cmd:gpolish ptlabel} {it:varname} {ifin}{cmd:,} {opt x(varname)} {opt y(varname)}
-[{opt siz:e(#)} {opt col:or(rgb)} {opt off:set(#)} {opt ms:ize(#)} {opt halo} {opt nolead:er} {opt lc:olor(rgb)} {opt lw:idth(str)} {opt xax:is(#)} {opt yax:is(#)} {opt maxl:abels(#)} {opt name(graphname)}]
+[{opt siz:e(#)} {opt col:or(rgb)} {opt off:set(#)} {opt ms:ize(#)} {opt halo} {opt nolead:er} {opt lc:olor(rgb)} {opt lw:idth(str)} {opt xax:is(#)} {opt yax:is(#)} {opt maxl:abels(#)} {opt undrawn} {opt name(graphname)}]
 
 {p 8 16 2}{cmd:gpolish bracket} [{it:"label line 1"} ...]{cmd:,} {c -(}{opt x(#)} {opt y0(#)} {opt y1(#)} [{opt left}] | {opt y(#)} {opt x0(#)} {opt x1(#)} [{opt below}]{c )-} [{opt tick(#)} {opt gap(#)} {opt siz:e(#)} {opt col:or(rgb)} {opt lc:olor(rgb)} {opt lw:idth(str)}
 {opt xax:is(#)} {opt yax:is(#)} {opt name(graphname)}]
@@ -100,7 +100,9 @@ and {cmd:gpolish render} redraws the finished graph with matplotlib (see {helpb 
 {phang}
 {cmd:gpolish endlabel} replaces the legend with a label at the end of each line, in the line's color.
 Labels that would overlap are moved apart, and the margin grows to fit the longest label.
-The legend is switched off; {opt keeplegend} keeps it.
+The legend is switched off; {opt keeplegend} keeps it. {cmd:endlabel} also keeps it, with a note, when two labeled plots
+get the same label. A kept legend that sits beside the plot region on the label side is moved out past the labels,
+and {cmd:gpolish clear} or a rerun moves it back.
 By default every line plot is labeled; {opt plots()} names the plots to label by number, and series with no
 nonmissing values are skipped with a note.
 Label text is the plot's legend text when it differs from the variable label, as it does for a fit line from {cmd:lfit} or a line drawn by {cmd:marginsplot}; otherwise it is the variable label.
@@ -184,6 +186,11 @@ labels least. If even the best of the eight still overlaps something, the label 
 rings around its point, and joined to the point by a thin leader line; it moves out only when that spot costs less
 than the best spot next to the point. {opt noleader} keeps every
 label next to its point; {opt lcolor()} and {opt lwidth()} style the leader lines.
+{opt msize(#)} is the diameter of the drawn markers in points (default 6); set it to match the scatter's {cmd:msize()}
+so labels keep clear of the markers. {opt offset(#)} is the gap in points between the marker edge and its label (default 3).
+{cmd:ptlabel} reads the data in memory, so give it the same {it:if} and {it:in} as the graph command. Selected
+observations whose {opt x()} and {opt y()} values match no point that a plot of {opt y()} against {opt x()} draws
+are skipped with a note that gives how many; {opt undrawn} labels them anyway.
 {opt x()} and {opt y()} name the plotted variables. Their values are read on the scales of the plot region
 where a plot draws {opt y()} against {opt x()}, so points plotted on a second axis need no option. When no plot
 draws that pair, the first plot region that carries an axis {opt y()} is drawn on and an axis {opt x()} is drawn
@@ -216,6 +223,7 @@ The two ends ({opt y0()} and {opt y1()}, or {opt x0()} and {opt x1()}) must diff
 {cmd:gpolish legend} colors each legend label to match its key and makes it bold. Labels of more than one
 line keep every line. Each label takes the color of the key beside it, also when the legend uses {cmd:order()}.
 {opt plots()} names the plots whose labels are colored, by plot number; the other labels are left as they are.
+A plot number larger than the number of plots in the graph stops with r(198) before any edit, as in {cmd:endlabel}.
 
 {phang}
 {cmd:gpolish clear} removes every added text box, line and marker from the graph and undoes the margin and legend
@@ -262,6 +270,7 @@ It stops with an error when {cmd:endlabel}, {cmd:callout}, {cmd:note}, {cmd:arro
 {p2col:{cmd:endlabel} with {cmd:aspectratio()}}when a y axis is drawn on the labeled side, the room for labels would have to be made inside a plot region whose shape is fixed, which distorts the axes; {cmd:endlabel} stops with r(198) before any edit. Drop {cmd:aspectratio()} or label the other side with {opt side()}{p_end}
 {p2col:Positions outside the plot region}{cmd:callout} and {cmd:note} refuse a {opt to()} outside the axis ranges; {opt at()}, {opt from()}, {cmd:arrow}, {cmd:brace} and {cmd:bracket} get a note; a {cmd:callout} or {cmd:note} box placed with {opt at()} that runs past an edge of the graph gets a note and is drawn where it is, so the part outside is cut off; ranges are given in the axis's own units, so dates show as numbers; a {cmd:bracket} note names only the option that is off the plot and gives the {cmd:xscale(range(#))} or {cmd:yscale(range(#))} to add{p_end}
 {p2col:Labels wider than the plot region}{cmd:ptlabel} skips them with a note; an automatically placed callout or note stops with an error; {cmd:gpolish} does not wrap text itself{p_end}
+{p2col:{cmd:ptlabel} and points the graph leaves out}a selected point is matched to the drawn points by its {opt x()} and {opt y()} values; the check is made only when a plot draws the {opt y()} variable against the {opt x()} variable, so a graph of other variables (for example a transformed copy) is not checked; an observation left out of the graph that has the same values as a drawn point is still labeled{p_end}
 {p2col:Zero or negative positions on a log axis}{cmd:arrow}, {cmd:brace} and {cmd:bracket} stop with r(198) before any edit; {cmd:ptlabel} skips such points{p_end}
 {p2col:{cmd:endlabel, side(left)} and the last x tick label}the right margin added after the legend is switched off is sized for the tick labels of x axis 1 drawn horizontally; a second x axis or angled tick labels are not measured, and {cmd:graphregion(margin())} can add room by hand{p_end}
 {p2col:Plot-region outlines}when a scheme such as {cmd:s1mono} outlines the plot region and the end labels sit outside it, {cmd:endlabel} starts them {opt xgap()} points beyond the outline rather than beyond the line end. An outline counts as drawn when its colour differs from the graph background, so an outline turned off with {cmd:plotregion(lstyle(none))} still moves the labels out{p_end}

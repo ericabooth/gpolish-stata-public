@@ -1564,6 +1564,96 @@ log close _r7
 logcount `"`r7lg'"' "runs past the left edge of the graph"
 chk r7_note_edge_left r(n)==1
 
+* ---- r8. kept legend beside end labels, legend plots() range, ptlabel on drawn points only ----
+capture program drop r8gap
+program r8gap, rclass
+    args g
+    gr_draw `g'
+    return scalar gap = `.`g'.legend.gdi_x0' - `.`g'.plotregion1.gdi_x1'
+end
+capture program drop r8rec
+program r8rec, rclass
+    args g
+    local k `.`g'.plotregion1.added_text.arrnels'
+    local rec
+    forvalues j = 1/`k' {
+        local t `"`.`g'.plotregion1.added_text[`j'].text[1]'"'
+        if substr(`"`t'"', 1, 17)=="gpolish-endlabel|" local rec `"`t'"'
+    }
+    * the last field is the legend margin
+    local lm = substr(`"`rec'"', strrpos(`"`rec'"', "|")+1, .)
+    return local lm `"`lm'"'
+end
+sysuse auto, clear
+* a right-hand legend kept because two plots share a label moves out past the labels
+scatter price mpg || lfit price mpg || qfit price mpg, legend(position(3) cols(1)) name(r8a, replace)
+r8gap r8a
+local gap0 = r(gap)
+gpolish endlabel
+r8rec r8a
+chk r8_dup_legend_recorded "`r(lm)'"!=""
+r8gap r8a
+local gap1 = r(gap)
+chk r8_dup_legend_moved `gap1' > `gap0' + 1000
+chk r8_dup_legend_shown "`.r8a.legend.draw_view.setting'"=="yes"
+gpolish clear
+r8gap r8a
+chk r8_dup_legend_back abs(r(gap) - `gap0') < 1
+* an explicit keeplegend does the same
+scatter price mpg || lfit price mpg || qfit price mpg, legend(position(3) cols(1)) name(r8b, replace)
+gpolish endlabel, keeplegend labels("Linear" "Quad")
+r8rec r8b
+chk r8_keep_legend_recorded "`r(lm)'"!=""
+r8gap r8b
+local gapk = r(gap)
+chk r8_keep_legend_moved `gapk' > `gap0' + 1000
+* a rerun undoes the move before it makes its own, so the gap does not grow
+gpolish endlabel, keeplegend labels("Linear" "Quad")
+r8gap r8b
+local gapb = r(gap)
+chk r8_keep_legend_rerun abs(`gapb' - `gapk') < 1
+* a legend below the plot is left where it is
+scatter price mpg || lfit price mpg || qfit price mpg, legend(position(6)) name(r8c, replace)
+gpolish endlabel, keeplegend labels("Linear" "Quad")
+r8rec r8c
+chk r8_bottom_legend_unmoved "`r(lm)'"==""
+* legend, plots() checks the plot numbers as endlabel does
+twoway line price mpg || line weight mpg, sort name(r8d, replace)
+capture gpolish legend, plots(7)
+chk r8_legend_plots_range _rc==198
+capture gpolish legend, plots(2)
+chk r8_legend_plots_ok _rc==0
+* ptlabel labels only the points the graph draws
+scatter price mpg if foreign, name(r8e, replace)
+tempfile r8lg
+log using `"`r8lg'"', text name(_r8) replace
+gpolish ptlabel make if price>6000, x(mpg) y(price)
+log close _r8
+quietly count if foreign & price>6000
+local nf = r(N)
+ntext r8e added_text
+chk r8_ptlabel_drawn_only r(k)==`nf'
+logcount `"`r8lg'"' "are not drawn in the graph"
+chk r8_ptlabel_undrawn_note r(n)==1
+* undrawn keeps the selected points inside the plot region
+scatter price mpg if foreign, name(r8f, replace)
+gpolish ptlabel make if price>6000, x(mpg) y(price) undrawn
+ntext r8f added_text
+chk r8_ptlabel_undrawn_opt r(k) > `nf'
+* a graph that draws every observation gets every label and no note
+scatter price mpg, name(r8g, replace)
+log using `"`r8lg'"', text name(_r8) replace
+gpolish ptlabel make if price>12000, x(mpg) y(price)
+log close _r8
+quietly count if price>12000
+local na = r(N)
+ntext r8g added_text
+chk r8_ptlabel_all_drawn r(k)==`na'
+logcount `"`r8lg'"' "are not drawn in the graph"
+chk r8_ptlabel_no_note r(n)==0
+* the data in memory are unchanged
+chk r8_ptlabel_data_kept _N==74
+
 gpolish limits
 
 if `"`_wf0'"'!="" graph set window fontface `"`_wf0'"'
