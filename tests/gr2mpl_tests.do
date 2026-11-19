@@ -1220,4 +1220,21 @@ capture gr2mpl, saving("tests/out/r_sav_sub.png", bogus)
 ok _rc == 198
 erase "tests/out/r_sav_sub.png"
 
+* -- lwscale() and msscale() below 1 render (JSON needs 0.5, not .5); 0 or less is an error
+twoway scatter mpg weight
+gr2mpl, msscale(0.5) saving("tests/out/r_scale.png") replace
+ok _rc == 0
+gr2mpl, lwscale(.75) msscale(.5) saving("tests/out/r_scale.png") replace
+capture confirm file "tests/out/r_scale.png"
+ok _rc == 0
+capture gr2mpl, msscale(-1) saving("tests/out/r_scale.png") replace
+ok _rc == 198
+capture gr2mpl, lwscale(0) saving("tests/out/r_scale.png") replace
+ok _rc == 198
+erase "tests/out/r_scale.png"
+
+* -- gr2mpl doctor returns r(mplok) as a number
+gr2mpl doctor
+ok r(mplok) == 1
+
 di as res "$R_N checks passed"

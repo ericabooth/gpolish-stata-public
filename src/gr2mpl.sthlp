@@ -76,7 +76,7 @@ tick labels, end labels and titles; the axes of {cmd:by()} panels are lined up.
 
 {phang}{opt nogrid}, {opt nohalo} and {opt noticks} switch off the grid, the white halo behind annotation text, and the x-axis tick marks.
 
-{phang}{opt lwscale(#)} and {opt msscale(#)} multiply all line widths and marker sizes (default 1, which matches Stata).
+{phang}{opt lwscale(#)} and {opt msscale(#)} multiply all line widths and marker sizes (default 1, which matches Stata). Each must be greater than 0; values below 1, such as {cmd:msscale(0.5)}, make lines or markers smaller.
 
 {phang}{opt python(path)} names the Python interpreter to use. See {help gr2mpl##python:Python setup}.
 
@@ -178,6 +178,7 @@ Other differences are limits of the translation:
 {p 8 12 2}o {cmd:aspectratio()} is followed in a single graph, with the plot region centred. In {cmd:by()} panels and {cmd:graph combine} it is not followed, and each panel fills its cell.{p_end}
 {p 8 12 2}o Minor tick labels from {cmd:xmlabel()} and {cmd:ymlabel()} are drawn at 80% of the major tick-label size; ticks from {cmd:xmtick()} and {cmd:ymtick()} without labels are not drawn.{p_end}
 {p 8 12 2}o {cmd:xscale(alt)} is not followed: the x axis stays at the bottom. When Stata draws both y axes on one side (as it does with a third y axis), the second is drawn on the other side.{p_end}
+{p 8 12 2}o Text positions in the {cmd:gr2mpl} image were measured against Stata's own export on one graph only, where titles and tick labels sat within about 4 points of Stata's. Other graphs may differ by more; compare the two images before using a translated figure in print.{p_end}
 
 
 {marker examples}{...}
@@ -197,7 +198,7 @@ Other differences are limits of the translation:
 (skipped layers, panels and annotations, separated by semicolons), and, with {opt keepspec}, {cmd:r(specdir)} (the folder that holds the intermediate files).
 
 {pstd}{cmd:gr2mpl doctor} returns {cmd:r(python)}, {cmd:r(pymode)}, {cmd:r(mplversion)} (the matplotlib version)
-and {cmd:r(mplok)} (1 when that version is 3.6 or later, 0 when it is older).
+and the scalar {cmd:r(mplok)} (1 when that version is 3.6 or later, 0 when it is older, missing when the version could not be read).
 
 
 {title:Technical note}

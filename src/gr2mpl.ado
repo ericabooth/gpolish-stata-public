@@ -19,6 +19,15 @@ program gr2mpl, rclass
         di as err "gr2mpl: unknown subcommand `sub'"
         exit 198
     }
+    foreach o in lwscale msscale {
+        if ``o'' <= 0 | ``o'' >= . {
+            di as err "gr2mpl: `o'() must be a number greater than 0"
+            exit 198
+        }
+        * JSON needs a leading zero (.5 is not a valid number)
+        local `o' = strtrim(strofreal(``o'', "%12.0g"))
+        if substr("``o''", 1, 1) == "." local `o' "0``o''"
+    }
     local palette = strlower(strtrim(`"`palette'"'))
     if !inlist(`"`palette'"', "", "house") {
         di as err `"gr2mpl: palette() must be house (got `palette')"'
@@ -530,7 +539,8 @@ program _g2m_doctor, rclass
     return local pymode "`mode'"
     return local python `"`exe'"'
     return local mplversion "`mplv'"
-    return local mplok "`mplok'"
+    if inlist("`mplok'", "0", "1") return scalar mplok = `mplok'
+    else return scalar mplok = .
 end
 
 * ---------------------------------------------------------------------------
