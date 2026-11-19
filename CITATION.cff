@@ -15,8 +15,8 @@ authors:
     given-names: Eric A.
     affiliation: Texas 2036
     email: eric.a.booth@gmail.com
-version: 0.6.1
-date-released: "2026-11-17"
+version: 0.7.0
+date-released: "2026-11-18"
 license: MIT
 repository-code: "https://github.com/ericabooth/gpolish-stata-public"
 url: "https://ericabooth.github.io/gpolish-stata-public/gallery/"
