@@ -621,6 +621,13 @@ scatter mpg price, name(gs, replace)
 graph combine gb gs, title("by() inside combine")
 rchk by_in_combine
 ok strpos(`"$R_UNSUP"', "a by() graph inside graph combine")
+* after a by() graph has been put in graph combine, Stata reports .graphfamily
+* "combine" for later by() graphs; gr2mpl reads the family from .classname
+scatter mpg weight, by(foreign)
+rchk by_after_combine
+has "family=by"
+has "panel1.ptitle=Domestic"
+has "panel2.ptitle=Foreign"
 
 * -- end labels sit outside the plot on a reversed x axis
 sysuse uslifeexp, clear
@@ -664,7 +671,10 @@ has "ytitle_side=left"
 sysuse auto, clear
 scatter mpg weight, yscale(alt) by(foreign)
 rchk by_yalt
+* (this runs after the graph combine above, so it also checks the family)
+has "family=by"
 has "ytitle_side=left"
+has "panel1.yside=right"
 * yaxis(1 2): one region holds both axes (.y_scales is "2 1"); Stata draws both axes,
 * the axis-1 title and the grid
 sysuse uslifeexp, clear
@@ -708,7 +718,14 @@ ok ustrregexm(lower(`"`r(val)'"'), "^price\|turn circle \(ft\.\) ?\|mileage \(mp
 has "panel1.legend_plots=2|3|1"
 twoway (scatter mpg weight) (scatter price weight, yaxis(2)) (scatter turn weight), by(foreign)
 rchk legend_regions_by
+has "family=by"
 has "panel1.plot2.axis=y2"
+has "panel1.ptitle=Domestic"
+has "panel2.ptitle=Foreign"
+* the shared legend maps its keys region by region, as in a single twoway graph
+has "fig_legend_plots=1|3|2"
+getv fig_legend
+ok ustrregexm(lower(`"`r(val)'"'), "^mileage \(mpg\)\|turn circle \(ft\.\) ?\|price$")
 sysuse uslifeexp, clear
 
 * -- gpolish endlabel next to a y axis: the plot-region margin is kept, so the labels
@@ -768,6 +785,16 @@ getv panel1.axes_wpts
 local wa = real(`"`r(val)'"')
 getv panel2.axes_wpts
 ok `wa' > real(`"`r(val)'"')
+graph drop ga gb
+* text() in a graph combine member is drawn (the member reports .n_text as 0)
+line le year, name(ga, replace) text(75 1950 "a text box", box) text(60 1920 "second" "two lines", place(e))
+line le_male year, name(gb, replace) text(50 1960 "member two", color(red))
+graph combine ga gb, title("text() in combine members")
+rchk combine_text
+has "panel1.ann=a text box|left|0|y1|in"
+has "panel1.ann=second|left|0|y1|in"
+has "panel1.ann=two lines|left|0|y1|in"
+has "panel2.ann=member two|left|0|y1|in"
 graph drop ga gb
 * a default plot-region margin keeps gr2mpl's padding (no change from earlier renders)
 line le year, title("default margin")
@@ -857,6 +884,50 @@ if c(os) != "Windows" {
         ok _rc == 601
         capture confirm file "tests/out/r_old.png"
         ok _rc != 0
+        * the 601 message names the global itself, not its contents twice
+        global GR2MPL_SEARCH nosuchpy1 nosuchpy2
+        global GR2MPL_PYRESOLVED
+        capture log close g2mse
+        log using "tests/out/search601.txt", text replace name(g2mse)
+        capture noisily gr2mpl, name(mv) saving("tests/out/r_old.png") replace
+        local rc601 = _rc
+        log close g2mse
+        ok `rc601' == 601
+        local nfrom 0
+        local nbad 0
+        file open `dh' using "tests/out/search601.txt", read text
+        file read `dh' line
+        while r(eof) == 0 {
+            if strpos(`"`macval(line)'"', "nosuchpy1 nosuchpy2   (from " + char(36) + "GR2MPL_SEARCH)") local ++nfrom
+            if strpos(`"`macval(line)'"', "(from nosuchpy1") local ++nbad
+            file read `dh' line
+        }
+        file close `dh'
+        ok `nfrom' == 1
+        ok `nbad' == 0
+        erase "tests/out/search601.txt"
+        * the search stops at the first Python that is new enough: a stand-in listed
+        * after it (one that reports 3.9.0 but cannot draw) is not used
+        file open `fk' using "tests/out/newmpl.sh", write text replace
+        file write `fk' "#!/bin/sh" _n `"echo "MPLOK 3.9.0""' _n
+        file close `fk'
+        shell chmod +x "tests/out/newmpl.sh"
+        global GR2MPL_PYRESOLVED
+        global GR2MPL_SEARCH `""`keeppy'" "`c(pwd)'/tests/out/newmpl.sh""'
+        gr2mpl, name(mv) saving("tests/out/r_old.png") replace
+        ok `"`r(python)'"' == `"`keeppy'"'
+        ok `"$GR2MPL_PYRESOLVED"' == `"`keeppy'"'
+        * python() is used as given; the default search is not run after it
+        global GR2MPL_PYRESOLVED
+        global GR2MPL_SEARCH `""`c(pwd)'/tests/out/newmpl.sh""'
+        gr2mpl, name(mv) saving("tests/out/r_old.png") replace python(`"`keeppy'"')
+        ok `"`r(python)'"' == `"`keeppy'"'
+        ok `"$GR2MPL_PYRESOLVED"' == `"`keeppy'"'
+        * a quoted python() path is accepted
+        global GR2MPL_PYRESOLVED
+        gr2mpl, name(mv) saving("tests/out/r_old.png") replace python(`""`keeppy'""')
+        ok `"`r(python)'"' == `"`keeppy'"'
+        erase "tests/out/newmpl.sh"
         global GR2MPL_SEARCH
         global GR2MPL_PYRESOLVED
         global GR2MPL_PYMODE

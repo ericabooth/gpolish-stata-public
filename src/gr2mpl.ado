@@ -1,4 +1,4 @@
-*! gr2mpl 0.6.0  redraw a Stata graph held in memory with matplotlib
+*! gr2mpl 0.6.0  18nov2026  redraw a Stata graph held in memory with matplotlib
 *! Walks the graph object (not the syntax), writes a JSON spec + serset CSVs,
 *! then runs gr2mpl_render.py (embedded Python if it has matplotlib, else a shell
 *! call). Writes a PNG, PDF, SVG or JPG image. Needs matplotlib 3.6 or later.
@@ -40,7 +40,8 @@ program gr2mpl, rclass
         di as err "graph `name' not found in memory"
         exit 111
     }
-    if "``g'.classname'" == "piegraph_g" local fam pie
+    _g2m_family `g'
+    local fam `s(fam)'
     if !inlist("`fam'", "twoway", "bar", "by", "combine", "matrix") {
         di as err "gr2mpl: graph family `fam' is not supported"
         di as err "        (supported: twoway, graph bar/hbar/dot/box, graph matrix, by(), graph combine)"
@@ -279,6 +280,26 @@ program _g2m_cleanup
 end
 
 * ---------------------------------------------------------------------------
+* graph family, read from .classname. .graphfamily is not reliable: once a by()
+* graph has been put in a graph combine, Stata reports "combine" as the
+* .graphfamily of every later by() graph in the session (.classname stays
+* bygraph_g). .graphfamily is used only for a class this list does not name.
+* ---------------------------------------------------------------------------
+program _g2m_family, sclass
+    args g
+    local cls `"``g'.classname'"'
+    local fam
+    if "`cls'" == "twowaygraph_g" local fam twoway
+    else if "`cls'" == "bygraph_g" local fam by
+    else if "`cls'" == "combinegraph_g" local fam combine
+    else if "`cls'" == "matrixgraph_g" local fam matrix
+    else if "`cls'" == "piegraph_g" local fam pie
+    else if inlist("`cls'", "bargraph_g", "hbargraph_g", "dotchartgraph_g", "boxgraph_g") local fam bar
+    else local fam `"``g'.graphfamily'"'
+    sreturn local fam `"`fam'"'
+end
+
+* ---------------------------------------------------------------------------
 * Python discovery
 *   1 python() option  2 $GR2MPL_PYTHON  3 Stata's embedded Python
 *   4 python3, then python, on PATH.  In 3 and 4 a Python whose matplotlib is
@@ -296,9 +317,16 @@ program _g2m_python, sclass
         sreturn local mplversion "$GR2MPL_MPLVERSION"
         exit
     }
-    if `"`python'"' != "" local cands `"`"`python'"'"'
-    else if `"$GR2MPL_PYTHON"' != "" local cands `"`"$GR2MPL_PYTHON"'"'
-    foreach c of local cands {
+    * an explicit choice is checked on its own, with no loop (a bare exit
+    * inside a loop does not leave the program)
+    local c `"`python'"'
+    if `"`c'"' == "" local c `"$GR2MPL_PYTHON"'
+    * python("/path with spaces/python") keeps its quotes; drop them
+    if usubstr(`"`c'"', 1, 1) == char(34) & usubstr(`"`c'"', -1, 1) == char(34) ///
+        & ustrlen(`"`c'"') > 1 {
+        local c = usubstr(`"`c'"', 2, ustrlen(`"`c'"') - 2)
+    }
+    if `"`c'"' != "" {
         if strpos(`"`c'"', "/") | strpos(`"`c'"', "\") {
             capture confirm file `"`c'"'
             if _rc {
@@ -314,7 +342,6 @@ program _g2m_python, sclass
             exit
         }
         _g2m_trypy `"`c'"'
-        local tried `"`tried' `"`c'"'"'
         if "`s(ok)'" == "1" {
             local v `s(v)'
             * a Python whose matplotlib is too old is reported, not remembered
@@ -373,12 +400,20 @@ program _g2m_python, sclass
             }
             continue
         }
-        global GR2MPL_PYMODE "`mode'"
-        global GR2MPL_PYRESOLVED `"`c'"'
-        global GR2MPL_MPLVERSION "`v'"
-        sreturn local mode "`mode'"
-        sreturn local python `"`c'"'
-        sreturn local mplversion "`v'"
+        * the first candidate that is new enough is used; the search stops
+        * here (a bare exit inside the loop would not leave the program)
+        local usemode `mode'
+        local usepy `"`c'"'
+        local usev `v'
+        continue, break
+    }
+    if "`usemode'" != "" {
+        global GR2MPL_PYMODE "`usemode'"
+        global GR2MPL_PYRESOLVED `"`usepy'"'
+        global GR2MPL_MPLVERSION "`usev'"
+        sreturn local mode "`usemode'"
+        sreturn local python `"`usepy'"'
+        sreturn local mplversion "`usev'"
         exit
     }
     * none is new enough: report the first one found, which the caller stops on
@@ -390,7 +425,7 @@ program _g2m_python, sclass
     }
     di as err "gr2mpl: no Python with matplotlib was found."
     di as err "  tried, in order:"
-    if `"$GR2MPL_SEARCH"' != "" di as err `"    $GR2MPL_SEARCH   (from \$GR2MPL_SEARCH)"'
+    if `"$GR2MPL_SEARCH"' != "" di as err `"    $GR2MPL_SEARCH   (from {c 36}GR2MPL_SEARCH)"'
     else {
         if `"`embexe'"' != "" di as err `"    Stata's Python (`embexe')"'
         else di as err "    Stata's Python (none configured; see {help python})"
@@ -487,8 +522,8 @@ end
 program _g2m_panel
     args fh g specdir role gm
     if "`gm'" == "" local gm 1
-    local fam `"``g'.graphfamily'"'
-    if "``g'.classname'" == "piegraph_g" local fam pie
+    _g2m_family `g'
+    local fam `s(fam)'
     file write `fh' "    {" _n
     _g2m_kv `fh' "family" `"`fam'"' 6
     _g2m_kv `fh' "role" "`role'" 6
@@ -673,6 +708,18 @@ program _g2m_twoway
     * text boxes placed with text(); text(, yaxis(2)) is stored in another region
     local nt ``g'.n_text'
     if "`nt'" == "" local nt 0
+    * a member of graph combine reports .n_text as 0 although its plot regions
+    * still hold textbox1, textbox2, ...; count those directly
+    local more 1
+    while `more' {
+        local k = `nt' + 1
+        local more 0
+        forvalues j = 1/`npr' {
+            if "``g'.plotregion`j'.textbox`k'.xpos.val'" != "" local more 1
+        }
+        if `more' local nt `k'
+        if `nt' >= 1000 local more 0
+    }
     file write `fh' `"  "textboxes": ["' _n
     local first 1
     forvalues k = 1/`nt' {
@@ -1006,8 +1053,10 @@ end
 * word k of s(rord).
 program _g2m_rorder, sclass
     args g
+    _g2m_family `g'
+    local fam `s(fam)'
     sreturn local rord ""
-    if `"``g'.graphfamily'"' != "twoway" exit
+    if "`fam'" != "twoway" exit
     capture local npr = ``g'.n_plotregions'
     if _rc | "`npr'" == "" exit
     if `npr' < 2 exit

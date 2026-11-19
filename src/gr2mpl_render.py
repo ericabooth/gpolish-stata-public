@@ -1965,6 +1965,12 @@ class Figure:
         out = []
         fig = self.fig
         r = fig.canvas.get_renderer()
+        out.append(f"family={self.s.get('family', '')}")
+        fl = getattr(self, "fig_legend", None)
+        if fl:
+            out.append("fig_legend=" + "|".join(str(t) for t in fl[1]))
+            out.append("fig_legend_plots=" + "|".join(
+                str(k) for k in getattr(fl[2], "_legend_plots", [])))
         arts = getattr(self, "_title_artists", [])
         texts = [a for a in arts if isinstance(a, matplotlib.text.Text)]
         if texts and self.s.get("title"):
@@ -1982,6 +1988,9 @@ class Figure:
             pos = ax.get_position()
             axbb = ax.get_window_extent(r)
             out.append(f"{tag}.axes={pos.x0:.3f},{pos.y0:.3f},{pos.width:.3f},{pos.height:.3f}")
+            pt = ax.get_title(loc="left")
+            if pt:
+                out.append(f"{tag}.ptitle={pt}")
             for info in p.infos:
                 which = "y2" if (p.ax2 is not None and info["ax"] is p.ax2) else "y1"
                 out.append(f"{tag}.plot{info['p'].get('index')}.axis={which}")

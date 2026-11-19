@@ -49,7 +49,8 @@ tick label, legend, marker label and text box, and converts it to points the way
 shorter side of the graph, so a small {cmd:xsize()} and {cmd:ysize()} or a scheme with its own sizes
 gives the same proportions as Stata's own export. Panels of {cmd:by()}, {cmd:graph combine} and
 {cmd:graph matrix} graphs are shrunk by the same factor Stata uses ({cmd:iscale()}), and that factor
-also applies to text added with {cmd:text()} or {cmd:gpolish}. As in Stata, each member of
+also applies to text added with {cmd:text()} or {cmd:gpolish}, including {cmd:text()} boxes inside
+the members of {cmd:graph combine}. As in Stata, each member of
 {cmd:graph combine} gets a cell of equal size, and its plot takes what is left of the cell after its own
 tick labels, end labels and titles; the axes of {cmd:by()} panels are lined up.
 

@@ -35,8 +35,8 @@ prints it.
 Order: `python()` option, `$GR2MPL_PYTHON`, Stata's embedded Python if it can import
 matplotlib (then the renderer runs through `python script`, no shell), then `python3`,
 then `python`, on PATH. In the default search (the last three) an interpreter whose
-matplotlib is older than 3.6 is passed over with a note and the next one is tried; the
-first one found is reported with error 601 only when none is new enough. An interpreter
+matplotlib is older than 3.6 is passed over with a note and the next one is tried, and
+the search stops at the first one that is new enough; the first one found is reported with error 601 only when none is new enough. An interpreter
 named with `python()` or `$GR2MPL_PYTHON` is not passed over. `$GR2MPL_SEARCH` replaces
 the default search list (`embedded` names Stata's Python), which the test battery uses
 to check the fall-through. The working choice is cached in `$GR2MPL_PYRESOLVED`, `$GR2MPL_PYMODE`
@@ -54,9 +54,17 @@ is exported by Stata and by gr2mpl into `tests/out/` for side-by-side comparison
 ## Object-model facts (verified)
 
 Graph level (`.g` = `.graphname`)
+- `.g.classname` names the kind of graph: `twowaygraph_g`, `bygraph_g`, `combinegraph_g`,
+  `matrixgraph_g`, `bargraph_g`, `hbargraph_g`, `dotchartgraph_g`, `boxgraph_g`,
+  `piegraph_g`. gr2mpl reads the family from it.
 - `.g.graphfamily`: `twoway`, `bar` (graph bar/hbar/dot/box and pie all say `bar`), `by`,
-  `combine`, `matrix`. A pie chart is told apart by `.g.classname == "piegraph_g"`.
-- `.g.n_views`: number of plots; `.g.n_text`: number of `text()` boxes
+  `combine`, `matrix`. It is not reliable for by() graphs: once a by() graph has been put
+  in `graph combine`, Stata reports `combine` for every later by() graph in the session
+  (checked on Stata 16.1 and 19.5), while `.classname` stays `bygraph_g`. gr2mpl uses
+  `.graphfamily` only for a class not listed above.
+- `.g.n_views`: number of plots; `.g.n_text`: number of `text()` boxes. Inside a member
+  of `graph combine`, `.n_text` is 0 although the member's plot regions still hold
+  `textbox1`, `textbox2`, ...; gr2mpl counts those directly.
 - `.g.style.declared_xsize.val`, `.declared_ysize.val`: size in inches (default 7.5 x 4.5 with
   stcolor in Stata 19.5, 5.5 x 4 with s2color in Stata 16.1)
 - `.g.title.text[k]`, `.subtitle`, `.note`, `.caption`: arrays of lines (`.text.arrnels`)
@@ -183,11 +191,11 @@ Other
 | tri-panel sharing in `by(, total)` / `holes()` | untested | |
 
 More object paths
-- by(): `.g.graphfamily == "by"`, `.g.n`, `.g.rows`, `.g.cols`, `.g.graphs[k]` (each a
+- by(): `.g.classname == "bygraph_g"`, `.g.n`, `.g.rows`, `.g.cols`, `.g.graphs[k]` (each a
   full twoway or bar graph object), panel label in `.g.graphs[k].subtitle.text[1]`,
   shared legend in `.g.legend`, overall title/note at `.g.title` / `.g.note`. A panel's
   suppressed axis shows as `.graphs[k].yaxis1.draw_view.setting == "no"`.
-- combine: `.g.graphfamily == "combine"`, same `.graphs[k]` array; each member keeps its
+- combine: `.g.classname == "combinegraph_g"`, same `.graphs[k]` array; each member keeps its
   own title, axes and legend.
 - box: `.plotregion1.boxes[k]` with `.z` (category position, 0-100), `.p25 .p50 .p75
   .adjl .adjh .width2 .horizontal`, colour in `.rect.style.shadestyle.color.setting`;
@@ -235,7 +243,9 @@ More object paths
   when Stata drew the y axis on the right (`yscale(alt)`). With two y axes each title stays beside its axis. by() graphs keep the shared
   title at the left, as Stata does with `yscale(alt)`.
 - Text boxes (`text()` and gpolish's `added_text`) in by() and combine panels are scaled
-  by the panel's `iscale()` factor (`.gmetric_mult`), like titles and tick labels.
+  by the panel's `iscale()` factor (`.gmetric_mult`), like titles and tick labels. The
+  `text()` boxes of a combine member are found through its plot regions
+  (`.plotregionJ.textboxK`), since the member's `.n_text` is 0.
 - graph combine: each member gets an equal cell, and its axes take what is left of the
   cell after its own tick labels, end labels and titles, so a member whose end labels
   sit outside the plot has a narrower plot than its neighbour, as in Stata. by() panels
@@ -302,7 +312,7 @@ glyphs. Boxed text is not rotated.
 
 ## graph matrix
 
-- `.g.graphfamily == "matrix"`, `.g.nvars`.
+- `.g.classname == "matrixgraph_g"` (`.g.graphfamily == "matrix"`), `.g.nvars`.
 - Cell (row i, column j): `.g.plotregion1.plotregion<i>_<j>.plot1`, an ordinary scatter
   view with its own `.xscale` / `.yscale`. With `half` only i > j exists.
 - Diagonal titles: `.g.plotregion1.titlegrid<k>.variable_title<k>.text[1..]`.
