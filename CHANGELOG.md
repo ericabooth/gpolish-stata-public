@@ -6,6 +6,11 @@ This release contains gpolish 0.7.0 and gr2mpl 0.6.0. The changes listed under 0
 
 ### gpolish
 
+- `gpolish endlabel` takes each label from the plot's legend text when that text differs from the variable label, so a fit line from `lfit`, `qfit` or `lowess` is labelled "Fitted values" and `marginsplot` lines are labelled "Domestic" and "Foreign" as in the legend. Otherwise the raw variable label is used, as before. `labels()` still overrides both.
+- `gpolish endlabel` prints a note when two plots would get the same label, suggests `labels()`, and keeps the legend in that case.
+- `gpolish clear` with nothing to remove makes no edit and prints nothing. Before, it printed "removed 0 text box(es), ..." and the Graph Editor note.
+- `gpolish ptlabel` skips selected points that fall outside the axis range of the plot region and prints a note that gives how many. Before, it labelled them, and the labels sat above the plot or past the edge of the graph. When no selected point is inside the plot region, it makes no edit.
+- `gpolish ptlabel` prints a note when it places more than 300 labels, because run time grows quickly with the number of labels. The new option `maxlabels(#)` (default 1000) refuses a larger selection before any edit, with error 198.
 - `gpolish endlabel` keeps its record in the graph itself, in one hidden text box, instead of in a session list keyed by graph name and drawing time. A second `endlabel` replaces the first set of labels, and `gpolish clear` restores the margin and the legend, also after arrows, callouts, brackets or leader lines were added and after `graph save` and `graph use` in a new session. A re-run reuses the record box, so a graph has at most one. A graph redrawn under the same name starts without a record.
 - After any sequence of `endlabel` runs, one `gpolish clear` returns the plot region and the legend to their state before the first run and removes every added text box, line and marker; a second `clear` makes no edit and prints no note.
 - When a recorded end label was changed or removed by other means (for example in the Graph Editor), `endlabel` still gives back the earlier run's margin and restores the legend if that run switched it off. It hides the earlier labels, values and dots that are unchanged, leaves the changed ones as they are, and a note gives their number. Before, the margin stayed and one `clear` left the plot region narrower than before the first run, with the legend off.
@@ -24,6 +29,10 @@ This release contains gpolish 0.7.0 and gr2mpl 0.6.0. The changes listed under 0
 
 ### gr2mpl 0.6.0
 
+- graph bar, hbar, box and dot with by(): every panel is now drawn on the scale range Stata shares across the panels, so bars in panels without tick labels have the right height against the labelled axis. by(, yrescale) keeps each panel on its own scale.
+- Legends that wrap onto more than one row now read row by row in Stata's order (legend order(), plot order), as Stata fills them; legend(colfirst) fills column by column. This applies to single-graph legends, graph bar legends and the shared by() legend. The spec now records Stata's col_first setting (and rows/cols for graph bar legends).
+- graph bar with two over() groups: the outer group labels are now placed below the lowest edge of the inner category labels, after any rotation, so the two rows no longer overprint.
+- legend(cols()) and legend(rows()) counts are not followed: gr2mpl fits as many keys per row as the width allows (documented in the help's Limits).
 - Second axes: plots on `yaxis(2)` are drawn against that axis wherever they appear in the command, `yaxis(1 2)` keeps both axes, `yline(, axis(2))` and `text(, yaxis(2))` are drawn on the second axis, each y axis is drawn on the side Stata used, and `yscale(alt)` puts the y axis and its title on the right. A layer, reference line or `text()` on a second x axis or a third y axis is skipped with a note and listed in `r(unsupported)`; so is a `by()` graph inside `graph combine`.
 - A plot-region margin wider than 4 relative units is kept, so `gpolish endlabel` with an axis on the labelled side renders with the labels between the axis and the lines. `plotregion(margin(large))` is followed.
 - Text sizes follow the sizes Stata stored, and panels of `by()`, `graph combine` and `graph matrix` are scaled by Stata's `iscale()` factor, text boxes included. In `graph combine`, each member gets a cell of equal width.
