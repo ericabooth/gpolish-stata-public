@@ -1101,6 +1101,30 @@ barpix rbar_none 0 8000 dark
 twoway bar mpg weight, fcolor(none) barwidth(40) title("bar, fcolor(none)")
 rchk bar_fnone
 barpix bar_fnone 1000
+* area and rarea with color(none) draw their outline in lcolor(), as Stata does
+sysuse uslifeexp, clear
+gen lo = le - 3
+twoway area le year, color(none) lcolor(cranberry) title("area, color(none)")
+rchk area_none
+barpix area_none 500
+twoway rarea lo le year, color(none) lcolor(cranberry) title("rarea, color(none)")
+rchk rarea_none
+barpix rarea_none 1000
+* with lcolor(none) too, nothing coloured is drawn
+twoway area le year, color(none) lcolor(none) title("area, no colour")
+rchk area_none2
+barpix area_none2 0 50
+* mcolor(none) and mfcolor(none) with a visible mlcolor() draw hollow markers:
+* the outline is drawn and the marker is not filled black
+sysuse auto, clear
+scatter mpg weight, mcolor(none) mlcolor(cranberry) msize(large) title("scatter, mcolor(none)")
+rchk mcolor_none
+barpix mcolor_none 1000
+barpix mcolor_none 0 8000 dark
+scatter mpg weight, mfcolor(none) mlcolor(cranberry) msize(large) title("scatter, mfcolor(none)")
+rchk mfcolor_none
+barpix mfcolor_none 1000
+barpix mfcolor_none 0 8000 dark
 erase "tests/out/barpix.py"
 
 di as res "$R_N checks passed"

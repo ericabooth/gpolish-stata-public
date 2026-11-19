@@ -54,6 +54,8 @@ This release contains gpolish 0.7.0 and gr2mpl 0.6.0. The changes listed under 0
 - `saving()` naming a folder that ends in a slash writes `<graphname>_mpl.png` there; `palette()` accepts only `house`; matplotlib's font-fallback warnings are no longer printed.
 - `twoway bar` and `twoway rbar` bars narrower than about 0.5% of the x range (for example the default `barwidth()` on a weight axis in pounds) are outlined in their own colour, as Stata draws them, so they show as thin bars instead of disappearing behind a white edge. Wider bars keep their white separators. This also restores the rbar layer in `rarea || rbar` graphs.
 - A colour set to `none` is passed to matplotlib as no colour. Before, the spec recorded it as black, so `twoway bar` and `rbar` with `color(none)` or `fcolor(none)` drew black bars; they now draw no fill, as in Stata, with an outline only when the outline colour is visible.
+- `area` and `rarea` with `color(none)` draw their outline in `lcolor()`: an `area` gets its top edge and an `rarea` both edges, and the legend key is an outlined box. Stata also draws an `area`'s base and side edges; gr2mpl draws only the top edge. Before, the `area` outline was drawn in white and the `rarea` had no outline. With `lcolor(none)` too, nothing is drawn.
+- `scatter` (and other marker plots) with `mcolor(none)` or `mfcolor(none)` and a visible `mlcolor()` draw hollow markers. Before, the spec recorded the marker fill as black, because Stata stores a `none` marker fill as black and only its style name says it is none, so the markers were drawn filled black.
 
 ### Benchmark
 

@@ -1141,7 +1141,8 @@ program _g2m_pairs
         if _rc local val ""
         local val : list retokenize val
         * color(none) reads back as black; its style name says it is none
-        if substr("`path'", -14, .) == ".color.setting" {
+        * (also marker fillcolor, whose path ends in fillcolor.setting)
+        if substr("`path'", -13, .) == "color.setting" {
             local cpath = substr("`path'", 1, strlen("`path'")-8)
             local snm
             capture local snm ``obj'.`cpath'.snm'

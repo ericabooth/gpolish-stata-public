@@ -1235,4 +1235,5 @@ chk r3_bracket_fixed abs(`bx1'-`bx2') < 1e-6
 gpolish limits
 
 if `"`_wf0'"'!="" graph set window fontface `"`_wf0'"'
+else graph set window fontface default
 di as res _n "gpolish battery: $NCHK checks passed (Stata `c(stata_version)')"

@@ -581,6 +581,12 @@ class Panel:
                 return dict(marker="None")
             same = tuple(mline[:3]) == tuple(mfill[:3])
             mlw = num(p.get("mlwidth"))
+            if mfill[3] == 0:
+                # mcolor(none) or mfcolor(none): a hollow marker, outlined only when
+                # the outline colour is visible, as Stata draws it
+                edge = mline if mline[3] > 0 else "none"
+                return dict(marker=marker, ms=self.ms(p), mfc="none", mec=edge,
+                            mew=max(1.0, self.pts(mlw)) if mlw else 1.2)
             if hollow:
                 return dict(marker=marker, ms=self.ms(p), mfc="white", mec=mline,
                             mew=max(1.0, self.pts(mlw)) if mlw else 1.2)
@@ -605,7 +611,8 @@ class Panel:
                 (h,) = ax.plot(x, y, color=lc, lw=self.lw(p), ls=ls, zorder=z + 1.5,
                                **marker_kw())
             info["handle"] = h
-            info["color"] = lc if t == "connected" else (mline if hollow else mfill)
+            info["color"] = lc if t == "connected" else (
+                mline if (hollow or mfill[3] == 0) else mfill)
             self.point_labels(ax, cols, x, y, p)
         elif t in ("bar", "rbar"):
             width = num(p.get("barsize"), 0.8) or 0.8
@@ -652,13 +659,24 @@ class Panel:
             if base is None:
                 base = num(p.get("drawnbase"), 0.0) or 0.0
             col = afill if afill[3] < 1 else (afill[0], afill[1], afill[2], 0.85)
+            edge = afill[:3]
+            if afill[3] == 0:
+                # color(none): no fill; the outline takes lcolor(), as in Stata
+                aline = self.plot_color(p, "aline", i, lc)
+                edge = aline if aline[3] > 0 else None
             if horizontal:
                 h = ax.fill_betweenx(x, base, y, color=col, lw=0, zorder=z)
-                ax.plot(y, x, color=afill[:3], lw=1.2, zorder=z + 0.5)
+                if edge is not None:
+                    ax.plot(y, x, color=edge, lw=1.2, zorder=z + 0.5)
             else:
                 h = ax.fill_between(x, base, y, color=col, lw=0, zorder=z)
-                ax.plot(x, y, color=afill[:3], lw=1.2, zorder=z + 0.5)
-            info.update(handle=h, color=afill, horizontal=horizontal)
+                if edge is not None:
+                    ax.plot(x, y, color=edge, lw=1.2, zorder=z + 0.5)
+            if afill[3] == 0 and edge is not None:
+                # the legend key is an outlined box, as the area is drawn
+                h = Rectangle((0, 0), 1, 1, facecolor="none", edgecolor=edge, lw=1.2)
+            info.update(handle=h, color=afill if edge is None or afill[3] > 0 else edge,
+                        horizontal=horizontal)
         elif t == "rarea":
             if y2 is None:
                 return None
@@ -669,7 +687,21 @@ class Panel:
                 h = ax.fill_betweenx(x, y, y2, color=col, lw=0, zorder=1.5)
             else:
                 h = ax.fill_between(x, y, y2, color=col, lw=0, zorder=1.5)
-            info.update(handle=h, color=afill, band=True)
+            shown = afill
+            if afill[3] == 0:
+                # color(none): no fill; both edges are drawn in lcolor() when it is
+                # visible, as Stata outlines the band
+                aline = self.plot_color(p, "aline", i, lc)
+                if aline[3] > 0:
+                    lw = self.lw(p, floor=0.8)
+                    for edge_y in (y, y2):
+                        if horizontal:
+                            ax.plot(edge_y, x, color=aline, lw=lw, zorder=1.6)
+                        else:
+                            ax.plot(x, edge_y, color=aline, lw=lw, zorder=1.6)
+                    shown = aline
+                    h = Rectangle((0, 0), 1, 1, facecolor="none", edgecolor=aline, lw=lw)
+            info.update(handle=h, color=shown, band=True)
         elif t in ("rcap", "rspike", "rcapsym"):
             if y2 is None:
                 return None
