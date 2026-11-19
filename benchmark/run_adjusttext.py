@@ -6,9 +6,12 @@ adjustText runs with its defaults except for the stopping rule, and is told abou
 With neither time_lim nor iter_lim set, adjust_text() stops after 1 second of wall-clock time, so its
 result depends on machine speed and load and differs from run to run. Here it runs a fixed number
 of iterations (ITER_LIM, or the first argument) with no time limit, so two runs give the same positions.
-Writes, per scenario set, out/adjusttext/results_<set>.csv (one row per label: its box and, when
+Writes, per scenario set, out/adjusttext/results_<set>.csv (one row per label: the box adjustText
+worked with, the text's anchor and alignment (adjustText centres each text on its anchor) and, when
 adjustText drew one, its leader line, all in points with y up) and timing_<set>.csv (seconds and
-iterations). A run limited by BENCH_SCENARIOS keeps the rows of the set's other scenarios.
+iterations). score.py measures each box from the anchor with the same rule as the other methods; the
+box adjustText worked with comes from this 72 dpi figure, whose text extents are rounded to whole
+pixels. A run limited by BENCH_SCENARIOS keeps the rows of the set's other scenarios.
 Run from the benchmark folder after run_stata.do:  python run_adjusttext.py [iterations]
 """
 import csv
@@ -108,16 +111,22 @@ def main(iter_lim):
                 lead[id(ap.patchA)] = seg
             for r, t in zip(lab, texts):
                 b = t.get_window_extent(rend)
+                tx, ty = ax.transData.transform(t.get_position())
                 seg = lead.get(id(t), ("", "", "", ""))
-                lab_rows.append([scen, r["label"], b.x0, b.y0, b.x1, b.y1, *seg])
+                lab_rows.append([scen, r["label"], b.x0, b.y0, b.x1, b.y1, tx, ty, t.get_ha(), t.get_va(), *seg])
             time_rows.append([scen, secs, counter.steps])
-            if set_name == "main" and m["seed"] in ("0", "1"):
-                fig.savefig(f"out/adjusttext/{scen}.png", dpi=200, facecolor="white")
+            # images are kept for the main set's real-data scenarios and seed 1 at 200 dpi, or for
+            # every scenario run at BENCH_PNG_DPI when it is set (for audit_ink.py)
+            png_dpi = os.environ.get("BENCH_PNG_DPI", "")
+            if png_dpi or (set_name == "main" and m["seed"] in ("0", "1")):
+                fig.savefig(f"out/adjusttext/{scen}.png", dpi=float(png_dpi or 200), facecolor="white")
             plt.close(fig)
         scens = {m["scenario"] for m in mans}
         merge_write(f"out/adjusttext/results_{set_name}.csv",
-                    ["scenario", "label", "x0", "y0", "x1", "y1", "lx0", "ly0", "lx1", "ly1"], lab_rows, scens,
+                    ["scenario", "label", "x0", "y0", "x1", "y1", "tx", "ty", "ha", "va", "lx0", "ly0", "lx1", "ly1"], lab_rows, scens,
                     set_order(set_name))
+        if os.environ.get("BENCH_PNG_DPI", ""):
+            continue      # its seconds include saving larger images, so they are not kept
         merge_write(f"out/adjusttext/timing_{set_name}.csv", ["scenario", "seconds", "iterations"], time_rows, scens,
                     set_order(set_name))
         print(set_name, len(time_rows), "scenarios")

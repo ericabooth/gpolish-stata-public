@@ -1,0 +1,846 @@
+set,scenario,method,label,found,left,right,bottom,top,dx,dy,dw,dh
+main,autoall,adjusttext,BMW 320i,1,-0.120,-0.205,-0.000,-0.000,-0.042,-0.000,-0.325,-0.000
+main,autoall,adjusttext,Cad. Seville,1,0.000,-0.040,0.000,-0.020,-0.020,-0.010,-0.040,-0.020
+main,autoall,adjusttext,Chev. Malibu,1,-0.120,-0.040,0.000,-0.020,0.040,-0.010,-0.160,-0.020
+main,autoall,adjusttext,Dodge Colt,1,-0.000,0.045,0.000,-0.011,0.023,-0.006,0.045,-0.011
+main,autoall,adjusttext,Mazda GLC,1,0.000,-0.120,0.000,-0.020,-0.060,-0.010,-0.120,-0.020
+main,autoall,adjusttext,Merc. Cougar,1,-0.000,0.080,-0.000,0.009,0.040,0.004,0.080,0.009
+main,autoall,adjusttext,Merc. Marquis,1,-0.000,0.000,-0.000,0.009,0.000,0.004,0.000,0.009
+main,autoall,adjusttext,Olds Toronado,1,0.000,0.010,0.000,-0.020,0.005,-0.010,0.010,-0.020
+main,autoall,adjusttext,Plym. Arrow,1,-0.000,-0.050,0.000,-0.011,-0.025,-0.006,-0.050,-0.011
+main,autoall,adjusttext,Toyota Corolla,1,0.120,0.110,0.000,0.109,-0.005,0.054,0.230,0.109
+main,autoall,adjusttext,VW Dasher,1,-0.120,-0.110,0.000,-0.020,0.005,-0.010,-0.230,-0.020
+main,autoall,default,Fiat Strada,1,-0.120,0.005,0.000,-0.020,0.063,-0.010,-0.115,-0.020
+main,autoall,default,Plym. Arrow,1,-0.120,-0.050,0.120,-0.131,0.035,-0.126,-0.170,-0.011
+main,autoall,default,VW Diesel,1,0.000,0.075,0.000,-0.020,0.038,-0.010,0.075,-0.020
+main,autoall,ggrepel,Audi 5000,1,0.000,0.140,-0.120,0.220,0.070,0.170,0.140,0.100
+main,autoall,ggrepel,Audi Fox,1,-0.120,-0.010,-0.120,0.220,0.055,0.170,-0.130,0.100
+main,autoall,ggrepel,Buick Opel,1,-0.120,0.130,0.000,0.110,0.125,0.055,0.010,0.110
+main,autoall,ggrepel,Buick Skylark,1,-0.120,0.105,-0.120,0.109,0.113,0.114,-0.015,-0.011
+main,autoall,ggrepel,Cad. Deville,1,-0.120,0.190,-0.120,0.221,0.155,0.170,0.070,0.101
+main,autoall,ggrepel,Chev. Chevette,1,-0.120,0.115,-0.120,0.220,0.117,0.170,-0.005,0.100
+main,autoall,ggrepel,Chev. Malibu,1,-0.120,-0.040,0.000,0.101,0.040,0.050,-0.160,0.101
+main,autoall,ggrepel,Fiat Strada,1,-0.000,0.005,-0.120,0.220,0.003,0.170,0.005,0.100
+main,autoall,ggrepel,Linc. Versailles,1,0.000,0.005,0.000,0.100,0.002,0.050,0.005,0.100
+main,autoall,ggrepel,Merc. Cougar,1,-0.120,0.080,-0.120,0.129,0.100,0.124,-0.040,0.009
+main,autoall,ggrepel,Merc. Marquis,1,-0.120,0.120,0.000,0.249,0.120,0.124,0.000,0.249
+main,autoall,ggrepel,Merc. Monarch,1,-0.120,0.145,-0.120,0.220,0.133,0.170,0.025,0.100
+main,autoall,ggrepel,Olds Delta 88,1,-0.120,0.105,0.000,0.100,0.112,0.050,-0.015,0.100
+main,autoall,ggrepel,Olds Omega,1,-0.120,0.035,0.000,0.109,0.077,0.054,-0.085,0.109
+main,autoall,ggrepel,Olds Starfire,1,-0.120,0.125,-0.120,0.100,0.123,0.110,0.005,-0.020
+main,autoall,ggrepel,Plym. Champ,1,-0.000,0.030,0.000,0.110,0.015,0.055,0.030,0.110
+main,autoall,ggrepel,Plym. Volare,1,0.000,0.120,0.000,0.109,0.060,0.054,0.120,0.109
+main,autoall,ggrepel,Pont. Catalina,1,-0.000,0.040,-0.120,0.220,0.020,0.170,0.040,0.100
+main,autoall,ggrepel,Pont. Firebird,1,-0.000,0.015,-0.120,0.221,0.008,0.170,0.015,0.101
+main,autoall,ggrepel,Toyota Celica,1,-0.000,0.055,0.000,0.109,0.028,0.054,0.055,0.109
+main,autoall,ggrepel,Toyota Corona,1,-0.000,0.075,0.000,0.009,0.038,0.004,0.075,0.009
+main,autoall,ggrepel,VW Dasher,1,-0.120,0.010,-0.120,0.220,0.065,0.170,-0.110,0.100
+main,autoall,ggrepel_inf,AMC Pacer,1,-0.120,0.050,-0.120,0.120,0.085,0.120,-0.070,-0.000
+main,autoall,ggrepel_inf,Audi 5000,1,-0.120,0.140,-0.120,0.220,0.130,0.170,0.020,0.100
+main,autoall,ggrepel_inf,Audi Fox,1,-0.120,-0.010,-0.120,0.220,0.055,0.170,-0.130,0.100
+main,autoall,ggrepel_inf,BMW 320i,1,-0.120,0.155,0.000,0.241,0.138,0.120,0.035,0.241
+main,autoall,ggrepel_inf,Buick Electra,1,-0.000,0.050,-0.120,0.220,0.025,0.170,0.050,0.100
+main,autoall,ggrepel_inf,Buick Regal,1,-0.120,0.075,-0.120,0.229,0.098,0.174,-0.045,0.109
+main,autoall,ggrepel_inf,Cad. Deville,1,-0.120,0.190,-0.120,0.220,0.155,0.170,0.070,0.100
+main,autoall,ggrepel_inf,Cad. Seville,1,-0.120,0.200,-0.000,0.101,0.160,0.050,0.080,0.101
+main,autoall,ggrepel_inf,Chev. Chevette,1,-0.120,0.115,0.000,0.101,0.118,0.050,-0.005,0.101
+main,autoall,ggrepel_inf,Chev. Malibu,1,-0.120,0.080,-0.120,0.220,0.100,0.170,-0.040,0.100
+main,autoall,ggrepel_inf,Chev. Monza,1,-0.120,0.040,0.000,0.100,0.080,0.050,-0.080,0.100
+main,autoall,ggrepel_inf,Chev. Nova,1,-0.120,0.100,-0.120,0.220,0.110,0.170,-0.020,0.100
+main,autoall,ggrepel_inf,Dodge Colt,1,0.000,0.045,-0.120,0.229,0.023,0.174,0.045,0.109
+main,autoall,ggrepel_inf,Dodge St. Regis,1,-0.000,0.100,-0.120,0.109,0.050,0.114,0.100,-0.011
+main,autoall,ggrepel_inf,Fiat Strada,1,0.000,0.125,-0.120,0.220,0.062,0.170,0.125,0.100
+main,autoall,ggrepel_inf,Ford Fiesta,1,-0.120,0.080,-0.120,0.220,0.100,0.170,-0.040,0.100
+main,autoall,ggrepel_inf,Linc. Mark V,1,-0.120,0.115,0.000,0.100,0.118,0.050,-0.005,0.100
+main,autoall,ggrepel_inf,Linc. Versailles,1,-0.120,0.125,-0.000,0.100,0.123,0.050,0.005,0.100
+main,autoall,ggrepel_inf,Merc. Bobcat,1,-0.120,0.115,-0.120,0.220,0.118,0.170,-0.005,0.100
+main,autoall,ggrepel_inf,Merc. Cougar,1,-0.000,0.080,-0.120,0.129,0.040,0.124,0.080,0.009
+main,autoall,ggrepel_inf,Olds Delta 88,1,-0.120,0.105,-0.000,0.100,0.113,0.050,-0.015,0.100
+main,autoall,ggrepel_inf,Olds Omega,1,-0.120,0.035,-0.120,0.110,0.077,0.115,-0.085,-0.010
+main,autoall,ggrepel_inf,Olds Toronado,1,-0.120,0.130,-0.000,0.100,0.125,0.050,0.010,0.100
+main,autoall,ggrepel_inf,Plym. Champ,1,-0.000,0.030,0.000,0.110,0.015,0.055,0.030,0.110
+main,autoall,ggrepel_inf,Plym. Sapporo,1,-0.000,0.070,0.000,0.109,0.035,0.054,0.070,0.109
+main,autoall,ggrepel_inf,Plym. Volare,1,-0.120,0.120,0.000,0.109,0.120,0.054,0.000,0.109
+main,autoall,ggrepel_inf,Pont. Catalina,1,0.000,0.040,-0.120,0.100,0.020,0.110,0.040,-0.020
+main,autoall,ggrepel_inf,Pont. Firebird,1,-0.000,0.015,0.000,0.100,0.008,0.050,0.015,0.100
+main,autoall,ggrepel_inf,Subaru,1,0.000,0.145,-0.120,0.220,0.073,0.170,0.145,0.100
+main,autoall,ggrepel_inf,Toyota Celica,1,-0.120,0.055,-0.000,0.109,0.088,0.054,-0.065,0.109
+main,autoall,ggrepel_inf,VW Diesel,1,-0.120,0.075,0.000,0.101,0.098,0.050,-0.045,0.101
+main,autoall,ggrepel_inf,Volvo 260,1,-0.120,0.120,-0.120,0.220,0.120,0.170,-0.000,0.100
+main,autoall,gpolish,AMC Spirit,1,-0.120,-0.010,-0.000,0.009,0.055,0.004,-0.130,0.009
+main,autoall,gpolish,Audi Fox,1,-0.000,-0.010,-0.000,-0.020,-0.005,-0.010,-0.010,-0.020
+main,autoall,gpolish,Cad. Eldorado,1,0.000,0.014,-0.000,-0.020,0.007,-0.010,0.014,-0.020
+main,autoall,gpolish,Cad. Seville,1,0.000,0.080,0.000,-0.020,0.040,-0.010,0.080,-0.020
+main,autoall,gpolish,Datsun 210,1,-0.000,0.004,0.000,-0.000,0.002,-0.000,0.004,-0.000
+main,autoall,gpolish,Dodge Magnum,1,0.000,-0.020,0.000,-0.011,-0.010,-0.006,-0.020,-0.011
+main,autoall,gpolish,Fiat Strada,1,0.000,0.004,0.000,-0.020,0.002,-0.010,0.004,-0.020
+main,autoall,gpolish,Merc. Bobcat,1,0.000,-0.005,0.000,-0.140,-0.002,-0.070,-0.005,-0.140
+main,autoall,gpolish,Peugeot 604,1,0.000,-0.015,0.000,0.009,-0.007,0.004,-0.015,0.009
+main,autoall,gpolish,Plym. Arrow,1,0.000,-0.050,0.120,-0.131,-0.025,-0.126,-0.050,-0.011
+main,autoall,gpolish,Plym. Champ,1,0.000,0.030,-0.000,-0.011,0.015,-0.006,0.030,-0.011
+main,autoall,gpolish,Subaru,1,-0.000,0.025,0.000,-0.020,0.013,-0.010,0.025,-0.020
+main,autoall,gpolish,Toyota Celica,1,-0.120,-0.065,0.000,-0.011,0.028,-0.006,-0.185,-0.011
+main,autoall,gpolish,Toyota Corona,1,0.000,0.075,0.000,0.009,0.038,0.004,0.075,0.009
+main,autoall,gpolish,VW Dasher,1,-0.000,0.010,0.000,-0.020,0.005,-0.010,0.010,-0.020
+main,autoall,gpolish,VW Diesel,1,0.000,0.075,0.000,-0.020,0.038,-0.010,0.075,-0.020
+main,autoall,gpolish060,Audi Fox,1,-0.000,-0.010,0.000,-0.020,-0.005,-0.010,-0.010,-0.020
+main,autoall,gpolish060,Buick Century,1,-0.000,-0.036,0.000,-0.011,-0.018,-0.006,-0.036,-0.011
+main,autoall,gpolish060,Chev. Chevette,1,0.000,-0.005,0.000,-0.020,-0.002,-0.010,-0.005,-0.020
+main,autoall,gpolish060,Chev. Monte Carlo,1,-0.000,0.070,-0.000,-0.020,0.035,-0.010,0.070,-0.020
+main,autoall,gpolish060,Chev. Monza,1,0.000,0.040,-0.000,-0.020,0.020,-0.010,0.040,-0.020
+main,autoall,gpolish060,Datsun 210,1,-0.000,0.004,0.000,-0.000,0.002,-0.000,0.004,-0.000
+main,autoall,gpolish060,Dodge St. Regis,1,0.000,0.100,-0.000,-0.011,0.050,-0.006,0.100,-0.011
+main,autoall,gpolish060,Fiat Strada,1,-0.000,0.005,-0.000,-0.020,0.003,-0.010,0.005,-0.020
+main,autoall,gpolish060,Ford Fiesta,1,0.000,-0.040,0.000,-0.020,-0.020,-0.010,-0.040,-0.020
+main,autoall,gpolish060,Linc. Continental,1,-0.000,0.040,0.000,-0.020,0.020,-0.010,0.040,-0.020
+main,autoall,gpolish060,Linc. Mark V,1,-0.000,-0.005,0.000,-0.020,-0.002,-0.010,-0.005,-0.020
+main,autoall,gpolish060,Merc. Bobcat,1,-0.000,-0.005,-0.000,-0.020,-0.002,-0.010,-0.005,-0.020
+main,autoall,gpolish060,Merc. Zephyr,1,0.000,0.024,0.000,-0.011,0.012,-0.006,0.024,-0.011
+main,autoall,gpolish060,Olds 98,1,0.000,-0.035,0.120,-0.140,-0.017,-0.130,-0.035,-0.020
+main,autoall,gpolish060,Olds Cutlass,1,-0.000,0.030,0.000,-0.020,0.015,-0.010,0.030,-0.020
+main,autoall,gpolish060,Peugeot 604,1,-0.120,-0.016,0.120,-0.111,0.052,-0.116,-0.136,0.009
+main,autoall,gpolish060,Plym. Arrow,1,0.000,-0.050,0.120,-0.131,-0.025,-0.126,-0.050,-0.011
+main,autoall,gpolish060,Plym. Champ,1,0.000,0.030,-0.000,-0.011,0.015,-0.006,0.030,-0.011
+main,autoall,gpolish060,Pont. Le Mans,1,-0.000,0.010,0.120,-0.240,0.005,-0.180,0.010,-0.120
+main,autoall,gpolish060,Subaru,1,-0.120,0.024,0.000,-0.020,0.072,-0.010,-0.096,-0.020
+main,autoall,gpolish060,Toyota Celica,1,-0.120,-0.065,0.000,-0.011,0.028,-0.006,-0.185,-0.011
+main,autoall,gpolish060,Toyota Corolla,1,0.000,-0.010,-0.000,-0.011,-0.005,-0.006,-0.010,-0.011
+main,autoall,gpolish060,VW Dasher,1,-0.000,0.010,0.000,-0.020,0.005,-0.010,0.010,-0.020
+main,autoall,gpolish060,VW Diesel,1,0.000,0.075,0.000,-0.020,0.038,-0.010,0.075,-0.020
+main,autosub,adjusttext,Buick Electra,1,-0.000,-0.070,0.000,-0.020,-0.035,-0.010,-0.070,-0.020
+main,autosub,adjusttext,Chev. Nova,1,0.000,0.100,0.000,-0.020,0.050,-0.010,0.100,-0.020
+main,autosub,adjusttext,Pont. Sunbird,1,-0.000,-0.020,0.000,-0.020,-0.010,-0.010,-0.020,-0.020
+main,autosub,adjusttext,Toyota Corolla,1,0.120,0.110,-0.000,-0.011,-0.005,-0.006,0.230,-0.011
+main,autosub,default,VW Diesel,1,0.000,0.075,0.000,-0.020,0.038,-0.010,0.075,-0.020
+main,autosub,ggrepel_inf,Audi 5000,1,-0.120,0.140,0.000,0.100,0.130,0.050,0.020,0.100
+main,autosub,ggrepel_inf,Cad. Eldorado,1,-0.120,0.135,-0.120,0.220,0.128,0.170,0.015,0.100
+main,autosub,ggrepel_inf,Datsun 200,1,-0.120,0.125,-0.000,-0.000,0.123,-0.000,0.005,-0.000
+main,autosub,ggrepel_inf,Dodge Colt,1,-0.120,0.045,-0.120,0.229,0.083,0.174,-0.075,0.109
+main,autosub,ggrepel_inf,Honda Civic,1,-0.120,-0.005,-0.120,0.101,0.057,0.110,-0.125,-0.019
+main,autosub,ggrepel_inf,Olds Omega,1,-0.120,0.035,0.000,0.109,0.078,0.054,-0.085,0.109
+main,autosub,ggrepel_inf,VW Diesel,1,-0.120,0.075,0.000,0.100,0.098,0.050,-0.045,0.100
+main,autosub,ggrepel_inf,VW Rabbit,1,-0.120,-0.010,0.000,0.100,0.055,0.050,-0.130,0.100
+main,autosub,gpolish,AMC Spirit,1,-0.120,-0.010,0.000,0.129,0.055,0.064,-0.130,0.129
+main,autosub,gpolish,Audi 5000,1,0.000,0.020,0.000,-0.020,0.010,-0.010,0.020,-0.020
+main,autosub,gpolish,Chev. Malibu,1,-0.000,-0.040,0.000,-0.020,-0.020,-0.010,-0.040,-0.020
+main,autosub,gpolish,Datsun 200,1,-0.000,0.005,0.000,-0.000,0.003,-0.000,0.005,-0.000
+main,autosub,gpolish,Dodge Colt,1,0.000,0.045,0.000,-0.011,0.023,-0.006,0.045,-0.011
+main,autosub,gpolish,Linc. Mark V,1,-0.000,-0.005,0.000,-0.020,-0.002,-0.010,-0.005,-0.020
+main,autosub,gpolish,Olds Omega,1,0.000,0.036,-0.000,-0.011,0.018,-0.006,0.036,-0.011
+main,autosub,gpolish,Toyota Corolla,1,-0.120,-0.010,0.120,-0.131,0.055,-0.126,-0.130,-0.011
+main,autosub,gpolish,VW Diesel,1,0.000,0.075,0.000,-0.020,0.038,-0.010,0.075,-0.020
+main,autosub,gpolish060,AMC Spirit,1,0.000,0.110,0.000,0.129,0.055,0.064,0.110,0.129
+main,autosub,gpolish060,Audi 5000,1,0.000,0.020,0.000,-0.020,0.010,-0.010,0.020,-0.020
+main,autosub,gpolish060,Buick LeSabre,1,0.000,-0.005,-0.000,-0.020,-0.002,-0.010,-0.005,-0.020
+main,autosub,gpolish060,Cad. Eldorado,1,-0.000,0.134,0.000,-0.020,0.067,-0.010,0.134,-0.020
+main,autosub,gpolish060,Chev. Nova,1,0.000,0.100,-0.000,-0.020,0.050,-0.010,0.100,-0.020
+main,autosub,gpolish060,Datsun 200,1,-0.000,0.005,0.000,-0.000,0.003,-0.000,0.005,-0.000
+main,autosub,gpolish060,Dodge Colt,1,0.000,0.045,0.000,-0.011,0.023,-0.006,0.045,-0.011
+main,autosub,gpolish060,Linc. Mark V,1,-0.000,-0.005,0.000,-0.020,-0.002,-0.010,-0.005,-0.020
+main,autosub,gpolish060,VW Diesel,1,0.000,0.075,0.000,-0.020,0.038,-0.010,0.075,-0.020
+main,autosub,gpolish060,VW Rabbit,1,-0.120,-0.010,-0.000,-0.020,0.055,-0.010,-0.130,-0.020
+main,life12,adjusttext,Guatemala,1,-0.000,-0.045,0.000,-0.020,-0.022,-0.010,-0.045,-0.020
+main,life12,default,Armenia,1,-0.120,0.040,0.000,0.120,0.080,0.060,-0.080,0.120
+main,life12,default,Bolivia,1,-0.000,-0.025,0.000,-0.020,-0.012,-0.010,-0.025,-0.020
+main,life12,default,Haiti,1,0.000,0.020,0.000,0.120,0.010,0.060,0.020,0.120
+main,life12,default,Moldova,1,-0.000,0.020,0.120,-0.140,0.010,-0.130,0.020,-0.020
+main,life12,ggrepel_inf,Bolivia,1,0.000,-0.025,-0.120,0.100,-0.013,0.110,-0.025,-0.020
+main,life12,ggrepel_inf,Brazil,1,-0.120,0.145,-0.120,0.220,0.132,0.170,0.025,0.100
+main,life12,ggrepel_inf,Denmark,1,-0.120,0.095,-0.120,0.221,0.108,0.170,-0.025,0.101
+main,life12,ggrepel_inf,Guatemala,1,-0.120,-0.045,-0.120,0.220,0.037,0.170,-0.165,0.100
+main,life12,ggrepel_inf,Moldova,1,0.000,0.020,-0.120,0.221,0.010,0.170,0.020,0.101
+main,life12,ggrepel_inf,United States,1,-0.120,0.005,-0.120,0.220,0.063,0.170,-0.115,0.100
+main,life12,gpolish,Armenia,1,-0.120,0.040,0.000,0.120,0.080,0.060,-0.080,0.120
+main,life12,gpolish,Bolivia,1,0.000,-0.025,0.000,-0.020,-0.012,-0.010,-0.025,-0.020
+main,life12,gpolish,Brazil,1,0.000,0.025,0.120,-0.140,0.012,-0.130,0.025,-0.020
+main,life12,gpolish,Canada,1,-0.000,0.060,0.000,-0.020,0.030,-0.010,0.060,-0.020
+main,life12,gpolish,Haiti,1,-0.000,0.020,0.000,0.120,0.010,0.060,0.020,0.120
+main,life12,gpolish,Moldova,1,-0.000,0.020,0.000,-0.020,0.010,-0.010,0.020,-0.020
+main,life12,gpolish,Switzerland,1,0.000,0.035,0.000,-0.020,0.018,-0.010,0.035,-0.020
+main,life12,gpolish060,Armenia,1,-0.120,0.040,0.000,0.120,0.080,0.060,-0.080,0.120
+main,life12,gpolish060,Bolivia,1,0.000,-0.025,0.000,-0.020,-0.013,-0.010,-0.025,-0.020
+main,life12,gpolish060,Brazil,1,0.000,0.025,0.120,-0.140,0.012,-0.130,0.025,-0.020
+main,life12,gpolish060,Canada,1,-0.000,0.060,0.000,-0.020,0.030,-0.010,0.060,-0.020
+main,life12,gpolish060,Denmark,1,0.000,-0.145,0.000,-0.140,-0.073,-0.070,-0.145,-0.140
+main,life12,gpolish060,Guatemala,1,-0.120,-0.045,0.000,-0.020,0.037,-0.010,-0.165,-0.020
+main,life12,gpolish060,Haiti,1,-0.000,0.020,0.000,0.120,0.010,0.060,0.020,0.120
+main,life12,gpolish060,Kazakhstan,1,-0.120,-0.015,0.000,-0.020,0.053,-0.010,-0.135,-0.020
+main,life12,gpolish060,United States,1,-0.120,0.005,-0.000,-0.020,0.063,-0.010,-0.115,-0.020
+main,lifeall,adjusttext,Brazil,1,-0.120,0.025,-0.000,-0.020,0.072,-0.010,-0.095,-0.020
+main,lifeall,adjusttext,Chile,1,0.000,0.075,0.000,-0.019,0.038,-0.010,0.075,-0.019
+main,lifeall,adjusttext,Denmark,1,-0.120,-0.025,0.000,-0.020,0.048,-0.010,-0.145,-0.020
+main,lifeall,adjusttext,Georgia,1,0.120,-0.015,-0.000,0.009,-0.067,0.004,0.105,0.009
+main,lifeall,adjusttext,Greece,1,0.120,0.005,0.000,-0.000,-0.057,-0.000,0.125,-0.000
+main,lifeall,adjusttext,Guatemala,1,0.000,-0.045,0.000,-0.020,-0.022,-0.010,-0.045,-0.020
+main,lifeall,adjusttext,Jamaica,1,0.000,-0.060,0.000,0.001,-0.030,0.000,-0.060,0.001
+main,lifeall,adjusttext,Norway,1,-0.000,0.015,0.000,0.009,0.008,0.004,0.015,0.009
+main,lifeall,adjusttext,Poland,1,0.000,0.035,0.000,-0.020,0.018,-0.010,0.035,-0.020
+main,lifeall,adjusttext,Tajikistan,1,0.000,0.070,0.000,-0.011,0.035,-0.006,0.070,-0.011
+main,lifeall,adjusttext,Turkey,1,0.000,-0.040,-0.000,-0.011,-0.020,-0.006,-0.040,-0.011
+main,lifeall,default,Armenia,1,-0.120,0.040,0.000,0.120,0.080,0.060,-0.080,0.120
+main,lifeall,default,Azerbaijan,1,-0.120,0.130,0.000,-0.011,0.125,-0.006,0.010,-0.011
+main,lifeall,default,Bolivia,1,-0.000,-0.025,0.000,-0.020,-0.012,-0.010,-0.025,-0.020
+main,lifeall,default,Haiti,1,0.000,0.020,0.000,0.120,0.010,0.060,0.020,0.120
+main,lifeall,default,Jamaica,1,0.000,0.060,-0.000,0.120,0.030,0.060,0.060,0.120
+main,lifeall,default,Tajikistan,1,-0.120,-0.050,0.000,-0.011,0.035,-0.006,-0.170,-0.011
+main,lifeall,default,Ukraine,1,-0.120,0.125,0.120,-0.140,0.123,-0.130,0.005,-0.020
+main,lifeall,ggrepel,Albania,1,-0.120,0.020,-0.120,0.220,0.070,0.170,-0.100,0.100
+main,lifeall,ggrepel,Austria,1,-0.120,-0.020,-0.120,0.240,0.050,0.180,-0.140,0.120
+main,lifeall,ggrepel,Belarus,1,-0.120,0.105,-0.120,0.220,0.113,0.170,-0.015,0.100
+main,lifeall,ggrepel,Canada,1,-0.120,0.060,-0.000,0.100,0.090,0.050,-0.060,0.100
+main,lifeall,ggrepel,Czech Republic,1,-0.120,-0.060,-0.120,0.229,0.030,0.174,-0.180,0.109
+main,lifeall,ggrepel,Denmark,1,-0.000,0.095,0.000,0.100,0.048,0.050,0.095,0.100
+main,lifeall,ggrepel,El Salvador,1,-0.000,0.100,-0.120,0.221,0.050,0.170,0.100,0.101
+main,lifeall,ggrepel,Estonia,1,-0.120,0.045,-0.120,0.241,0.083,0.180,-0.075,0.121
+main,lifeall,ggrepel,Finland,1,-0.120,0.120,-0.120,0.220,0.120,0.170,0.000,0.100
+main,lifeall,ggrepel,Georgia,1,-0.120,-0.015,-0.000,0.249,0.052,0.124,-0.135,0.249
+main,lifeall,ggrepel,Greece,1,-0.120,0.125,-0.120,0.121,0.123,0.120,0.005,0.001
+main,lifeall,ggrepel,Ireland,1,-0.120,0.145,0.000,0.101,0.132,0.050,0.025,0.101
+main,lifeall,ggrepel,Kyrgyz Republic,1,-0.120,0.040,-0.240,0.230,0.080,0.235,-0.080,-0.010
+main,lifeall,ggrepel,Macedonia FYR,1,-0.120,-0.080,-0.120,0.220,0.020,0.170,-0.200,0.100
+main,lifeall,ggrepel,Moldova,1,0.000,0.020,-0.120,0.100,0.010,0.110,0.020,-0.020
+main,lifeall,ggrepel,Norway,1,-0.000,0.015,0.000,0.009,0.008,0.004,0.015,0.009
+main,lifeall,ggrepel,Panama,1,0.000,0.015,0.000,-0.000,0.008,-0.000,0.015,-0.000
+main,lifeall,ggrepel,Peru,1,-0.000,0.055,-0.120,0.121,0.028,0.120,0.055,0.001
+main,lifeall,ggrepel,Poland,1,-0.120,0.035,-0.120,0.220,0.078,0.170,-0.085,0.100
+main,lifeall,ggrepel,Russian Federation,1,-0.120,0.135,-0.120,0.220,0.128,0.170,0.015,0.100
+main,lifeall,ggrepel,Sweden,1,-0.120,0.065,-0.000,0.100,0.093,0.050,-0.055,0.100
+main,lifeall,ggrepel,Switzerland,1,-0.000,0.035,0.000,0.100,0.018,0.050,0.035,0.100
+main,lifeall,ggrepel,Trinidad and Tobago,1,-0.120,0.075,-0.120,0.229,0.098,0.174,-0.045,0.109
+main,lifeall,ggrepel,Turkey,1,-0.120,0.080,-0.000,0.109,0.100,0.054,-0.040,0.109
+main,lifeall,ggrepel,Ukraine,1,0.000,0.125,-0.120,0.221,0.062,0.170,0.125,0.101
+main,lifeall,ggrepel_inf,Albania,1,-0.120,0.020,-0.120,0.100,0.070,0.110,-0.100,-0.020
+main,lifeall,ggrepel_inf,Argentina,1,-0.120,0.120,-0.120,0.249,0.120,0.184,0.000,0.129
+main,lifeall,ggrepel_inf,Belarus,1,-0.000,-0.015,-0.120,0.221,-0.007,0.170,-0.015,0.101
+main,lifeall,ggrepel_inf,Bolivia,1,0.000,-0.025,-0.120,0.101,-0.013,0.110,-0.025,-0.019
+main,lifeall,ggrepel_inf,Brazil,1,-0.000,0.025,-0.120,0.220,0.013,0.170,0.025,0.100
+main,lifeall,ggrepel_inf,Canada,1,-0.120,0.060,0.000,0.100,0.090,0.050,-0.060,0.100
+main,lifeall,ggrepel_inf,Chile,1,-0.120,0.075,0.000,0.100,0.097,0.050,-0.045,0.100
+main,lifeall,ggrepel_inf,Croatia,1,-0.120,0.075,0.000,0.241,0.097,0.120,-0.045,0.241
+main,lifeall,ggrepel_inf,Czech Republic,1,-0.120,0.060,-0.120,0.229,0.090,0.174,-0.060,0.109
+main,lifeall,ggrepel_inf,Denmark,1,-0.120,0.095,-0.120,0.100,0.108,0.110,-0.025,-0.020
+main,lifeall,ggrepel_inf,Ecuador,1,-0.120,0.140,-0.120,0.221,0.130,0.170,0.020,0.101
+main,lifeall,ggrepel_inf,El Salvador,1,-0.120,0.100,0.000,0.100,0.110,0.050,-0.020,0.100
+main,lifeall,ggrepel_inf,Estonia,1,-0.120,0.045,0.000,0.240,0.082,0.120,-0.075,0.240
+main,lifeall,ggrepel_inf,Finland,1,-0.000,0.000,-0.120,0.221,0.000,0.170,-0.000,0.101
+main,lifeall,ggrepel_inf,Georgia,1,-0.120,0.105,-0.120,0.249,0.113,0.184,-0.015,0.129
+main,lifeall,ggrepel_inf,Germany,1,-0.120,-0.010,0.000,0.010,0.055,0.005,-0.130,0.010
+main,lifeall,ggrepel_inf,Greece,1,-0.120,0.125,-0.120,0.120,0.123,0.120,0.005,-0.000
+main,lifeall,ggrepel_inf,Guatemala,1,-0.120,0.075,0.000,0.100,0.098,0.050,-0.045,0.100
+main,lifeall,ggrepel_inf,Hungary,1,-0.120,0.120,0.000,0.009,0.120,0.004,-0.000,0.009
+main,lifeall,ggrepel_inf,Ireland,1,0.000,0.025,-0.120,0.221,0.013,0.170,0.025,0.101
+main,lifeall,ggrepel_inf,Kazakhstan,1,-0.000,0.105,-0.120,0.220,0.053,0.170,0.105,0.100
+main,lifeall,ggrepel_inf,Kyrgyz Republic,1,0.000,0.040,0.000,0.109,0.020,0.054,0.040,0.109
+main,lifeall,ggrepel_inf,Macedonia FYR,1,-0.120,-0.080,-0.120,0.220,0.020,0.170,-0.200,0.100
+main,lifeall,ggrepel_inf,Moldova,1,0.000,0.020,-0.120,0.220,0.010,0.170,0.020,0.100
+main,lifeall,ggrepel_inf,Nicaragua,1,-0.120,-0.010,-0.120,0.369,0.055,0.244,-0.130,0.249
+main,lifeall,ggrepel_inf,Norway,1,-0.120,0.015,-0.120,0.129,0.068,0.124,-0.105,0.009
+main,lifeall,ggrepel_inf,Peru,1,-0.120,0.055,0.000,0.001,0.088,0.000,-0.065,0.001
+main,lifeall,ggrepel_inf,Portugal,1,-0.120,0.105,-0.120,0.229,0.113,0.174,-0.015,0.109
+main,lifeall,ggrepel_inf,Russian Federation,1,-0.120,0.015,0.000,0.100,0.067,0.050,-0.105,0.100
+main,lifeall,ggrepel_inf,Sweden,1,-0.120,-0.055,-0.000,0.100,0.032,0.050,-0.175,0.100
+main,lifeall,ggrepel_inf,Tajikistan,1,-0.000,0.070,-0.120,0.229,0.035,0.174,0.070,0.109
+main,lifeall,ggrepel_inf,Trinidad and Tobago,1,0.000,0.075,0.000,0.109,0.037,0.054,0.075,0.109
+main,lifeall,ggrepel_inf,Turkey,1,0.000,0.080,0.000,0.109,0.040,0.054,0.080,0.109
+main,lifeall,ggrepel_inf,Ukraine,1,0.000,0.125,-0.120,0.220,0.063,0.170,0.125,0.100
+main,lifeall,ggrepel_inf,United States,1,-0.000,0.125,-0.120,0.221,0.063,0.170,0.125,0.101
+main,lifeall,gpolish,Bolivia,1,0.000,-0.025,0.000,-0.020,-0.012,-0.010,-0.025,-0.020
+main,lifeall,gpolish,Brazil,1,0.000,0.025,0.120,-0.140,0.012,-0.130,0.025,-0.020
+main,lifeall,gpolish,Haiti,1,-0.000,0.020,0.000,0.120,0.010,0.060,0.020,0.120
+main,lifeall,gpolish,Italy,1,0.000,0.020,0.000,-0.011,0.010,-0.006,0.020,-0.011
+main,lifeall,gpolish,Mexico,1,0.000,0.015,0.000,-0.000,0.007,-0.000,0.015,-0.000
+main,lifeall,gpolish060,Albania,1,-0.000,0.020,0.000,-0.020,0.010,-0.010,0.020,-0.020
+main,lifeall,gpolish060,Argentina,1,-0.120,0.000,0.000,0.009,0.060,0.004,-0.120,0.009
+main,lifeall,gpolish060,Armenia,1,-0.120,0.040,0.000,0.120,0.080,0.060,-0.080,0.120
+main,lifeall,gpolish060,Azerbaijan,1,-0.000,0.010,0.000,-0.011,0.005,-0.006,0.010,-0.011
+main,lifeall,gpolish060,Bolivia,1,0.000,-0.025,0.000,-0.020,-0.013,-0.010,-0.025,-0.020
+main,lifeall,gpolish060,Croatia,1,-0.120,0.075,0.000,-0.000,0.098,-0.000,-0.045,-0.000
+main,lifeall,gpolish060,Denmark,1,0.000,-0.025,0.000,-0.020,-0.012,-0.010,-0.025,-0.020
+main,lifeall,gpolish060,Dominican Republic,1,0.120,0.100,0.000,-0.011,-0.010,-0.006,0.220,-0.011
+main,lifeall,gpolish060,Ecuador,1,0.000,0.020,0.120,-0.140,0.010,-0.130,0.020,-0.020
+main,lifeall,gpolish060,Guatemala,1,-0.120,-0.045,0.000,-0.020,0.037,-0.010,-0.165,-0.020
+main,lifeall,gpolish060,Haiti,1,-0.000,0.020,0.000,0.120,0.010,0.060,0.020,0.120
+main,lifeall,gpolish060,Kyrgyz Republic,1,0.000,-0.080,0.000,-0.011,-0.040,-0.006,-0.080,-0.011
+main,lifeall,gpolish060,Macedonia FYR,1,0.120,-0.080,0.000,-0.020,-0.100,-0.010,0.040,-0.020
+main,lifeall,gpolish060,Mexico,1,-0.000,0.016,0.000,-0.000,0.008,-0.000,0.016,-0.000
+main,lifeall,gpolish060,Netherlands,1,0.000,-0.035,-0.000,-0.020,-0.017,-0.010,-0.035,-0.020
+main,lifeall,gpolish060,Portugal,1,0.000,-0.014,0.120,-0.131,-0.007,-0.126,-0.014,-0.011
+main,lifeall,gpolish060,Slovak Republic,1,0.000,-0.050,-0.000,-0.011,-0.025,-0.006,-0.050,-0.011
+main,lifeall,gpolish060,Slovenia,1,-0.120,-0.030,0.000,-0.020,0.045,-0.010,-0.150,-0.020
+main,lifeall,gpolish060,Trinidad and Tobago,1,0.000,0.075,-0.000,-0.011,0.038,-0.006,0.075,-0.011
+main,lifeall,gpolish060,Ukraine,1,-0.120,0.125,0.120,-0.140,0.123,-0.130,0.005,-0.020
+main,lifeall,gpolish060,United States,1,0.000,0.005,-0.000,-0.020,0.002,-0.010,0.005,-0.020
+main,lifeall,gpolish060,Uruguay,1,0.000,0.020,0.000,-0.111,0.010,-0.056,0.020,-0.111
+main,lifeall,gpolish060,Uzbekistan,1,0.000,-0.030,-0.000,-0.020,-0.015,-0.010,-0.030,-0.020
+main,lifeall,gpolish060,Venezuela,1,0.000,0.085,0.000,-0.140,0.043,-0.070,0.085,-0.140
+main,lifeall,labrepel,Czech Republic,1,0.000,0.060,-0.000,-0.011,0.030,-0.006,0.060,-0.011
+main,syn30all_s01,default,Annel,1,-0.120,-0.040,0.000,-0.020,0.040,-0.010,-0.160,-0.020
+main,syn30all_s01,default,Ansa Osthal,1,0.000,-0.005,0.000,-0.020,-0.002,-0.010,-0.005,-0.020
+main,syn30all_s01,default,Bridundun,1,-0.000,0.060,-0.000,-0.020,0.030,-0.010,0.060,-0.020
+main,syn30all_s01,default,Falummor,1,-0.120,0.095,0.000,-0.020,0.108,-0.010,-0.025,-0.020
+main,syn30all_s01,default,Halelren Mi,1,0.000,-0.005,0.000,-0.020,-0.002,-0.010,-0.005,-0.020
+main,syn30all_s01,default,Isren,1,-0.120,0.060,0.000,-0.120,0.090,-0.060,-0.060,-0.120
+main,syn30all_s01,default,Issa Hal,1,-0.120,-0.060,-0.000,-0.020,0.030,-0.010,-0.180,-0.020
+main,syn30all_s01,default,Junmor,1,0.000,0.030,0.000,-0.120,0.015,-0.060,0.030,-0.120
+main,syn30all_s01,default,Kaanrentor Vel,1,-0.000,0.015,0.000,-0.020,0.008,-0.010,0.015,-0.020
+main,syn30all_s01,default,Lolo,1,0.000,0.130,0.000,-0.020,0.065,-0.010,0.130,-0.020
+main,syn30all_s01,default,Losasaren,1,-0.120,-0.015,0.000,-0.120,0.052,-0.060,-0.135,-0.120
+main,syn30all_s01,default,Lumlum,1,-0.000,-0.040,0.000,-0.020,-0.020,-0.010,-0.040,-0.020
+main,syn30all_s01,default,Mihal,1,0.000,-0.025,0.000,-0.020,-0.012,-0.010,-0.025,-0.020
+main,syn30all_s01,default,Mipra,1,0.000,-0.020,0.000,0.129,-0.010,0.064,-0.020,0.129
+main,syn30all_s01,default,Misavel Ka,1,-0.000,-0.080,0.000,-0.020,-0.040,-0.010,-0.080,-0.020
+main,syn30all_s01,default,Morelgor,1,-0.120,0.035,0.000,-0.011,0.078,-0.006,-0.085,-0.011
+main,syn30all_s01,default,Morlopra,1,-0.120,0.080,0.000,-0.011,0.100,-0.006,-0.040,-0.011
+main,syn30all_s01,default,Ostloqui Lo,1,-0.120,0.105,0.120,-0.131,0.113,-0.126,-0.015,-0.011
+main,syn30all_s01,default,Saan,1,-0.120,-0.010,-0.000,-0.000,0.055,-0.000,-0.130,-0.000
+main,syn30all_s01,default,Torren,1,-0.120,-0.070,0.120,-0.240,0.025,-0.180,-0.190,-0.120
+main,syn30all_s01,default,Velchodun,1,-0.120,0.165,0.000,-0.020,0.143,-0.010,0.045,-0.020
+main,syn30all_s01,default,Veljun,1,-0.120,0.010,0.000,-0.011,0.065,-0.006,-0.110,-0.011
+main,syn30all_s01,default,Veljunren,1,-0.000,-0.070,-0.000,-0.011,-0.035,-0.006,-0.070,-0.011
+main,syn30all_s01,default,Velkapra,1,0.000,0.055,0.000,-0.011,0.028,-0.006,0.055,-0.011
+main,syn30all_s01,ggrepel_inf,Ansa Osthal,1,-0.120,0.115,-0.120,0.220,0.117,0.170,-0.005,0.100
+main,syn30all_s01,ggrepel_inf,Bridundun,1,-0.120,0.180,0.000,0.100,0.150,0.050,0.060,0.100
+main,syn30all_s01,ggrepel_inf,Falummor,1,-0.120,0.095,-0.120,0.221,0.108,0.170,-0.025,0.101
+main,syn30all_s01,ggrepel_inf,Issa Hal,1,-0.120,0.060,-0.120,0.221,0.090,0.170,-0.060,0.101
+main,syn30all_s01,ggrepel_inf,Logor,1,-0.120,0.035,-0.120,0.129,0.078,0.124,-0.085,0.009
+main,syn30all_s01,ggrepel_inf,Lolo,1,-0.120,0.130,-0.120,0.220,0.125,0.170,0.010,0.100
+main,syn30all_s01,ggrepel_inf,Losasaren,1,-0.120,0.105,0.000,-0.000,0.113,-0.000,-0.015,-0.000
+main,syn30all_s01,ggrepel_inf,Mihal,1,-0.000,0.095,-0.120,0.220,0.048,0.170,0.095,0.100
+main,syn30all_s01,ggrepel_inf,Mipra,1,-0.120,0.100,-0.120,0.249,0.110,0.184,-0.020,0.129
+main,syn30all_s01,ggrepel_inf,Morelgor,1,0.000,0.035,0.000,0.109,0.017,0.054,0.035,0.109
+main,syn30all_s01,ggrepel_inf,Morvelsa Toran,1,-0.120,-0.025,0.000,0.100,0.047,0.050,-0.145,0.100
+main,syn30all_s01,ggrepel_inf,Saan,1,-0.120,-0.010,-0.120,0.120,0.055,0.120,-0.130,-0.000
+main,syn30all_s01,ggrepel_inf,Saanel,1,-0.000,0.030,-0.120,0.220,0.015,0.170,0.030,0.100
+main,syn30all_s01,ggrepel_inf,Veljun,1,-0.120,0.130,-0.120,0.230,0.125,0.175,0.010,0.110
+main,syn30all_s01,ggrepel_inf,Veljunren,1,-0.120,0.050,0.000,0.110,0.085,0.055,-0.070,0.110
+main,syn30all_s01,gpolish,Annel,1,-0.120,-0.040,0.000,-0.020,0.040,-0.010,-0.160,-0.020
+main,syn30all_s01,gpolish,Ansa Osthal,1,-0.120,0.115,0.000,-0.020,0.117,-0.010,-0.005,-0.020
+main,syn30all_s01,gpolish,Bridundun,1,0.000,0.060,-0.000,-0.020,0.030,-0.010,0.060,-0.020
+main,syn30all_s01,gpolish,Falummor,1,0.000,0.095,0.000,-0.020,0.048,-0.010,0.095,-0.020
+main,syn30all_s01,gpolish,Gormi,1,-0.000,0.045,-0.000,0.120,0.023,0.060,0.045,0.120
+main,syn30all_s01,gpolish,Halelren Mi,1,-0.000,-0.005,0.000,-0.020,-0.002,-0.010,-0.005,-0.020
+main,syn30all_s01,gpolish,Isren,1,-0.120,0.060,0.000,-0.120,0.090,-0.060,-0.060,-0.120
+main,syn30all_s01,gpolish,Issa Hal,1,-0.000,-0.060,-0.000,-0.020,-0.030,-0.010,-0.060,-0.020
+main,syn30all_s01,gpolish,Junmor,1,0.000,0.030,0.000,-0.120,0.015,-0.060,0.030,-0.120
+main,syn30all_s01,gpolish,Kaanrentor Vel,1,-0.000,0.015,0.000,-0.020,0.008,-0.010,0.015,-0.020
+main,syn30all_s01,gpolish,Logor,1,0.000,-0.085,0.000,-0.111,-0.042,-0.056,-0.085,-0.111
+main,syn30all_s01,gpolish,Lolo,1,-0.000,0.130,0.000,-0.020,0.065,-0.010,0.130,-0.020
+main,syn30all_s01,gpolish,Losasaren,1,-0.120,-0.015,0.000,-0.120,0.053,-0.060,-0.135,-0.120
+main,syn30all_s01,gpolish,Lumanquijun,1,-0.000,-0.030,0.000,0.009,-0.015,0.004,-0.030,0.009
+main,syn30all_s01,gpolish,Lumlum,1,0.000,-0.040,0.000,-0.020,-0.020,-0.010,-0.040,-0.020
+main,syn30all_s01,gpolish,Mihal,1,0.000,-0.025,0.000,-0.020,-0.012,-0.010,-0.025,-0.020
+main,syn30all_s01,gpolish,Mipra,1,0.000,-0.020,0.000,0.129,-0.010,0.064,-0.020,0.129
+main,syn30all_s01,gpolish,Misavel Ka,1,-0.000,0.040,0.000,-0.020,0.020,-0.010,0.040,-0.020
+main,syn30all_s01,gpolish,Morelgor,1,-0.000,0.155,0.000,-0.011,0.078,-0.006,0.155,-0.011
+main,syn30all_s01,gpolish,Morlopra,1,-0.120,0.080,0.000,-0.011,0.100,-0.006,-0.040,-0.011
+main,syn30all_s01,gpolish,Morvelsa Toran,1,-0.120,0.095,0.000,-0.020,0.108,-0.010,-0.025,-0.020
+main,syn30all_s01,gpolish,Ostloqui Lo,1,-0.000,0.105,0.120,-0.131,0.052,-0.126,0.105,-0.011
+main,syn30all_s01,gpolish,Saan,1,-0.000,-0.010,-0.000,-0.000,-0.005,-0.000,-0.010,-0.000
+main,syn30all_s01,gpolish,Saanel,1,-0.120,0.030,0.000,-0.020,0.075,-0.010,-0.090,-0.020
+main,syn30all_s01,gpolish,Torren,1,-0.120,-0.070,0.120,-0.240,0.025,-0.180,-0.190,-0.120
+main,syn30all_s01,gpolish,Velchodun,1,0.000,0.045,0.000,-0.020,0.022,-0.010,0.045,-0.020
+main,syn30all_s01,gpolish,Veljun,1,-0.120,0.010,0.000,-0.011,0.065,-0.006,-0.110,-0.011
+main,syn30all_s01,gpolish,Veljunren,1,0.000,0.050,-0.000,-0.011,0.025,-0.006,0.050,-0.011
+main,syn30all_s01,gpolish,Velkapra,1,-0.000,0.055,-0.000,-0.011,0.028,-0.006,0.055,-0.011
+main,syn30all_s01,gpolish060,Annel,1,-0.120,-0.040,0.000,-0.020,0.040,-0.010,-0.160,-0.020
+main,syn30all_s01,gpolish060,Ansa Osthal,1,-0.120,0.115,0.000,-0.020,0.117,-0.010,-0.005,-0.020
+main,syn30all_s01,gpolish060,Bridundun,1,0.000,0.060,-0.000,-0.020,0.030,-0.010,0.060,-0.020
+main,syn30all_s01,gpolish060,Falummor,1,0.000,0.095,0.000,-0.020,0.048,-0.010,0.095,-0.020
+main,syn30all_s01,gpolish060,Gormi,1,-0.000,0.045,-0.000,0.120,0.023,0.060,0.045,0.120
+main,syn30all_s01,gpolish060,Halelren Mi,1,-0.000,-0.005,0.000,-0.020,-0.002,-0.010,-0.005,-0.020
+main,syn30all_s01,gpolish060,Isren,1,-0.120,0.060,0.000,-0.120,0.090,-0.060,-0.060,-0.120
+main,syn30all_s01,gpolish060,Issa Hal,1,-0.000,-0.060,-0.000,-0.020,-0.030,-0.010,-0.060,-0.020
+main,syn30all_s01,gpolish060,Junmor,1,0.000,0.030,0.000,-0.120,0.015,-0.060,0.030,-0.120
+main,syn30all_s01,gpolish060,Kaanrentor Vel,1,-0.000,0.015,0.000,-0.020,0.008,-0.010,0.015,-0.020
+main,syn30all_s01,gpolish060,Logor,1,0.000,-0.085,0.000,-0.111,-0.042,-0.056,-0.085,-0.111
+main,syn30all_s01,gpolish060,Lolo,1,-0.000,0.130,0.000,-0.020,0.065,-0.010,0.130,-0.020
+main,syn30all_s01,gpolish060,Losasaren,1,-0.120,-0.015,0.000,-0.120,0.053,-0.060,-0.135,-0.120
+main,syn30all_s01,gpolish060,Lumanquijun,1,-0.000,-0.030,0.000,0.009,-0.015,0.004,-0.030,0.009
+main,syn30all_s01,gpolish060,Lumlum,1,0.000,-0.040,0.000,-0.020,-0.020,-0.010,-0.040,-0.020
+main,syn30all_s01,gpolish060,Mihal,1,0.000,-0.025,0.000,-0.020,-0.012,-0.010,-0.025,-0.020
+main,syn30all_s01,gpolish060,Mipra,1,-0.120,-0.020,0.000,0.129,0.050,0.064,-0.140,0.129
+main,syn30all_s01,gpolish060,Misavel Ka,1,-0.000,0.040,0.000,-0.020,0.020,-0.010,0.040,-0.020
+main,syn30all_s01,gpolish060,Morelgor,1,-0.000,0.155,0.000,-0.011,0.078,-0.006,0.155,-0.011
+main,syn30all_s01,gpolish060,Morlopra,1,-0.120,0.080,0.000,-0.011,0.100,-0.006,-0.040,-0.011
+main,syn30all_s01,gpolish060,Morvelsa Toran,1,-0.120,0.095,0.000,-0.020,0.108,-0.010,-0.025,-0.020
+main,syn30all_s01,gpolish060,Ostloqui Lo,1,-0.120,0.105,0.120,-0.131,0.113,-0.126,-0.015,-0.011
+main,syn30all_s01,gpolish060,Saan,1,-0.000,-0.010,-0.000,-0.000,-0.005,-0.000,-0.010,-0.000
+main,syn30all_s01,gpolish060,Saanel,1,-0.120,0.030,0.000,-0.020,0.075,-0.010,-0.090,-0.020
+main,syn30all_s01,gpolish060,Torren,1,-0.120,-0.070,0.120,-0.240,0.025,-0.180,-0.190,-0.120
+main,syn30all_s01,gpolish060,Velchodun,1,0.000,0.045,0.000,-0.020,0.022,-0.010,0.045,-0.020
+main,syn30all_s01,gpolish060,Veljun,1,-0.120,0.010,0.000,-0.011,0.065,-0.006,-0.110,-0.011
+main,syn30all_s01,gpolish060,Veljunren,1,0.000,0.050,-0.000,-0.011,0.025,-0.006,0.050,-0.011
+main,syn30all_s01,labrepel,Annel,1,-0.120,-0.040,0.000,-0.020,0.040,-0.010,-0.160,-0.020
+main,syn30all_s01,labrepel,Halelren Mi,1,0.000,0.116,0.000,-0.140,0.058,-0.070,0.116,-0.140
+main,syn30all_s01,labrepel,Issa Hal,1,0.000,0.060,0.000,-0.020,0.030,-0.010,0.060,-0.020
+main,syn30all_s01,labrepel,Kaanrentor Vel,1,0.000,0.015,0.000,-0.020,0.008,-0.010,0.015,-0.020
+main,syn30all_s01,labrepel,Lolo,1,-0.000,0.130,0.000,-0.020,0.065,-0.010,0.130,-0.020
+main,syn30all_s01,labrepel,Losasaren,1,-0.120,-0.015,0.000,-0.240,0.053,-0.120,-0.135,-0.240
+main,syn30all_s01,labrepel,Lumanquijun,1,-0.000,-0.030,-0.000,0.009,-0.015,0.004,-0.030,0.009
+main,syn30all_s01,labrepel,Lumlum,1,0.000,-0.040,-0.000,-0.020,-0.020,-0.010,-0.040,-0.020
+main,syn30all_s01,labrepel,Misavel Ka,1,-0.000,0.040,0.000,-0.020,0.020,-0.010,0.040,-0.020
+main,syn30all_s01,labrepel,Moran Ancho,1,0.000,0.050,0.000,-0.020,0.025,-0.010,0.050,-0.020
+main,syn30all_s01,labrepel,Morelgor,1,-0.000,0.035,0.000,-0.011,0.018,-0.006,0.035,-0.011
+main,syn30all_s01,labrepel,Morlopra,1,-0.000,-0.040,0.000,-0.011,-0.020,-0.006,-0.040,-0.011
+main,syn30all_s01,labrepel,Saan,1,-0.120,-0.010,0.000,-0.000,0.055,-0.000,-0.130,-0.000
+main,syn30all_s01,labrepel,Torren,1,0.000,0.050,0.000,-0.120,0.025,-0.060,0.050,-0.120
+main,syn30all_s01,labrepel,Velchodun,1,0.000,0.045,-0.000,-0.020,0.023,-0.010,0.045,-0.020
+main,syn30all_s01,labrepel,Veljun,1,-0.000,0.010,0.000,-0.011,0.005,-0.006,0.010,-0.011
+fontmark,syn60all_f11_s01,adjusttext,Anpraquimor,1,-0.000,-0.035,0.000,0.008,-0.017,0.004,-0.035,0.008
+fontmark,syn60all_f11_s01,adjusttext,Brilocho,1,-0.240,-0.150,-0.000,-0.000,0.045,-0.000,-0.390,-0.000
+fontmark,syn60all_f11_s01,adjusttext,Elfa,1,0.000,0.030,0.000,-0.112,0.015,-0.056,0.030,-0.112
+fontmark,syn60all_f11_s01,adjusttext,Isfa,1,-0.000,0.055,0.000,0.009,0.028,0.004,0.055,0.009
+fontmark,syn60all_f11_s01,adjusttext,Islum,1,0.000,-0.005,0.000,-0.000,-0.002,-0.000,-0.005,-0.000
+fontmark,syn60all_f11_s01,adjusttext,Ismorren Ost,1,-0.240,-0.245,-0.000,-0.000,-0.002,-0.000,-0.485,-0.000
+fontmark,syn60all_f11_s01,adjusttext,Issa,1,-0.120,0.020,-0.000,-0.000,0.070,-0.000,-0.100,-0.000
+fontmark,syn60all_f11_s01,adjusttext,Junis,1,0.000,-0.005,0.000,-0.000,-0.002,-0.000,-0.005,-0.000
+fontmark,syn60all_f11_s01,adjusttext,Kirtor,1,-0.120,-0.110,-0.000,-0.000,0.005,-0.000,-0.230,-0.000
+fontmark,syn60all_f11_s01,adjusttext,Loostsavel,1,-0.120,-0.050,0.000,-0.000,0.035,-0.000,-0.170,-0.000
+fontmark,syn60all_f11_s01,adjusttext,Lotorgor,1,-0.240,-0.090,-0.000,0.007,0.075,0.003,-0.330,0.007
+fontmark,syn60all_f11_s01,adjusttext,Midunfa,1,0.000,-0.040,0.120,0.009,-0.020,-0.056,-0.040,0.129
+fontmark,syn60all_f11_s01,adjusttext,Mifadundun,1,0.120,0.050,-0.000,0.008,-0.035,0.004,0.170,0.008
+fontmark,syn60all_f11_s01,adjusttext,Mihalsa,1,-0.000,0.005,0.000,-0.000,0.003,-0.000,0.005,-0.000
+fontmark,syn60all_f11_s01,adjusttext,Morbrieldun,1,-0.120,-0.020,0.000,-0.000,0.050,-0.000,-0.140,-0.000
+fontmark,syn60all_f11_s01,adjusttext,Morkagor,1,-0.120,-0.130,0.000,0.007,-0.005,0.003,-0.250,0.007
+fontmark,syn60all_f11_s01,adjusttext,Quirenhal,1,-0.120,0.055,0.000,-0.000,0.088,-0.000,-0.065,-0.000
+fontmark,syn60all_f11_s01,adjusttext,Quirenkir Vel,1,-0.120,-0.035,0.000,-0.000,0.043,-0.000,-0.155,-0.000
+fontmark,syn60all_f11_s01,adjusttext,Renis,1,-0.120,-0.090,-0.000,-0.000,0.015,-0.000,-0.210,-0.000
+fontmark,syn60all_f11_s01,default,Gorel,1,-0.000,-0.055,0.000,-0.006,-0.027,-0.003,-0.055,-0.006
+fontmark,syn60all_f11_s01,default,Mihalsa,1,-0.000,-0.120,0.000,-0.006,-0.060,-0.003,-0.120,-0.006
+fontmark,syn60all_f11_s01,default,Morkir,1,0.000,-0.200,0.000,-0.006,-0.100,-0.003,-0.200,-0.006
+fontmark,syn60all_f11_s01,default,Torellumka,1,-0.000,-0.190,0.000,-0.006,-0.095,-0.003,-0.190,-0.006
+fontmark,syn60all_f11_s01,default,Velcho,1,-0.120,-0.175,-0.000,-0.006,-0.027,-0.003,-0.295,-0.006
+fontmark,syn60all_f11_s01,ggrepel,Anpra,1,-0.120,0.115,-0.120,0.127,0.117,0.123,-0.005,0.007
+fontmark,syn60all_f11_s01,ggrepel,Anpraquimor,1,-0.120,0.085,-0.120,0.128,0.103,0.124,-0.035,0.008
+fontmark,syn60all_f11_s01,ggrepel,Brilocho,1,-0.120,-0.030,-0.120,0.001,0.045,0.060,-0.150,-0.119
+fontmark,syn60all_f11_s01,ggrepel,Fajunlo Tortor,1,-0.000,0.000,-0.120,0.008,0.000,0.064,0.000,-0.112
+fontmark,syn60all_f11_s01,ggrepel,Fakirbri,1,-0.120,0.115,0.000,-0.000,0.118,-0.000,-0.005,-0.000
+fontmark,syn60all_f11_s01,ggrepel,Falogordun,1,-0.000,0.090,-0.120,0.127,0.045,0.123,0.090,0.007
+fontmark,syn60all_f11_s01,ggrepel,Famielpra Dun,1,0.000,0.020,-0.120,0.128,0.010,0.124,0.020,0.008
+fontmark,syn60all_f11_s01,ggrepel,Isgorprator,1,0.000,0.060,-0.120,0.248,0.030,0.184,0.060,0.128
+fontmark,syn60all_f11_s01,ggrepel,Islum,1,-0.120,-0.005,0.000,-0.000,0.058,-0.000,-0.125,-0.000
+fontmark,syn60all_f11_s01,ggrepel,Ismorren Ost,1,0.000,0.235,-0.120,0.121,0.118,0.120,0.235,0.001
+fontmark,syn60all_f11_s01,ggrepel,Issa,1,0.000,0.020,-0.120,0.240,0.010,0.180,0.020,0.120
+fontmark,syn60all_f11_s01,ggrepel,Istor,1,-0.120,0.070,-0.000,0.120,0.095,0.060,-0.050,0.120
+fontmark,syn60all_f11_s01,ggrepel,Kakir Dunsa,1,-0.120,-0.005,0.000,-0.000,0.058,-0.000,-0.125,-0.000
+fontmark,syn60all_f11_s01,ggrepel,Morostjun,1,0.000,0.085,0.000,0.008,0.043,0.004,0.085,0.008
+fontmark,syn60all_f11_s01,ggrepel,Morsaelnel,1,-0.120,0.100,0.000,-0.000,0.110,-0.000,-0.020,-0.000
+fontmark,syn60all_f11_s01,ggrepel,Neliskahal,1,-0.120,0.145,-0.120,-0.000,0.133,0.060,0.025,-0.120
+fontmark,syn60all_f11_s01,ggrepel,Ostvelmor,1,-0.000,0.005,-0.000,0.001,0.003,0.000,0.005,0.001
+fontmark,syn60all_f11_s01,ggrepel,Quirenkir Vel,1,-0.000,0.085,-0.000,-0.000,0.042,-0.000,0.085,-0.000
+fontmark,syn60all_f11_s01,ggrepel_inf,Anlo,1,-0.120,-0.035,-0.120,0.120,0.043,0.120,-0.155,-0.000
+fontmark,syn60all_f11_s01,ggrepel_inf,Anpra,1,-0.120,-0.005,-0.120,0.128,0.058,0.124,-0.125,0.008
+fontmark,syn60all_f11_s01,ggrepel_inf,Anpraquimor,1,-0.000,-0.035,-0.120,0.128,-0.017,0.124,-0.035,0.008
+fontmark,syn60all_f11_s01,ggrepel_inf,Brilocho,1,0.000,0.090,-0.000,-0.000,0.045,-0.000,0.090,-0.000
+fontmark,syn60all_f11_s01,ggrepel_inf,Brirennelhal,1,0.000,0.175,-0.120,0.120,0.088,0.120,0.175,-0.000
+fontmark,syn60all_f11_s01,ggrepel_inf,Fajunlo Tortor,1,-0.000,0.000,-0.120,0.127,0.000,0.123,-0.000,0.007
+fontmark,syn60all_f11_s01,ggrepel_inf,Fakirbri,1,-0.120,0.115,-0.120,0.120,0.118,0.120,-0.005,-0.000
+fontmark,syn60all_f11_s01,ggrepel_inf,Falogordun,1,0.000,0.090,0.000,0.008,0.045,0.004,0.090,0.008
+fontmark,syn60all_f11_s01,ggrepel_inf,Famielpra Dun,1,-0.120,0.140,-0.120,0.127,0.130,0.123,0.020,0.007
+fontmark,syn60all_f11_s01,ggrepel_inf,Halmormivel,1,0.000,0.210,-0.120,0.120,0.105,0.120,0.210,-0.000
+fontmark,syn60all_f11_s01,ggrepel_inf,Isfa,1,-0.120,-0.065,-0.120,0.129,0.028,0.124,-0.185,0.009
+fontmark,syn60all_f11_s01,ggrepel_inf,Islum,1,0.000,-0.005,-0.120,0.120,-0.002,0.120,-0.005,-0.000
+fontmark,syn60all_f11_s01,ggrepel_inf,Ismorren Ost,1,-0.000,0.235,-0.120,0.240,0.118,0.180,0.235,0.120
+fontmark,syn60all_f11_s01,ggrepel_inf,Istor,1,-0.120,0.070,-0.120,0.120,0.095,0.120,-0.050,-0.000
+fontmark,syn60all_f11_s01,ggrepel_inf,Junis,1,-0.000,0.115,0.000,-0.000,0.058,-0.000,0.115,-0.000
+fontmark,syn60all_f11_s01,ggrepel_inf,Kakir Dunsa,1,0.000,-0.005,-0.120,0.120,-0.002,0.120,-0.005,-0.000
+fontmark,syn60all_f11_s01,ggrepel_inf,Kirtor,1,-0.120,0.010,-0.000,-0.000,0.065,-0.000,-0.110,-0.000
+fontmark,syn60all_f11_s01,ggrepel_inf,Lumostvel Jun,1,0.000,0.080,-0.120,-0.000,0.040,0.060,0.080,-0.120
+fontmark,syn60all_f11_s01,ggrepel_inf,Midunfa,1,-0.120,0.080,-0.120,0.128,0.100,0.124,-0.040,0.008
+fontmark,syn60all_f11_s01,ggrepel_inf,Morostjun,1,-0.120,0.085,-0.120,0.007,0.103,0.063,-0.035,-0.113
+fontmark,syn60all_f11_s01,ggrepel_inf,Morsaelnel,1,-0.000,0.220,-0.120,0.120,0.110,0.120,0.220,-0.000
+fontmark,syn60all_f11_s01,ggrepel_inf,Nelrenfavel Lo,1,0.000,0.135,-0.120,0.128,0.067,0.124,0.135,0.008
+fontmark,syn60all_f11_s01,ggrepel_inf,Osttorneltor,1,0.000,-0.030,-0.000,-0.000,-0.015,-0.000,-0.030,-0.000
+fontmark,syn60all_f11_s01,ggrepel_inf,Ostvelmor,1,-0.120,0.005,-0.120,0.120,0.063,0.120,-0.115,-0.000
+fontmark,syn60all_f11_s01,ggrepel_inf,Quirenkir Vel,1,-0.000,0.085,-0.120,0.120,0.043,0.120,0.085,-0.000
+fontmark,syn60all_f11_s01,ggrepel_inf,Velnelnel,1,-0.120,0.100,0.000,-0.000,0.110,-0.000,-0.020,-0.000
+fontmark,syn60all_f11_s01,gpolish,Fajunlo Tortor,1,-0.120,-0.200,-0.000,-0.006,-0.040,-0.003,-0.320,-0.006
+fontmark,syn60all_f11_s01,gpolish,Falogordun,1,-0.120,0.036,-0.000,-0.006,0.078,-0.003,-0.084,-0.006
+fontmark,syn60all_f11_s01,gpolish,Gorel,1,0.000,-0.055,0.000,-0.006,-0.028,-0.003,-0.055,-0.006
+fontmark,syn60all_f11_s01,gpolish,Isfa,1,-0.120,0.100,0.000,-0.126,0.110,-0.063,-0.020,-0.126
+fontmark,syn60all_f11_s01,gpolish,Isgorprator,1,-0.120,-0.045,0.000,-0.006,0.038,-0.003,-0.165,-0.006
+fontmark,syn60all_f11_s01,gpolish,Islum,1,0.000,-0.225,0.000,-0.006,-0.113,-0.003,-0.225,-0.006
+fontmark,syn60all_f11_s01,gpolish,Ismorren Ost,1,-0.120,-0.135,0.000,-0.006,-0.007,-0.003,-0.255,-0.006
+fontmark,syn60all_f11_s01,gpolish,Junis,1,-0.120,0.015,0.000,-0.126,0.067,-0.063,-0.105,-0.126
+fontmark,syn60all_f11_s01,gpolish,Junostfa,1,-0.120,-0.195,-0.000,-0.126,-0.037,-0.063,-0.315,-0.126
+fontmark,syn60all_f11_s01,gpolish,Kakir,1,-0.120,-0.095,0.000,-0.006,0.013,-0.003,-0.215,-0.006
+fontmark,syn60all_f11_s01,gpolish,Kirtor,1,0.000,-0.210,0.000,-0.246,-0.105,-0.123,-0.210,-0.246
+fontmark,syn60all_f11_s01,gpolish,Lotorgor,1,-0.120,-0.095,0.000,-0.006,0.012,-0.003,-0.215,-0.006
+fontmark,syn60all_f11_s01,gpolish,Lumostvel Jun,1,-0.120,-0.120,0.000,-0.006,0.000,-0.003,-0.240,-0.006
+fontmark,syn60all_f11_s01,gpolish,Mihalsa,1,-0.000,-0.120,0.000,-0.006,-0.060,-0.003,-0.120,-0.006
+fontmark,syn60all_f11_s01,gpolish,Mijunisfa,1,-0.120,-0.074,-0.000,-0.126,0.023,-0.063,-0.194,-0.126
+fontmark,syn60all_f11_s01,gpolish,Mikaren,1,-0.000,-0.125,0.000,-0.006,-0.062,-0.003,-0.125,-0.006
+fontmark,syn60all_f11_s01,gpolish,Morkagor,1,-0.120,-0.065,-0.000,-0.006,0.028,-0.003,-0.185,-0.006
+fontmark,syn60all_f11_s01,gpolish,Morkir,1,0.000,-0.200,0.000,-0.006,-0.100,-0.003,-0.200,-0.006
+fontmark,syn60all_f11_s01,gpolish,Morsaelnel,1,-0.120,-0.220,0.000,-0.006,-0.050,-0.003,-0.340,-0.006
+fontmark,syn60all_f11_s01,gpolish,Osttorneltor,1,-0.120,-0.110,-0.000,-0.006,0.005,-0.003,-0.230,-0.006
+fontmark,syn60all_f11_s01,gpolish,Renhalbribri,1,-0.120,-0.040,0.000,-0.006,0.040,-0.003,-0.160,-0.006
+fontmark,syn60all_f11_s01,gpolish,Renis,1,0.000,-0.190,0.000,-0.126,-0.095,-0.063,-0.190,-0.126
+fontmark,syn60all_f11_s01,gpolish,Velcho,1,-0.120,-0.175,-0.000,-0.006,-0.028,-0.003,-0.295,-0.006
+fontmark,syn60all_f11_s01,gpolish,Velcho Ka,1,-0.120,0.020,-0.000,-0.006,0.070,-0.003,-0.100,-0.006
+fontmark,syn60all_f11_s01,gpolish,Velnelnel,1,-0.120,-0.050,0.000,-0.006,0.035,-0.003,-0.170,-0.006
+fontmark,syn60all_f7_s01,adjusttext,Anlo,1,0.000,-0.035,-0.000,0.000,-0.018,0.000,-0.035,0.000
+fontmark,syn60all_f7_s01,adjusttext,Anpraquimor,1,0.000,-0.075,-0.000,-0.001,-0.037,-0.000,-0.075,-0.001
+fontmark,syn60all_f7_s01,adjusttext,Junostfa,1,-0.000,0.040,0.000,-0.001,0.020,-0.000,0.040,-0.001
+fontmark,syn60all_f7_s01,adjusttext,Kirtor,1,-0.000,-0.005,0.000,0.000,-0.002,0.000,-0.005,0.000
+fontmark,syn60all_f7_s01,adjusttext,Loostsavel,1,0.120,0.030,-0.000,-0.001,-0.045,-0.000,0.150,-0.001
+fontmark,syn60all_f7_s01,adjusttext,Lotorgor,1,0.000,0.100,-0.000,0.000,0.050,0.000,0.100,0.000
+fontmark,syn60all_f7_s01,adjusttext,Nelrenfavel Lo,1,-0.000,-0.080,0.000,0.000,-0.040,0.000,-0.080,0.000
+fontmark,syn60all_f7_s01,adjusttext,Ostvelmor,1,0.000,0.090,-0.000,-0.001,0.045,-0.000,0.090,-0.001
+fontmark,syn60all_f7_s01,adjusttext,Renis,1,-0.120,-0.085,-0.120,-0.001,0.018,0.060,-0.205,-0.121
+fontmark,syn60all_f7_s01,adjusttext,Torellumka,1,0.000,0.080,0.000,0.000,0.040,0.000,0.080,0.000
+fontmark,syn60all_f7_s01,adjusttext,Velcho Ka,1,0.000,-0.050,0.000,0.000,-0.025,0.000,-0.050,0.000
+fontmark,syn60all_f7_s01,default,Anpraquimor,1,0.000,-0.080,0.000,-0.127,-0.040,-0.063,-0.080,-0.127
+fontmark,syn60all_f7_s01,default,Brilocho,1,-0.000,-0.025,-0.000,-0.127,-0.012,-0.063,-0.025,-0.127
+fontmark,syn60all_f7_s01,default,Fakirbri,1,-0.120,-0.070,0.120,-0.127,0.025,-0.123,-0.190,-0.007
+fontmark,syn60all_f7_s01,default,Gorel,1,-0.000,-0.030,0.120,-0.127,-0.015,-0.123,-0.030,-0.007
+fontmark,syn60all_f7_s01,default,Halmormivel,1,-0.120,-0.030,0.120,-0.127,0.045,-0.123,-0.150,-0.007
+fontmark,syn60all_f7_s01,default,Kirtorsa,1,-0.120,-0.030,0.120,-0.127,0.045,-0.123,-0.150,-0.007
+fontmark,syn60all_f7_s01,default,Midunfa,1,0.000,-0.090,0.120,-0.127,-0.045,-0.123,-0.090,-0.007
+fontmark,syn60all_f7_s01,default,Mihalsa,1,-0.000,-0.120,0.120,-0.127,-0.060,-0.123,-0.120,-0.007
+fontmark,syn60all_f7_s01,default,Morbrieldun,1,-0.120,-0.120,0.120,-0.127,0.000,-0.123,-0.240,-0.007
+fontmark,syn60all_f7_s01,default,Morkir,1,0.000,-0.070,0.120,-0.127,-0.035,-0.123,-0.070,-0.007
+fontmark,syn60all_f7_s01,default,Morsaelnel,1,-0.120,-0.110,0.120,-0.127,0.005,-0.123,-0.230,-0.007
+fontmark,syn60all_f7_s01,default,Quirenkir Vel,1,-0.000,-0.150,0.000,-0.127,-0.075,-0.063,-0.150,-0.127
+fontmark,syn60all_f7_s01,default,Torellumka,1,-0.000,-0.020,0.240,-0.247,-0.010,-0.243,-0.020,-0.007
+fontmark,syn60all_f7_s01,default,Velcho,1,-0.120,-0.045,0.120,-0.247,0.038,-0.183,-0.165,-0.127
+fontmark,syn60all_f7_s01,ggrepel,Anlo,1,-0.120,-0.035,0.000,-0.001,0.043,-0.000,-0.155,-0.001
+fontmark,syn60all_f7_s01,ggrepel,Brirennelhal,1,0.000,-0.120,-0.120,0.120,-0.060,0.120,-0.120,0.000
+fontmark,syn60all_f7_s01,ggrepel,Elfa,1,0.000,0.070,-0.120,0.000,0.035,0.060,0.070,-0.120
+fontmark,syn60all_f7_s01,ggrepel,Fajunlo Tortor,1,0.000,0.025,-0.120,0.120,0.012,0.120,0.025,0.000
+fontmark,syn60all_f7_s01,ggrepel,Fakirbri,1,-0.000,0.030,-0.120,0.119,0.015,0.120,0.030,-0.001
+fontmark,syn60all_f7_s01,ggrepel,Famielpra Dun,1,0.000,0.075,0.000,0.000,0.037,0.000,0.075,0.000
+fontmark,syn60all_f7_s01,ggrepel,Issa,1,0.000,0.070,-0.000,-0.120,0.035,-0.060,0.070,-0.120
+fontmark,syn60all_f7_s01,ggrepel,Istor,1,0.000,-0.030,-0.120,-0.121,-0.015,-0.000,-0.030,-0.241
+fontmark,syn60all_f7_s01,ggrepel,Kakir,1,0.000,0.060,0.000,-0.001,0.030,-0.000,0.060,-0.001
+fontmark,syn60all_f7_s01,ggrepel,Nelrenfavel Lo,1,-0.000,0.040,0.000,-0.121,0.020,-0.060,0.040,-0.121
+fontmark,syn60all_f7_s01,ggrepel_inf,Anlo,1,-0.120,0.085,-0.120,0.119,0.102,0.120,-0.035,-0.001
+fontmark,syn60all_f7_s01,ggrepel_inf,Anpra,1,-0.120,0.095,-0.120,-0.001,0.108,0.060,-0.025,-0.121
+fontmark,syn60all_f7_s01,ggrepel_inf,Brilocho,1,0.000,0.000,-0.120,0.119,0.000,0.120,0.000,-0.001
+fontmark,syn60all_f7_s01,ggrepel_inf,Brirennelhal,1,-0.000,0.000,-0.000,0.000,0.000,0.000,0.000,0.000
+fontmark,syn60all_f7_s01,ggrepel_inf,Elfa,1,-0.000,0.070,0.000,-0.120,0.035,-0.060,0.070,-0.120
+fontmark,syn60all_f7_s01,ggrepel_inf,Fajunlo Tortor,1,0.000,0.025,-0.120,0.119,0.013,0.120,0.025,-0.001
+fontmark,syn60all_f7_s01,ggrepel_inf,Fakirbri,1,0.000,0.030,0.000,-0.001,0.015,-0.000,0.030,-0.001
+fontmark,syn60all_f7_s01,ggrepel_inf,Falogordun,1,-0.120,0.005,-0.120,0.120,0.062,0.120,-0.115,0.000
+fontmark,syn60all_f7_s01,ggrepel_inf,Famielpra Dun,1,-0.000,-0.045,-0.120,0.120,-0.022,0.120,-0.045,0.000
+fontmark,syn60all_f7_s01,ggrepel_inf,Goran Kir,1,0.000,0.045,-0.120,-0.001,0.023,0.060,0.045,-0.121
+fontmark,syn60all_f7_s01,ggrepel_inf,Gorel,1,-0.000,-0.005,-0.120,0.119,-0.002,0.120,-0.005,-0.001
+fontmark,syn60all_f7_s01,ggrepel_inf,Isfa,1,-0.000,0.055,-0.120,-0.001,0.028,0.060,0.055,-0.121
+fontmark,syn60all_f7_s01,ggrepel_inf,Islum,1,-0.000,-0.005,-0.120,0.120,-0.002,0.120,-0.005,0.000
+fontmark,syn60all_f7_s01,ggrepel_inf,Issa,1,-0.000,0.070,-0.000,-0.121,0.035,-0.060,0.070,-0.121
+fontmark,syn60all_f7_s01,ggrepel_inf,Istor,1,0.000,-0.030,0.000,-0.121,-0.015,-0.060,-0.030,-0.121
+fontmark,syn60all_f7_s01,ggrepel_inf,Junis,1,-0.120,0.000,-0.120,0.000,0.060,0.060,-0.120,-0.120
+fontmark,syn60all_f7_s01,ggrepel_inf,Junlomi Ren,1,-0.120,0.005,0.000,-0.001,0.063,-0.000,-0.115,-0.001
+fontmark,syn60all_f7_s01,ggrepel_inf,Kakir,1,0.000,0.060,0.000,0.000,0.030,0.000,0.060,0.000
+fontmark,syn60all_f7_s01,ggrepel_inf,Kirtor,1,-0.000,-0.005,-0.120,0.000,-0.002,0.060,-0.005,-0.120
+fontmark,syn60all_f7_s01,ggrepel_inf,Kirtorsa,1,0.000,0.045,-0.120,0.000,0.023,0.060,0.045,-0.120
+fontmark,syn60all_f7_s01,ggrepel_inf,Loostsavel,1,0.000,0.030,-0.120,0.119,0.015,0.120,0.030,-0.001
+fontmark,syn60all_f7_s01,ggrepel_inf,Lumostvel Jun,1,0.000,0.135,-0.120,0.119,0.068,0.120,0.135,-0.001
+fontmark,syn60all_f7_s01,ggrepel_inf,Mijunisfa,1,-0.000,0.115,-0.120,-0.001,0.058,0.060,0.115,-0.121
+fontmark,syn60all_f7_s01,ggrepel_inf,Morkagor,1,-0.120,0.075,-0.000,0.000,0.098,0.000,-0.045,0.000
+fontmark,syn60all_f7_s01,ggrepel_inf,Morkir,1,0.000,-0.020,-0.000,-0.001,-0.010,-0.000,-0.020,-0.001
+fontmark,syn60all_f7_s01,ggrepel_inf,Morostjun,1,0.000,-0.015,-0.000,-0.121,-0.007,-0.060,-0.015,-0.121
+fontmark,syn60all_f7_s01,ggrepel_inf,Morsaelnel,1,-0.000,-0.010,-0.120,0.120,-0.005,0.120,-0.010,0.000
+fontmark,syn60all_f7_s01,ggrepel_inf,Neliskahal,1,0.000,0.050,0.000,0.000,0.025,0.000,0.050,0.000
+fontmark,syn60all_f7_s01,gpolish,Anlo,1,-0.000,0.060,0.120,-0.127,0.030,-0.123,0.060,-0.007
+fontmark,syn60all_f7_s01,gpolish,Anpraquimor,1,-0.000,-0.080,0.000,-0.127,-0.040,-0.063,-0.080,-0.127
+fontmark,syn60all_f7_s01,gpolish,Brilocho,1,-0.000,-0.025,-0.000,-0.127,-0.012,-0.063,-0.025,-0.127
+fontmark,syn60all_f7_s01,gpolish,Brirennelhal,1,-0.120,-0.100,0.120,-0.127,0.010,-0.123,-0.220,-0.007
+fontmark,syn60all_f7_s01,gpolish,Cholovello,1,0.000,-0.100,0.120,-0.127,-0.050,-0.123,-0.100,-0.007
+fontmark,syn60all_f7_s01,gpolish,Falogordun,1,-0.120,-0.120,0.000,-0.127,0.000,-0.063,-0.240,-0.127
+fontmark,syn60all_f7_s01,gpolish,Famielpra Dun,1,-0.240,-0.005,0.000,-0.127,0.118,-0.063,-0.245,-0.127
+fontmark,syn60all_f7_s01,gpolish,Gorel,1,0.000,-0.030,0.120,-0.127,-0.015,-0.123,-0.030,-0.007
+fontmark,syn60all_f7_s01,gpolish,Halmormivel,1,-0.120,-0.030,0.120,-0.127,0.045,-0.123,-0.150,-0.007
+fontmark,syn60all_f7_s01,gpolish,Junis,1,-0.120,-0.075,0.000,-0.127,0.022,-0.063,-0.195,-0.127
+fontmark,syn60all_f7_s01,gpolish,Junlomi Ren,1,-0.120,-0.120,0.000,-0.127,0.000,-0.063,-0.240,-0.127
+fontmark,syn60all_f7_s01,gpolish,Junostfa,1,0.000,-0.060,0.000,-0.127,-0.030,-0.063,-0.060,-0.127
+fontmark,syn60all_f7_s01,gpolish,Kafavel Juntor,1,-0.120,-0.105,0.000,-0.127,0.008,-0.063,-0.225,-0.127
+fontmark,syn60all_f7_s01,gpolish,Kakir Dunsa,1,-0.240,0.050,0.120,-0.127,0.145,-0.123,-0.190,-0.007
+fontmark,syn60all_f7_s01,gpolish,Kirtor,1,0.000,-0.030,0.120,-0.127,-0.015,-0.123,-0.030,-0.007
+fontmark,syn60all_f7_s01,gpolish,Kirtorsa,1,0.000,-0.030,0.120,-0.127,-0.015,-0.123,-0.030,-0.007
+fontmark,syn60all_f7_s01,gpolish,Loostsavel,1,-0.120,-0.045,0.120,-0.127,0.037,-0.123,-0.165,-0.007
+fontmark,syn60all_f7_s01,gpolish,Lumostvel Jun,1,-0.120,-0.110,0.000,-0.127,0.005,-0.063,-0.230,-0.127
+fontmark,syn60all_f7_s01,gpolish,Midunfa,1,-0.000,-0.090,0.120,-0.127,-0.045,-0.123,-0.090,-0.007
+fontmark,syn60all_f7_s01,gpolish,Mihalsa,1,-0.000,-0.120,0.120,-0.127,-0.060,-0.123,-0.120,-0.007
+fontmark,syn60all_f7_s01,gpolish,Mijunisfa,1,0.000,-0.010,0.000,-0.127,-0.005,-0.063,-0.010,-0.127
+fontmark,syn60all_f7_s01,gpolish,Mikaren,1,-0.120,-0.110,0.120,-0.127,0.005,-0.123,-0.230,-0.007
+fontmark,syn60all_f7_s01,gpolish,Morbrieldun,1,-0.120,-0.120,0.120,-0.127,0.000,-0.123,-0.240,-0.007
+fontmark,syn60all_f7_s01,gpolish,Morkir,1,-0.120,-0.070,0.120,-0.127,0.025,-0.123,-0.190,-0.007
+fontmark,syn60all_f7_s01,gpolish,Morostjun,1,-0.000,-0.115,-0.000,-0.007,-0.057,-0.003,-0.115,-0.007
+fontmark,syn60all_f7_s01,gpolish,Morrendun,1,-0.120,-0.190,0.120,-0.127,-0.035,-0.123,-0.310,-0.007
+fontmark,syn60all_f7_s01,gpolish,Morsaelnel,1,-0.120,0.010,0.120,-0.127,0.065,-0.123,-0.110,-0.007
+fontmark,syn60all_f7_s01,gpolish,Neliskahal,1,-0.120,-0.100,0.120,-0.127,0.010,-0.123,-0.220,-0.007
+fontmark,syn60all_f7_s01,gpolish,Nelrenfavel Lo,1,-0.120,0.060,0.120,-0.127,0.090,-0.123,-0.060,-0.007
+fontmark,syn60all_f7_s01,gpolish,Osttorneltor,1,-0.120,-0.020,0.120,-0.127,0.050,-0.123,-0.140,-0.007
+fontmark,syn60all_f7_s01,gpolish,Ostvelmor,1,-0.000,-0.080,0.120,-0.127,-0.040,-0.123,-0.080,-0.007
+fontmark,syn60all_f7_s01,gpolish,Quirenkir Vel,1,0.000,-0.150,0.000,-0.127,-0.075,-0.063,-0.150,-0.127
+fontmark,syn60all_f7_s01,gpolish,Renis,1,-0.120,-0.040,0.120,-0.127,0.040,-0.123,-0.160,-0.007
+fontmark,syn60all_f7_s01,gpolish,Torellumka,1,0.000,-0.020,0.240,-0.247,-0.010,-0.243,-0.020,-0.007
+fontmark,syn60all_f7_s01,gpolish,Velcho,1,-0.120,-0.045,0.120,-0.247,0.038,-0.183,-0.165,-0.127
+fontmark,syn60all_m9_s01,adjusttext,Anpra,1,-0.120,-0.085,-0.000,0.010,0.017,0.005,-0.205,0.010
+fontmark,syn60all_m9_s01,adjusttext,Anpraquimor,1,-0.120,-0.060,0.000,0.009,0.030,0.004,-0.180,0.009
+fontmark,syn60all_m9_s01,adjusttext,Brilocho,1,-0.000,-0.040,0.000,-0.020,-0.020,-0.010,-0.040,-0.020
+fontmark,syn60all_m9_s01,adjusttext,Islum,1,0.000,-0.010,0.000,-0.020,-0.005,-0.010,-0.010,-0.020
+fontmark,syn60all_m9_s01,adjusttext,Ismorren Ost,1,-0.000,-0.070,-0.000,-0.000,-0.035,-0.000,-0.070,-0.000
+fontmark,syn60all_m9_s01,adjusttext,Junlomi Ren,1,-0.000,-0.070,0.000,-0.019,-0.035,-0.010,-0.070,-0.019
+fontmark,syn60all_m9_s01,adjusttext,Loostsavel,1,0.120,0.055,-0.120,-0.020,-0.032,0.050,0.175,-0.140
+fontmark,syn60all_m9_s01,adjusttext,Midun Morjun,1,-0.120,-0.040,-0.000,-0.011,0.040,-0.006,-0.160,-0.011
+fontmark,syn60all_m9_s01,adjusttext,Morbrieldun,1,0.000,-0.030,0.000,-0.019,-0.015,-0.010,-0.030,-0.019
+fontmark,syn60all_m9_s01,adjusttext,Nelrenfavel Lo,1,0.120,0.135,-0.000,-0.020,0.008,-0.010,0.255,-0.020
+fontmark,syn60all_m9_s01,adjusttext,Renis,1,-0.000,-0.020,-0.000,-0.000,-0.010,-0.000,-0.020,-0.000
+fontmark,syn60all_m9_s01,adjusttext,Torellumka,1,0.000,-0.040,0.000,-0.020,-0.020,-0.010,-0.040,-0.020
+fontmark,syn60all_m9_s01,default,Anpraquimor,1,-0.120,0.060,0.000,0.129,0.090,0.064,-0.060,0.129
+fontmark,syn60all_m9_s01,default,Gorel,1,-0.120,-0.010,0.000,-0.020,0.055,-0.010,-0.130,-0.020
+fontmark,syn60all_m9_s01,default,Midunfa,1,0.000,0.115,0.000,-0.020,0.058,-0.010,0.115,-0.020
+fontmark,syn60all_m9_s01,default,Mihalsa,1,0.000,0.090,0.000,-0.020,0.045,-0.010,0.090,-0.020
+fontmark,syn60all_m9_s01,default,Morkir,1,0.000,0.035,0.000,-0.020,0.017,-0.010,0.035,-0.020
+fontmark,syn60all_m9_s01,default,Morsaelnel,1,-0.120,0.105,0.000,-0.020,0.113,-0.010,-0.015,-0.020
+fontmark,syn60all_m9_s01,default,Torellumka,1,-0.120,-0.040,0.000,-0.020,0.040,-0.010,-0.160,-0.020
+fontmark,syn60all_m9_s01,default,Velcho,1,-0.120,0.180,0.000,-0.020,0.150,-0.010,0.060,-0.020
+fontmark,syn60all_m9_s01,ggrepel,Famielpra Dun,1,-0.120,0.080,-0.120,0.230,0.100,0.175,-0.040,0.110
+fontmark,syn60all_m9_s01,ggrepel,Ismorren Ost,1,-0.120,0.170,-0.000,-0.000,0.145,-0.000,0.050,-0.000
+fontmark,syn60all_m9_s01,ggrepel,Quirenkir Vel,1,-0.120,0.100,-0.000,0.220,0.110,0.110,-0.020,0.220
+fontmark,syn60all_m9_s01,ggrepel_inf,Anlo,1,-0.120,0.100,0.000,0.100,0.110,0.050,-0.020,0.100
+fontmark,syn60all_m9_s01,ggrepel_inf,Anpra,1,-0.120,0.035,-0.000,0.009,0.078,0.004,-0.085,0.009
+fontmark,syn60all_m9_s01,ggrepel_inf,Anpraquimor,1,-0.120,0.060,-0.120,0.249,0.090,0.184,-0.060,0.129
+fontmark,syn60all_m9_s01,ggrepel_inf,Brirennelhal,1,0.000,0.030,-0.120,0.220,0.015,0.170,0.030,0.100
+fontmark,syn60all_m9_s01,ggrepel_inf,Elfa,1,-0.120,0.010,-0.120,0.100,0.065,0.110,-0.110,-0.020
+fontmark,syn60all_m9_s01,ggrepel_inf,Fajunlo Tortor,1,-0.120,0.085,0.000,0.110,0.103,0.055,-0.035,0.110
+fontmark,syn60all_m9_s01,ggrepel_inf,Gorel,1,-0.120,0.110,-0.120,0.220,0.115,0.170,-0.010,0.100
+fontmark,syn60all_m9_s01,ggrepel_inf,Isfa,1,-0.120,0.040,-0.120,0.100,0.080,0.110,-0.080,-0.020
+fontmark,syn60all_m9_s01,ggrepel_inf,Isgorprator,1,-0.120,0.055,-0.120,0.129,0.088,0.124,-0.065,0.009
+fontmark,syn60all_m9_s01,ggrepel_inf,Islum,1,-0.000,-0.010,0.000,0.100,-0.005,0.050,-0.010,0.100
+fontmark,syn60all_m9_s01,ggrepel_inf,Ismorren Ost,1,0.000,0.050,-0.000,-0.000,0.025,-0.000,0.050,-0.000
+fontmark,syn60all_m9_s01,ggrepel_inf,Issa,1,0.000,0.015,-0.120,0.120,0.008,0.120,0.015,-0.000
+fontmark,syn60all_m9_s01,ggrepel_inf,Istor,1,-0.000,0.105,-0.120,0.120,0.053,0.120,0.105,-0.000
+fontmark,syn60all_m9_s01,ggrepel_inf,Junostfa,1,-0.120,-0.005,0.000,-0.020,0.058,-0.010,-0.125,-0.020
+fontmark,syn60all_m9_s01,ggrepel_inf,Kirtor,1,-0.120,0.115,-0.120,0.240,0.118,0.180,-0.005,0.120
+fontmark,syn60all_m9_s01,ggrepel_inf,Loostsavel,1,-0.120,0.055,0.000,0.100,0.088,0.050,-0.065,0.100
+fontmark,syn60all_m9_s01,ggrepel_inf,Midunfa,1,-0.120,0.115,0.000,-0.020,0.117,-0.010,-0.005,-0.020
+fontmark,syn60all_m9_s01,ggrepel_inf,Morostjun,1,-0.120,0.125,0.000,0.249,0.123,0.124,0.005,0.249
+fontmark,syn60all_m9_s01,ggrepel_inf,Morsaelnel,1,0.000,-0.015,-0.120,0.101,-0.007,0.110,-0.015,-0.019
+fontmark,syn60all_m9_s01,ggrepel_inf,Neliskahal,1,-0.120,0.115,-0.000,0.101,0.118,0.050,-0.005,0.101
+fontmark,syn60all_m9_s01,ggrepel_inf,Osttorneltor,1,-0.120,0.110,0.000,0.100,0.115,0.050,-0.010,0.100
+fontmark,syn60all_m9_s01,ggrepel_inf,Velnelnel,1,-0.120,0.075,-0.120,0.221,0.098,0.170,-0.045,0.101
+fontmark,syn60all_m9_s01,gpolish,Anlo,1,0.000,-0.020,0.000,-0.020,-0.010,-0.010,-0.020,-0.020
+fontmark,syn60all_m9_s01,gpolish,Anpraquimor,1,-0.120,0.060,0.000,0.129,0.090,0.064,-0.060,0.129
+fontmark,syn60all_m9_s01,gpolish,Brilocho,1,-0.120,0.080,0.000,-0.020,0.100,-0.010,-0.040,-0.020
+fontmark,syn60all_m9_s01,gpolish,Cholovello,1,0.000,0.070,-0.000,-0.020,0.035,-0.010,0.070,-0.020
+fontmark,syn60all_m9_s01,gpolish,Falogordun,1,0.000,-0.015,0.000,-0.011,-0.008,-0.006,-0.015,-0.011
+fontmark,syn60all_m9_s01,gpolish,Goran Kir,1,-0.000,0.015,0.000,0.120,0.008,0.060,0.015,0.120
+fontmark,syn60all_m9_s01,gpolish,Gorel,1,0.000,-0.010,0.000,-0.020,-0.005,-0.010,-0.010,-0.020
+fontmark,syn60all_m9_s01,gpolish,Halmormivel,1,0.000,0.115,-0.000,-0.020,0.058,-0.010,0.115,-0.020
+fontmark,syn60all_m9_s01,gpolish,Isfa,1,0.000,0.040,0.000,-0.020,0.020,-0.010,0.040,-0.020
+fontmark,syn60all_m9_s01,gpolish,Islum,1,0.000,-0.010,0.000,-0.020,-0.005,-0.010,-0.010,-0.020
+fontmark,syn60all_m9_s01,gpolish,Issa,1,-0.120,0.015,0.000,-0.120,0.068,-0.060,-0.105,-0.120
+fontmark,syn60all_m9_s01,gpolish,Junis,1,-0.000,0.045,0.000,-0.000,0.023,-0.000,0.045,-0.000
+fontmark,syn60all_m9_s01,gpolish,Junlomi Ren,1,-0.000,0.050,0.000,-0.020,0.025,-0.010,0.050,-0.020
+fontmark,syn60all_m9_s01,gpolish,Junostfa,1,-0.120,-0.005,0.000,-0.020,0.057,-0.010,-0.125,-0.020
+fontmark,syn60all_m9_s01,gpolish,Kafavel Juntor,1,0.000,0.050,0.000,-0.020,0.025,-0.010,0.050,-0.020
+fontmark,syn60all_m9_s01,gpolish,Kakir,1,0.000,-0.030,0.000,-0.020,-0.015,-0.010,-0.030,-0.020
+fontmark,syn60all_m9_s01,gpolish,Kakir Dunsa,1,-0.000,0.055,0.000,-0.020,0.027,-0.010,0.055,-0.020
+fontmark,syn60all_m9_s01,gpolish,Kirtor,1,0.000,-0.005,0.000,-0.000,-0.002,-0.000,-0.005,-0.000
+fontmark,syn60all_m9_s01,gpolish,Kirtorsa,1,-0.120,-0.010,0.000,0.120,0.055,0.060,-0.130,0.120
+fontmark,syn60all_m9_s01,gpolish,Loostsavel,1,-0.120,-0.065,0.000,-0.020,0.027,-0.010,-0.185,-0.020
+fontmark,syn60all_m9_s01,gpolish,Lotorgor,1,0.000,0.000,0.000,-0.111,0.000,-0.056,0.000,-0.111
+fontmark,syn60all_m9_s01,gpolish,Lumostvel Jun,1,-0.000,0.050,0.000,-0.020,0.025,-0.010,0.050,-0.020
+fontmark,syn60all_m9_s01,gpolish,Mihalsa,1,0.000,-0.030,0.000,-0.020,-0.015,-0.010,-0.030,-0.020
+fontmark,syn60all_m9_s01,gpolish,Mijunisfa,1,0.000,0.050,0.120,-0.131,0.025,-0.126,0.050,-0.011
+fontmark,syn60all_m9_s01,gpolish,Mikaren,1,-0.000,0.090,0.000,-0.140,0.045,-0.070,0.090,-0.140
+fontmark,syn60all_m9_s01,gpolish,Morbrieldun,1,-0.120,0.090,0.000,-0.020,0.105,-0.010,-0.030,-0.020
+fontmark,syn60all_m9_s01,gpolish,Morkagor,1,-0.000,0.055,0.000,-0.131,0.028,-0.066,0.055,-0.131
+fontmark,syn60all_m9_s01,gpolish,Morkir,1,-0.000,0.035,0.000,-0.020,0.018,-0.010,0.035,-0.020
+fontmark,syn60all_m9_s01,gpolish,Morostjun,1,-0.000,0.124,0.000,0.009,0.062,0.004,0.124,0.009
+fontmark,syn60all_m9_s01,gpolish,Morrendun,1,0.000,0.060,0.000,-0.020,0.030,-0.010,0.060,-0.020
+fontmark,syn60all_m9_s01,gpolish,Morsaelnel,1,0.000,-0.015,0.000,-0.020,-0.007,-0.010,-0.015,-0.020
+fontmark,syn60all_m9_s01,gpolish,Neliskahal,1,-0.000,-0.005,-0.000,-0.020,-0.002,-0.010,-0.005,-0.020
+fontmark,syn60all_m9_s01,gpolish,Quirenhal,1,-0.120,0.015,0.120,-0.020,0.068,-0.070,-0.105,0.100
+fontmark,syn60all_m9_s01,gpolish,Renhalbribri,1,-0.000,-0.010,-0.000,-0.020,-0.005,-0.010,-0.010,-0.020
+fontmark,syn60all_m9_s01,gpolish,Renis,1,-0.000,-0.020,-0.000,0.120,-0.010,0.060,-0.020,0.120
+fontmark,syn60all_m9_s01,gpolish,Torellumka,1,-0.120,0.080,0.000,-0.020,0.100,-0.010,-0.040,-0.020
+fontmark,syn60all_m9_s01,gpolish,Velcho,1,-0.000,0.180,0.000,-0.020,0.090,-0.010,0.180,-0.020
+fontmark,syn60all_m9_s01,gpolish,Velnelnel,1,-0.000,-0.045,0.000,-0.020,-0.022,-0.010,-0.045,-0.020
+main,syn60all_s01,adjusttext,Anpra,1,-0.120,-0.085,-0.000,0.010,0.017,0.005,-0.205,0.010
+main,syn60all_s01,adjusttext,Anpraquimor,1,-0.120,-0.060,0.000,0.009,0.030,0.004,-0.180,0.009
+main,syn60all_s01,adjusttext,Brilocho,1,-0.000,-0.040,0.000,-0.020,-0.020,-0.010,-0.040,-0.020
+main,syn60all_s01,adjusttext,Isfa,1,-0.000,0.040,0.000,-0.020,0.020,-0.010,0.040,-0.020
+main,syn60all_s01,adjusttext,Islum,1,0.000,-0.010,0.000,-0.020,-0.005,-0.010,-0.010,-0.020
+main,syn60all_s01,adjusttext,Ismorren Ost,1,-0.000,-0.070,-0.000,-0.000,-0.035,-0.000,-0.070,-0.000
+main,syn60all_s01,adjusttext,Junlomi Ren,1,-0.000,-0.070,0.000,-0.019,-0.035,-0.010,-0.070,-0.019
+main,syn60all_s01,adjusttext,Loostsavel,1,0.120,0.055,-0.120,-0.020,-0.032,0.050,0.175,-0.140
+main,syn60all_s01,adjusttext,Lotorgor,1,0.120,0.120,0.000,0.009,0.000,0.004,0.240,0.009
+main,syn60all_s01,adjusttext,Midun Morjun,1,-0.120,-0.040,-0.000,-0.011,0.040,-0.006,-0.160,-0.011
+main,syn60all_s01,adjusttext,Morbrieldun,1,0.000,-0.030,0.000,-0.019,-0.015,-0.010,-0.030,-0.019
+main,syn60all_s01,adjusttext,Morkagor,1,-0.000,0.055,0.000,-0.011,0.028,-0.006,0.055,-0.011
+main,syn60all_s01,adjusttext,Nelrenfavel Lo,1,0.120,0.135,-0.000,-0.020,0.008,-0.010,0.255,-0.020
+main,syn60all_s01,adjusttext,Renis,1,-0.000,-0.020,-0.000,-0.000,-0.010,-0.000,-0.020,-0.000
+main,syn60all_s01,adjusttext,Torellumka,1,0.000,-0.040,0.000,-0.020,-0.020,-0.010,-0.040,-0.020
+main,syn60all_s01,default,Anpraquimor,1,0.000,0.060,0.000,0.129,0.030,0.064,0.060,0.129
+main,syn60all_s01,default,Gorel,1,-0.000,-0.010,0.000,-0.020,-0.005,-0.010,-0.010,-0.020
+main,syn60all_s01,default,Halmormivel,1,0.000,-0.005,-0.000,-0.020,-0.003,-0.010,-0.005,-0.020
+main,syn60all_s01,default,Midunfa,1,-0.120,-0.005,0.000,-0.020,0.057,-0.010,-0.125,-0.020
+main,syn60all_s01,default,Mihalsa,1,-0.000,-0.030,0.000,-0.020,-0.015,-0.010,-0.030,-0.020
+main,syn60all_s01,default,Morkir,1,0.000,0.035,0.000,-0.020,0.018,-0.010,0.035,-0.020
+main,syn60all_s01,default,Morsaelnel,1,0.000,0.105,0.000,-0.020,0.052,-0.010,0.105,-0.020
+main,syn60all_s01,default,Torellumka,1,-0.000,0.080,0.000,-0.020,0.040,-0.010,0.080,-0.020
+main,syn60all_s01,default,Velcho,1,-0.120,0.060,0.000,-0.020,0.090,-0.010,-0.060,-0.020
+main,syn60all_s01,ggrepel,Anpra,1,-0.120,0.155,-0.120,0.129,0.138,0.124,0.035,0.009
+main,syn60all_s01,ggrepel,Brirennelhal,1,-0.120,0.150,-0.000,0.100,0.135,0.050,0.030,0.100
+main,syn60all_s01,ggrepel,Elfa,1,-0.120,0.130,-0.120,0.100,0.125,0.110,0.010,-0.020
+main,syn60all_s01,ggrepel,Famielpra Dun,1,-0.120,0.080,-0.120,0.230,0.100,0.175,-0.040,0.110
+main,syn60all_s01,ggrepel,Halmormivel,1,0.000,-0.005,-0.120,0.221,-0.002,0.170,-0.005,0.101
+main,syn60all_s01,ggrepel,Ismorren Ost,1,-0.120,0.170,-0.000,-0.000,0.145,-0.000,0.050,-0.000
+main,syn60all_s01,ggrepel,Issa,1,-0.120,0.015,-0.120,0.120,0.068,0.120,-0.105,-0.000
+main,syn60all_s01,ggrepel,Kakir,1,-0.120,0.090,-0.120,0.220,0.105,0.170,-0.030,0.100
+main,syn60all_s01,ggrepel,Loostsavel,1,-0.120,0.055,-0.000,0.100,0.088,0.050,-0.065,0.100
+main,syn60all_s01,ggrepel,Morostjun,1,-0.000,0.125,-0.120,0.250,0.063,0.185,0.125,0.130
+main,syn60all_s01,ggrepel,Nelrenfavel Lo,1,-0.120,0.135,-0.120,0.100,0.127,0.110,0.015,-0.020
+main,syn60all_s01,ggrepel,Quirenkir Vel,1,-0.120,0.100,-0.000,0.220,0.110,0.110,-0.020,0.220
+main,syn60all_s01,ggrepel_inf,Anlo,1,-0.120,0.100,0.000,0.101,0.110,0.050,-0.020,0.101
+main,syn60all_s01,ggrepel_inf,Anpra,1,0.000,0.035,-0.000,0.009,0.018,0.004,0.035,0.009
+main,syn60all_s01,ggrepel_inf,Brilocho,1,0.000,0.200,-0.120,0.220,0.100,0.170,0.200,0.100
+main,syn60all_s01,ggrepel_inf,Elfa,1,0.000,0.010,0.000,-0.019,0.005,-0.010,0.010,-0.019
+main,syn60all_s01,ggrepel_inf,Fajunlo Tortor,1,-0.120,0.085,0.000,0.109,0.102,0.054,-0.035,0.109
+main,syn60all_s01,ggrepel_inf,Fakirbri,1,-0.120,0.135,-0.000,0.101,0.128,0.050,0.015,0.101
+main,syn60all_s01,ggrepel_inf,Falogordun,1,-0.120,0.105,-0.120,0.109,0.113,0.114,-0.015,-0.011
+main,syn60all_s01,ggrepel_inf,Famielpra Dun,1,-0.120,0.080,0.000,0.109,0.100,0.054,-0.040,0.109
+main,syn60all_s01,ggrepel_inf,Goran Kir,1,-0.120,0.135,0.000,0.240,0.127,0.120,0.015,0.240
+main,syn60all_s01,ggrepel_inf,Gorel,1,-0.120,-0.010,-0.000,0.100,0.055,0.050,-0.130,0.100
+main,syn60all_s01,ggrepel_inf,Isfa,1,0.000,0.040,-0.120,0.100,0.020,0.110,0.040,-0.020
+main,syn60all_s01,ggrepel_inf,Islum,1,-0.120,-0.010,-0.120,0.101,0.055,0.110,-0.130,-0.019
+main,syn60all_s01,ggrepel_inf,Ismorren Ost,1,-0.120,0.050,-0.000,0.001,0.085,0.000,-0.070,0.001
+main,syn60all_s01,ggrepel_inf,Issa,1,-0.120,0.135,-0.120,0.120,0.127,0.120,0.015,-0.000
+main,syn60all_s01,ggrepel_inf,Istor,1,-0.120,0.105,0.000,-0.000,0.113,-0.000,-0.015,-0.000
+main,syn60all_s01,ggrepel_inf,Junostfa,1,0.000,-0.005,-0.000,-0.020,-0.002,-0.010,-0.005,-0.020
+main,syn60all_s01,ggrepel_inf,Kirtor,1,-0.120,0.115,0.000,0.240,0.118,0.120,-0.005,0.240
+main,syn60all_s01,ggrepel_inf,Kirtorsa,1,-0.120,0.110,0.000,0.240,0.115,0.120,-0.010,0.240
+main,syn60all_s01,ggrepel_inf,Loostsavel,1,-0.120,0.175,-0.120,0.220,0.148,0.170,0.055,0.100
+main,syn60all_s01,ggrepel_inf,Lumostvel Jun,1,0.000,0.170,0.000,0.100,0.085,0.050,0.170,0.100
+main,syn60all_s01,ggrepel_inf,Midunfa,1,-0.120,0.115,0.000,-0.020,0.118,-0.010,-0.005,-0.020
+main,syn60all_s01,ggrepel_inf,Mijunisfa,1,-0.120,0.050,-0.120,0.110,0.085,0.115,-0.070,-0.010
+main,syn60all_s01,ggrepel_inf,Morkir,1,-0.120,0.155,-0.120,0.221,0.137,0.170,0.035,0.101
+main,syn60all_s01,ggrepel_inf,Morostjun,1,-0.120,0.005,-0.120,0.249,0.063,0.184,-0.115,0.129
+main,syn60all_s01,ggrepel_inf,Morrendun,1,-0.120,0.060,0.000,0.100,0.090,0.050,-0.060,0.100
+main,syn60all_s01,ggrepel_inf,Morsaelnel,1,-0.120,0.105,0.000,0.100,0.113,0.050,-0.015,0.100
+main,syn60all_s01,ggrepel_inf,Neliskahal,1,-0.120,0.115,0.000,0.101,0.118,0.050,-0.005,0.101
+main,syn60all_s01,ggrepel_inf,Nelrenfavel Lo,1,0.000,0.135,0.000,-0.020,0.067,-0.010,0.135,-0.020
+main,syn60all_s01,ggrepel_inf,Osttorneltor,1,-0.120,0.110,-0.120,0.221,0.115,0.170,-0.010,0.101
+main,syn60all_s01,gpolish,Anlo,1,-0.120,0.100,0.000,-0.020,0.110,-0.010,-0.020,-0.020
+main,syn60all_s01,gpolish,Cholovello,1,0.000,0.070,0.000,-0.020,0.035,-0.010,0.070,-0.020
+main,syn60all_s01,gpolish,Fakirbri,1,-0.120,0.015,0.000,-0.140,0.068,-0.070,-0.105,-0.140
+main,syn60all_s01,gpolish,Falogordun,1,0.000,-0.015,-0.000,-0.011,-0.007,-0.006,-0.015,-0.011
+main,syn60all_s01,gpolish,Gorel,1,-0.120,-0.010,0.000,-0.020,0.055,-0.010,-0.130,-0.020
+main,syn60all_s01,gpolish,Halmormivel,1,-0.000,-0.005,-0.000,-0.020,-0.002,-0.010,-0.005,-0.020
+main,syn60all_s01,gpolish,Isfa,1,-0.000,0.040,0.000,-0.020,0.020,-0.010,0.040,-0.020
+main,syn60all_s01,gpolish,Issa,1,-0.000,0.015,-0.000,-0.240,0.008,-0.120,0.015,-0.240
+main,syn60all_s01,gpolish,Junis,1,-0.120,0.045,0.000,0.120,0.083,0.060,-0.075,0.120
+main,syn60all_s01,gpolish,Junlomi Ren,1,-0.120,0.050,0.000,-0.020,0.085,-0.010,-0.070,-0.020
+main,syn60all_s01,gpolish,Kafavel Juntor,1,0.000,0.050,0.000,-0.020,0.025,-0.010,0.050,-0.020
+main,syn60all_s01,gpolish,Kakir,1,-0.120,0.090,0.000,-0.020,0.105,-0.010,-0.030,-0.020
+main,syn60all_s01,gpolish,Kakir Dunsa,1,0.000,-0.065,0.000,-0.020,-0.032,-0.010,-0.065,-0.020
+main,syn60all_s01,gpolish,Kirloel,1,-0.120,0.005,0.000,-0.020,0.063,-0.010,-0.115,-0.020
+main,syn60all_s01,gpolish,Lumostvel Jun,1,-0.000,0.050,-0.000,-0.020,0.025,-0.010,0.050,-0.020
+main,syn60all_s01,gpolish,Mihalsa,1,-0.000,-0.030,0.000,-0.020,-0.015,-0.010,-0.030,-0.020
+main,syn60all_s01,gpolish,Mikaren,1,0.000,-0.030,0.000,-0.140,-0.015,-0.070,-0.030,-0.140
+main,syn60all_s01,gpolish,Morbrieldun,1,-0.000,0.090,0.000,-0.020,0.045,-0.010,0.090,-0.020
+main,syn60all_s01,gpolish,Morkagor,1,0.000,0.055,0.000,-0.131,0.028,-0.066,0.055,-0.131
+main,syn60all_s01,gpolish,Morkir,1,-0.000,0.035,-0.000,-0.020,0.018,-0.010,0.035,-0.020
+main,syn60all_s01,gpolish,Morostjun,1,-0.120,0.005,0.120,0.009,0.062,-0.056,-0.115,0.129
+main,syn60all_s01,gpolish,Morsaelnel,1,-0.120,0.105,0.000,-0.020,0.113,-0.010,-0.015,-0.020
+main,syn60all_s01,gpolish,Neliskahal,1,0.000,-0.005,-0.000,-0.020,-0.002,-0.010,-0.005,-0.020
+main,syn60all_s01,gpolish,Quirenhal,1,-0.000,0.015,0.120,-0.020,0.008,-0.070,0.015,0.100
+main,syn60all_s01,gpolish,Renhalbribri,1,0.000,0.110,0.000,-0.020,0.055,-0.010,0.110,-0.020
+main,syn60all_s01,gpolish,Renis,1,0.000,0.100,-0.000,0.120,0.050,0.060,0.100,0.120
+main,syn60all_s01,gpolish,Torellumka,1,0.000,0.080,0.000,-0.020,0.040,-0.010,0.080,-0.020
+main,syn60all_s01,gpolish,Velcho,1,-0.120,0.060,0.000,-0.020,0.090,-0.010,-0.060,-0.020
+main,syn60all_s01,gpolish,Velnelnel,1,0.000,-0.044,0.000,-0.020,-0.022,-0.010,-0.044,-0.020
+main,syn60all_s01,gpolish060,Anlo,1,-0.000,-0.020,0.000,-0.020,-0.010,-0.010,-0.020,-0.020
+main,syn60all_s01,gpolish060,Anpra,1,-0.000,0.036,-0.000,-0.111,0.018,-0.056,0.036,-0.111
+main,syn60all_s01,gpolish060,Anpraquimor,1,-0.000,0.060,0.000,0.129,0.030,0.064,0.060,0.129
+main,syn60all_s01,gpolish060,Brirennelhal,1,0.000,0.030,-0.000,-0.020,0.015,-0.010,0.030,-0.020
+main,syn60all_s01,gpolish060,Cholovello,1,0.000,0.070,0.000,-0.020,0.035,-0.010,0.070,-0.020
+main,syn60all_s01,gpolish060,Fajunlo Tortor,1,-0.120,0.085,0.000,-0.011,0.102,-0.006,-0.035,-0.011
+main,syn60all_s01,gpolish060,Fakirbri,1,-0.000,0.015,0.000,-0.020,0.008,-0.010,0.015,-0.020
+main,syn60all_s01,gpolish060,Falogordun,1,0.000,-0.015,-0.000,-0.011,-0.007,-0.006,-0.015,-0.011
+main,syn60all_s01,gpolish060,Famielpra Dun,1,0.120,0.080,-0.000,-0.011,-0.020,-0.006,0.200,-0.011
+main,syn60all_s01,gpolish060,Gorel,1,-0.120,-0.010,0.000,-0.020,0.055,-0.010,-0.130,-0.020
+main,syn60all_s01,gpolish060,Halmormivel,1,-0.000,-0.005,-0.000,-0.020,-0.002,-0.010,-0.005,-0.020
+main,syn60all_s01,gpolish060,Isfa,1,-0.000,0.040,0.000,-0.020,0.020,-0.010,0.040,-0.020
+main,syn60all_s01,gpolish060,Isgorprator,1,-0.000,0.055,0.000,-0.111,0.028,-0.056,0.055,-0.111
+main,syn60all_s01,gpolish060,Islum,1,0.000,-0.010,0.000,-0.020,-0.005,-0.010,-0.010,-0.020
+main,syn60all_s01,gpolish060,Ismorren Ost,1,0.000,0.050,0.000,-0.000,0.025,-0.000,0.050,-0.000
+main,syn60all_s01,gpolish060,Junis,1,-0.120,0.045,0.000,0.120,0.083,0.060,-0.075,0.120
+main,syn60all_s01,gpolish060,Junostfa,1,0.000,-0.005,0.000,-0.020,-0.002,-0.010,-0.005,-0.020
+main,syn60all_s01,gpolish060,Kakir,1,-0.120,0.090,0.000,-0.020,0.105,-0.010,-0.030,-0.020
+main,syn60all_s01,gpolish060,Kakir Dunsa,1,0.000,-0.065,0.000,-0.020,-0.032,-0.010,-0.065,-0.020
+main,syn60all_s01,gpolish060,Kirtor,1,0.000,-0.005,0.000,-0.000,-0.002,-0.000,-0.005,-0.000
+main,syn60all_s01,gpolish060,Midunfa,1,-0.000,-0.005,0.000,-0.020,-0.002,-0.010,-0.005,-0.020
+main,syn60all_s01,gpolish060,Mihalsa,1,-0.000,-0.030,0.000,-0.020,-0.015,-0.010,-0.030,-0.020
+main,syn60all_s01,gpolish060,Mijunisfa,1,0.000,0.050,0.000,-0.011,0.025,-0.006,0.050,-0.011
+main,syn60all_s01,gpolish060,Mikaren,1,0.000,-0.030,0.000,-0.140,-0.015,-0.070,-0.030,-0.140
+main,syn60all_s01,gpolish060,Morbrieldun,1,-0.000,0.090,0.000,-0.020,0.045,-0.010,0.090,-0.020
+main,syn60all_s01,gpolish060,Morkagor,1,0.000,0.055,0.000,-0.131,0.028,-0.066,0.055,-0.131
+main,syn60all_s01,gpolish060,Morkir,1,0.000,0.035,0.000,-0.020,0.017,-0.010,0.035,-0.020
+main,syn60all_s01,gpolish060,Morlomi Ost,1,0.000,0.035,0.000,-0.020,0.017,-0.010,0.035,-0.020
+main,syn60all_s01,gpolish060,Morrendun,1,-0.000,-0.060,0.000,-0.020,-0.030,-0.010,-0.060,-0.020
+main,syn60all_s01,gpolish060,Morsaelnel,1,-0.000,-0.015,0.000,-0.140,-0.007,-0.070,-0.015,-0.140
+main,syn60all_s01,gpolish060,Neliskahal,1,0.000,-0.005,-0.000,-0.020,-0.002,-0.010,-0.005,-0.020
+main,syn60all_s01,gpolish060,Osttorneltor,1,-0.000,-0.010,0.000,-0.020,-0.005,-0.010,-0.010,-0.020
+main,syn60all_s01,gpolish060,Ostvelmor,1,0.000,0.064,-0.000,-0.020,0.032,-0.010,0.064,-0.020
+main,syn60all_s01,gpolish060,Renis,1,0.000,0.100,-0.000,0.120,0.050,0.060,0.100,0.120
+main,syn60all_s01,gpolish060,Torellumka,1,-0.120,-0.040,-0.000,-0.020,0.040,-0.010,-0.160,-0.020
+main,syn60all_s01,gpolish060,Velcho,1,-0.120,0.060,0.000,-0.020,0.090,-0.010,-0.060,-0.020
+main,syn60all_s01,labrepel,Gorel,1,-0.000,-0.010,0.000,-0.020,-0.005,-0.010,-0.010,-0.020
+main,syn60all_s01,labrepel,Halmormivel,1,0.000,-0.006,0.000,-0.020,-0.003,-0.010,-0.006,-0.020
+main,syn60all_s01,labrepel,Isfa,1,-0.000,0.040,0.000,-0.020,0.020,-0.010,0.040,-0.020
+main,syn60all_s01,labrepel,Islum,1,-0.000,-0.010,-0.000,-0.020,-0.005,-0.010,-0.010,-0.020
+main,syn60all_s01,labrepel,Kirtorsa,1,-0.120,-0.010,-0.000,-0.000,0.055,-0.000,-0.130,-0.000
+main,syn60all_s01,labrepel,Lotorgor,1,0.000,0.000,0.000,-0.111,0.000,-0.056,0.000,-0.111
+main,syn60all_s01,labrepel,Morkir,1,-0.120,0.036,0.000,-0.020,0.078,-0.010,-0.084,-0.020
+main,syn60all_s01,labrepel,Torellumka,1,0.000,0.080,-0.000,-0.020,0.040,-0.010,0.080,-0.020
+main,syn60all_s01,labrepel,Velcho,1,-0.000,0.060,0.000,-0.020,0.030,-0.010,0.060,-0.020
+main,syn60sub_s01,adjusttext,Isqui,1,0.000,0.025,0.000,0.009,0.013,0.004,0.025,0.009
+main,syn60sub_s01,adjusttext,Junkiran,1,-0.000,-0.020,0.000,0.100,-0.010,0.050,-0.020,0.100
+main,syn60sub_s01,adjusttext,Neltor,1,0.120,0.120,0.000,-0.020,0.000,-0.010,0.240,-0.020
+main,syn60sub_s01,adjusttext,Renrenbrilo,1,0.000,-0.050,-0.000,-0.020,-0.025,-0.010,-0.050,-0.020
+main,syn60sub_s01,default,Anmordun,1,-0.120,0.050,0.000,-0.020,0.085,-0.010,-0.070,-0.020
+main,syn60sub_s01,default,Junjunbri,1,0.000,0.045,-0.000,-0.011,0.022,-0.006,0.045,-0.011
+main,syn60sub_s01,default,Junkirfalo,1,-0.120,0.085,0.000,-0.020,0.103,-0.010,-0.035,-0.020
+main,syn60sub_s01,default,Kanelnel Jun,1,0.000,0.115,-0.000,-0.020,0.058,-0.010,0.115,-0.020
+main,syn60sub_s01,default,Karenmi,1,-0.000,-0.015,0.000,0.120,-0.007,0.060,-0.015,0.120
+main,syn60sub_s01,ggrepel_inf,Anmordun,1,-0.120,0.050,-0.120,0.220,0.085,0.170,-0.070,0.100
+main,syn60sub_s01,ggrepel_inf,Choquimi,1,-0.120,0.160,-0.120,0.229,0.140,0.174,0.040,0.109
+main,syn60sub_s01,ggrepel_inf,Dunbribrimor,1,-0.120,0.105,0.000,0.101,0.113,0.050,-0.015,0.101
+main,syn60sub_s01,ggrepel_inf,Isangornel,1,-0.120,0.105,-0.120,0.229,0.113,0.174,-0.015,0.109
+main,syn60sub_s01,ggrepel_inf,Junjunbri,1,-0.120,0.165,-0.000,0.109,0.143,0.054,0.045,0.109
+main,syn60sub_s01,ggrepel_inf,Kachotor,1,-0.000,0.110,0.000,0.100,0.055,0.050,0.110,0.100
+main,syn60sub_s01,ggrepel_inf,Renjunmiost,1,-0.120,0.130,-0.120,0.249,0.125,0.184,0.010,0.129
+main,syn60sub_s01,ggrepel_inf,Torjunlo,1,0.000,0.190,-0.120,0.229,0.095,0.174,0.190,0.109
+main,syn60sub_s01,ggrepel_inf,Torquihalmor,1,0.000,0.140,-0.120,0.229,0.070,0.174,0.140,0.109
+main,syn60sub_s01,gpolish,Anmordun,1,-0.000,0.050,0.000,-0.020,0.025,-0.010,0.050,-0.020
+main,syn60sub_s01,gpolish,Choquimi,1,-0.120,0.040,0.000,-0.011,0.080,-0.006,-0.080,-0.011
+main,syn60sub_s01,gpolish,Dunbribrimor,1,-0.120,0.105,0.000,-0.020,0.112,-0.010,-0.015,-0.020
+main,syn60sub_s01,gpolish,Isangornel,1,-0.120,0.106,0.000,-0.011,0.113,-0.006,-0.014,-0.011
+main,syn60sub_s01,gpolish,Junjunbri,1,-0.120,0.045,-0.000,-0.011,0.083,-0.006,-0.075,-0.011
+main,syn60sub_s01,gpolish,Junkiran,1,-0.120,0.100,-0.000,-0.020,0.110,-0.010,-0.020,-0.020
+main,syn60sub_s01,gpolish,Junkirfalo,1,-0.120,0.085,0.000,-0.020,0.103,-0.010,-0.035,-0.020
+main,syn60sub_s01,gpolish,Kachotor,1,0.000,-0.010,0.000,-0.020,-0.005,-0.010,-0.010,-0.020
+main,syn60sub_s01,gpolish,Kanelnel Jun,1,0.000,-0.005,-0.000,-0.020,-0.002,-0.010,-0.005,-0.020
+main,syn60sub_s01,gpolish,Karenmi,1,0.000,-0.015,0.000,-0.000,-0.008,-0.000,-0.015,-0.000
+main,syn60sub_s01,gpolish,Renrenbrilo,1,0.000,-0.050,0.000,-0.020,-0.025,-0.010,-0.050,-0.020
+main,syn60sub_s01,gpolish,Torduntorel,1,-0.000,0.000,0.000,-0.020,0.000,-0.010,0.000,-0.020
+main,syn60sub_s01,gpolish,Torquihalmor,1,-0.000,0.020,0.000,-0.131,0.010,-0.066,0.020,-0.131
+main,syn60sub_s01,gpolish060,Anmordun,1,-0.000,0.050,0.000,-0.020,0.025,-0.010,0.050,-0.020
+main,syn60sub_s01,gpolish060,Dunbribrimor,1,0.000,0.105,-0.000,-0.020,0.053,-0.010,0.105,-0.020
+main,syn60sub_s01,gpolish060,Junkiran,1,0.000,0.100,0.000,-0.020,0.050,-0.010,0.100,-0.020
+main,syn60sub_s01,gpolish060,Junkirfalo,1,-0.120,0.085,0.000,-0.020,0.103,-0.010,-0.035,-0.020
+main,syn60sub_s01,gpolish060,Kachotor,1,0.000,-0.010,0.000,-0.020,-0.005,-0.010,-0.010,-0.020
+main,syn60sub_s01,gpolish060,Karenmi,1,0.000,-0.015,0.000,-0.000,-0.008,-0.000,-0.015,-0.000
+main,syn60sub_s01,gpolish060,Lodunpradun Is,1,0.000,0.120,0.120,-0.131,0.060,-0.126,0.120,-0.011
+main,syn60sub_s01,gpolish060,Renrenbrilo,1,0.000,-0.050,0.000,-0.020,-0.025,-0.010,-0.050,-0.020
+main,syn60sub_s01,gpolish060,Torduntorel,1,-0.000,0.000,0.000,-0.020,0.000,-0.010,0.000,-0.020
+main,syn60sub_s01,gpolish060,Torquihalmor,1,-0.000,0.020,0.000,-0.131,0.010,-0.066,0.020,-0.131
+main,syn60sub_s01,labrepel,Anmordun,1,-0.000,0.050,0.000,-0.020,0.025,-0.010,0.050,-0.020
+main,syn60sub_s01,labrepel,Isqui,1,0.000,0.025,0.000,0.129,0.013,0.064,0.025,0.129
+main,syn60sub_s01,labrepel,Junkirfalo,1,-0.120,0.085,0.000,-0.020,0.103,-0.010,-0.035,-0.020
+main,syn60sub_s01,labrepel,Karenmi,1,0.000,-0.015,0.000,0.120,-0.007,0.060,-0.015,0.120

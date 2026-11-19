@@ -102,12 +102,19 @@ def geometry(scen, method="default"):
 
 
 class Measurer:
-    """Measures text boxes in points (y up) with matplotlib, the same way for every method."""
+    """Measures text boxes in points (y up) with matplotlib, the same way for every method.
+    The text is laid out at K * 72 dpi and the extent scaled back to points. At 72 dpi matplotlib
+    rounds text extents to whole pixels (whole points), which made boxes about 6 percent wider and
+    0.4 points taller than the drawn text; at 40 * 72 dpi the rounding is 0.025 points."""
+
+    K = 40
 
     def __init__(self, W, H, size=LABEL_PT):
-        self.fig = plt.figure(figsize=(W / 72, H / 72), dpi=72)
+        # a one-inch figure is enough: the text is laid out at its centre and the box moved to (x, y)
+        self.fig = plt.figure(figsize=(1, 1), dpi=72 * self.K)
         self.r = self.fig.canvas.get_renderer()
-        self.t = self.fig.text(0, 0, "", fontsize=size, family=FONT)
+        self.t = self.fig.text(0.5, 0.5, "", fontsize=size, family=FONT)
+        self.o = 0.5 * 72 * self.K
         self.W, self.H, self.size = W, H, size
 
     def box(self, s, x, y, ha="left", va="baseline", size=None):
@@ -115,9 +122,9 @@ class Measurer:
         self.t.set_fontsize(size or self.size)
         self.t.set_ha(ha)
         self.t.set_va(va)
-        self.t.set_position((x / self.W, y / self.H))
         b = self.t.get_window_extent(self.r)
-        return (b.x0, b.y0, b.x1, b.y1)
+        k, o = self.K, self.o
+        return (x + (b.x0 - o) / k, y + (b.y0 - o) / k, x + (b.x1 - o) / k, y + (b.y1 - o) / k)
 
     def m_ascent(self, size=None):
         """Height of the ink of "M" above the baseline, in points (grid's string height for one line)."""

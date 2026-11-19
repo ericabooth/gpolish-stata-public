@@ -26,7 +26,7 @@
 # A run limited to some scenarios keeps the rows of the others.
 # Run from the benchmark folder after run_stata.do:  Rscript run_ggrepel.R [scenario ...]
 # With no scenarios named, BENCH_SCENARIOS (if set) names them; BENCH_SETS and BENCH_METHODS limit the
-# sets and the two versions.
+# sets and the two versions. BENCH_PNG_DPI keeps every drawn image at that resolution (see audit_ink.py).
 suppressPackageStartupMessages({ library(ggplot2); library(ggrepel); library(grid) })
 args <- commandArgs(trailingOnly = TRUE)
 envlist <- function(v) { x <- strsplit(trimws(Sys.getenv(v)), "[[:space:]]+")[[1]]; x[nzchar(x)] }
@@ -42,6 +42,7 @@ man <- do.call(rbind, lapply(seq_along(files), function(i) {
   read.csv(files[i], colClasses = c(scenario = "character", set = "character", design = "character"))
 }))
 if (length(args)) man <- man[man$scenario %in% args, ]
+PNG_DPI <- Sys.getenv("BENCH_PNG_DPI")
 geo <- do.call(rbind, lapply(Sys.glob("out/stata/geometry_default_*.csv"), read.csv))
 MAX_ITER <- 10000                     # ggrepel's default, written out
 MAX_TIME <- Inf                       # no time limit (the default 0.5 s makes results depend on the machine)
@@ -90,9 +91,13 @@ run_one <- function(i, method) {
   }
   p <- p + scale_x_continuous(limits = xl, expand = c(0, 0)) + scale_y_continuous(limits = yl, expand = c(0, 0)) +
     theme_void() + theme(plot.margin = margin(H - g$py1, W - g$px1, g$py0, g$px0, unit = "bigpts"))
-  keep <- man$set[i] == "main" && man$seed[i] <= 1
+  # images are kept for the main set's real-data scenarios and seed 1 at 200 dpi, or for every
+  # scenario run at BENCH_PNG_DPI when it is set (for audit_ink.py); the resolution does not change
+  # the placement
+  keep <- nzchar(PNG_DPI) || (man$set[i] == "main" && man$seed[i] <= 1)
   f <- file.path("out", method, paste0(scen, if (keep) ".png" else ".tmp.png"))
-  png(f, width = W / 72, height = H / 72, units = "in", res = if (keep) 200 else 72)
+  png(f, width = W / 72, height = H / 72, units = "in",
+      res = if (nzchar(PNG_DPI)) as.numeric(PNG_DPI) else if (keep) 200 else 72)
   # verbose = TRUE only makes ggrepel report its iterations and time as a message; it does not change
   # the placement. print() places and draws the labels (the timed step); grid.force() then runs the same
   # placement again, with the same seed, so the drawn grid objects can be read. Both runs are recorded,
@@ -154,7 +159,9 @@ for (set in unique(man$set)) {
     scens <- man$scenario[rows]
     ord <- set_order(set)
     merge_write(do.call(rbind, lapply(out, `[[`, "res")), file.path("out", method, paste0("results_", set, ".csv")), scens, ord)
-    merge_write(do.call(rbind, lapply(out, `[[`, "tim")), file.path("out", method, paste0("timing_", set, ".csv")), scens, ord)
+    # a run with BENCH_PNG_DPI draws larger images, so its seconds are not kept
+    if (!nzchar(PNG_DPI))
+      merge_write(do.call(rbind, lapply(out, `[[`, "tim")), file.path("out", method, paste0("timing_", set, ".csv")), scens, ord)
     cat(method, set, length(rows), "scenarios\n")
   }
 }

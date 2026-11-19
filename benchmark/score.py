@@ -2,10 +2,12 @@
 
 Two stages.
 1. Collect (needs out/): every label box is measured in points (y up) with matplotlib's text extent
-   for Open Sans at the scenario's font size. For Stata methods the label position and alignment come
-   from the exported SVG and the leader lines from out/stata/leaders_*.csv; for adjustText the boxes
-   and leader lines come from the finished figure; for ggrepel the label centres and leader segments
-   come from the drawn grid objects. Writes results/positions.csv (each method's label boxes and
+   for Open Sans at the scenario's font size (common.Measurer, laid out at 40 x 72 dpi so that the
+   extent is not rounded to whole points), placed where the method anchored the text. For Stata
+   methods the label position and alignment come from the exported SVG and the leader lines from
+   out/stata/leaders_*.csv; for adjustText the text anchors, alignment and leader lines come from the
+   finished figure; for ggrepel the label centres, baselines and leader segments come from the drawn
+   grid objects. Writes results/positions.csv (each method's label boxes and
    leader segments, rounded to 0.001 pt), results/geometry.csv (plot geometry, fit line, font and
    marker size, seconds and, for adjustText and ggrepel, iterations per graph) and results/points.csv (the data points).
 2. Score (needs only those three files): writes results/labels.csv and results/graphs.csv.
@@ -203,7 +205,11 @@ def method_outputs():
         times[(scen, meth)] = g["seconds"]
     for f in sorted(glob.glob("out/adjusttext/results_*.csv")):
         for r in read_csv(f):
-            at.setdefault(r["scenario"], {})[r["label"]] = tuple(float(r[k]) for k in ("x0", "y0", "x1", "y1"))
+            # the text anchor and alignment when the output has them, else adjustText's own box
+            if r.get("tx", "") != "":
+                at.setdefault(r["scenario"], {})[r["label"]] = ("anchor", float(r["tx"]), float(r["ty"]), r["ha"], r["va"])
+            else:
+                at.setdefault(r["scenario"], {})[r["label"]] = tuple(float(r[k]) for k in ("x0", "y0", "x1", "y1"))
             if r["lx0"] != "":
                 at_lead.setdefault(r["scenario"], {})[r["label"]] = tuple(float(r[k]) for k in ("lx0", "ly0", "lx1", "ly1"))
     for meth in ("ggrepel", "ggrepel_inf"):
@@ -260,7 +266,8 @@ def collect(only=None):
                 for s, (x0, y0, x1, y1) in leads.get((scen, meth), {}).items():
                     lead[s] = (g["xA"] + g["xB"] * x0, g["yA"] + g["yB"] * y0, g["xA"] + g["xB"] * x1, g["yA"] + g["yB"] * y1)
             elif meth == "adjusttext":
-                boxes = {s: b for s, b in at.get(scen, {}).items() if s in labels}
+                boxes = {s: (meas.box(s, b[1], b[2], ha=b[3], va=b[4]) if b[0] == "anchor" else b)
+                         for s, b in at.get(scen, {}).items() if s in labels}
                 lead = dict(at_lead.get(scen, {}))
             else:
                 boxes = {}

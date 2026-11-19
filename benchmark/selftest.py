@@ -120,12 +120,23 @@ def check_baseline():
             check(abs(b_file[1] - b_calc[1]) < 0.01,
                   f"{lab}: score.py's baseline matches the one grid reports ({b_calc[1]:.3f} vs {b_file[1]:.3f})")
             old = meas.box(lab, cx, cy, ha="center", va="center")
-            check(abs((old[1] - b_calc[1]) - 0.6) < 0.05, f"{lab}: the box sits 0.6 pt below a va=center box")
+            check(old[1] - b_calc[1] > 0.5, f"{lab}: the box sits {old[1] - b_calc[1]:.2f} pt below a va=center box")
             a = np.asarray(Image.open(png).convert("L"))
-            ys = np.where(a < 128)[0]
+            ys, xs = np.where(a < 128)
             ink_lo, ink_hi = (a.shape[0] - 1 - ys.max()) / 10, (a.shape[0] - ys.min()) / 10
             check(b_calc[1] <= ink_lo + 0.15 and ink_hi <= b_calc[3] + 0.15,
                   f"{lab}: the ink ({ink_lo:.2f} to {ink_hi:.2f}) lies inside the box ({b_calc[1]:.2f} to {b_calc[3]:.2f})")
+            # the box is as wide as the drawn text: the ink starts and ends where the glyph outlines
+            # (side bearings included) put it in the box. At 72 dpi matplotlib rounded the width to
+            # whole points, which left about 1 pt of extra box on each side of a centred label.
+            from matplotlib.textpath import TextPath
+            from matplotlib.font_manager import FontProperties
+            from common import FONT
+            e = TextPath((0, 0), lab, size=8.6, prop=FontProperties(family=FONT)).get_extents()
+            ink_l, ink_r = xs.min() / 10, (xs.max() + 1) / 10
+            want_l, want_r = b_calc[0] + e.x0, b_calc[0] + e.x1
+            check(abs(ink_l - want_l) < 0.15 and abs(ink_r - want_r) < 0.15,
+                  f"{lab}: the drawn ink across ({ink_l:.2f} to {ink_r:.2f}) is where the box puts it ({want_l:.2f} to {want_r:.2f})")
             if lab == "Egypt":
                 check(abs(b_calc[1] - ink_lo) < 0.15, "Egypt: the descender ink reaches the bottom of the box")
     meas.close()
