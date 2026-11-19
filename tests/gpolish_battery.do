@@ -1232,6 +1232,90 @@ gpolish bracket "Span", x(15) y0(5) y1(25)
 local bx2 `.r3k2.plotregion1.added_text[1].xpos.val'
 chk r3_bracket_fixed abs(`bx1'-`bx2') < 1e-6
 
+* ---- 37. round 4: legend order(), endlabel with aspectratio(), dotsize(), horizontal bracket
+* legend labels take the colour of the key beside them when order() reorders the keys
+sysuse uslifeexp, clear
+twoway line le le_male le_female year, legend(order(3 "F" 1 "All")) name(r4l, replace)
+gpolish legend
+local p1 `.r4l.plotregion1.plot1.style.line.color.rgb'
+local p1 : list retokenize p1
+local p3 `.r4l.plotregion1.plot3.style.line.color.rgb'
+local p3 : list retokenize p3
+local c `.r4l.legend.plotregion1.label[1].style.color.rgb'
+local c : list retokenize c
+chk r4_leg_order1 "`c'"=="`p3'" & 1
+local c `.r4l.legend.plotregion1.label[2].style.color.rgb'
+local c : list retokenize c
+chk r4_leg_order2 "`c'"=="`p1'" & 1
+* plots() names plot numbers, not legend slots
+twoway line le le_male le_female year, legend(order(3 "F" 1 "All")) name(r4m, replace)
+local s1 `.r4m.legend.plotregion1.label[1].style.color.rgb'
+local s1 : list retokenize s1
+gpolish legend, plots(1)
+local c `.r4m.legend.plotregion1.label[2].style.color.rgb'
+local c : list retokenize c
+chk r4_leg_plots1 "`c'"=="`p1'" & 1
+local c `.r4m.legend.plotregion1.label[1].style.color.rgb'
+local c : list retokenize c
+chk r4_leg_plots2 "`c'"=="`s1'" & 1
+twoway line le le_male le_female year, legend(order(3 "F" 1 "All")) name(r4n, replace)
+gpolish legend, plots(1 3)
+local c `.r4n.legend.plotregion1.label[1].style.color.rgb'
+local c : list retokenize c
+chk r4_leg_plots13a "`c'"=="`p3'" & 1
+local c `.r4n.legend.plotregion1.label[2].style.color.rgb'
+local c : list retokenize c
+chk r4_leg_plots13b "`c'"=="`p1'" & 1
+* endlabel stops before any edit on aspectratio() with a y axis on the label side
+twoway (line le year) (line le_wmale year, yaxis(2)), aspectratio(1) name(r4a, replace)
+local m0 `.r4a.plotregion1.style.margin.right.val'
+local m0 : list retokenize m0
+capture gpolish endlabel
+chk r4_aspect_rc _rc==198
+ntext r4a added_text
+chk r4_aspect_noedit r(all)==0
+local m1 `.r4a.plotregion1.style.margin.right.val'
+local m1 : list retokenize m1
+chk r4_aspect_margin "`m1'"=="`m0'" & 1
+* one y axis with aspectratio() still works
+twoway (line le year) (line le_wmale year), aspectratio(1) name(r4b, replace)
+capture gpolish endlabel
+chk r4_aspect_1ax _rc==0
+twoway (line le year) (line le_wmale year), aspectratio(1) name(r4c, replace)
+capture gpolish endlabel, side(left)
+chk r4_aspect_left _rc==198
+ntext r4c added_text
+chk r4_aspect_left_noedit r(all)==0
+* dotsize() implies dots; dots(#) is no longer read as dotsize()
+twoway line le year, name(r4d, replace)
+gpolish endlabel, dotsize(8)
+chk r4_dotsize_dots "`.r4d.plotregion1.added_markers.arrnels'"=="1"
+twoway line le year, name(r4e, replace)
+capture gpolish endlabel, dots(20)
+chk r4_dots_num _rc==198
+* horizontal bracket across two bars; label centred above, or below with below
+sysuse auto, clear
+collapse mpg, by(rep78)
+twoway bar mpg rep78, name(r4h, replace)
+gpolish bracket "p<.05", y(23) x0(2) x1(4)
+chk r4_hbr_lines "`.r4h.plotregion1.added_lines.arrnels'"=="3"
+chk r4_hbr_xmid abs(`.r4h.plotregion1.added_text[1].xpos.val' - 3) < 1e-6
+chk r4_hbr_above `.r4h.plotregion1.added_text[1].ypos.val' > 23
+gpolish bracket "n.s.", y(18.5) x0(3) x1(1+4) below
+chk r4_hbr_below `.r4h.plotregion1.added_text[2].ypos.val' < 18.5
+chk r4_hbr_lines2 "`.r4h.plotregion1.added_lines.arrnels'"=="6"
+capture gpolish bracket "x", y(23) x0(2) y1(4)
+chk r4_hbr_mix _rc==198
+capture gpolish bracket "x", y(23) x0(2)
+chk r4_hbr_partial _rc==198
+capture gpolish bracket "x", y(23) x0(2) x1(2)
+chk r4_hbr_same _rc==198
+capture gpolish bracket "x", y(23) x0(2) x1(4) left
+chk r4_hbr_left _rc==198
+capture gpolish bracket "x", x(3) y0(20) y1(22) below
+chk r4_vbr_below _rc==198
+chk r4_hbr_nochange "`.r4h.plotregion1.added_lines.arrnels'"=="6"
+
 gpolish limits
 
 if `"`_wf0'"'!="" graph set window fontface `"`_wf0'"'

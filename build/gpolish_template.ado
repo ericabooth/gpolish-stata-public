@@ -725,10 +725,12 @@ end
 
 program _gpl_endlabel
     syntax [, name(string) SIZe(real 9.5) GAP(real 1.3) VALues FORmat(string) noBOLD ///
-              DOTs DOTSize(real 5.5) PLOTs(numlist integer >0) XGap(real 8) LABels(string asis) noREPEL ///
+              DOTs DOTSIze(real 5.5) PLOTs(numlist integer >0) XGap(real 8) LABels(string asis) noREPEL ///
               WRAP(integer 0) SIDe(string) COLor(string) KEEPLegend]
     _gpl_name `name'
     local name `r(name)'
+    * dotsize() on its own asks for dots
+    if "`dots'"=="" & `dotsize'!=5.5 local dots dots
     if "`format'"=="" local format %4.1f
     if "`side'"=="" local side right
     if !inlist("`side'", "right", "left") {
@@ -754,6 +756,27 @@ program _gpl_endlabel
         if `i' > `n' {
             di as err "gpolish endlabel: plots(`i') is out of range; graph {bf:`name'} has `n' plot(s)"
             exit 198
+        }
+    }
+    * With a y axis on the label side the room is made inside the plot region (see below). On a
+    * graph with aspectratio() that margin fights the fixed shape and distorts the axes, so the
+    * combination stops here, before any edit.
+    local ar `.`name'.style.aspect_ratio.val'
+    if "`ar'"!="" & "`ar'"!="0" & "`ar'"!="." {
+        _gpl_geom, name(`name')
+        local pc0 = (r(gx0) + r(gx1))/2
+        local s0 = cond("`side'"=="right", 1, -1)
+        forvalues a = 1/9 {
+            if "`.`name'.yaxis`a'.isa'"=="" | "`.`name'.yaxis`a'.draw_view.setting'"=="no" continue
+            local ax0 `.`name'.yaxis`a'.gdi_x0'
+            local ax1 `.`name'.yaxis`a'.gdi_x1'
+            if "`ax0'"=="" | "`ax1'"=="" continue
+            if `s0'*((`ax0' + `ax1')/2 - `pc0') > 0 {
+                di as err "gpolish endlabel: graph {bf:`name'} has aspectratio() and a y axis on the `side' side;"
+                di as err "  endlabel cannot make room inside its plot region without distorting the axes."
+                di as err "  Drop aspectratio(), or use side() to label the side that has no y axis."
+                exit 198
+            }
         }
     }
     * a second endlabel replaces the first instead of stacking on it
@@ -1416,46 +1439,104 @@ program _gpl_brace
 end
 
 * ================================================================ bracket
-* a square bracket from y0() to y1() at x(); its ticks point right on screen, or left with
-* left; an optional label sits on the other side of the spine
+* Vertical form: a square bracket from y0() to y1() at x(); its ticks point right on screen,
+* or left with left; an optional label sits on the other side of the spine.
+* Horizontal form: a bracket from x0() to x1() at y(); its ticks point down on screen, or up
+* with below; an optional label is centred on the other side of the spine.
 program _gpl_bracket
-    syntax [anything(name=txt everything)], x(string) y0(string) y1(string) [name(string) TICK(real 4) ///
-        LColor(string) LWidth(string) LEFT SIZe(real 8.8) COLor(string) GAP(real 4) XAXis(string) YAXis(string)]
-    _gpl_val x `"`x'"'
-    _gpl_val y0 `"`y0'"'
-    _gpl_val y1 `"`y1'"'
-    if `y0v'==`y1v' {
-        di as err "gpolish bracket: y0() and y1() are the same; a bracket needs two different ends"
+    syntax [anything(name=txt everything)], [x(string) y0(string) y1(string) y(string) x0(string) x1(string) ///
+        name(string) TICK(real 4) LColor(string) LWidth(string) LEFT BELOW SIZe(real 8.8) COLor(string) ///
+        GAP(real 4) XAXis(string) YAXis(string)]
+    local nv = (`"`x'"'!="") + (`"`y0'"'!="") + (`"`y1'"'!="")
+    local nh = (`"`y'"'!="") + (`"`x0'"'!="") + (`"`x1'"'!="")
+    if !((`nv'==3 & `nh'==0) | (`nv'==0 & `nh'==3)) {
+        di as err "gpolish bracket: give either x(), y0() and y1() (a vertical bracket) or y(), x0() and x1()"
+        di as err "  (a horizontal bracket), and not a mix of the two"
         exit 198
+    }
+    local horiz = (`nh'==3)
+    if `horiz' & "`left'"!="" {
+        di as err "gpolish bracket: left goes with the vertical form; use below with y(), x0() and x1()"
+        exit 198
+    }
+    if !`horiz' & "`below'"!="" {
+        di as err "gpolish bracket: below goes with the horizontal form; use left with x(), y0() and y1()"
+        exit 198
+    }
+    if `horiz' {
+        _gpl_val y `"`y'"'
+        _gpl_val x0 `"`x0'"'
+        _gpl_val x1 `"`x1'"'
+        if `x0v'==`x1v' {
+            di as err "gpolish bracket: x0() and x1() are the same; a bracket needs two different ends"
+            exit 198
+        }
+    }
+    else {
+        _gpl_val x `"`x'"'
+        _gpl_val y0 `"`y0'"'
+        _gpl_val y1 `"`y1'"'
+        if `y0v'==`y1v' {
+            di as err "gpolish bracket: y0() and y1() are the same; a bracket needs two different ends"
+            exit 198
+        }
     }
     _gpl_name `name'
     local name `r(name)'
     _gpl_axpos `name' "`xaxis'" "`yaxis'"
-    local b0x `xv'
-    local b0y `y0v'
-    local b1y `y1v'
-    _gpl_toreg1 `name' "`_gpl_reg'" b0 `xv' `y0v'
-    _gpl_toreg1 `name' "`_gpl_reg'" b1 `xv' `y1v'
+    if `horiz' {
+        local b0x `x0v'
+        local b1x `x1v'
+        local b0y `yv'
+        local b1y `yv'
+    }
+    else {
+        local b0x `xv'
+        local b1x `xv'
+        local b0y `y0v'
+        local b1y `y1v'
+    }
+    _gpl_toreg1 `name' "`_gpl_reg'" b0 `b0x' `b0y'
+    _gpl_toreg1 `name' "`_gpl_reg'" b1 `b1x' `b1y'
     _gpl_geom, name(`name')
-    * device units run left to right on screen whatever the axis direction
-    local s = cond("`left'"!="", -1, 1)
-    local dg = `s'*`tick'/72*r(gpi)
-    local gx = r(xa) + r(xb)*cond(r(xlog), ln(`b0x'), `b0x')
-    local x2 = (`gx' + `dg' - r(xa))/r(xb)
-    if r(xlog) local x2 = exp(`x2')
-    local xt = (`gx' - `s'*`gap'/72*r(gpi) - r(xa))/r(xb)
-    if r(xlog) local xt = exp(`xt')
-    local ym = (r(ya) + r(yb)*cond(r(ylog), ln(`b0y'), `b0y') + r(ya) + r(yb)*cond(r(ylog), ln(`b1y'), `b1y'))/2
-    local ym = (`ym' - r(ya))/r(yb)
-    if r(ylog) local ym = exp(`ym')
-    local segs `" "`b0x' `b0y' `b0x' `b1y'" "`b0x' `b0y' `x2' `b0y'" "`b0x' `b1y' `x2' `b1y'" "'
+    * device units run left to right and bottom to top on screen whatever the axis direction
+    local g0x = r(xa) + r(xb)*cond(r(xlog), ln(`b0x'), `b0x')
+    local g1x = r(xa) + r(xb)*cond(r(xlog), ln(`b1x'), `b1x')
+    local g0y = r(ya) + r(yb)*cond(r(ylog), ln(`b0y'), `b0y')
+    local g1y = r(ya) + r(yb)*cond(r(ylog), ln(`b1y'), `b1y')
+    if `horiz' {
+        local s = cond("`below'"!="", 1, -1)
+        local y2 = (`g0y' + `s'*`tick'/72*r(gpi) - r(ya))/r(yb)
+        if r(ylog) local y2 = exp(`y2')
+        local yt = (`g0y' - `s'*`gap'/72*r(gpi) - r(ya))/r(yb)
+        if r(ylog) local yt = exp(`yt')
+        local xm = ((`g0x' + `g1x')/2 - r(xa))/r(xb)
+        if r(xlog) local xm = exp(`xm')
+        local segs `" "`b0x' `b0y' `b1x' `b0y'" "`b0x' `b0y' `b0x' `y2'" "`b1x' `b0y' `b1x' `y2'" "'
+    }
+    else {
+        local s = cond("`left'"!="", -1, 1)
+        local x2 = (`g0x' + `s'*`tick'/72*r(gpi) - r(xa))/r(xb)
+        if r(xlog) local x2 = exp(`x2')
+        local xt = (`g0x' - `s'*`gap'/72*r(gpi) - r(xa))/r(xb)
+        if r(xlog) local xt = exp(`xt')
+        local ym = ((`g0y' + `g1y')/2 - r(ya))/r(yb)
+        if r(ylog) local ym = exp(`ym')
+        local segs `" "`b0x' `b0y' `b0x' `b1y'" "`b0x' `b0y' `x2' `b0y'" "`b0x' `b1y' `x2' `b1y'" "'
+    }
     foreach sg of local segs {
         _gpl_addline, name(`name') seg(`sg') lcolor(`lcolor') lwidth(`lwidth')
     }
     if `"`txt'"'!="" {
-        local hz = cond(`s' > 0, "right", "left")
-        local ba = cond(`s' > 0, "west", "east")
-        _gpl_addtext, name(`name') x(`xt') y(`ym') lines(`txt') size(`size') color("`color'") hz(`hz') ba(`ba')
+        if `horiz' {
+            local ba = cond(`s' > 0, "south", "north")
+            _gpl_addtext, name(`name') x(`xm') y(`yt') lines(`txt') size(`size') color("`color'") hz(center) ba(`ba')
+        }
+        else {
+            local hz = cond(`s' > 0, "right", "left")
+            local ba = cond(`s' > 0, "west", "east")
+            _gpl_addtext, name(`name') x(`xt') y(`ym') lines(`txt') size(`size') color("`color'") hz(`hz') ba(`ba')
+        }
     }
 end
 
@@ -1471,15 +1552,25 @@ program _gpl_legend
         di as txt "note: graph {bf:`name'} shows no legend; nothing to colour"
         exit
     }
-    if "`plots'"=="" {
-        forvalues i = 1/`n' {
-            local plots `plots' `i'
+    * each legend slot is matched to the plot its key draws, so legend(order()) is followed;
+    * plots() names plot numbers, not legend slots
+    local nk `.`name'.legend.plotregion1.key.arrnels'
+    if "`nk'"=="" local nk 0
+    forvalues k = 1/`nk' {
+        local okey `"`.`name'.legend.plotregion1.key[`k'].view.objkey'"'
+        local i 0
+        forvalues ii = 1/`n' {
+            local rr : word `ii' of `regs'
+            if `"`.`name'.plotregion`rr'.plot`ii'.objkey'"'==`"`okey'"' & `"`okey'"'!="" {
+                local i `ii'
+                continue, break
+            }
         }
-    }
-    local k 0
-    foreach i of local plots {
-        local ++k
-        if `i' > `n' continue
+        if `i'==0 continue
+        if "`plots'"!="" {
+            local inl : list i in plots
+            if !`inl' continue
+        }
         local rg : word `i' of `regs'
         local p .`name'.plotregion`rg'.plot`i'
         local t ``p'.type.setting'

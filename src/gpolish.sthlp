@@ -18,7 +18,7 @@
 {p 8 16 2}{cmd:gpolish} [{cmd:style}] [{cmd:,} {opt name(graphname)} {opt nobold} {opt keepyl:ine} {opt keepyt:icks}]
 
 {p 8 16 2}{cmd:gpolish endlabel} [{cmd:,} {opt name(graphname)} {opt plot:s(numlist)} {opt lab:els(strlist)} {opt val:ues}
-{opt for:mat(%fmt)} {opt dot:s} {opt dots:ize(#)} {opt sid:e(right|left)} {opt col:or(rgb)} {opt keepl:egend}
+{opt for:mat(%fmt)} {opt dot:s} {opt dotsi:ze(#)} {opt sid:e(right|left)} {opt col:or(rgb)} {opt keepl:egend}
 {opt siz:e(#)} {opt gap(#)} {opt xg:ap(#)} {opt wrap(#)} {opt nobold} {opt norepel}]
 
 {p 8 16 2}{cmd:gpolish callout} {it:"line 1"} [{it:"line 2"} ...]{cmd:,} {c -(}{opt at(x y)} | {opt to(x y)}{c )-}
@@ -38,7 +38,7 @@
 {p 8 16 2}{cmd:gpolish ptlabel} {it:varname} {ifin}{cmd:,} {opt x(varname)} {opt y(varname)}
 [{opt siz:e(#)} {opt col:or(rgb)} {opt off:set(#)} {opt ms:ize(#)} {opt halo} {opt nolead:er} {opt lc:olor(rgb)} {opt lw:idth(str)} {opt xax:is(#)} {opt yax:is(#)} {opt maxl:abels(#)} {opt name(graphname)}]
 
-{p 8 16 2}{cmd:gpolish bracket} [{it:"label line 1"} ...]{cmd:,} {opt x(#)} {opt y0(#)} {opt y1(#)} [{opt tick(#)} {opt left} {opt gap(#)} {opt siz:e(#)} {opt col:or(rgb)} {opt lc:olor(rgb)} {opt lw:idth(str)}
+{p 8 16 2}{cmd:gpolish bracket} [{it:"label line 1"} ...]{cmd:,} {c -(}{opt x(#)} {opt y0(#)} {opt y1(#)} [{opt left}] | {opt y(#)} {opt x0(#)} {opt x1(#)} [{opt below}]{c )-} [{opt tick(#)} {opt gap(#)} {opt siz:e(#)} {opt col:or(rgb)} {opt lc:olor(rgb)} {opt lw:idth(str)}
 {opt xax:is(#)} {opt yax:is(#)} {opt name(graphname)}]
 
 {p 8 16 2}{cmd:gpolish legend} [{cmd:,} {opt plot:s(numlist)} {opt nobold} {opt name(graphname)}]
@@ -52,7 +52,7 @@
 {p 8 16 2}{cmd:gpolish geom} [{cmd:,} {opt name(graphname)}]
 
 {pstd}All sizes are in points. Positions are in the units of the graph's axes.
-Each value in {opt at()}, {opt to()}, {opt from()} and the {opt x()}, {opt y0()} and {opt y1()} of {cmd:bracket}
+Each value in {opt at()}, {opt to()}, {opt from()} and the {opt x()}, {opt y0()}, {opt y1()}, {opt y()}, {opt x0()} and {opt x1()} of {cmd:bracket}
 may be a number or an expression written without spaces, such as {cmd:to(td(21sep2001) 966)} on a date axis.
 An expression may use the results of the previous command, such as {cmd:to(1999 r(max))} after {cmd:summarize}.
 Positions are read on the first x and y axes; on a graph with a second axis, {opt xaxis(#)} and {opt yaxis(#)}
@@ -105,7 +105,7 @@ Label text is the plot's legend text when it differs from the variable label, as
 When two plots would get the same label, {cmd:endlabel} prints a note, keeps the legend and suggests {opt labels()}.
 {opt values} adds the last value in a column, formatted with {opt format()}. The column sits beyond the line end
 farthest out on the labeled side, so a line that ends early still has its value in the same column.
-{opt dots} adds a marker at each line end. {opt color()} sets one text color for all labels instead of each line's color.
+{opt dots} adds a marker at each line end. {opt dotsize(#)} sets its size in points (default 5.5) and implies {opt dots}. {opt color()} sets one text color for all labels instead of each line's color.
 {opt side(left)} labels the left ends of the lines instead of the right; on a reversed axis
 ({cmd:xscale(reverse)}) the labels follow the screen, not the data.
 Normally the labels go into the graph margin beside the plot. When a y axis is drawn on the labeled side
@@ -192,14 +192,18 @@ Placement avoids the same drawn objects as an automatic {cmd:gpolish callout}.
 {phang}
 {cmd:gpolish bracket} draws a square bracket from {opt y0()} to {opt y1()} at {opt x()}.
 Its ticks point right on the screen, whatever the axis direction; {opt left} points them left.
+With {opt y()}, {opt x0()} and {opt x1()} instead, it draws a horizontal bracket from {opt x0()} to {opt x1()} at {opt y()},
+as used to mark a comparison between two bars. Its ticks point down, and its label is centred above the spine;
+{opt below} puts the ticks up and the label below. Give one set of positions or the other; a mix stops with r(198).
 {opt tick(#)} sets their length in points. An optional label sits beside the middle of the bracket, on the side
 away from the ticks, {opt gap(#)} points from it. The label's position is fixed: unlike the other layout commands,
 {cmd:bracket} does not check it against markers, lines, bars or earlier labels, and prints no note if they overlap.
-{opt y0()} and {opt y1()} must differ. For a labeled span across x, use {cmd:gpolish brace}.
+The two ends ({opt y0()} and {opt y1()}, or {opt x0()} and {opt x1()}) must differ. For a curly brace, use {cmd:gpolish brace}.
 
 {phang}
 {cmd:gpolish legend} colors each legend label to match its key and makes it bold. Labels of more than one
-line keep every line. If the legend uses {cmd:order()}, give the plot numbers in the same order in {opt plots()}.
+line keep every line. Each label takes the color of the key beside it, also when the legend uses {cmd:order()}.
+{opt plots()} names the plots whose labels are colored, by plot number; the other labels are left as they are.
 
 {phang}
 {cmd:gpolish clear} removes every added text box, line and marker from the graph and undoes the margin and legend
@@ -241,7 +245,8 @@ It stops with an error when {cmd:endlabel}, {cmd:callout}, {cmd:note}, {cmd:arro
 {p2col:{cmd:graph bar}, {cmd:by()} and combined graphs}layout commands and {cmd:geom} are refused with a message; plain {cmd:gpolish} still makes the title bold; {helpb gr2mpl} redraws them{p_end}
 {p2col:{cmd:graph pie}}layout commands are refused; {helpb gr2mpl} does not redraw pie charts either{p_end}
 {p2col:{cmd:ptlabel} on many points}run time grows quickly with the number of labels; a note is printed above 300 labels and more than {opt maxlabels()} (default 1000) are refused{p_end}
-{p2col:{cmd:bracket} labels}placed at a fixed spot beside the spine and not checked against the data or other labels; move the bracket with {opt x()} or {opt left} if its label covers something{p_end}
+{p2col:{cmd:bracket} labels}placed at a fixed spot beside the spine and not checked against the data or other labels; move the bracket with {opt x()} or {opt left} (or {opt y()} or {opt below}) if its label covers something{p_end}
+{p2col:{cmd:endlabel} with {cmd:aspectratio()}}when a y axis is drawn on the labeled side, the room for labels would have to be made inside a plot region whose shape is fixed, which distorts the axes; {cmd:endlabel} stops with r(198) before any edit. Drop {cmd:aspectratio()} or label the other side with {opt side()}{p_end}
 {p2col:Positions outside the plot region}{cmd:callout} and {cmd:note} refuse a {opt to()} outside the axis ranges; {opt at()}, {opt from()}, {cmd:arrow} and {cmd:brace} get a note; ranges are given in the axis's own units, so dates show as numbers{p_end}
 {p2col:Labels wider than the plot region}{cmd:ptlabel} skips them with a note; an automatically placed callout or note stops with an error; {cmd:gpolish} does not wrap text itself{p_end}
 {p2col:Positions on a second axis}{opt at()}, {opt to()} and {opt from()} use the first axes unless {opt xaxis()} or {opt yaxis()} says otherwise{p_end}
