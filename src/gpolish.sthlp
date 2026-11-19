@@ -106,12 +106,14 @@ nonmissing values are skipped with a note.
 Label text is the plot's legend text when it differs from the variable label, as it does for a fit line from {cmd:lfit} or a line drawn by {cmd:marginsplot}; otherwise it is the variable label.
 {opt labels()} overrides both, one label per plot in the order of {opt plots()}.
 With fewer labels than plots the rest keep their own label; extra labels are ignored, with a note.
+An entry in compound quotes may contain double quotes, as in {cmd:labels(`"Men "M""' "Women")}, and a variable label with double quotes is shown with them.
 When two plots would get the same label, {cmd:endlabel} prints a note, keeps the legend and suggests {opt labels()}.
 {opt values} adds the last value in a column, formatted with {opt format()} (default {cmd:%4.1f}). The column sits beyond the line end
 farthest out on the labeled side, so a line that ends early still has its value in the same column.
 {opt dots} adds a marker at each line end. {opt dotsize(#)} sets its size in points (default 5.5) and implies {opt dots}. {opt color()} sets one text color for all labels instead of each line's color.
 {opt side(left)} labels the left ends of the lines instead of the right; on a reversed axis
 ({cmd:xscale(reverse)}) the labels follow the screen, not the data.
+When {opt side(left)} switches the legend off, {cmd:endlabel} adds a right margin if the last x tick label of axis 1 would otherwise run past the right edge of the graph.
 Normally the labels go into the graph margin beside the plot. When a y axis is drawn on the labeled side
 (the usual left axis with {opt side(left)}, or an axis moved right with {cmd:yscale(alt)} or {cmd:yaxis(2)}),
 the room is made inside the plot region instead, so the labels sit between the axis and the lines.
@@ -154,6 +156,7 @@ With {opt to()} it draws an arrow from the box; with {opt at()} alone it is a pl
 the plot region (the message gives the axis ranges), or, with automatic placement, when the text box is wider or
 taller than the plot region. An {opt at()} or {opt from()} outside the plot region gets a note and is drawn where
 it is, so a box can still be placed by hand in the graph margin.
+A box placed with {opt at()} that runs past an edge of the graph also gets a note, which suggests {opt align()} or a different {opt at()}.
 With the default {opt align(left)} the left edge of the box sits on {opt at()}, with {opt align(right)} its right
 edge does, and with {opt align(center)} the box is centered on {opt at()}, which suits flow charts.
 
@@ -254,9 +257,10 @@ It stops with an error when {cmd:endlabel}, {cmd:callout}, {cmd:note}, {cmd:arro
 {p2col:{cmd:ptlabel} on many points}run time grows quickly with the number of labels; a note is printed above 300 labels and more than {opt maxlabels()} (default 1000) are refused{p_end}
 {p2col:{cmd:bracket} labels}placed at a fixed spot beside the spine and not checked against the data or other labels; move the bracket with {opt x()} or {opt left} (or {opt y()} or {opt below}) if its label covers something{p_end}
 {p2col:{cmd:endlabel} with {cmd:aspectratio()}}when a y axis is drawn on the labeled side, the room for labels would have to be made inside a plot region whose shape is fixed, which distorts the axes; {cmd:endlabel} stops with r(198) before any edit. Drop {cmd:aspectratio()} or label the other side with {opt side()}{p_end}
-{p2col:Positions outside the plot region}{cmd:callout} and {cmd:note} refuse a {opt to()} outside the axis ranges; {opt at()}, {opt from()}, {cmd:arrow}, {cmd:brace} and {cmd:bracket} get a note; ranges are given in the axis's own units, so dates show as numbers; a {cmd:bracket} note names only the option that is off the plot and gives the {cmd:xscale(range(#))} or {cmd:yscale(range(#))} to add{p_end}
+{p2col:Positions outside the plot region}{cmd:callout} and {cmd:note} refuse a {opt to()} outside the axis ranges; {opt at()}, {opt from()}, {cmd:arrow}, {cmd:brace} and {cmd:bracket} get a note; a {cmd:callout} or {cmd:note} box placed with {opt at()} that runs past an edge of the graph gets a note and is drawn where it is, so the part outside is cut off; ranges are given in the axis's own units, so dates show as numbers; a {cmd:bracket} note names only the option that is off the plot and gives the {cmd:xscale(range(#))} or {cmd:yscale(range(#))} to add{p_end}
 {p2col:Labels wider than the plot region}{cmd:ptlabel} skips them with a note; an automatically placed callout or note stops with an error; {cmd:gpolish} does not wrap text itself{p_end}
 {p2col:Zero or negative positions on a log axis}{cmd:arrow}, {cmd:brace} and {cmd:bracket} stop with r(198) before any edit; {cmd:ptlabel} skips such points{p_end}
+{p2col:{cmd:endlabel, side(left)} and the last x tick label}the right margin added after the legend is switched off is sized for the tick labels of x axis 1 drawn horizontally; a second x axis or angled tick labels are not measured, and {cmd:graphregion(margin())} can add room by hand{p_end}
 {p2col:Plot-region outlines}when a scheme such as {cmd:s1mono} outlines the plot region and the end labels sit outside it, {cmd:endlabel} starts them {opt xgap()} points beyond the outline rather than beyond the line end. An outline counts as drawn when its colour differs from the graph background, so an outline turned off with {cmd:plotregion(lstyle(none))} still moves the labels out{p_end}
 {p2col:Positions on a second axis}{opt at()}, {opt to()} and {opt from()} use the first axes unless {opt xaxis()} or {opt yaxis()} says otherwise{p_end}
 {p2col:Graphs edited by {cmd:gpolish} 0.6.1 or earlier}these carry no {cmd:endlabel} record; their end labels are found in the graph's edit log (see {help gpolish##technical:Technical notes}){p_end}

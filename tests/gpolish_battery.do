@@ -1481,6 +1481,89 @@ chk r6_bracket_ends_quiet `n0'==0 & r(n)==0
 logcount `"`r6lg'"' "yscale(range(5.6))"
 chk r6_bracket_hint_value r(n)==1
 
+* ---- r7. endlabel quotes and apostrophes, side(left) tick room, note box past the edge ---
+tempfile r7lg
+sysuse uslifeexp, clear
+label var le_male `"Men "all" $5 50%"'
+label var le_female "Women's {x}"
+line le_male le_female year, name(r7a, replace)
+log using `"`r7lg'"', text name(_r7) replace
+capture noisily gpolish endlabel
+local rc1 = _rc
+* a second run undoes the first; its record check reads the label with the apostrophe
+capture noisily gpolish endlabel
+local rc2 = _rc
+log close _r7
+chk r7_quote_label_rc `rc1'==0 & `rc2'==0
+logcount `"`r7lg'"' "too few quotes"
+chk r7_quote_label_quiet r(n)==0
+local found 0
+local nt `.r7a.plotregion1.added_text.arrnels'
+forvalues k = 1/`nt' {
+    if "`.r7a.plotregion1.added_text[`k'].draw_view.setting'"=="no" continue
+    local t `"`.r7a.plotregion1.added_text[`k'].text[1]'"'
+    if strpos(`"`t'"', `""all""') local ++found
+}
+chk r7_quote_label_kept `found'==1
+ntext r7a added_text
+chk r7_quote_label_two r(k)==2
+* labels() with an entry in compound quotes
+line le_male le_female year, name(r7b, replace)
+log using `"`r7lg'"', text name(_r7) replace
+capture noisily gpolish endlabel, labels(`"Men "M""' "Women's")
+local rc1 = _rc
+log close _r7
+chk r7_labels_quote_rc `rc1'==0
+logcount `"`r7lg'"' "too few quotes"
+chk r7_labels_quote_quiet r(n)==0
+chk r7_labels_quote_text strpos(`"`.r7b.plotregion1.added_text[1].text[1]'"', `""M""')>0
+chk r7_labels_apostrophe strpos(`"`.r7b.plotregion1.added_text[2].text[1]'"', "Women's")>0
+* side(left) with the legend switched off keeps room for the last x tick label
+foreach fmt in comma tm {
+    sysuse uslifeexp, clear
+    if "`fmt'"=="tm" {
+        replace year = tm(2015m1) + year - 1900
+        format year %tm
+        line le_male le_female year, xlabel(, labsize(large)) name(r7c, replace)
+    }
+    else line le_male le_female year, xlabel(1900(20)2000, format(%9.0fc) labsize(large)) xscale(range(1900 2000)) name(r7c, replace)
+    gr_draw r7c
+    local gw `.r7c.gdi_x1'
+    local room0 = `gw' - max(`.r7c.plotregion1.gdi_x0', `.r7c.plotregion1.gdi_x1')
+    gpolish endlabel, side(left)
+    gr_draw r7c
+    quietly graph describe r7c
+    local gpi = `.r7c.gdi_y1'/real("`r(ysize)'")
+    local tl = max(`.r7c.xaxis1.major.dlg_tickpos.arrnels', 1)
+    local tt `"`.r7c.xaxis1.major.dlg_ticklabel[`tl']'"'
+    local tsz = `.r7c.xaxis1.style.majorstyle.tickstyle.textstyle.size.val'
+    * a lower bound on half the last tick label (0.3 em per character), in device units; without the margin the room is near 0
+    local need = 0.5*0.3*strlen(`"`tt'"')*`tsz'/(100/(72*min(real("`r(xsize)'"), real("`r(ysize)'"))))/72*`gpi'
+    local room1 = `gw' - max(`.r7c.plotregion1.gdi_x0', `.r7c.plotregion1.gdi_x1')
+    chk r7_left_tick_room_`fmt' `room1' >= `need'
+    gpolish clear
+    gr_draw r7c
+    local room2 = `gw' - max(`.r7c.plotregion1.gdi_x0', `.r7c.plotregion1.gdi_x1')
+    chk r7_left_tick_clear_`fmt' abs(`room2' - `room0') < 1
+}
+* a note box placed with at() that runs past the right edge gets a note
+sysuse auto, clear
+scatter price mpg, name(r7d, replace)
+log using `"`r7lg'"', text name(_r7) replace
+gpolish note `"A "quoted" note"' "line 2", at(39.5 14000)
+gpolish note "inside", at(20 14000)
+log close _r7
+logcount `"`r7lg'"' "runs past the right edge of the graph"
+chk r7_note_edge_once r(n)==1
+logcount `"`r7lg'"' "use align(right)"
+chk r7_note_edge_hint r(n)==1
+scatter price mpg, name(r7e, replace)
+log using `"`r7lg'"', text name(_r7) replace
+gpolish note "a much longer note that sits on the left side", at(12 14000) align(right)
+log close _r7
+logcount `"`r7lg'"' "runs past the left edge of the graph"
+chk r7_note_edge_left r(n)==1
+
 gpolish limits
 
 if `"`_wf0'"'!="" graph set window fontface `"`_wf0'"'

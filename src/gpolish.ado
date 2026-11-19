@@ -343,7 +343,8 @@ end
 
 * an endlabel record, kept in the graph itself as a hidden text box so that it lasts through
 * graph save and graph use and belongs to this graph only. Its text is
-* gpolish-endlabel|<text boxes>|<markers>|<side>|<margin>|<legend>|<where>|<first-line lengths>
+* gpolish-endlabel|<text boxes>|<markers>|<side>|<margin>|<legend>|<where>|<first-line lengths>|<right margin>
+* (the last field, kept for side(left) only, is the right graph margin that holds the last x tick label)
 program _gpl_regget, rclass
     args name
     return local ok 0
@@ -378,7 +379,8 @@ program _gpl_regget, rclass
         }
         local L : word `q' of `lens'
         local t `"`.`name'.plotregion1.added_text[`k'].text[1]'"'
-        if `"`L'"'!="`=strlen(`"`t'"')'" {
+        mata: st_local("tl", strofreal(strlen(st_local("t"))))
+        if `"`L'"'!="`tl'" {
             local stale 1
             local ++nchg
         }
@@ -399,6 +401,7 @@ program _gpl_regget, rclass
     return local m `m'
     return local leg `leg'
     return local pm `pm'
+    return local rm `rm'
 end
 
 * Undo a recorded endlabel: hide its objects, give back its margin, restore the legend. Every run
@@ -419,6 +422,7 @@ program _gpl_regundo
     local side `r(side)'
     local leg `r(leg)'
     local pm `r(pm)'
+    local rm `r(rm)'
     local nchg `r(nchg)'
     c_local _gpl_legn 0
     c_local _gpl_nchg 0
@@ -448,6 +452,7 @@ program _gpl_regundo
         }
         else _gpl_ge `name' .style.editstyle margin(`s'-`m') editcopy
     }
+    if "`rm'"!="" _gpl_ge `name' .style.editstyle margin(r-`rm') editcopy
     if "`leg'"=="1" _gpl_ge `name' .legend.draw_view.setstyle, style(yes)
 end
 
@@ -853,6 +858,15 @@ program _gpl_endlabel
         _gpl_geom, name(`name') region(`j')
         local dir`j' = `s'*sign(r(xb))
     }
+    * labels() is read entry by entry, so an entry in compound quotes may hold double quotes
+    local nlab 0
+    local rest `"`labels'"'
+    while `"`rest'"'!="" {
+        gettoken ll rest : rest, qed(qq)
+        if `"`ll'"'=="" & !`qq' continue
+        local ++nlab
+        local lbl_`nlab' `"`ll'"'
+    }
     local np : word count `plots'
     tempname Y
     matrix `Y' = J(`np', 6, 1)
@@ -906,10 +920,13 @@ program _gpl_endlabel
         * the legend text has passed through global expansion, so it is compared with the label
         * expanded the same way
         mata: st_local("lexp", _gpl_gexp(st_local("lab`j'")))
+        * Stata splits a label with embedded double quotes into several legend lines, so the
+        * quotes are dropped and the spacing squeezed before the comparison
+        mata: st_local("lexp", stritrim(strtrim(subinstr(st_local("lexp"), char(34), " "))))
         if `"`ltx'"'!="" & `"`ltx'"'!=`"`lexp'"' local lab`j' `"`ltx'"'
         if `"`lab`j''"'=="" local lab`j' `sname'
         mata: st_local("lab`j'", _gpl_esc(st_local("lab`j'")))
-        if `"`labels'"'=="" | `"`: word `q' of `labels''"'=="" {
+        if `"`lbl_`q''"'=="" {
             * two plots with one label leave the reader unable to tell them apart
             forvalues jj = 1/`=`j'-1' {
                 if `"`lab`jj''"'==`"`lab`j''"' {
@@ -920,10 +937,10 @@ program _gpl_endlabel
                 }
             }
         }
-        if `"`labels'"'!="" {
-            * labels() follow the order of plots(), one per plot
-            local ll : word `q' of `labels'
-            if `"`ll'"'!="" local lab`j' `"`ll'"'
+        * labels() follow the order of plots(), one per plot
+        if `"`lbl_`q''"'!="" {
+            local lab`j' `"`lbl_`q''"'
+            mata: st_local("lab`j'", _gpl_esc(st_local("lab`j'")))
         }
         * bold wraps the label in {bf:...}; a literal } in the label would close it early,
         * so such a label is left as typed
@@ -947,7 +964,6 @@ program _gpl_endlabel
         local maxv = max(`maxv', `w2')
     }
     if `"`labels'"'!="" {
-        local nlab : word count `labels'
         if `nlab' != `q' {
             di as txt "note: gpolish endlabel: labels() has `nlab' entries for `q' plots; plots without one keep"
             di as txt "      their own label, extra entries are ignored"
@@ -1009,6 +1025,7 @@ program _gpl_endlabel
         di as txt "      a smaller size(), or a wider graph (xsize())."
     }
     local mside = cond("`side'"=="right", "r", "l")
+    local rm
     if `inner' {
         forvalues rg = 1/`npr' {
             _gpl_ge `name' .plotregion`rg'.style.editstyle margin(`mside'+`m') editcopy
@@ -1022,6 +1039,43 @@ program _gpl_endlabel
     }
     * the plot region moved: redraw so the transforms below are current
     gr_draw `name'
+    * With the labels on the left and the legend switched off, the plot region can widen to the
+    * right edge of the graph, and the x tick label at that end then runs off the graph. A right
+    * margin is added that holds the overhang of every x tick label of axis 1, with 15% added
+    * to the estimated width (rendered text runs a little wider than the font tables), plus 4 points.
+    if "`side'"=="left" & `leg' {
+        _gpl_geom, name(`name')
+        local gpi0 = r(gpi)
+        local rel0 = r(relperpt)
+        local xa0 = r(xa)
+        local xb0 = r(xb)
+        local xlg0 = r(xlog)
+        local gedge0 = r(xsize)*r(gpi)
+        local ax .`name'.xaxis1
+        local nt0 `.`ax'.major.dlg_tickpos.arrnels'
+        local tsz `.`ax'.style.majorstyle.tickstyle.textstyle.size.val'
+        local tang `.`ax'.style.majorstyle.tickstyle.textstyle.angle.val'
+        if "`nt0'"=="" local nt0 0
+        if "`tang'"=="" local tang 0
+        local over 0
+        if "`.`ax'.isa'"!="" & "`.`ax'.draw_view.setting'"!="no" & "`tsz'"!="" & `tang'==0 {
+            forvalues k = 1/`nt0' {
+                local tp `.`ax'.major.dlg_tickpos[`k']'
+                capture confirm number `tp'
+                if _rc continue
+                if `xlg0' & `tp' <= 0 continue
+                local tt `"`.`ax'.major.dlg_ticklabel[`k']'"'
+                mata: st_local("tw", strofreal(_gpl_textw(st_global("GPL_FONT"), st_local("tt"), 0)))
+                local gt = `xa0' + `xb0'*cond(`xlg0', ln(`tp'), `tp')
+                local over = max(`over', `gt' + 1.15*`tw'*`tsz'/`rel0'/72*`gpi0'/2 - `gedge0')
+            }
+        }
+        if `over' > 0 {
+            local rm = (`over'/`gpi0'*72 + 4)*`rel0'
+            _gpl_ge `name' .style.editstyle margin(r+`rm') editcopy
+            gr_draw `name'
+        }
+    }
     forvalues rg = 1/`npr' {
         _gpl_geom, name(`name') region(`rg')
         foreach v in xa xb ya yb xlog ylog {
@@ -1122,9 +1176,11 @@ program _gpl_endlabel
     local lens
     foreach k of local regtxt {
         local t `"`.`name'.plotregion1.added_text[`k'].text[1]'"'
-        local lens `lens' `=strlen(`"`t'"')'
+        * measured in Mata: an apostrophe in the text would end an `=...' expression early
+        mata: st_local("tl", strofreal(strlen(st_local("t"))))
+        local lens `lens' `tl'
     }
-    local rec `"gpolish-endlabel|`regtxt'|`regmk'|`side'|`m'|`leg'|`inner'|`lens'"'
+    local rec `"gpolish-endlabel|`regtxt'|`regmk'|`side'|`m'|`leg'|`inner'|`lens'|`rm'"'
     * an earlier record box (spent by the undo above) is reused, so a graph holds at most one
     _gpl_count `name' added_text
     local nt = r(k)
@@ -1380,6 +1436,8 @@ program _gpl_callout
     local yb = r(yb)
     local xlog = r(xlog)
     local ylog = r(ylog)
+    local gw = r(xsize)*`gpi'
+    local gh = r(ysize)*`gpi'
     local fs = `size'/72*`gpi'
     local bw = `w'*`fs'
     local bh = `nl'*`fs'*1.3
@@ -1408,6 +1466,24 @@ program _gpl_callout
         local gay = `ya' + `yb'*cond(`ylog', ln(`aty'), `aty')
         local x0 = `gax' - cond("`align'"=="right", `bw', cond("`align'"=="center", `bw'/2, 0))
         matrix `B' = (`x0', `gay' - `bh'/2, `x0' + `bw', `gay' + `bh'/2, 0)
+        * a box placed by hand can run past the edge of the graph, where it is cut off
+        local tol = 0.5/72*`gpi'
+        local edges
+        if `B'[1,1] < -`tol' local edges `edges' left
+        if `B'[1,3] > `gw' + `tol' local edges `edges' right
+        if `B'[1,2] < -`tol' local edges `edges' bottom
+        if `B'[1,4] > `gh' + `tol' local edges `edges' top
+        local edges : list retokenize edges
+        if "`edges'"!="" {
+            local edges : subinstr local edges " " " and ", all
+            local what = cond("`isnote'"!="", "note box", "text")
+            local fix
+            if strpos("`edges'", "right") & "`align'"!="right" local fix "use align(right) or a smaller x in at()"
+            else if strpos("`edges'", "left") & "`align'"!="left" local fix "use align(left) or a larger x in at()"
+            else local fix "move at(), shorten the text, or use a smaller size()"
+            di as txt "note: gpolish `cmd': the `what' runs past the `edges' edge of the graph;"
+            di as txt "      the part outside is cut off. To fix it, `fix'."
+        }
     }
     * anchor of the text box in data units (left-middle, centre or right-middle). Stata draws a
     * boxed text with the box edge on the anchor and the text inset by the padding, so the drawn
@@ -2573,8 +2649,8 @@ void _gpl_recparse(string scalar s)
         p = strpos(s, "|")
     }
     f = f, s
-    nm = ("", "txt", "mk", "side", "m", "leg", "pm", "lens")
-    for (i=2; i<=8; i++) st_local(nm[i], (i <= cols(f) ? f[i] : ""))
+    nm = ("", "txt", "mk", "side", "m", "leg", "pm", "lens", "rm")
+    for (i=2; i<=9; i++) st_local(nm[i], (i <= cols(f) ? f[i] : ""))
 }
 // End labels added by gpolish 0.6.1 or earlier, read from a graph's edit log L (see _gpl_legundo).
 // Sets the caller's locals n (runs whose margin was not given back), txt and mk (their text boxes and
