@@ -1133,6 +1133,20 @@ barpix bar_wide 3000
 twoway (rarea lo hi weight, sort) (rbar lo hi weight, color(cranberry)), title("rarea and rbar")
 rchk rbar_layer
 barpix rbar_layer 1500
+* rbar and rarea at x = 1 to 5 on an x axis that scatteri widens to 5000: each bar
+* is under a pixel wide, so it must still draw as an own-colour hairline (not vanish
+* under white edges); without the outline these graphs hold 400 to 1,350 coloured pixels
+preserve
+twoway rbar mpg trunk rep78 || scatteri 10 5000, title("narrow rbar, wide axis")
+rchk rbar_narrowaxis
+barpix rbar_narrowaxis 1600
+twoway rarea mpg trunk rep78, sort || scatteri 10 5000, title("narrow rarea, wide axis")
+rchk rarea_narrowaxis
+barpix rarea_narrowaxis 1450
+twoway rbar mpg trunk rep78, horizontal || scatteri 5000 10, title("narrow horizontal rbar")
+rchk rbar_narrowh
+barpix rbar_narrowh 1500
+restore
 * color(none) and fcolor(none) draw no fill, as in Stata (not black bars)
 twoway rbar lo hi weight, color(none) barwidth(40) title("rbar, color(none)")
 rchk rbar_none
