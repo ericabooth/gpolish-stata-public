@@ -69,6 +69,18 @@ program gr2mpl, rclass
     }
 
     * ---- output locations --------------------------------------------------
+    * saving(filename [, replace]), as in graph's own saving()
+    if `"`saving'"' != "" {
+        local keeprep `replace'
+        local 0 `"`saving'"'
+        capture syntax anything(name=saving equalok) [, REPLACE]
+        if _rc {
+            di as err `"gr2mpl: saving() takes a file name, optionally followed by , replace"'
+            exit 198
+        }
+        local saving `saving'
+        if "`replace'" == "" local replace `keeprep'
+    }
     if `"`saving'"' == "" local saving "`name'_mpl.png"
     * saving() that names a folder ("out/") gets the default file name in it
     local sbase = ustrregexra(`"`saving'"', "^.*[/\\\\]", "")
@@ -138,6 +150,12 @@ program gr2mpl, rclass
         _g2m_kv `fh' "saving" `"`outtmp'"'
         _g2m_kv `fh' "font" `"`font'"'
         _g2m_kv `fh' "palette" `"`palette'"'
+        * aspectratio(): plot-region height over width (0 when not set)
+        capture local asp = ``g'.style.aspect_ratio.val'
+        if _rc | "`asp'" == "" | "`asp'" == "." local asp 0
+        local asp = strtrim(strofreal(`asp', "%12.0g"))
+        if substr("`asp'", 1, 1) == "." local asp "0`asp'"
+        file write `fh' `"  "aspect": `asp',"' _n
         _g2m_kv `fh' "specdir" `"`specdir'"'
         file write `fh' `"  "lwscale": `lwscale', "msscale": `msscale',"' _n
         file write `fh' `"  "endlabels": `=("`endlabels'"!="")', "nolegend": `=("`legend'"!="")', "' ///
@@ -657,7 +675,7 @@ program _g2m_twoway
         }
         file write `fh' `"  "`a'axis": {"' _n
         _g2m_textarr `fh' "title" "`ax'.title" 4
-        _g2m_ticks `fh' "ticks" "`ax'"
+        _g2m_ticks `fh' "ticks" "`ax'" extra
         _g2m_pairs `fh' "`ax'" "format major.label_format" "grid style.draw_major_grid.setting" ///
             "draw draw_view.setting" "linecolor style.linestyle.color.setting" ///
             "tsize title.style.size.gmval" "ticksize style.majorstyle.tickstyle.textstyle.size.gmval" ///
@@ -963,7 +981,7 @@ program _g2m_bar
         "gtickangle grpaxis.style.majorstyle.tickangle.setting" ///
         "stickangle scaleaxis.style.majorstyle.tickangle.setting"
     file write `fh' _n
-    _g2m_ticks `fh' "scaleaxis" "`g'.scaleaxis"
+    _g2m_ticks `fh' "scaleaxis" "`g'.scaleaxis" extra
     _g2m_ticks `fh' "grpaxis" "`g'.grpaxis"
     _g2m_ticks `fh' "supaxis" "`g'.supaxis"
     file write `fh' "  "
@@ -1116,7 +1134,7 @@ end
 
 * drawn tick positions and labels of an axis object
 program _g2m_ticks
-    args fh key ax
+    args fh key ax extra
     local n ``ax'.major.dlg_tickpos.arrnels'
     if "`n'" == "" local n 0
     file write `fh' `"    "`key'": ["'
@@ -1130,7 +1148,29 @@ program _g2m_ticks
         local first 0
         file write `fh' `"["`pos'", "`s(esc)'"]"'
     }
-    file write `fh' "]," _n
+    file write `fh' "],"
+    if "`extra'" != "" {
+        * xlabel(none): no tick list, no rule and not the default ticks
+        local none 0
+        if "``ax'.major.ticks.arrnels'" == "0" & "``ax'.major._default'" == "0" ///
+            & "``ax'.major.use_rule.setting'" != "yes" local none 1
+        file write `fh' `" "`key'_none": `none', "`key'_minor": ["'
+        * xmlabel()/ymlabel() ticks sit in the labelled minor tickset
+        local n ``ax'.minor.dlg_tickpos.arrnels'
+        if "`n'" == "" local n 0
+        local first 1
+        forvalues k = 1/`n' {
+            local pos ``ax'.minor.dlg_tickpos[`k']'
+            local lab `"``ax'.minor.dlg_ticklabel[`k']'"'
+            if "`pos'" == "" | "`pos'" == "." continue
+            _g2m_esc `"`lab'"'
+            if !`first' file write `fh' ", "
+            local first 0
+            file write `fh' `"["`pos'", "`s(esc)'"]"'
+        }
+        file write `fh' "],"
+    }
+    file write `fh' _n
 end
 
 * write `"key": "value", ' for each "key member.path" pair of an object;

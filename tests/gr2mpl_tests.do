@@ -1161,4 +1161,63 @@ twoway scatter mpg weight, legend(on label(1 "Cars")) title("legend(on label()),
 rchk legend_on1lab
 has "panel1.legend=Cars"
 
+* -- xlabel(none) / ylabel(none) draw no major tick labels (twoway and graph bar)
+sysuse auto, clear
+twoway (scatter mpg weight) (lfit mpg weight), legend(off) xlabel(none) ylabel(none) title("labels none")
+rchk lab_none
+has "panel1.xticks="
+has "panel1.yticks="
+has "panel1.ygrid=0"
+twoway scatter mpg weight, xlabel(none) title("xlabel none")
+rchk xlab_none
+has "panel1.xticks="
+has "panel1.yticks=", absent
+twoway scatter mpg weight, ylabel(none) xscale(off) title("ylabel none, xscale off")
+rchk ylab_none_xoff
+has "panel1.yticks="
+graph bar mpg, over(rep78) ylabel(none) title("bar ylabel none")
+rchk bar_ylab_none
+has "panel1.yticks="
+* nolabels keeps the tick positions but no labels, as before
+twoway scatter mpg weight, xlabel(, nolabels) title("nolabels")
+rchk xlab_nolab
+has "panel1.xticks=", absent
+
+* -- xmlabel() / ymlabel() are drawn as labelled minor ticks
+twoway scatter mpg weight, ylabel(10 "ten" 20 "twenty" 40 "forty") ymlabel(15 25 35) xmlabel(2500 3500 4500)
+rchk mlabels
+has "panel1.yminor=15|25|35"
+has "panel1.xminor=2,500|3,500|4,500"
+has "panel1.yticks=ten|twenty|forty"
+graph bar mpg, over(rep78) ymlabel(5 15)
+rchk bar_mlabels
+has "panel1.yminor=5|15"
+
+* -- aspectratio() gives the plot region Stata's height-to-width ratio
+twoway scatter mpg weight, aspectratio(1) title("aspectratio(1)")
+rchk aspect1
+has "panel1.box_aspect=1"
+twoway scatter mpg weight, aspectratio(0.5)
+rchk aspect05
+has "panel1.box_aspect=0.5"
+twoway scatter mpg weight
+rchk aspect_def
+has "panel1.box_aspect=0"
+
+* -- saving(file, replace) works as in graph's own saving(); a bad suboption is an error
+twoway scatter mpg weight
+capture erase "tests/out/r_sav_sub.png"
+gr2mpl, saving("tests/out/r_sav_sub.png")
+gr2mpl, saving("tests/out/r_sav_sub.png", replace)
+ok "`r(filename)'" == "tests/out/r_sav_sub.png"
+capture confirm file "tests/out/r_sav_sub.png, replace.png"
+ok _rc != 0
+gr2mpl, saving(tests/out/r_sav_sub.png, replace)
+ok "`r(filename)'" == "tests/out/r_sav_sub.png"
+capture gr2mpl, saving("tests/out/r_sav_sub.png")
+ok _rc == 602
+capture gr2mpl, saving("tests/out/r_sav_sub.png", bogus)
+ok _rc == 198
+erase "tests/out/r_sav_sub.png"
+
 di as res "$R_N checks passed"
