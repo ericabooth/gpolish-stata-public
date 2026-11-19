@@ -1368,6 +1368,20 @@ local tc "`r(val)'"
 scatter mpg weight, title("plain")
 rchk optcolors_plain
 has "title_color=`tc'"
+* a title() or subtitle() nested inside legend() or by() is not the graph's own
+* (the spec's colour keys stay empty: no option at depth 0 set them)
+scatter mpg weight, title("plain") legend(on title("L", color(red)) subtitle("S", color(red)))
+rchk optcolors_legend
+has "title_color=`tc'"
+ok strpos(fileread("$R_DIR/spec.json"), `""title_color": "", "subtitle_color": "","') > 0
+scatter mpg weight, by(foreign, title("B", color(red)) subtitle("S", color(red)))
+rchk optcolors_by
+ok strpos(fileread("$R_DIR/spec.json"), `""title_color": "", "subtitle_color": "","') > 0
+* the same colour given at depth 0 still carries over
+scatter mpg weight, legend(on title("L")) title("T", color(red)) subtitle("S", color(red))
+rchk optcolors_depth0
+has "title_color=#ff0000"
+ok strpos(fileread("$R_DIR/spec.json"), `""subtitle_color": "255 0 0"') > 0
 scatter mpg weight, title("T") scheme(s2color)
 rchk optcolors_scheme
 has "fig_face=#ffffff"
@@ -1381,7 +1395,7 @@ has "fig_face=#e0e0e0"
 has "title_color=#ff0000"
 
 * -- width() and dpi() are checked before Python runs
-capture gr2mpl, width(-5) saving("tests/out/r_wd.png") replace
+capture noisily gr2mpl, width(-5) saving("tests/out/r_wd.png") replace
 ok _rc == 198
 capture gr2mpl, dpi(-10) saving("tests/out/r_wd.png") replace
 ok _rc == 198

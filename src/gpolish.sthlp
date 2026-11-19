@@ -214,6 +214,12 @@ A label wider than the plot region is skipped with a note; shorten it or use a s
 grows quickly with the number of labels (about 40 seconds for 600). {opt maxlabels(#)} refuses a selection of more
 than # points before any edit; the default is 1000.
 Placement avoids the same drawn objects as an automatic {cmd:gpolish callout}.
+The package's benchmark (benchmark/README.md in the source repository) compares {cmd:ptlabel} with {cmd:labrepel},
+adjustText and ggrepel. {cmd:ptlabel} has the highest share of clean labels when a subset of points is labelled
+and on the synthetic test graphs. With every point labelled on crowded real graphs, ggrepel tuned on the same
+tuning graphs scores higher: 0.68 against 0.59 with every car in {cmd:auto} labelled, 0.76 against 0.75 with every
+country in {cmd:lifeexp}, and 0.78 against 0.68 ({cmd:census}) and 0.88 against 0.56 ({cmd:states}) with all 50 states
+labelled. ggrepel's tuning tried 256 settings, against 566 for {cmd:ptlabel}.
 
 {phang}
 {cmd:gpolish bracket} draws a square bracket from {opt y0()} to {opt y1()} at {opt x()}.

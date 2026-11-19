@@ -20,7 +20,7 @@ program gr2mpl, rclass
         exit 198
     }
     if `width' < 0 {
-        di as err "gr2mpl: width() must be a positive integer (0 = default)"
+        di as err "gr2mpl: width() must be 0 (the default size) or a positive integer"
         exit 198
     }
     if `dpi' <= 0 {
@@ -1310,19 +1310,31 @@ mata:
 /* the bodies of every option in cmd whose name abbreviates full (at least
    minlen letters), joined by spaces; quoted text is skipped when matching
    parentheses and left out of the result, so a title such as
-   "rbar, color(none)" is not read as a color() option */
+   "rbar, color(none)" is not read as a color() option. Only options at
+   parenthesis depth 0 count, so a title() or subtitle() nested inside
+   legend(), by() or a plot's own options is not read as the graph's */
 string scalar _g2m_optbody(string scalar cmd, string scalar full, real scalar minlen)
 {
-    real scalar i, j, n, depth, inq
+    real scalar i, j, n, depth, inq, odepth
     string scalar out, c, w, body
 
     out = ""
     n = strlen(cmd)
     inq = 0
+    odepth = 0
     for (i = 1; i <= n; i++) {
         c = substr(cmd, i, 1)
         if (c == char(34)) inq = !inq
         if (inq) continue
+        if (c == "(") {
+            odepth++
+            continue
+        }
+        if (c == ")") {
+            if (odepth > 0) odepth--
+            continue
+        }
+        if (odepth > 0) continue
         if (i > 1) {
             if (!anyof((" ", ","), substr(cmd, i - 1, 1))) continue
         }

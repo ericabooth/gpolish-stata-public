@@ -90,14 +90,14 @@ Four scatterplots from Stata example datasets never used while `gpolish` was dev
 
 | Scenario | `mlabel()` | `labrepel` | `gpolish` | `gpolish` 0.6.0 | adjustText | ggrepel | ggrepel (informed) | adjustText, tuned | ggrepel (informed), tuned |
 |---|---|---|---|---|---|---|---|---|---|
-| Census: deaths per 1,000 by median age, all 50 states | 0.12 / 0.12 |  | 0.68 / 0.46 | 0.56 / 0.36 | 0.30 / 0.14 | 0.62 / 0.32 | 0.56 / 0.44 | 0.56 / 0.30 | 0.78 / 0.52 |
-| Census: the same, 13 of 50 states labelled | 0.38 / 0.38 |  | 1.00 / 0.92 | 0.77 / 0.69 | 0.08 / 0.08 | 0.15 / 0.15 | 0.54 / 0.54 | 0.62 / 0.62 | 0.62 / 0.62 |
-| hsng: median rent by family income, all 50 states | 0.10 / 0.10 |  | 0.74 / 0.56 | 0.60 / 0.30 | 0.48 / 0.24 | 0.66 / 0.48 | 0.64 / 0.48 | 0.64 / 0.26 | 0.66 / 0.50 |
-| states: divorce rate by median age, all 50 states | 0.12 / 0.12 |  | 0.56 / 0.40 | 0.60 / 0.40 | 0.38 / 0.22 | 0.54 / 0.44 | 0.76 / 0.62 | 0.60 / 0.32 | 0.88 / 0.68 |
+| Census: deaths per 1,000 by median age, all 50 states | 0.12 / 0.12 | 0.00 / 0.00 | 0.68 / 0.46 | 0.56 / 0.36 | 0.30 / 0.14 | 0.62 / 0.32 | 0.56 / 0.44 | 0.56 / 0.30 | 0.78 / 0.52 |
+| Census: the same, 13 of 50 states labelled | 0.38 / 0.38 | 0.00 / 0.00 | 1.00 / 0.92 | 0.77 / 0.69 | 0.08 / 0.08 | 0.15 / 0.15 | 0.54 / 0.54 | 0.62 / 0.62 | 0.62 / 0.62 |
+| hsng: median rent by family income, all 50 states | 0.10 / 0.10 | 0.00 / 0.00 | 0.74 / 0.56 | 0.60 / 0.30 | 0.48 / 0.24 | 0.66 / 0.48 | 0.64 / 0.48 | 0.64 / 0.26 | 0.66 / 0.50 |
+| states: divorce rate by median age, all 50 states | 0.12 / 0.12 | 0.10 / 0.10 | 0.56 / 0.40 | 0.60 / 0.40 | 0.38 / 0.22 | 0.54 / 0.44 | 0.76 / 0.62 | 0.60 / 0.32 | 0.88 / 0.68 |
 
 | Scenario | `mlabel()` | `labrepel` | `gpolish` | `gpolish` 0.6.0 | adjustText | ggrepel | ggrepel (informed) | adjustText, tuned | ggrepel (informed), tuned |
 |---|---|---|---|---|---|---|---|---|---|
-| Census: deaths per 1,000 by median age, all 50 states | 0.12 (0.12 to 0.12) |  | 0.68 (0.56 to 0.74) | 0.58 (0.48 to 0.66) | 0.34 (0.32 to 0.38) | 0.62 (0.56 to 0.66) | 0.56 (0.52 to 0.64) | 0.53 (0.46 to 0.64) | 0.74 (0.70 to 0.78) |
-| Census: the same, 13 of 50 states labelled | 0.38 (0.38 to 0.38) |  | 1.00 (1.00 to 1.00) | 0.77 (0.69 to 0.85) | 0.08 (0.08 to 0.08) | 0.23 (0.15 to 0.31) | 0.62 (0.54 to 0.69) | 0.62 (0.62 to 0.62) | 0.62 (0.54 to 0.69) |
-| hsng: median rent by family income, all 50 states | 0.10 (0.10 to 0.10) |  | 0.66 (0.60 to 0.70) | 0.58 (0.50 to 0.66) | 0.40 (0.32 to 0.50) | 0.60 (0.54 to 0.62) | 0.63 (0.58 to 0.68) | 0.68 (0.62 to 0.74) | 0.71 (0.66 to 0.74) |
-| states: divorce rate by median age, all 50 states | 0.12 (0.12 to 0.12) |  | 0.67 (0.60 to 0.74) | 0.57 (0.48 to 0.62) | 0.38 (0.34 to 0.46) | 0.62 (0.60 to 0.68) | 0.76 (0.70 to 0.80) | 0.58 (0.52 to 0.70) | 0.82 (0.74 to 0.84) |
+| Census: deaths per 1,000 by median age, all 50 states | 0.12 (0.12 to 0.12) | 0.00 (0.00 to 0.06) | 0.68 (0.56 to 0.74) | 0.58 (0.48 to 0.66) | 0.34 (0.32 to 0.38) | 0.62 (0.56 to 0.66) | 0.56 (0.52 to 0.64) | 0.53 (0.46 to 0.64) | 0.74 (0.70 to 0.78) |
+| Census: the same, 13 of 50 states labelled | 0.38 (0.38 to 0.38) | 0.00 (0.00 to 0.00) | 1.00 (1.00 to 1.00) | 0.77 (0.69 to 0.85) | 0.08 (0.08 to 0.08) | 0.23 (0.15 to 0.31) | 0.62 (0.54 to 0.69) | 0.62 (0.62 to 0.62) | 0.62 (0.54 to 0.69) |
+| hsng: median rent by family income, all 50 states | 0.10 (0.10 to 0.10) | 0.00 (0.00 to 0.00) | 0.66 (0.60 to 0.70) | 0.58 (0.50 to 0.66) | 0.40 (0.32 to 0.50) | 0.60 (0.54 to 0.62) | 0.63 (0.58 to 0.68) | 0.68 (0.62 to 0.74) | 0.71 (0.66 to 0.74) |
+| states: divorce rate by median age, all 50 states | 0.12 (0.12 to 0.12) | 0.07 (0.02 to 0.10) | 0.67 (0.60 to 0.74) | 0.57 (0.48 to 0.62) | 0.38 (0.34 to 0.46) | 0.62 (0.60 to 0.68) | 0.76 (0.70 to 0.80) | 0.58 (0.52 to 0.70) | 0.82 (0.74 to 0.84) |

@@ -24,9 +24,11 @@ for each drawn plot in the graph:
     connected, line, rline, function: one square 4 pt wide every 4 pt along each segment (at most 400 per segment)
     bar, rbar: one box per bar (bar width, else 2 pt)
     area, rarea: strips at most 4 pt wide between neighbouring positions (at most 200 per interval)
+    (line squares and area strips: past 20,000 per plot, neighbours merge into equal groups, one box each)
     rcap, rspike, rcapsym: one box 3 pt wide per range
+    other plot types (spike, dropline, and the rest): none
 for each xline()/yline(): a box 2 pt wide around the line
-for each text already added: a box as wide as its widest line and nlines * size * 1.3 tall,
+for each text already added in plot region 1: a box as wide as its widest line and nlines * size * 1.3 tall,
     placed by its box alignment
 ```
 
@@ -97,9 +99,10 @@ Later passes see every other label's box from the pass before or the current pas
 leader: q = nearest point of box b to the point (px, py); from (px, py) toward q,
         start r0 out from the point and stop gap short of q
         (if |q - p| < r0 + gap + 1, the segment is the whole span p to q)
-leadcost(seg) = 2    * h^2 * (other label boxes the segment touches)
-              + 1.5  * h^2 * (other leaders it properly crosses)
-              + 0.15 * h^2 * (obstacle boxes in O it touches)
+leadcost(seg) = 2    * h^2 * (other label boxes B[j], j != i, the segment touches;
+                              unlike hard(), in pass 1 this includes the starting east boxes of labels not yet placed)
+              + 1.5  * h^2 * (other labels' current leaders it properly crosses)
+              + 0.15 * h^2 * (obstacle boxes in O it touches, the label's own marker included)
 ```
 
 ## Output
