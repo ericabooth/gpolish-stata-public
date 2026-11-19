@@ -205,8 +205,16 @@ def _bold_toggles(s):
             elif part in ("sf", "rm", "it"):
                 bold = False
             continue
-        if part:
-            out.append("{bf:" + part + "}" if bold and "}" not in part else part)
+        if not part:
+            continue
+        if not bold:
+            out.append(part)
+            continue
+        # inside a bold run an explicit {bf:...} is already bold: unwrap it so the run
+        # stays one bold segment; text with a literal brace is left as typed
+        for piece in re.split(r"\{bf:([^}]*)\}", part):
+            if piece:
+                out.append("{bf:" + piece + "}" if "}" not in piece and "{" not in piece else piece)
     return "".join(out)
 
 

@@ -47,6 +47,12 @@ This release contains gpolish 0.7.0 and gr2mpl 0.6.0. The changes listed under 0
 - `bracket` tests its shared position and its two ends separately, so its out-of-range note names the option that is off the plot (for example `y()` rather than `x0()` and `x1()`) and gives the `xscale(range(#))` or `yscale(range(#))` to add, with the value.
 - `at()`, `to()` and `from()` accept an expression with spaces inside parentheses, such as `to(tc(02jan2020 05:00:00) 0)` on a clock-time axis; the error for a wrong number of values shows that form.
 
+- `endlabel` now shows a variable label that contains double quotes as typed, for example `Men "all" $5 50%`. Before, Stata's legend split such a label into several lines, `endlabel` took that joined legend text, and the quotes were lost.
+- `endlabel` no longer prints "too few quotes" when a label contains an apostrophe, such as "Women's", also when it is run a second time on such a graph. The label length that `endlabel` stores in its record is now measured in Mata.
+- `endlabel, labels()` accepts entries in compound quotes that contain double quotes, for example `` labels(`"Men "M""' "Women's") ``. Before, such an entry stopped with r(132). The entries in `labels()` also have `$` and stray backticks escaped, in the same way as other label text.
+- `endlabel, side(left)` adds a right graph margin when switching the legend off would let the last x tick label of axis 1 run past the right edge of the graph. The record keeps this margin, so a rerun or `gpolish clear` gives it back. Only horizontal tick labels on the first x axis are measured; the help's Limits table names `graphregion(margin())` for other cases.
+- `callout` and `note` print a note when a box placed with `at()` runs past an edge of the graph. The note names the edge and suggests `align(right)`, `align(left)`, or moving `at()`.
+
 ### gr2mpl 0.6.0
 
 - graph bar, hbar, box and dot with by(): every panel is now drawn on the scale range Stata shares across the panels, so bars in panels without tick labels have the right height against the labelled axis. by(, yrescale) keeps each panel on its own scale.
@@ -79,6 +85,10 @@ This release contains gpolish 0.7.0 and gr2mpl 0.6.0. The changes listed under 0
 - `lwscale()` and `msscale()` reject values of 0 or less with r(198). Before, `msscale(-1)` was accepted without a message.
 - `gr2mpl doctor` returns `r(mplok)` as a numeric scalar (1, 0, or missing when the matplotlib version cannot be read), so `assert r(mplok)==1` works. Before, it was a string macro.
 
+- gr2mpl applies the SMCL toggle tags `{bf}`, `{it}`, `{sf}` and `{rm}` (and drops `{stSerif}`, `{stSans}`, `{stMono}` and `{stSymbol}`) instead of printing them: `{bf}` sets bold until the next `{sf}`, `{rm}` or `{it}`, and italic is drawn upright as before. An explicit `{bf:...}` or `{sup:...}` inside a `{bf}` run keeps the text around it bold.
+- In `graph combine`, gr2mpl now draws each member's `subtitle()` under the member's title, and the member's `note()` and `caption()` left-aligned under its x axis (this includes the bandwidth note that `kdensity` adds). Before, only the member's title was drawn. The caption is drawn at the note's size.
+- The render record (render_info.txt, kept with `keepspec`) gains `panelN.psubtitle`, `panelN.pnote`, `panelN.ylabel` and placement checks.
+
 ### Benchmark
 
 - The benchmark numbers changed. Release 0.6.1 measured the Open Sans labels with `gpolish`'s Helvetica width table in batch runs; `run_stata.do` and `tune.do` now set the svg font to Open Sans, check that `gpolish` used its Open Sans table, and set the recorded font back afterwards. The six placement settings were not tuned again. adjustText now runs a fixed 100 iterations and ggrepel runs with `max.time = Inf`, so repeated runs give identical positions; ggrepel's label and marker sizes were corrected (they were 0.4 percent too large). `labrepel` gets its seed set before each call, because version 1.0 ignores `seed()`.
@@ -96,6 +106,13 @@ This release contains gpolish 0.7.0 and gr2mpl 0.6.0. The changes listed under 0
 - The further runs are options of the harness: `extra.py` runs each in its own working copy and writes results/extra/. `raised` gives adjustText `iter_lim=1000` and both ggrepel columns `max.iter = 100000`; `fitline` gives adjustText and informed ggrepel the fitted line as points; `holdout` draws synthetic seeds 201 to 220 and the rule-based list of the 12 countries farthest from the fitted line; `seeds` draws ggrepel, informed ggrepel and `labrepel` on the real-data graphs with seeds 1 to 20. With the raised limits, both ggrepel columns pass `gpolish` with every car labelled (clean shares 0.64 and 0.74 against 0.59) but not with every country labelled (0.62 and 0.70 against 0.75); adjustText reaches 0.46 and 0.41. On the holdout seeds, `gpolish`'s clean shares are 0.99, 0.98 and 0.92 in the three synthetic designs, against 0.97, 0.91 and 0.86 for informed ggrepel. Across seeds 1 to 20 with every car labelled, informed ggrepel's clean share is above `gpolish`'s 0.59 on 6 seeds and equal on 3.
 - New `sensitivity.py` varies, one at a time and on the tuning seeds only, the constants of the placement search that were set by hand. No single constant moves the mean clean share by more than 0.014 (against 0.958). It also checks convergence of the four passes: 20 of 1,100 labels (1.8 percent) move between the 3-pass and 4-pass drawings, and 8 passes place 14 labels (1.3 percent) differently from 4. Pass counts of 1 to 8 (except 4, the default) change the mean clean share by -0.009 to +0.002. `--only` redraws named variants and merges their rows into results/sensitivity.csv.
 
+- The ink-audit commands in benchmark/README.md and the `audit_ink.py` docstring now list all 10 scenarios of the archived results/ink_audit.md, so running them reproduces that file instead of rewriting it with 2 scenarios.
+- New `near_sensitivity.py` rescores the main set from the archive with the clean-and-near cutoff at 2, 3, 4 and 6 ems and writes results/near_sensitivity.md. `score.score_all()` takes a `near_em` argument for it; its default (3 ems) leaves `score.py --rescore` output unchanged byte for byte. The script also runs under `python -I` and from any folder.
+- New `ring_spacing.py` draws the 30 tuning graphs with ring spacings of 0.2, 0.3 and 0.4 label heights, with the other tuned settings kept, and writes results/ring_spacing.md. It reports only; the setting is unchanged.
+- benchmark/README.md, Tuning: states that the 0.93 tuning score used the Helvetica table and the 72 dpi rule, and compares tuning and test seeds under one rule: 0.941 on tuning seeds 101 to 110 and 0.939 on test seeds 1 to 10.
+- benchmark/README.md, Tuning: reports the spacings below the grid. The clean-and-near share is 0.949 at 0.2, 0.944 at 0.3 and 0.941 at 0.4 label heights; the clean share is 0.952, 0.958 and 0.958.
+- benchmark/README.md, points of process: reports the cutoff check. The order of the methods is the same at every cutoff in 3 of 7 scenarios. At 2 ems both ggrepel columns (0.24) lead `gpolish` (0.22) with every car labelled, and with every country labelled `gpolish` ties informed ggrepel (0.49) and trails its 0.6.0 settings (0.57). At 3, 4 and 6 ems `gpolish` is first among the five methods at their defaults in every scenario.
+
 ### Documentation
 
 - README: describes batch-mode fonts, `GPOLISH_FONT`, the matplotlib 3.6 minimum, second-axis options, the output formats of `gr2mpl`, and the handling of graphs saved by 0.6.1 or earlier; the benchmark paragraph reports the current numbers.
@@ -105,6 +122,7 @@ This release contains gpolish 0.7.0 and gr2mpl 0.6.0. The changes listed under 0
 - README and `gpolish` help: the quick-start example sets short variable labels for the four `uslifeexp` series ("White women", "White men", "Black women", "Black men"), so it gives the end labels shown in images/before_after.png and no longer prints the end-label width note.
 - README and benchmark/README.md: `gpolish` has the highest clean share with every country labelled "of the five methods at their defaults", and the release 0.6.0 settings also score higher than the tuned ones with 19 of 74 cars labelled (0.89 against 0.84).
 - New gallery/fidelity.md measures how far each text item in the 22 `gr2mpl` gallery images sits from the same item in Stata's own export (`fidelity.do`, `fidelity.py`, per-item data in fidelity.csv). Of 545 matched items, half are within 10.0 points and 90 percent within 20.9 points; the largest distance is 62.2 points, a legend entry of the heatmap. Legend entries are farthest off (median 25.9 points).
+- README and `gpolish` help: brace labels, like bracket labels, are described as set at a fixed position (beyond the brace tip) and not checked against the data; the help's Limits table has a row for them.
 
 ## 0.6.1 (2026-11-17)
 

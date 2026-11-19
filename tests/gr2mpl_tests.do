@@ -565,6 +565,22 @@ twoway scatter mpg weight, title("A {bf}bold{sf} and {it}italic{sf} word; {it:co
 rchk smcl_toggle
 has "title=A bold and italic word; colon form"
 has "panel1.ann=hi|left|0|y1|in"
+* an explicit {bf:...} or {sup:...} inside a {bf} run keeps the text around it bold
+tempname tg
+file open `tg' using "tests/out/toggles.py", write text replace
+file write `tg' "import sys" _n "sys.path.insert(0, 'src')" _n "import gr2mpl_render as g" _n
+file write `tg' "r1 = g.rich_segments('{bf}A {bf:B} C{rm} D')" _n
+file write `tg' "r2 = g.rich_segments('{bf}x{sup:2} y{sf}z')" _n
+file write `tg' "ok = ''.join(t for t, b in r1 if b) == 'A B C' and ''.join(t for t, b in r1 if not b) == ' D'" _n
+file write `tg' "ok = ok and ''.join(t for t, b in r2 if b) == 'x' + chr(178) + ' y' and ''.join(t for t, b in r2 if not b) == 'z'" _n
+file write `tg' "open(sys.argv[1], 'w').write(str(int(ok)))" _n
+file close `tg'
+shell "$GR2MPL_PYTHON" "tests/out/toggles.py" "tests/out/toggles.txt"
+file open `tg' using "tests/out/toggles.txt", read text
+file read `tg' tgok
+file close `tg'
+erase "tests/out/toggles.txt"
+ok "`tgok'" == "1"
 
 * -- graph combine keeps each member's subtitle(), note() and caption()
 sysuse auto, clear

@@ -11,7 +11,7 @@
 | Piece | What it does | Output |
 |---|---|---|
 | `scheme(pypolish)` | Static defaults: white background, left-aligned titles, light horizontal grid, horizontal axis labels, a restrained palette. | Stata graph |
-| `gpolish` | Reads the drawn graph and adds direct labels, callouts, point labels and brackets. A layout step places them clear of markers, lines, bars, shaded areas, range plots, `xline()` and `yline()` reference lines, labels added earlier and the edges of the plot. Bracket labels are the exception: `gpolish bracket` sets its label at a fixed position beside the spine and does not check it against the data. | Stata graph |
+| `gpolish` | Reads the drawn graph and adds direct labels, callouts, point labels and brackets. A layout step places them clear of markers, lines, bars, shaded areas, range plots, `xline()` and `yline()` reference lines, labels added earlier and the edges of the plot. Bracket and brace labels are the exception: `gpolish bracket` and `gpolish brace` set their labels at a fixed position (beside the spine, or beyond the brace tip) and do not check them against the data. | Stata graph |
 | `gr2mpl` | Redraws the graph held in memory with matplotlib, including every `gpolish` edit. Handles `graph bar`, box, dot, `graph matrix`, `by()` and combined graphs too. | PNG, PDF, SVG or JPG image |
 
 `gpolish` needs only Stata. `gr2mpl` needs Python with matplotlib 3.6 or later and numpy.

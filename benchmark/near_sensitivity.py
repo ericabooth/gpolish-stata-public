@@ -8,14 +8,21 @@ the methods in each scenario. Nothing else in the scoring changes, and no settin
 Writes results/near_sensitivity.md.  Run from the benchmark folder after score.py:
     python near_sensitivity.py
 """
+import os
 import statistics as st
-import score
+import sys
+
+# python -I leaves the script folder off sys.path; score and summarize live beside this file
+HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, HERE)
+import score  # noqa: E402
 from summarize import DESIGNS, METHODS, NAMES
 
 CUTOFFS = [2.0, 3.0, 4.0, 6.0]
 
 
 def main():
+    os.chdir(HERE)  # score reads and writes results/ relative to the benchmark folder
     arch = score.load_archive()
     res = {}
     for c in CUTOFFS:

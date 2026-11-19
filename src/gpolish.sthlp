@@ -165,6 +165,8 @@ edge does, and with {opt align(center)} the box is centered on {opt at()}, which
 Use it to mark a confidence interval, a gap between two values, or a range on an axis.
 The tip points to the left of the direction from {opt from()} to {opt to()}; {opt flip} turns it to the other side.
 {opt width(#)} is the depth of the brace in points.
+The label's position is fixed beyond the tip: unlike the other layout commands, {cmd:brace} does not check it
+against markers, lines, bars or earlier labels, and prints no note if they overlap.
 
 {phang}
 {cmd:gpolish arrow} draws an arrow between two points, straight by default; {opt curve(#)} bends it.
@@ -256,6 +258,7 @@ It stops with an error when {cmd:endlabel}, {cmd:callout}, {cmd:note}, {cmd:arro
 {p2col:{cmd:graph pie}}layout commands are refused; {helpb gr2mpl} does not redraw pie charts either{p_end}
 {p2col:{cmd:ptlabel} on many points}run time grows quickly with the number of labels; a note is printed above 300 labels and more than {opt maxlabels()} (default 1000) are refused{p_end}
 {p2col:{cmd:bracket} labels}placed at a fixed spot beside the spine and not checked against the data or other labels; move the bracket with {opt x()} or {opt left} (or {opt y()} or {opt below}) if its label covers something{p_end}
+{p2col:{cmd:brace} labels}placed at a fixed spot beyond the brace tip and not checked against the data or other labels; move the brace with {opt from()} and {opt to()}, or turn it with {opt flip}, if its label covers something{p_end}
 {p2col:{cmd:endlabel} with {cmd:aspectratio()}}when a y axis is drawn on the labeled side, the room for labels would have to be made inside a plot region whose shape is fixed, which distorts the axes; {cmd:endlabel} stops with r(198) before any edit. Drop {cmd:aspectratio()} or label the other side with {opt side()}{p_end}
 {p2col:Positions outside the plot region}{cmd:callout} and {cmd:note} refuse a {opt to()} outside the axis ranges; {opt at()}, {opt from()}, {cmd:arrow}, {cmd:brace} and {cmd:bracket} get a note; a {cmd:callout} or {cmd:note} box placed with {opt at()} that runs past an edge of the graph gets a note and is drawn where it is, so the part outside is cut off; ranges are given in the axis's own units, so dates show as numbers; a {cmd:bracket} note names only the option that is off the plot and gives the {cmd:xscale(range(#))} or {cmd:yscale(range(#))} to add{p_end}
 {p2col:Labels wider than the plot region}{cmd:ptlabel} skips them with a note; an automatically placed callout or note stops with an error; {cmd:gpolish} does not wrap text itself{p_end}
