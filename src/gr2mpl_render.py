@@ -1903,6 +1903,29 @@ class Figure:
         rows = max(rows, math.ceil(n / cols))
         return rows, cols
 
+    def scolor(self, key, default):
+        """A colour that an option on the graph command set, else the default."""
+        c = stata_color(self.s.get(key))
+        if c is None or (len(c) > 3 and c[3] == 0):
+            return default
+        return c
+
+    def apply_option_colors(self):
+        """graphregion()/plotregion() fills and tick-label colours from the command."""
+        self.fig.patch.set_facecolor(self.scolor("gfill", "white"))
+        if self.multi or not self.panels:
+            return
+        p = self.panels[0]
+        pf = self.scolor("pfill", None)
+        if pf is not None:
+            for a in (p.ax, p.ax2):
+                if a is not None:
+                    a.set_facecolor(pf)
+        for which, key in (("x", "xtick_color"), ("y", "ytick_color")):
+            c = self.scolor(key, None)
+            if c is not None:
+                p.ax.tick_params(axis=which, labelcolor=c)
+
     def render(self):
         s = self.s
         names = {f.name for f in font_manager.fontManager.ttflist}
@@ -1946,6 +1969,7 @@ class Figure:
                 ax.set_axis_off()
             self.panels.append(p)
         self.share_bar_scale()
+        self.apply_option_colors()
         asp = num(s.get("aspect"), 0.0) or 0.0
         if asp > 0 and not self.multi and self.panels:
             # aspectratio(): Stata's ratio is plot-region height over width
@@ -1963,10 +1987,12 @@ class Figure:
         two_axes = any(p.ax2 is not None for p in self.panels)
         for p in self.panels:
             if not self.xtitle and p.axis_title("x"):
-                p.ax.set_xlabel(p.axis_title("x"), fontsize=p.axis_title_size("x"), color=MUTED,
+                p.ax.set_xlabel(p.axis_title("x"), fontsize=p.axis_title_size("x"),
+                                color=self.scolor("xtitle_color", MUTED),
                                 labelpad=6 * self.k)
             if (not self.ytitle or two_axes) and p.axis_title("y"):
-                p.ax.set_ylabel(p.axis_title("y"), fontsize=p.axis_title_size("y"), color=MUTED,
+                p.ax.set_ylabel(p.axis_title("y"), fontsize=p.axis_title_size("y"),
+                                color=self.scolor("ytitle_color", MUTED),
                                 labelpad=6 * self.k)
             if p.ax2 is not None and p.axis_title("y2"):
                 right = getattr(p, "y2side", "right") != "left"
@@ -2099,12 +2125,12 @@ class Figure:
         self._ytitle_any = None
         if title:
             arts.append(fig.text(left, ycur / H, title, fontsize=fs_title, fontweight="bold",
-                                 color=INK, ha="left", va="top", linespacing=1.15))
+                                 color=self.scolor("title_color", INK), ha="left", va="top", linespacing=1.15))
             ycur -= fs_title * 1.22 * (title.count("\n") + 1) + 3 * k
         if subtitle:
             right = sub_is_ytitle and yt_right
             a = fig.text(1 - left if right else left, ycur / H, subtitle, fontsize=fs_sub,
-                         color=MUTED, ha="right" if right else "left", va="top",
+                         color=self.scolor("ytitle_color" if sub_is_ytitle else "subtitle_color", MUTED), ha="right" if right else "left", va="top",
                          linespacing=1.2)
             arts.append(a)
             if right:
@@ -2114,7 +2140,7 @@ class Figure:
             ycur -= fs_sub * 1.3 * (subtitle.count("\n") + 1) + 2 * k
         if ytitle:
             a = fig.text(1 - left if yt_right else left, ycur / H, ytitle, fontsize=fs_y,
-                         color=MUTED, ha="right" if yt_right else "left", va="top")
+                         color=self.scolor("ytitle_color", MUTED), ha="right" if yt_right else "left", va="top")
             arts.append(a)
             self._ytitle_any = a
             if yt_right:
@@ -2151,7 +2177,8 @@ class Figure:
                                  va="bottom", linespacing=1.3))
             bottom += fs_note * 1.35 * (note.count("\n") + 1) + 6 * k
         if self.xtitle:
-            xt = fig.text(0.5, bottom / H, self.xtitle, fontsize=fs_x, color=MUTED,
+            xt = fig.text(0.5, bottom / H, self.xtitle, fontsize=fs_x,
+                          color=self.scolor("xtitle_color", MUTED),
                           ha="center", va="bottom")
             arts.append(xt)
             self._xtitle_artist = xt
@@ -2246,6 +2273,22 @@ class Figure:
         fig = self.fig
         r = fig.canvas.get_renderer()
         out.append(f"family={self.s.get('family', '')}")
+        hx = matplotlib.colors.to_hex
+        out.append(f"fig_face={hx(fig.get_facecolor())}")
+        if self.panels:
+            ax0 = self.panels[0].ax
+            out.append(f"panel1.face={hx(ax0.get_facecolor())}")
+            for w, axis in (("x", ax0.xaxis), ("y", ax0.yaxis)):
+                labs = [t for t in axis.get_ticklabels() if t.get_text()]
+                if labs:
+                    out.append(f"panel1.{w}tick_color={hx(labs[0].get_color())}")
+        for key, art in (("title", "_title_artists"),):
+            ts = [a for a in getattr(self, art, []) if isinstance(a, matplotlib.text.Text)]
+            if ts and self.s.get("title"):
+                out.append(f"title_color={hx(ts[0].get_color())}")
+        xa = getattr(self, "_xtitle_artist", None)
+        if xa is not None:
+            out.append(f"xtitle_color={hx(xa.get_color())}")
         fl = getattr(self, "fig_legend", None)
         if fl:
             out.append("fig_legend=" + "|".join(str(t) for t in fl[1]))
@@ -2522,7 +2565,7 @@ class Figure:
             self.outline_narrow()
         except Exception:
             pass
-        self.fig.savefig(out, dpi=self.dpi, facecolor="white")
+        self.fig.savefig(out, dpi=self.dpi, facecolor=self.fig.get_facecolor())
         try:
             with open(os.path.join(self.dir, "render_info.txt"), "w", encoding="utf-8") as fh:
                 fh.write("\n".join(self.info_lines()) + "\n")

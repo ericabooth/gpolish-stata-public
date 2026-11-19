@@ -64,7 +64,7 @@ tick labels, end labels and titles; the axes of {cmd:by()} panels are lined up.
 
 {phang}{opt replace} allows an existing file to be overwritten; without it {cmd:gr2mpl} stops with an error, as {helpb graph export} does. The image is rendered to a temporary file first, so a failed render leaves an existing file untouched.
 
-{phang}{opt width(#)} sets the image width in pixels; {opt dpi(#)} sets the resolution (default 200). The figure keeps the graph's {cmd:xsize()} and {cmd:ysize()}.
+{phang}{opt width(#)} sets the image width in pixels; {opt dpi(#)} sets the resolution (default 200). {opt width()} must be 0 (the default size) or more, and {opt dpi()} must be greater than 0. The figure keeps the graph's {cmd:xsize()} and {cmd:ysize()}.
 
 {phang}{opt endlabels} replaces the legend of a line graph with labels at the line ends. {opt nolegend} drops the legend.
 
@@ -131,6 +131,7 @@ To set the interpreter once, put {cmd:global GR2MPL_PYTHON "/path/to/python"} in
 {p2col:aspectratio()}yes (see {help gr2mpl##limits:Limits}){p_end}
 {p2col:xline(), yline(), text(), also on the second y axis}yes{p_end}
 {p2col:gpolish edits}yes{p_end}
+{p2col:graphregion() and plotregion() fill colours, title, axis-title and tick-label colours}yes, when set on the command line (see {help gr2mpl##limits:Limits}){p_end}
 {p2col:legend order(), subtitle, repeated labels}yes{p_end}
 {p2col:order() with text-only entries or a plot listed twice}yes{p_end}
 {p2col:plot-region margin wider than 4}kept (see {help gr2mpl##limits:Limits}){p_end}
@@ -177,6 +178,7 @@ Other differences are limits of the translation:
 {p 8 12 2}o With {cmd:gpolish endlabel, values}, the value column is spaced from the widths matplotlib measures, so it can sit a little further right than in Stata.{p_end}
 {p 8 12 2}o Plot-region margins of 4 or less (in Stata's relative units; the default margins of Stata's schemes and of {cmd:pypolish} are 3 or less) are replaced by {cmd:gr2mpl}'s own padding of about 2.5% of the axis range at each end (none below a y axis that starts at 0). A wider margin is kept, in points, as Stata draws it: for example the room {cmd:gpolish endlabel} makes between a y axis and the lines with {cmd:side(left)}, {cmd:yscale(alt)} or {cmd:yaxis(2)}, or {cmd:plotregion(margin(large))}.{p_end}
 {p 8 12 2}o The number of legend columns set by {cmd:legend(cols())} or {cmd:legend(rows())} is not followed: {cmd:gr2mpl} puts as many keys on a row as fit the figure width. The keys read row by row, in Stata's order, and column by column with {cmd:legend(colfirst)}.{p_end}
+{p 8 12 2}o Colours set by options in the graph command are kept: the fill of {cmd:graphregion()}, the fill of {cmd:plotregion()} in a single twoway graph or {cmd:graph bar}, the colour of {cmd:title()} and {cmd:subtitle()}, and in a single twoway graph the colours of {cmd:xtitle()}, {cmd:ytitle()} and of the tick labels set by {cmd:labcolor()} in {cmd:xlabel()} or {cmd:ylabel()}. {cmd:gr2mpl} reads these options from the command Stata stored with the graph. Colours that come only from the scheme (for example the blue-gray background of {cmd:scheme(economist)} or {cmd:scheme(s2color)}), colours set later in the Graph Editor or by {cmd:gr_edit}, and text colours in {cmd:by()} panels, {cmd:graph combine} members and {cmd:graph bar} axes are replaced by the house style.{p_end}
 {p 8 12 2}o {cmd:aspectratio()} is followed in a single graph, with the plot region centred and the axis titles moved with it. In {cmd:by()} panels and {cmd:graph combine} it is not followed, and each panel fills its cell.{p_end}
 {p 8 12 2}o Minor tick labels from {cmd:xmlabel()} and {cmd:ymlabel()} are drawn at 80% of the major tick-label size; ticks from {cmd:xmtick()} and {cmd:ymtick()} without labels are not drawn.{p_end}
 {p 8 12 2}o {cmd:xscale(alt)} is not followed: the x axis stays at the bottom. When Stata draws both y axes on one side (as it does with a third y axis), the second is drawn on the other side.{p_end}
