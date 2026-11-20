@@ -139,9 +139,10 @@ local c2 `.g8.legend.plotregion1.label[2].style.color.rgb'
 chk legend_colour "`: list retokenize c1'"=="`: list retokenize c2'"
 
 * ---- 9. rotation: quarter turn drawn, other angles stored + noted ------------
+* (added_text[5] is the hidden record of ptlabel above)
 gpolish callout "Vertical", at(1000 60) angle(90)
 gpolish callout "Tilted", at(2000 60) angle(20)
-chk angle_stored "`.g8.plotregion1.added_text[6].style.angle.setting'"=="20"
+chk angle_stored "`.g8.plotregion1.added_text[7].style.angle.setting'"=="20"
 
 * ---- 10. refusals and fallbacks ---------------------------------------------
 graph bar (mean) lexp, over(region) name(g9, replace)
@@ -782,11 +783,15 @@ chk ax_x_ok _rc==0
 twoway (scatter price length, yaxis(2)) (scatter mpg weight, xaxis(2)), name(ax11, replace)
 capture gpolish ptlabel make if price > 12000, x(weight) y(price)
 chk ax_noregion _rc==198
-* a variable that is not plotted is not checked
+* a variable that no plot draws stops before any edit; undrawn allows it and it is then not checked
 gen w2 = weight
 twoway scatter mpg weight, name(ax4, replace)
 capture gpolish ptlabel make in 1, x(w2) y(mpg)
-chk ax_unplotted _rc==0
+chk ax_unplotted _rc==198
+ntext ax4 added_text
+chk ax_unplotted_noedit r(all)==0
+capture gpolish ptlabel make in 1, x(w2) y(mpg) undrawn
+chk ax_unplotted_undrawn _rc==0
 * positions on yaxis(2) when plot 1 is on yaxis(2) and a later plot on axis 1
 twoway (scatter price weight, yaxis(2)) (scatter mpg weight), name(ax12, replace)
 capture gpolish callout "x", to(3000 5000) yaxis(2)
@@ -1207,7 +1212,8 @@ gen str80 s = make
 replace s = 60*"W" in 1
 scatter price mpg, name(r3c, replace)
 gpolish ptlabel s in 1/3, x(mpg) y(price)
-chk r3_wide_skip "`.r3c.plotregion1.added_text.arrnels'"=="2"
+ntext r3c added_text
+chk r3_wide_skip r(k)==2
 * numeric label variables: value label, else display format
 scatter price mpg, name(r3d, replace)
 gpolish ptlabel foreign if price>13000, x(mpg) y(price)
@@ -1955,6 +1961,70 @@ gpolish endlabel, values name(r14f)
 log close _r14
 local r14txt = fileread(`"`r14log'"')
 chk r14_endlabel_first_nonote strpos(`"`r14txt'"', "endlabel first") == 0
+
+* ---- r15. ptlabel reruns replace their labels; x()/y() inference and checks ----------
+sysuse auto, clear
+scatter price mpg, name(r15a, replace)
+gpolish ptlabel make if price > 12000
+ntext r15a added_text
+local n1 = r(k)
+ntext r15a added_lines
+local l1 = r(k)
+gpolish ptlabel make if price > 12000
+ntext r15a added_text
+chk r15_rerun_text r(k)==`n1' & `n1'==5
+ntext r15a added_lines
+chk r15_rerun_lines r(k)==`l1'
+* a rerun on some of the points replaces only theirs; other labels stay
+gpolish ptlabel make if price > 14000, size(10)
+ntext r15a added_text
+chk r15_rerun_part r(k)==5
+* a different variable pair is a different set of points
+scatter price mpg, name(r15b, replace)
+gpolish ptlabel make if price > 12000
+gpolish ptlabel make if price > 12000, x(mpg) y(price)
+ntext r15b added_text
+chk r15_rerun_same_pair r(k)==5
+* the rerun's labels are placed with the earlier ones out of the way: same spots as a first run
+scatter price mpg, name(r15c, replace)
+gpolish ptlabel make if price > 12000
+local p1
+forvalues j = 1/5 {
+    local p1 `p1' `.r15c.plotregion1.added_text[`j'].xpos.val' `.r15c.plotregion1.added_text[`j'].ypos.val'
+}
+gpolish ptlabel make if price > 12000
+local p2
+forvalues j = 7/11 {
+    local p2 `p2' `.r15c.plotregion1.added_text[`j'].xpos.val' `.r15c.plotregion1.added_text[`j'].ypos.val'
+}
+chk r15_rerun_same_spots "`p1'"=="`p2'"
+* gpolish clear counts the labels of both runs (10), not the hidden record
+tempfile r15log
+log using `"`r15log'"', text name(_r15)
+gpolish clear, name(r15c)
+log close _r15
+local r15txt = fileread(`"`r15log'"')
+chk r15_clear_count strpos(`"`r15txt'"', "removed 10 text box(es)") > 0
+* a scatter split by group draws one pair: x() and y() are inferred
+twoway (scatter price mpg if foreign) (scatter price mpg if !foreign), name(r15d, replace)
+capture gpolish ptlabel make if price > 12000, name(r15d)
+chk r15_infer_groups _rc==0
+ntext r15d added_text
+chk r15_infer_groups_n r(k)==5
+twoway (scatter price mpg) (scatter weight mpg), name(r15e, replace)
+capture gpolish ptlabel make if price > 12000, name(r15e)
+chk r15_infer_two_pairs _rc==198
+* x() naming a variable the graph does not draw
+scatter price mpg, name(r15f, replace)
+log using `"`r15log'"', text replace name(_r15)
+capture noisily gpolish ptlabel make if price > 12000, x(weight) y(price) name(r15f)
+local rc = _rc
+log close _r15
+local r15txt = fileread(`"`r15log'"')
+chk r15_undrawn_rc `rc'==198
+chk r15_undrawn_msg strpos(`"`r15txt'"', "x(weight): no plot in graph") > 0
+ntext r15f added_text
+chk r15_undrawn_noedit r(all)==0
 
 gpolish limits
 

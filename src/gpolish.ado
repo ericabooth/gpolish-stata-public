@@ -1329,7 +1329,7 @@ program _gpl_endlabel
 end
 
 * ================================================================ clear
-* count the visible text boxes (other than endlabel's record) and line segments on a graph; r(n)
+* count the visible text boxes (other than the records of endlabel and ptlabel) and line segments on a graph; r(n)
 program _gpl_prior, rclass
     args name
     foreach a in added_text added_lines {
@@ -1339,6 +1339,7 @@ program _gpl_prior, rclass
             if "`.`name'.plotregion1.`a'[`k'].draw_view.setting'"=="no" continue
             if "`a'"=="added_text" {
                 if substr(`"`.`name'.plotregion1.added_text[`k'].text[1]'"', 1, 16)=="gpolish-endlabel" continue
+                if substr(`"`.`name'.plotregion1.added_text[`k'].text[1]'"', 1, 16)=="gpolish-ptlabel|" continue
             }
             local ++n`a'
         }
@@ -1364,9 +1365,10 @@ program _gpl_clear
         local n = r(k)
         local k`a' = `n'
         if "`a'"=="added_text" {
-            * endlabel's hidden records are not counted as text boxes
+            * the hidden records of endlabel and ptlabel are not counted as text boxes
             forvalues k = 1/`n' {
                 if substr(`"`.`name'.plotregion1.added_text[`k'].text[1]'"', 1, 16)=="gpolish-endlabel" local --k`a'
+                if substr(`"`.`name'.plotregion1.added_text[`k'].text[1]'"', 1, 16)=="gpolish-ptlabel|" local --k`a'
             }
         }
         if `n' > 0 {
@@ -1993,9 +1995,9 @@ program _gpl_legend
     }
 end
 
-* ptlabel: x() and y() left out. They are read from the graph only when exactly one plot draws
-* markers (scatter or connected) from two variables that exist in memory and agree with any x() or
-* y() given. Otherwise ptlabel stops and says what it found, because a guess could put the labels
+* ptlabel: x() and y() left out. They are read from the graph only when the plots that draw
+* markers (scatter or connected) from two variables in memory, and agree with any x() or y() given,
+* all draw the same pair. Otherwise ptlabel stops and says what it found, because a guess could put the labels
 * on the wrong points. r(x), r(y)
 program _gpl_ptinfer, rclass
     args name xg yg
@@ -2029,8 +2031,12 @@ program _gpl_ptinfer, rclass
             local other `other' `t'(`yn' `xn')
             continue
         }
-        local ++found
         local plist `plist' `t'(`yn' `xn')
+        * plots that draw the same pair (for example one scatter per group) count once
+        if !`: list posof "`yn'|`xn'" in pairs' {
+            local pairs `pairs' `yn'|`xn'
+            local ++found
+        }
         local fx `xn'
         local fy `yn'
     }
@@ -2043,13 +2049,62 @@ program _gpl_ptinfer, rclass
             di as err "."
         }
         else {
-            di as err "  graph {bf:`name'} has `found' scatter or connected plots that could be labelled: `plist';"
-            di as err "  ptlabel cannot tell which one to label."
+            di as err "  graph {bf:`name'} has scatter or connected plots of `found' pairs of variables that could be labelled:"
+            di as err "  `plist'; ptlabel cannot tell which pair to label."
         }
         exit 198
     }
     return local x `fx'
     return local y `fy'
+end
+
+* ptlabel with x() and y() given: a variable that no plot of the graph draws is most likely a typing
+* slip, so ptlabel stops before any edit; undrawn allows it (for example a copy of a plotted variable).
+* Only plots whose variable names can be read take part in the check.
+program _gpl_ptdrawn
+    args name xg yg undrawn
+    _gpl_plots `name'
+    local n = r(n)
+    local regs `r(regs)'
+    local read 0
+    local xin 0
+    local yin 0
+    local pair 0
+    local plist
+    forvalues i = 1/`n' {
+        local j : word `i' of `regs'
+        local pr .`name'.plotregion`j'
+        local t ``pr'.plot`i'.type.setting'
+        local yn
+        local xn
+        capture {
+            local yv = ``pr'.plot`i'.yvar'
+            local xv = ``pr'.plot`i'.xvar'
+            local yn ``pr'.plot`i'.serset.sers[`yv'].name'
+            local xn ``pr'.plot`i'.serset.sers[`xv'].name'
+        }
+        if "`yn'"=="" | "`xn'"=="" continue
+        local ++read
+        local plist `plist' `t'(`yn' `xn')
+        if inlist("`xg'", "`xn'", "`yn'") local xin 1
+        if inlist("`yg'", "`xn'", "`yn'") local yin 1
+        if "`xg'"=="`xn'" & "`yg'"=="`yn'" local pair 1
+    }
+    if `read'==0 exit
+    if "`undrawn'"=="" & (!`xin' | !`yin') {
+        foreach d in x y {
+            if !``d'in' {
+                di as err "gpolish ptlabel: `d'(``d'g'): no plot in graph {bf:`name'} draws this variable."
+            }
+        }
+        di as err "  Plots found: `plist'."
+        di as err "  Name the plotted variables in x() and y(), or add undrawn to label at these values anyway."
+        exit 198
+    }
+    if `xin' & `yin' & !`pair' {
+        di as txt "note: gpolish ptlabel: no plot draws `yg' against `xg'; the points are placed on the scales of the axes"
+        di as txt "      those variables are drawn on and are not checked against the drawn points"
+    }
 end
 
 * ================================================================ ptlabel
@@ -2064,6 +2119,7 @@ program _gpl_ptlabel
         local x `r(x)'
         local y `r(y)'
     }
+    else _gpl_ptdrawn `name' `x' `y' "`undrawn'"
     _gpl_poschk ptlabel size `size'
     _gpl_poschk ptlabel msize `msize' nonneg
     _gpl_poschk ptlabel offset `offset' nonneg
@@ -2216,6 +2272,50 @@ program _gpl_ptlabel
         quietly count if `sel'
         if r(N)==0 exit
     }
+    * A rerun replaces the labels and leader lines that ptlabel placed earlier for the points it labels
+    * now. They are found from ptlabel's record (a hidden text box) by the x() and y() variables and
+    * values, hidden before placement, and so are not obstacles. A recorded label that was changed or
+    * removed by other means is left as it is.
+    _gpl_count `name' added_text
+    local nt = r(k)
+    _gpl_count `name' added_lines
+    local nln = r(k)
+    local prk 0
+    forvalues k = `nt'(-1)1 {
+        if substr(`"`.`name'.plotregion1.added_text[`k'].text[1]'"', 1, 16)=="gpolish-ptlabel|" {
+            local prk `k'
+            continue, break
+        }
+    }
+    local keep
+    local nhid 0
+    if `prk' > 0 {
+        local ent `"`.`name'.plotregion1.added_text[`prk'].text[1]'"'
+        local ent = substr(`"`ent'"', 17, .)
+        while `"`ent'"'!="" {
+            foreach v in exn eyn exh eyh et etl el {
+                gettoken `v' ent : ent
+            }
+            local same 0
+            if "`exn'"=="`x'" & "`eyn'"=="`y'" {
+                quietly count if `sel' & `x'==`exh' & `y'==`eyh'
+                local same = r(N) > 0
+            }
+            if !`same' {
+                local keep `keep' `exn' `eyn' `exh' `eyh' `et' `etl' `el'
+                continue
+            }
+            if `et' > `nt' | `et'==`prk' continue
+            if "`.`name'.plotregion1.added_text[`et'].draw_view.setting'"=="no" continue
+            local s `"`.`name'.plotregion1.added_text[`et'].text[1]'"'
+            mata: st_local("tl", strofreal(strlen(st_local("s"))))
+            if "`tl'"!="`etl'" continue
+            _gpl_ge `name' .plotregion1.added_text[`et'].draw_view.setstyle, style(no)
+            if `el' > 0 & `el' <= `nln' _gpl_ge `name' .plotregion1.added_lines[`el'].draw_view.setstyle, style(no)
+            local ++nhid
+        }
+        if `nhid' > 0 _gpl_obstacles `name'
+    }
     _gpl_geom, name(`name')
     tempname R
     mata: _gpl_place("`gx'", "`gy'", "`varlist'", "`sel'", "`R'", `size'/72*`gpi', `msize'/72*`gpi'/2, ///
@@ -2238,6 +2338,10 @@ program _gpl_ptlabel
         mata: st_local("t", _gpl_esc(st_local("t")))
         local bad = `bad' + (`R'[`i',6] > 0)
         _gpl_addtext, name(`name') x(`px') y(`py') lines(`"`t'"') size(`size') color("`color'") hz(`hz') ba(`ba') `halo'
+        local kt = r(k)
+        local s `"`.`name'.plotregion1.added_text[`kt'].text[1]'"'
+        mata: st_local("tl", strofreal(strlen(st_local("s"))))
+        local kl 0
         if `R'[`i',7] == 1 {
             * leader line from the point to a label placed farther out
             local s
@@ -2249,7 +2353,20 @@ program _gpl_ptlabel
             }
             _gpl_addline, name(`name') seg(`s') lcolor(`lcolor') lwidth(`lwidth')
             local ++nlead
+            _gpl_count `name' added_lines
+            local kl = r(k)
         }
+        local keep `keep' `x' `y' `=string(`x'[`obs'], "%21x")' `=string(`y'[`obs'], "%21x")' `kt' `tl' `kl'
+    }
+    * record the labels, in the graph itself, so that a rerun can replace them; one record box per graph
+    local rec `"gpolish-ptlabel|`keep'"'
+    if `prk' > 0 {
+        _gpl_ge `name' .plotregion1.added_text[`prk'].text = {}
+        _gpl_ge `name' .plotregion1.added_text[`prk'].text.Arrpush `"`rec'"'
+    }
+    else {
+        _gpl_addtext, name(`name') x(`px') y(`py') lines(`"`rec'"') size(1)
+        _gpl_ge `name' .plotregion1.added_text[`r(k)'].draw_view.setstyle, style(no)
     }
     if `bad' > 0 _gpl_note crowded `bad'
 end

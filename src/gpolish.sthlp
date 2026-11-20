@@ -198,19 +198,26 @@ labels least, including marker labels drawn by {opt mlabel()}. If even the best 
 rings around its point, and joined to the point by a thin leader line; it moves out only when that spot costs less
 than the best spot next to the point. {opt noleader} keeps every
 label next to its point; {opt lcolor()} and {opt lwidth()} style the leader lines.
+Running {cmd:gpolish ptlabel} again for points it has already labeled replaces those labels and their leader lines
+instead of adding a second set; labels of other points stay. A point counts as the same when the run uses the same
+{opt x()} and {opt y()} variables and the point has the same values. A label that was changed or removed in the
+Graph Editor is left as it is.
 {opt msize(#)} is the diameter of the drawn markers in points (default 6); set it to match the scatter's {cmd:msize()}
 so labels keep clear of the markers. {opt offset(#)} is the gap in points between the marker edge and its label (default 3).
 {cmd:ptlabel} reads the data in memory, so give it the same {it:if} and {it:in} as the graph command. Selected
 observations whose {opt x()} and {opt y()} values match no point that a plot of {opt y()} against {opt x()} draws
 are skipped with a note that gives how many; {opt undrawn} labels them anyway.
-{opt x()} and {opt y()} name the plotted variables. They may be left out when the graph has exactly one plot
-that draws markers ({cmd:scatter} or {cmd:connected}) from two variables in memory; {cmd:ptlabel} then uses that
-plot's x and y variables. If one of the two options is given, the plot must also draw that variable. With no such
-plot, or with more than one, {cmd:ptlabel} stops with r(198), lists the plots it found, and asks for {opt x()} and
-{opt y()}, because it cannot tell which points to label. Their values are read on the scales of the plot region
+{opt x()} and {opt y()} name the plotted variables. They may be left out when the plots that draw markers
+({cmd:scatter} or {cmd:connected}) from two variables in memory all draw the same pair, as a scatter split into
+groups with {it:if} does; {cmd:ptlabel} then uses that pair. If one of the two options is given, the plots must
+also draw that variable. With no such plot, or with plots of more than one pair of variables, {cmd:ptlabel} stops
+with r(198), lists the plots it found, and asks for {opt x()} and {opt y()}, because it cannot tell which points
+to label. When {opt x()} and {opt y()} are both given and either one names a variable that no plot of the graph
+draws, {cmd:ptlabel} stops with r(198) before any edit and lists the plots it found; {opt undrawn} allows such a
+variable, for example a copy of a plotted variable. Their values are read on the scales of the plot region
 where a plot draws {opt y()} against {opt x()}, so points plotted on a second axis need no option. When no plot
-draws that pair, the first plot region that carries an axis {opt y()} is drawn on and an axis {opt x()} is drawn
-on is used. A variable that no plot draws puts no condition on the region, so when neither is drawn the first
+draws that pair, a note says so, and the first plot region that carries an axis {opt y()} is drawn on and an axis {opt x()} is drawn
+on is used. With {opt undrawn}, a variable that no plot draws puts no condition on the region, so when neither is drawn the first
 plot region is used. {opt yaxis(#)} and {opt xaxis(#)} limit the choice to the plot regions that carry those axes.
 When the {opt y()} variable is drawn only on other y axes than {opt yaxis()} names (or the {opt x()} variable
 only on other x axes than {opt xaxis()} names), or when no plot region carries an axis of each variable,
@@ -295,7 +302,7 @@ It stops with an error when {cmd:endlabel}, {cmd:callout}, {cmd:note}, {cmd:arro
 {p2col:{cmd:endlabel} with {cmd:aspectratio()}}when a y axis is drawn on the labeled side, the room for labels would have to be made inside a plot region whose shape is fixed, which distorts the axes; {cmd:endlabel} stops with r(198) before any edit. Drop {cmd:aspectratio()} or label the other side with {opt side()}{p_end}
 {p2col:Positions outside the plot region}{cmd:callout} and {cmd:note} refuse a {opt to()} outside the axis ranges; {opt at()}, {opt from()}, {cmd:arrow}, {cmd:brace} and {cmd:bracket} get a note; a {cmd:callout} or {cmd:note} box placed with {opt at()} that runs past an edge of the graph gets a note and is drawn where it is, so the part outside is cut off; ranges are given in the axis's own units, so dates show as numbers; a {cmd:bracket} note names only the option that is off the plot and gives the {cmd:xscale(range(#))} or {cmd:yscale(range(#))} to add{p_end}
 {p2col:Labels wider than the plot region}{cmd:ptlabel} skips them with a note; an automatically placed callout or note stops with an error; {cmd:gpolish} does not wrap text itself{p_end}
-{p2col:{cmd:ptlabel} and points the graph leaves out}a selected point is matched to the drawn points by its {opt x()} and {opt y()} values; the check is made only when a plot draws the {opt y()} variable against the {opt x()} variable, so a graph of other variables (for example a transformed copy) is not checked; an observation left out of the graph that has the same values as a drawn point is still labeled{p_end}
+{p2col:{cmd:ptlabel} and points the graph leaves out}a selected point is matched to the drawn points by its {opt x()} and {opt y()} values; the check is made only when a plot draws the {opt y()} variable against the {opt x()} variable, so a graph of other variables (for example a copy given with {opt undrawn}) is not checked; an observation left out of the graph that has the same values as a drawn point is still labeled{p_end}
 {p2col:Zero or negative positions on a log axis}{cmd:arrow}, {cmd:brace}, {cmd:bracket}, {cmd:callout} and {cmd:note} stop with r(198) before any edit; {cmd:ptlabel} skips such points{p_end}
 {p2col:{cmd:endlabel} and the last x tick label}the right margin added for the last x tick label (with {opt side(left)} after the legend is switched off, or beside labels on the right) is sized for the tick labels of x axis 1 drawn horizontally; a second x axis or angled tick labels are not measured, and {cmd:graphregion(margin())} can add room by hand{p_end}
 {p2col:Plot-region outlines}when a scheme such as {cmd:s1mono} outlines the plot region and the end labels sit outside it, {cmd:endlabel} starts them {opt xgap()} points beyond the outline rather than beyond the line end. An outline counts as drawn when its colour differs from the graph background, so an outline turned off with {cmd:plotregion(lstyle(none))} still moves the labels out{p_end}

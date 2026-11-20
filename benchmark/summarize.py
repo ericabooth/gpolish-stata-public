@@ -208,7 +208,7 @@ def main():
                     w = sum(x > 1e-12 for x in diffs)
                     t = sum(abs(x) <= 1e-12 for x in diffs)
                     paired[(key, d, m)] = (mn, mn - h, mn + h, w, t, len(diffs) - w - t)
-                    cells.append(f"{mn:+.3f} ({mn - h:+.3f} to {mn + h:+.3f}); {w}/{t}/{len(diffs) - w - t}")
+                    cells.append(f"{_hu(mn, 3):+.3f} ({_hu(mn - h, 3):+.3f} to {_hu(mn + h, 3):+.3f}); {w}/{t}/{len(diffs) - w - t}")
                 body.append([dname] + cells)
             out += [f"### {title}", ""] + table(["Design"] + [NAMES[m] for m in others], body)
 
